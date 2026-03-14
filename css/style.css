@@ -1,0 +1,59 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  font-family: 'Playfair Display', Georgia, serif;
+  min-height: 100vh;
+}
+
+/* ── Home greeting ── */
+.home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.greeting {
+  font-size: clamp(2rem, 8vw, 3.5rem);
+  font-weight: 400;
+  color: #4A4A4A;
+  text-align: center;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* ── Wolf logo footer ── */
+.nav-trigger {
+  position: fixed;
+  bottom: 2rem;
+  width: 100%;
+  text-align: center;
+}
+
+.wolf-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-block;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.wolf-btn img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: block;
+}
+
+/* ── Pulse animation ── */
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
