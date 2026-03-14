@@ -99,7 +99,7 @@ body {
 .menu-inner {
   text-align: left;
   padding: 2rem;
-  padding-left: 25%;
+  padding-left: 10%;
 }
 
 .menu-prompt {
@@ -132,16 +132,11 @@ body {
   color: #A0622A;
 }
 
-/* ── Go home — hidden on home page, visible elsewhere ── */
-.page-home .menu-home {
+/* ── Hide current page from menu ── */
+.page-home .nav-home,
+.page-talk-data .nav-talk-data,
+.page-intentions .nav-intentions,
+.page-shop .nav-shop,
+.page-about .nav-about {
   display: none;
-}
-
-.menu-home a {
-  color: #909090;
-  font-size: clamp(1.2rem, 3.5vw, 1.8rem);
-}
-
-.menu-home a:hover {
-  color: #4A7FA5;
 }
