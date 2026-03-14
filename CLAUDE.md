@@ -69,12 +69,29 @@ inviting a click
 
 ## Brand & Design
 
-### Colours
+### Primary Palette (from the logo)
 - **Steel Blue:** `#4A7FA5` — navigation, structural elements
-- **Copper/Bronze:** `#A0622A` — accents, calls to action, highlights
+- **Copper/Bronze:** `#A0622A` — accents, highlights
 - **Charcoal:** `#4A4A4A` — body text, dark backgrounds
 - **White:** `#FFFFFF` — reading backgrounds, reversed text
 - **Black:** `#000000` — wolf illustration, strong contrast moments
+
+### Statement / CTA Colour
+- **Deep Navy:** `#214459` — primary call-to-action buttons and high-impact actions only
+  - Always paired with **white text**
+  - Use sparingly — reserve for the most important action on a page
+  - This colour commands attention; don't dilute it by overusing it
+
+### Extended Palette (supporting / accent use)
+- **Emerald Green:** `#3AB87A`
+- **Royal Blue:** `#2A6AB0`
+- **Mustard/Gold:** `#C8B020`
+- **Cornflower Blue:** `#6090C0`
+- **Crimson Red:** `#A82020`
+- **Teal:** `#70C0C8`
+- **Powder Blue:** `#A8D0E0`
+- **Mid Grey:** `#909090`
+- **Copper/Terracotta:** `#C87840`
 
 ### Logo
 - The Wolfman wolf mark — a howling wolf across three panels 

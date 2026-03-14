@@ -57,3 +57,77 @@ body {
   50%  { transform: scale(1.06); }
   100% { transform: scale(1); }
 }
+
+/* ── Full-screen menu overlay ── */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: #F7F5F2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 100;
+}
+
+.menu-overlay.is-open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.menu-close {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #4A4A4A;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.5rem;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.menu-close:hover {
+  opacity: 1;
+}
+
+.menu-inner {
+  text-align: center;
+  padding: 2rem;
+}
+
+.menu-prompt {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  font-weight: 400;
+  color: #909090;
+  margin: 0 0 3rem 0;
+  letter-spacing: 0.05em;
+}
+
+.menu-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+.menu-links a {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.8rem, 6vw, 3rem);
+  font-weight: 400;
+  color: #4A4A4A;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.menu-links a:hover {
+  color: #A0622A;
+}
