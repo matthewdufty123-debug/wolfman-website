@@ -97,17 +97,17 @@ body {
 }
 
 .menu-inner {
-  text-align: center;
+  text-align: left;
   padding: 2rem;
+  padding-left: 25%;
 }
 
 .menu-prompt {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(1rem, 3vw, 1.4rem);
+  font-size: clamp(1.8rem, 6vw, 3rem);
   font-weight: 400;
   color: #909090;
   margin: 0 0 3rem 0;
-  letter-spacing: 0.05em;
 }
 
 .menu-links {
@@ -130,4 +130,18 @@ body {
 
 .menu-links a:hover {
   color: #A0622A;
+}
+
+/* ── Go home — hidden on home page, visible elsewhere ── */
+.page-home .menu-home {
+  display: none;
+}
+
+.menu-home a {
+  color: #909090;
+  font-size: clamp(1.2rem, 3.5vw, 1.8rem);
+}
+
+.menu-home a:hover {
+  color: #4A7FA5;
 }
