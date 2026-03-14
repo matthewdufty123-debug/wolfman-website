@@ -41,7 +41,7 @@ body {
   padding: 0;
   cursor: pointer;
   display: inline-block;
-  animation: pulse 3s ease-in-out infinite;
+  animation: pulse 2.5s ease-in-out infinite;
 }
 
 .wolf-btn img {
@@ -51,10 +51,13 @@ body {
   display: block;
 }
 
-/* ── Pulse animation ── */
+/* ── Heartbeat animation ── */
 @keyframes pulse {
   0%   { transform: scale(1); }
-  50%  { transform: scale(1.06); }
+  10%  { transform: scale(1.18); }
+  20%  { transform: scale(1); }
+  32%  { transform: scale(1.18); }
+  42%  { transform: scale(1); }
   100% { transform: scale(1); }
 }
 
