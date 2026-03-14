@@ -41,7 +41,7 @@ body {
   padding: 0;
   cursor: pointer;
   display: inline-block;
-  animation: pulse 2.5s ease-in-out infinite;
+  animation: pulse 5s ease-in-out infinite;
 }
 
 .wolf-btn img {
