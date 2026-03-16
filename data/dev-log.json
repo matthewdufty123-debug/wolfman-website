@@ -1,0 +1,58 @@
+[
+  {
+    "date": "2026-03-16",
+    "commit": "pending",
+    "commit_url": null,
+    "title": "FD-008: Menu update — settings link, left-aligned text, footer icons",
+    "detail": "Replaced 'go home' menu link with 'settings'. Pulled menu text to the left (padding-left 10% → 1.5rem). Added icon footer inside the menu: Wolfman logo links home, Claude Code icon links to development page. Icons are 54px, pinned to the bottom of the menu via flex layout. Updated CLAUDE.md with session startup workflow and FD-driven planning process.",
+    "areas": ["js/nav.js", "css/style.css", "data/future-dev.json", "CLAUDE.md"]
+  },
+  {
+    "date": "2026-03-16",
+    "commit": "pending",
+    "commit_url": null,
+    "title": "Add public development page",
+    "detail": "Created development.html with commit log and future pipeline tables driven by JSON. Updated nav button to link to dev page. Added JetBrains Mono font for terminal aesthetic.",
+    "areas": ["development.html", "data/dev-log.json", "data/future-dev.json", "css/style.css", "js/nav.js", "CLAUDE.md"]
+  },
+  {
+    "date": "2026-03-15",
+    "commit": "2e8224d",
+    "commit_url": "https://github.com/matthewdufty123-debug/wolfman.blog/commit/2e8224d",
+    "title": "Delete post entry for 'The Honda Engine'",
+    "detail": "Removed the Honda Engine post entry from the post manifest.",
+    "areas": ["talk-data.html"]
+  },
+  {
+    "date": "2026-03-15",
+    "commit": "4a3b01b",
+    "commit_url": "https://github.com/matthewdufty123-debug/wolfman.blog/commit/4a3b01b",
+    "title": "Add Morning Intension post",
+    "detail": "Added the Morning Intension post to the manifest and created the post HTML file.",
+    "areas": ["posts/2026-02-26-morning-intension.html", "talk-data.html"]
+  },
+  {
+    "date": "2026-03-15",
+    "commit": "f95eb20",
+    "commit_url": "https://github.com/matthewdufty123-debug/wolfman.blog/commit/f95eb20",
+    "title": "Add Morning Post",
+    "detail": "Added the Morning Post to the manifest and created the post HTML file.",
+    "areas": ["posts/2026-02-27-morning-post.html", "talk-data.html"]
+  },
+  {
+    "date": "2026-03-15",
+    "commit": "4659a50",
+    "commit_url": "https://github.com/matthewdufty123-debug/wolfman.blog/commit/4659a50",
+    "title": "Add Morning Walk post type and category support to admin",
+    "detail": "Extended the admin/post creation tooling to support Morning Walk as a post type with category tagging.",
+    "areas": ["js/nav.js", "css/style.css"]
+  },
+  {
+    "date": "2026-03-14",
+    "commit": "8dde655",
+    "commit_url": "https://github.com/matthewdufty123-debug/wolfman.blog/commit/8dde655",
+    "title": "Slow heartbeat animation to 5s",
+    "detail": "Halved the pulse animation speed on the wolf logo — felt more natural and less urgent at 5s.",
+    "areas": ["css/style.css"]
+  }
+]

@@ -18,53 +18,8 @@
       <ul class="post-list" id="postList" aria-live="polite"></ul>
     </main>
 
-    <nav class="menu-overlay" id="menuOverlay" aria-hidden="true">
-      <button class="menu-close" id="menuClose" aria-label="Close menu">&times;</button>
-      <div class="menu-inner">
-        <p class="menu-prompt">What shall we do?</p>
-        <ul class="menu-links">
-          <li class="nav-talk-data"><a href="talk-data.html">talk data</a></li>
-          <li class="nav-intentions"><a href="intentions.html">set an intention</a></li>
-          <li class="nav-shop"><a href="shop.html">buy something cool</a></li>
-          <li class="nav-about"><a href="about.html">discover Wolfman</a></li>
-          <li class="nav-home"><a href="index.html">go home</a></li>
-        </ul>
-      </div>
-    </nav>
-
-    <footer class="nav-trigger">
-      <button class="wolf-btn" id="wolfBtn" aria-label="Open menu">
-        <img src="images/site_images/Grey Bronze LogoAsset 14300.png" alt="Wolfman">
-      </button>
-    </footer>
-
+    <script src="js/nav.js"></script>
     <script>
-      const wolfBtn = document.getElementById('wolfBtn');
-      const menuClose = document.getElementById('menuClose');
-      const menuOverlay = document.getElementById('menuOverlay');
-
-      function openMenu() {
-        menuOverlay.classList.add('is-open');
-        menuOverlay.setAttribute('aria-hidden', 'false');
-        wolfBtn.setAttribute('aria-label', 'Close menu');
-      }
-
-      function closeMenu() {
-        menuOverlay.classList.remove('is-open');
-        menuOverlay.setAttribute('aria-hidden', 'true');
-        wolfBtn.setAttribute('aria-label', 'Open menu');
-      }
-
-      wolfBtn.addEventListener('click', () => {
-        menuOverlay.classList.contains('is-open') ? closeMenu() : openMenu();
-      });
-
-      menuClose.addEventListener('click', closeMenu);
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeMenu();
-      });
-
       // ── Post list loader ──
       // Note: fetch() requires a server (http://). For local preview run: npx serve .
 

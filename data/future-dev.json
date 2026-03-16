@@ -1,0 +1,90 @@
+[
+  {
+    "id": "FD-001",
+    "date_raised": "2026-03-16",
+    "title": "Shop integration",
+    "detail": "Integrate Printful API for canvas prints and clothing. Stripe for payments. Product descriptions written in Matthew's voice.",
+    "status": "planned",
+    "date_closed": null,
+    "commit": null,
+    "commit_url": null,
+    "prompt": null
+  },
+  {
+    "id": "FD-002",
+    "date_raised": "2026-03-16",
+    "title": "Settings page",
+    "detail": "Currently a placeholder. Build out actual settings — theme preferences, notification opt-ins, or reader preferences.",
+    "status": "planned",
+    "date_closed": null,
+    "commit": null,
+    "commit_url": null,
+    "prompt": null
+  },
+  {
+    "id": "FD-003",
+    "date_raised": "2026-03-16",
+    "title": "Photography gallery",
+    "detail": "A dedicated gallery page showcasing Matthew's photography. Minimal layout, full-bleed images, no clutter.",
+    "status": "planned",
+    "date_closed": null,
+    "commit": null,
+    "commit_url": null,
+    "prompt": null
+  },
+  {
+    "id": "FD-004",
+    "date_raised": "2026-03-16",
+    "title": "User Settings Page with Switchable Theme",
+    "detail": "Build out the settings page with a switchable light/dark theme preference, persisted to localStorage.",
+    "status": "planned",
+    "date_closed": null,
+    "commit": null,
+    "commit_url": null,
+    "prompt": null
+  },
+  {
+    "id": "FD-005",
+    "date_raised": "2026-03-16",
+    "title": "xxx",
+    "detail": "xxx",
+    "status": "planned",
+    "date_closed": null,
+    "commit": null,
+    "commit_url": null,
+    "prompt": null
+  },
+  {
+    "id": "FD-006",
+    "date_raised": "2026-03-16",
+    "title": "xxx",
+    "detail": "xxx",
+    "status": "planned",
+    "date_closed": null,
+    "commit": null,
+    "commit_url": null,
+    "prompt": null
+  },
+  {
+    "id": "FD-007",
+    "date_raised": "2026-03-16",
+    "title": "xxx",
+    "detail": "xxx",
+    "status": "planned",
+    "date_closed": null,
+    "commit": null,
+    "commit_url": null,
+    "prompt": null
+  },
+  {
+    "id": "FD-008",
+    "date_raised": "2026-03-16",
+    "title": "Menu update",
+    "detail": "As part of the menu update i want to a link to a settlings page. We need to bring hte text more to the left hand side to. At the moment it is a bit too centered. We should loose the go home link and put two small icons near the bottom of the menu window. on the left i want our Wolfman logo. One hte right i want the claude code icon. The wolfman logo will link to the hom page, claude code icon will link to the development page.",
+    "status": "completed",
+    "date_closed": "2026-03-16",
+    "commit": null,
+    "commit_url": null,
+    "prompt": null
+  }
+]

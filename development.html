@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Development — Wolfman</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body class="page-dev">
+
+    <main class="dev-main">
+
+      <!-- Section 1: Technical Profile -->
+      <section class="dev-section">
+        <h1 class="dev-page-title">wolfman.blog / development</h1>
+        <p class="dev-subtitle">An open log of how this site is built and where it's going.</p>
+        <div class="dev-links">
+          <a href="https://github.com/matthewdufty123-debug" class="dev-link" target="_blank" rel="noopener">
+            See my work on GitHub →
+          </a>
+        </div>
+
+        <div class="dev-collab">
+          <div class="dev-collab-logos">
+            <img src="images/site_images/White Bronze LogoAsset 12300.png" class="dev-collab-logo" alt="Wolfman">
+            <img src="images/site_images/claudecode-color.png" class="dev-collab-logo" alt="Claude Code">
+          </div>
+          <p class="dev-collab-caption">I am collaborating with Claude Code to build this website from the ground up. Our development area details what changes we have committed to so far and what changes we plan to make. The development log below is being used as part of our workflow to incrementally enhance this site.</p>
+          <a href="#future-pipeline" class="dev-link dev-collab-jump">Jump to future pipeline →</a>
+        </div>
+      </section>
+
+      <!-- Section 2: Development Log -->
+      <section class="dev-section">
+        <h2 class="dev-section-title">// development log</h2>
+        <div class="dev-table-wrap" id="devLogWrap">
+          <p class="dev-loading">Loading...</p>
+        </div>
+      </section>
+
+      <!-- Section 3: Future Pipeline -->
+      <section class="dev-section" id="future-pipeline">
+        <h2 class="dev-section-title">// future pipeline</h2>
+        <div class="dev-table-wrap" id="futurePipelineWrap">
+          <p class="dev-loading">Loading...</p>
+        </div>
+      </section>
+
+    </main>
+
+    <script src="js/nav.js"></script>
+    <script>
+      function formatDate(iso) {
+        if (!iso) return '—';
+        var d = new Date(iso + 'T00:00:00');
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+      }
+
+      function statusBadge(status) {
+        return '<span class="dev-badge dev-badge--' + status + '">' + status + '</span>';
+      }
+
+      function shortSha(sha) {
+        if (!sha) return '—';
+        return sha.substring(0, 7);
+      }
+
+      function commitLink(sha, url) {
+        if (!sha) return '—';
+        if (url) return '<a href="' + url + '" target="_blank" rel="noopener" class="dev-commit-link">' + shortSha(sha) + '</a>';
+        return shortSha(sha);
+      }
+
+      function areasHtml(areas) {
+        if (!areas || !areas.length) return '—';
+        return areas.map(function(a) {
+          return '<span class="dev-tag">' + a + '</span>';
+        }).join(' ');
+      }
+
+      // ── Dev log ──
+      fetch('data/dev-log.json')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var wrap = document.getElementById('devLogWrap');
+          if (!data.length) {
+            wrap.innerHTML = '<p class="dev-empty">No entries yet.</p>';
+            return;
+          }
+
+          var GITHUB_COMMITS = 'https://github.com/matthewdufty123-debug/wolfman-website';
+
+          function buildLogRow(entry) {
+            return '<tr>' +
+              '<td>' + formatDate(entry.date) + '</td>' +
+              '<td>' + commitLink(entry.commit, entry.commit_url) + '</td>' +
+              '<td class="dev-col-title">' + entry.title + '</td>' +
+              '<td class="dev-col-detail">' + entry.detail + '</td>' +
+            '</tr>';
+          }
+
+          function renderLogTable(entries, showExpand) {
+            var rows = entries.map(buildLogRow).join('');
+            var footer = showExpand
+              ? '<p class="dev-log-action"><a href="#" class="dev-link" id="devLogExpand">Show more commits →</a></p>'
+              : '<p class="dev-log-action"><a href="' + GITHUB_COMMITS + '" class="dev-link" target="_blank" rel="noopener">See all commits on GitHub →</a></p>';
+            wrap.innerHTML =
+              '<table class="dev-table dev-table--log">' +
+                '<thead><tr>' +
+                  '<th>Date</th>' +
+                  '<th>Commit</th>' +
+                  '<th>Title</th>' +
+                  '<th>Detail</th>' +
+                '</tr></thead>' +
+                '<tbody>' + rows + '</tbody>' +
+              '</table>' + footer;
+
+            if (showExpand) {
+              document.getElementById('devLogExpand').addEventListener('click', function(e) {
+                e.preventDefault();
+                renderLogTable(data.slice(0, 10), false);
+              });
+            }
+          }
+
+          renderLogTable(data.slice(0, 3), data.length > 3);
+        })
+        .catch(function() {
+          document.getElementById('devLogWrap').innerHTML = '<p class="dev-error">Could not load development log.</p>';
+        });
+
+      // ── Future pipeline ──
+      fetch('data/future-dev.json')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var wrap = document.getElementById('futurePipelineWrap');
+          if (!data.length) {
+            wrap.innerHTML = '<p class="dev-empty">No items yet.</p>';
+            return;
+          }
+
+          var open = data.filter(function(e) { return e.status !== 'completed'; });
+          var done = data.filter(function(e) { return e.status === 'completed'; });
+
+          function buildPipelineRow(entry) {
+            return '<tr>' +
+              '<td class="dev-col-id">' + entry.id + '</td>' +
+              '<td>' + statusBadge(entry.status) + '</td>' +
+              '<td class="dev-col-title">' + entry.title + '</td>' +
+              '<td class="dev-prompt-cell">' + (entry.prompt || entry.detail || '—') + '</td>' +
+              '<td>' + formatDate(entry.date_closed) + '</td>' +
+              '<td>' + commitLink(entry.commit, entry.commit_url) + '</td>' +
+            '</tr>';
+          }
+
+          var promptHeader = '<img src="images/site_images/claudecode-color.png" class="dev-prompt-icon" alt="Claude Code"> Prompt';
+
+          var thead = '<thead><tr>' +
+            '<th>ID</th><th>Status</th><th>Title</th><th>' + promptHeader + '</th><th>Closed</th><th>Commit</th>' +
+          '</tr></thead>';
+
+          var html =
+            '<table class="dev-table">' + thead +
+              '<tbody>' + open.map(buildPipelineRow).join('') + '</tbody>' +
+            '</table>';
+
+          if (done.length) {
+            html +=
+              '<p class="dev-log-action"><a href="#" class="dev-link" id="pipelineShowDone">Show ' + done.length + ' completed →</a></p>' +
+              '<table class="dev-table" id="pipelineDoneTable" style="display:none">' + thead +
+                '<tbody>' + done.map(buildPipelineRow).join('') + '</tbody>' +
+              '</table>';
+          }
+
+          wrap.innerHTML = html;
+
+          if (done.length) {
+            document.getElementById('pipelineShowDone').addEventListener('click', function(e) {
+              e.preventDefault();
+              var tbl = document.getElementById('pipelineDoneTable');
+              var visible = tbl.style.display !== 'none';
+              tbl.style.display = visible ? 'none' : 'table';
+              e.target.textContent = visible
+                ? 'Show ' + done.length + ' completed →'
+                : 'Hide completed ↑';
+            });
+          }
+        })
+        .catch(function() {
+          document.getElementById('futurePipelineWrap').innerHTML = '<p class="dev-error">Could not load pipeline.</p>';
+        });
+    </script>
+  </body>
+</html>
