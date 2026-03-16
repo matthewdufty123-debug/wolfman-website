@@ -83,8 +83,8 @@
     "detail": "As part of the menu update i want to a link to a settlings page. We need to bring hte text more to the left hand side to. At the moment it is a bit too centered. We should loose the go home link and put two small icons near the bottom of the menu window. on the left i want our Wolfman logo. One hte right i want the claude code icon. The wolfman logo will link to the hom page, claude code icon will link to the development page.",
     "status": "completed",
     "date_closed": "2026-03-16",
-    "commit": null,
-    "commit_url": null,
+    "commit": "e2a90ba",
+    "commit_url": "https://github.com/matthewdufty123-debug/wolfman.blog/commit/e2a90ba",
     "prompt": null
   }
 ]

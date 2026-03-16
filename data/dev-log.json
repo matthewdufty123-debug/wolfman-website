@@ -1,16 +1,16 @@
 [
   {
     "date": "2026-03-16",
-    "commit": "pending",
-    "commit_url": null,
+    "commit": "e2a90ba",
+    "commit_url": "https://github.com/matthewdufty123-debug/wolfman.blog/commit/e2a90ba",
     "title": "FD-008: Menu update — settings link, left-aligned text, footer icons",
     "detail": "Replaced 'go home' menu link with 'settings'. Pulled menu text to the left (padding-left 10% → 1.5rem). Added icon footer inside the menu: Wolfman logo links home, Claude Code icon links to development page. Icons are 54px, pinned to the bottom of the menu via flex layout. Updated CLAUDE.md with session startup workflow and FD-driven planning process.",
     "areas": ["js/nav.js", "css/style.css", "data/future-dev.json", "CLAUDE.md"]
   },
   {
     "date": "2026-03-16",
-    "commit": "pending",
-    "commit_url": null,
+    "commit": "e2a90ba",
+    "commit_url": "https://github.com/matthewdufty123-debug/wolfman.blog/commit/e2a90ba",
     "title": "Add public development page",
     "detail": "Created development.html with commit log and future pipeline tables driven by JSON. Updated nav button to link to dev page. Added JetBrains Mono font for terminal aesthetic.",
     "areas": ["development.html", "data/dev-log.json", "data/future-dev.json", "css/style.css", "js/nav.js", "CLAUDE.md"]
