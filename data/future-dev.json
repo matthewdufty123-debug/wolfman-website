@@ -36,11 +36,11 @@
     "id": "FD-004",
     "date_raised": "2026-03-16",
     "title": "User Settings Page with Switchable Theme",
-    "detail": "Build out the settings page with a switchable light/dark theme preference, persisted to localStorage.",
-    "status": "planned",
-    "date_closed": null,
-    "commit": null,
-    "commit_url": null,
+    "detail": "Build a light/dark theme toggle on the settings page. Dark mode: White Bronze logos, background #333F50, nav border #193343, heading text #E5CBBB, paragraph text white. Light mode: Grey Bronze logos, background #F9F6F5, nav border #E5CBBB, heading text #193343, paragraph text #333F50. Nav bar has a subtle upward fade (dark grey in light mode, light grey in dark mode). Menu colours switch with theme but use muted tones. The development page is unaffected.",
+    "status": "completed",
+    "date_closed": "2026-03-16",
+    "commit": "TBC",
+    "commit_url": "TBC",
     "prompt": null
   },
   {

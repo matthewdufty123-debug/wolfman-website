@@ -5,7 +5,7 @@
   var navHTML = `
     <nav class="wolfman-nav" id="wolfmanNav">
       <svg class="nav-bg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 375 100" aria-hidden="true">
-        <path d="M0,100 L0,46 L95,46 C125,46 158,0 187.5,0 C217,0 250,46 280,46 L375,46 L375,100 Z" fill="#214459"/>
+        <path d="M0,100 L0,46 L95,46 C125,46 158,0 187.5,0 C217,0 250,46 280,46 L375,46 L375,100 Z"/>
       </svg>
       <button class="nav-btn nav-btn--left" id="navBack" aria-label="Go back"></button>
       <button class="nav-btn nav-btn--center wolf-btn" id="wolfBtn" aria-label="Open menu">
@@ -27,7 +27,7 @@
         </ul>
         <div class="menu-footer-icons">
           <a href="${basePath}index.html" aria-label="Go home">
-            <img class="menu-footer-icon" src="${basePath}images/site_images/White Bronze LogoAsset 12300.png" alt="Wolfman home">
+            <img class="menu-footer-icon" id="menuFooterLogo" src="${basePath}images/site_images/White Bronze LogoAsset 12300.png" alt="Wolfman home">
           </a>
           <a href="${basePath}development.html" aria-label="Development page">
             <img class="menu-footer-icon" src="${basePath}images/site_images/claudecode-color.png" alt="Claude Code development">

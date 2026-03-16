@@ -1,6 +1,14 @@
 [
   {
     "date": "2026-03-16",
+    "commit": "TBC",
+    "commit_url": "TBC",
+    "title": "FD-004: Light/dark theme switcher with persisted preference",
+    "detail": "Full theme system — CSS variables for dark/light palettes, flash-prevention inline script on every page, js/theme.js for runtime switching and logo swapping. Settings page rebuilt with dark/light toggle buttons. Nav bell-curve fill, menu colours, nav fade, and triangle/square icons all driven by theme tokens. Dark button always dark-backgrounded, central wolf logo gets white background in light mode. development.html excluded from theming.",
+    "areas": ["css/style.css", "js/theme.js", "js/nav.js", "settings.html", "index.html", "about.html", "shop.html", "talk-data.html", "intentions.html", "posts/", "data/future-dev.json"]
+  },
+  {
+    "date": "2026-03-16",
     "commit": "e2a90ba",
     "commit_url": "https://github.com/matthewdufty123-debug/wolfman.blog/commit/e2a90ba",
     "title": "FD-008: Menu update — settings link, left-aligned text, footer icons",

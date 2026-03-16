@@ -8,12 +8,24 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <script>(function(){var t=localStorage.getItem('wolfman-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
   </head>
   <body class="page-settings">
-    <main class="home">
-      <h1 class="greeting">settings</h1>
+
+    <main class="settings-main">
+      <div class="settings-section">
+        <h1 class="settings-title">settings</h1>
+        <div class="settings-group">
+          <p class="settings-label">appearance</p>
+          <div class="theme-toggle">
+            <button class="theme-btn" data-theme="dark" onclick="WolfmanTheme.setTheme('dark')">dark</button>
+            <button class="theme-btn" data-theme="light" onclick="WolfmanTheme.setTheme('light')">light</button>
+          </div>
+        </div>
+      </div>
     </main>
 
     <script src="js/nav.js"></script>
+    <script src="js/theme.js"></script>
   </body>
 </html>
