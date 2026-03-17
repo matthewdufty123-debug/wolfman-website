@@ -540,6 +540,37 @@ body {
   color: #3AB87A;
 }
 
+.dev-badge--bug {
+  background: #3a0d0d;
+  color: #d73a4a;
+}
+
+.dev-badge--enhancement {
+  background: #0d2a2a;
+  color: #a2eeef;
+}
+
+.dev-badge--default {
+  background: #21262d;
+  color: #8b949e;
+}
+
+.dev-milestone {
+  margin-bottom: 2.5rem;
+}
+
+.dev-milestone-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #4A7FA5;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.75rem 0;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #21262d;
+}
+
 .dev-loading,
 .dev-empty,
 .dev-error {

@@ -149,6 +149,7 @@ AI-generated
 - **Git workflow:** add → commit locally. Do NOT push to GitHub unless Matthew explicitly asks.
 - When Matthew says "push" or "push to main" (or similar), then push. Not before.
 - Commit messages should be descriptive and human
+- **Closing issues:** include `closes #N` in the commit message to auto-close the GitHub issue
 - Never break the mobile reading experience
 - Images should be optimised before adding to the repo
 - Keep the folder structure clean:
@@ -157,40 +158,42 @@ AI-generated
   - `/posts` — blog post HTML files (to be created)
   - `/css` — stylesheets
   - `/js` — javascript files
-  - `/data` — JSON data files (dev log, future pipeline)
+  - `/data` — JSON data files (deprecated — see Development Log below)
 
 ---
 
 ## Development Log
 
-The public development page (`development.html`) is driven by two JSON files:
-- `data/dev-log.json` — past commits (newest first)
-- `data/future-dev.json` — planned / in-progress / completed pipeline items
+GitHub Issues is the single source of truth for all planned and in-progress work.
+- **Repo:** `https://github.com/matthewdufty123-debug/wolfman-website/issues`
+- **Labels:** `planned` (blue), `in-progress` (yellow), `bug` (red), `enhancement` (green)
+- **Milestone labels:** `Milestone-1` through `Milestone-11` (grey) — group issues by release
 
-**At every commit:**
-1. Add an entry to `data/dev-log.json` (prepend to top — newest first)
-   - Fields: `date`, `commit` (short SHA), `commit_url`, `title`, `detail`, `areas[]`
-   - Commit URL format: `https://github.com/matthewdufty123-debug/wolfman.blog/commit/<sha>`
-2. Scan `data/future-dev.json` — if this commit closes a planned item:
-   - Set `status` → `"completed"`
-   - Set `date_closed` → today's date
-   - Set `commit` → short SHA
-   - Set `commit_url` → full GitHub commit URL
-3. If new work is identified during a session, add it to `future-dev.json` with `status: "planned"`
+> `data/dev-log.json` and `data/future-dev.json` are **deprecated**. They are kept for
+> historical reference only and must not be used for planning or session tracking.
 
 **Session startup — do this every time before any work begins:**
-1. Run `git log --oneline -10` to see the last 10 commits — understand what was recently shipped and why.
-2. Read `data/dev-log.json` (top entries) — this gives the fuller story behind each commit.
-3. Read `data/future-dev.json` in full — scan all items and their statuses.
-4. Check for any `"in-progress"` items first — these were left mid-session and jump the queue.
-5. Then look at all `"planned"` items together — consider which are related or dependent, and discuss the best order with Matthew before picking one.
-6. Summarise what you found: recent work, anything in-flight, and a suggested next priority. Let Matthew confirm before starting.
+1. Run `git log --oneline -10` to see the last 10 commits.
+2. Fetch open issues from the GitHub API:
+   `https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues?state=open`
+3. Check for any `in-progress` labelled issues first — these were left mid-session and jump the queue.
+4. Then review all `planned` issues — consider dependencies and milestone grouping, and discuss the best order with Matthew before picking one.
+5. Summarise what you found: recent commits, anything in-flight, and a suggested next priority. Let Matthew confirm before starting.
 
-**Session workflow (FD-driven planning):**
-1. Once a pipeline item is agreed, set its `status` to `"in-progress"`.
-2. Use its `detail` / `prompt` field as the brief — generate a plan and confirm with Matthew before implementing.
-3. On completion, mark `"completed"`, set `date_closed` and `commit` / `commit_url`, and add a `dev-log.json` entry.
-4. If new work surfaces during a session, add it to `future-dev.json` with `status: "planned"` so it doesn't get lost.
+**Session workflow (Issues-driven planning):**
+1. Once an issue is agreed, apply the `in-progress` label to it (note it in conversation — label changes require the GitHub API or UI).
+2. Use the issue's description as the brief — generate a plan and confirm with Matthew before implementing.
+3. On completion, reference the issue in the commit message: `closes #N` — this auto-closes the issue on push.
+4. If new work surfaces during a session, create a new GitHub Issue with appropriate labels and milestone so it doesn't get lost.
+
+**Label conventions:**
+| Label | Colour | Meaning |
+|-------|--------|---------|
+| `planned` | Blue `#4A7FA5` | Identified, not yet started |
+| `in-progress` | Yellow `#C8B020` | Actively being worked on |
+| `bug` | Red `#d73a4a` | Something broken |
+| `enhancement` | Green `#a2eeef` | New feature or improvement |
+| `Milestone-1` … `Milestone-11` | Grey `#bfd4f2` | Milestone grouping |
 
 ---
 

@@ -28,28 +28,24 @@
             <img src="images/site_images/White Bronze LogoAsset 12300.png" class="dev-collab-logo" alt="Wolfman">
             <img src="images/site_images/claudecode-color.png" class="dev-collab-logo" alt="Claude Code">
           </div>
-          <p class="dev-collab-caption">I am collaborating with Claude Code to build this website from the ground up. Our development area details what changes we have committed to so far and what changes we plan to make. The development log below is being used as part of our workflow to incrementally enhance this site.</p>
-          <a href="#future-pipeline" class="dev-link dev-collab-jump">Jump to future pipeline →</a>
+          <p class="dev-collab-caption">I am collaborating with Claude Code to build this website from the ground up. Our development area details what changes we have committed to so far and what changes we plan to make. GitHub Issues is our single source of truth — every planned feature, bug, and improvement lives there.</p>
+          <a href="#pipeline" class="dev-link dev-collab-jump">Jump to pipeline →</a>
         </div>
       </section>
 
-      <!-- Section 2: Development Log -->
+      <!-- Section 2: Completed Work -->
       <section class="dev-section">
-        <h2 class="dev-section-title">// development log</h2>
-        <div class="dev-table-wrap" id="devLogWrap">
-          <p class="dev-loading">Loading...</p>
+        <h2 class="dev-section-title">// completed work</h2>
+        <div id="closedWrap">
+          <p class="dev-loading">Fetching completed issues…</p>
         </div>
       </section>
 
-      <!-- Section 3: Future Pipeline -->
-      <section class="dev-section" id="future-pipeline">
-        <h2 class="dev-section-title">// future pipeline</h2>
-        <div class="dev-pipeline-intro">
-          <img src="images/site_images/claudecode-color.png" class="dev-prompt-icon dev-prompt-icon--lg" alt="Claude Code">
-          Each item below has a prompt — a brief written by Matthew that Claude Code reads alongside <code>CLAUDE.md</code> to plan the work. Before any code is written, a full implementation plan is presented for review. Once confirmed, Claude Code builds it, marks the item complete, and logs the commit SHA. The pipeline is how we keep the work intentional and traceable.
-        </div>
-        <div class="dev-table-wrap" id="futurePipelineWrap">
-          <p class="dev-loading">Loading...</p>
+      <!-- Section 3: Pipeline -->
+      <section class="dev-section" id="pipeline">
+        <h2 class="dev-section-title">// pipeline</h2>
+        <div id="pipelineWrap">
+          <p class="dev-loading">Fetching pipeline…</p>
         </div>
       </section>
 
@@ -57,157 +53,197 @@
 
     <script src="js/nav.js"></script>
     <script>
+      var GITHUB_REPO = 'matthewdufty123-debug/wolfman-website';
+      var GITHUB_API  = 'https://api.github.com/repos/' + GITHUB_REPO;
+      var ISSUES_URL  = 'https://github.com/' + GITHUB_REPO + '/issues/';
+      var CACHE_KEY   = 'wm_gh_cache';
+      var CACHE_TTL   = 5 * 60 * 1000; // 5 minutes
+
+      // ── Label badge ──────────────────────────────────────────────────────────
+      var LABEL_CLASSES = {
+        'planned':     'dev-badge--planned',
+        'in-progress': 'dev-badge--in-progress',
+        'bug':         'dev-badge--bug',
+        'enhancement': 'dev-badge--enhancement'
+      };
+
+      function labelBadge(label) {
+        var cls = LABEL_CLASSES[label.name] || 'dev-badge--default';
+        return '<span class="dev-badge ' + cls + '">' + label.name + '</span>';
+      }
+
+      function labelBadges(labels) {
+        return labels
+          .filter(function(l) { return !l.name.match(/^Milestone-/i); })
+          .map(labelBadge)
+          .join(' ');
+      }
+
+      // ── Milestone name from labels ────────────────────────────────────────────
+      function milestoneName(issue) {
+        if (issue.milestone && issue.milestone.title) return issue.milestone.title;
+        var ml = (issue.labels || []).find(function(l) { return l.name.match(/^Milestone-/i); });
+        return ml ? ml.name : 'Unassigned';
+      }
+
+      // ── Group array by key ────────────────────────────────────────────────────
+      function groupBy(arr, fn) {
+        return arr.reduce(function(acc, item) {
+          var key = fn(item);
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(item);
+          return acc;
+        }, {});
+      }
+
+      // ── Fetch with sessionStorage cache ──────────────────────────────────────
+      function cachedFetch(url, cacheKey) {
+        try {
+          var raw = sessionStorage.getItem(cacheKey);
+          if (raw) {
+            var cached = JSON.parse(raw);
+            if (Date.now() - cached.ts < CACHE_TTL) return Promise.resolve(cached.data);
+          }
+        } catch(e) {}
+
+        return fetch(url, { headers: { 'Accept': 'application/vnd.github.v3+json' } })
+          .then(function(r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          })
+          .then(function(data) {
+            try { sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: data })); } catch(e) {}
+            return data;
+          });
+      }
+
+      // Fetch all pages of issues
+      function fetchAllIssues(state) {
+        var key = CACHE_KEY + '_' + state;
+        var url = GITHUB_API + '/issues?state=' + state + '&per_page=100&page=1';
+        return cachedFetch(url, key);
+      }
+
+      // ── Render pipeline (open issues grouped by milestone) ───────────────────
+      function renderPipeline(issues) {
+        var wrap = document.getElementById('pipelineWrap');
+        if (!issues.length) {
+          wrap.innerHTML = '<p class="dev-empty">No open issues.</p>';
+          return;
+        }
+
+        var grouped = groupBy(issues, milestoneName);
+
+        // Sort milestone keys naturally
+        var keys = Object.keys(grouped).sort(function(a, b) {
+          var na = parseInt(a.replace(/\D+/g, '')) || 999;
+          var nb = parseInt(b.replace(/\D+/g, '')) || 999;
+          return na - nb;
+        });
+
+        var html = '';
+
+        keys.forEach(function(ms) {
+          var items = grouped[ms];
+          html += '<div class="dev-milestone">';
+          html += '<h3 class="dev-milestone-title">' + ms + '</h3>';
+          html += '<table class="dev-table">';
+          html += '<thead><tr><th>#</th><th>Title</th><th>Labels</th></tr></thead>';
+          html += '<tbody>';
+          items.forEach(function(issue) {
+            var badges = labelBadges(issue.labels || []);
+            html += '<tr class="dev-row-main">' +
+              '<td class="dev-col-id"><a href="' + ISSUES_URL + issue.number + '" target="_blank" rel="noopener" class="dev-commit-link">#' + issue.number + '</a></td>' +
+              '<td class="dev-col-title">' + escHtml(issue.title) + '</td>' +
+              '<td>' + (badges || '—') + '</td>' +
+            '</tr>';
+          });
+          html += '</tbody></table></div>';
+        });
+
+        wrap.innerHTML = html;
+      }
+
+      // ── Render completed work (closed issues) ────────────────────────────────
+      function renderClosed(issues) {
+        var wrap = document.getElementById('closedWrap');
+        if (!issues.length) {
+          wrap.innerHTML = '<p class="dev-empty">Nothing closed yet.</p>';
+          return;
+        }
+
+        var SHOW = 5;
+        var showing = issues.slice(0, SHOW);
+        var rest    = issues.slice(SHOW);
+
+        function buildTable(items) {
+          var rows = items.map(function(issue) {
+            var badges = labelBadges(issue.labels || []);
+            var closed = issue.closed_at ? formatDate(issue.closed_at) : '—';
+            return '<tr class="dev-row-main">' +
+              '<td class="dev-col-id"><a href="' + ISSUES_URL + issue.number + '" target="_blank" rel="noopener" class="dev-commit-link">#' + issue.number + '</a></td>' +
+              '<td class="dev-col-title">' + escHtml(issue.title) + '</td>' +
+              '<td>' + (badges || '—') + '</td>' +
+              '<td>' + closed + '</td>' +
+            '</tr>';
+          }).join('');
+          return '<table class="dev-table">' +
+            '<thead><tr><th>#</th><th>Title</th><th>Labels</th><th>Closed</th></tr></thead>' +
+            '<tbody>' + rows + '</tbody>' +
+          '</table>';
+        }
+
+        var html = buildTable(showing);
+
+        if (rest.length) {
+          html += '<p class="dev-log-action"><a href="#" class="dev-link" id="closedExpand">Show ' + rest.length + ' more →</a></p>';
+          html += '<div id="closedRest" style="display:none">' + buildTable(rest) + '</div>';
+        } else {
+          html += '<p class="dev-log-action"><a href="' + 'https://github.com/' + GITHUB_REPO + '/issues?q=is%3Aissue+is%3Aclosed" class="dev-link" target="_blank" rel="noopener">See all closed issues on GitHub →</a></p>';
+        }
+
+        wrap.innerHTML = html;
+
+        var expandBtn = document.getElementById('closedExpand');
+        if (expandBtn) {
+          expandBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var el = document.getElementById('closedRest');
+            var open = el.style.display !== 'none';
+            el.style.display = open ? 'none' : 'block';
+            e.target.textContent = open ? 'Show ' + rest.length + ' more →' : 'Hide ↑';
+          });
+        }
+      }
+
+      // ── Helpers ───────────────────────────────────────────────────────────────
+      function escHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
       function formatDate(iso) {
-        if (!iso) return '—';
-        var d = new Date(iso + 'T00:00:00');
+        var d = new Date(iso);
         var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
       }
 
-      function statusBadge(status) {
-        return '<span class="dev-badge dev-badge--' + status + '">' + status + '</span>';
+      function showError(id, msg) {
+        document.getElementById(id).innerHTML =
+          '<p class="dev-error">' + (msg || 'Could not load data from GitHub.') + ' <a href="https://github.com/' + GITHUB_REPO + '/issues" class="dev-link" target="_blank" rel="noopener">View on GitHub →</a></p>';
       }
 
-      function shortSha(sha) {
-        if (!sha) return '—';
-        return sha.substring(0, 7);
-      }
+      // ── Boot ──────────────────────────────────────────────────────────────────
+      fetchAllIssues('open')
+        .then(renderPipeline)
+        .catch(function() { showError('pipelineWrap'); });
 
-      function commitLink(sha, url) {
-        if (!sha) return '—';
-        if (url) return '<a href="' + url + '" target="_blank" rel="noopener" class="dev-commit-link">' + shortSha(sha) + '</a>';
-        return shortSha(sha);
-      }
-
-      function areasHtml(areas) {
-        if (!areas || !areas.length) return '—';
-        return areas.map(function(a) {
-          return '<span class="dev-tag">' + a + '</span>';
-        }).join(' ');
-      }
-
-      // ── Dev log ──
-      fetch('data/dev-log.json')
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          var wrap = document.getElementById('devLogWrap');
-          if (!data.length) {
-            wrap.innerHTML = '<p class="dev-empty">No entries yet.</p>';
-            return;
-          }
-
-          var GITHUB_COMMITS = 'https://github.com/matthewdufty123-debug/wolfman-website';
-
-          function buildLogRow(entry) {
-            var hasAreas = entry.areas && entry.areas.length;
-            return '<tr class="dev-row-main">' +
-                '<td>' + formatDate(entry.date) + '</td>' +
-                '<td>' + commitLink(entry.commit, entry.commit_url) + '</td>' +
-                '<td class="dev-col-title">' + entry.title + '</td>' +
-              '</tr>' +
-              '<tr class="dev-row-detail' + (hasAreas ? '' : ' dev-row-last') + '">' +
-                '<td colspan="3">' + (entry.detail || '—') + '</td>' +
-              '</tr>' +
-              (hasAreas
-                ? '<tr class="dev-row-areas dev-row-last"><td colspan="3">' + areasHtml(entry.areas) + '</td></tr>'
-                : '');
-          }
-
-          function renderLogTable(entries, showExpand) {
-            var rows = entries.map(buildLogRow).join('');
-            var footer = showExpand
-              ? '<p class="dev-log-action"><a href="#" class="dev-link" id="devLogExpand">Show more commits →</a></p>'
-              : '<p class="dev-log-action"><a href="' + GITHUB_COMMITS + '" class="dev-link" target="_blank" rel="noopener">See all commits on GitHub →</a></p>';
-            wrap.innerHTML =
-              '<table class="dev-table dev-table--log">' +
-                '<thead><tr>' +
-                  '<th>Date</th>' +
-                  '<th>Commit</th>' +
-                  '<th>Title</th>' +
-                '</tr></thead>' +
-                '<tbody>' + rows + '</tbody>' +
-              '</table>' + footer;
-
-            if (showExpand) {
-              document.getElementById('devLogExpand').addEventListener('click', function(e) {
-                e.preventDefault();
-                renderLogTable(data.slice(0, 10), false);
-              });
-            }
-          }
-
-          renderLogTable(data.slice(0, 3), data.length > 3);
-        })
-        .catch(function() {
-          document.getElementById('devLogWrap').innerHTML = '<p class="dev-error">Could not load development log.</p>';
-        });
-
-      // ── Future pipeline ──
-      fetch('data/future-dev.json')
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          var wrap = document.getElementById('futurePipelineWrap');
-          if (!data.length) {
-            wrap.innerHTML = '<p class="dev-empty">No items yet.</p>';
-            return;
-          }
-
-          var open = data.filter(function(e) { return e.status !== 'completed'; });
-          var done = data.filter(function(e) { return e.status === 'completed'; });
-
-          function buildPipelineRow(entry) {
-            var detailText = entry.prompt || entry.detail || '—';
-            var meta = '';
-            if (entry.date_closed || entry.commit) {
-              meta = '<div class="dev-row-detail--meta">';
-              if (entry.date_closed) meta += 'Closed: ' + formatDate(entry.date_closed) + '&ensp;';
-              if (entry.commit) meta += 'Commit: ' + commitLink(entry.commit, entry.commit_url);
-              meta += '</div>';
-            }
-            return '<tr class="dev-row-main">' +
-                '<td class="dev-col-id">' + entry.id + '</td>' +
-                '<td>' + statusBadge(entry.status) + '</td>' +
-                '<td class="dev-col-title">' + entry.title + '</td>' +
-              '</tr>' +
-              '<tr class="dev-row-detail">' +
-                '<td colspan="3">' + detailText + meta + '</td>' +
-              '</tr>';
-          }
-
-          var thead = '<thead><tr>' +
-            '<th>ID</th><th>Status</th><th>Title</th>' +
-          '</tr></thead>';
-
-          var html =
-            '<table class="dev-table">' + thead +
-              '<tbody>' + open.map(buildPipelineRow).join('') + '</tbody>' +
-            '</table>';
-
-          if (done.length) {
-            html +=
-              '<p class="dev-log-action"><a href="#" class="dev-link" id="pipelineShowDone">Show ' + done.length + ' completed →</a></p>' +
-              '<table class="dev-table" id="pipelineDoneTable" style="display:none">' + thead +
-                '<tbody>' + done.map(buildPipelineRow).join('') + '</tbody>' +
-              '</table>';
-          }
-
-          wrap.innerHTML = html;
-
-          if (done.length) {
-            document.getElementById('pipelineShowDone').addEventListener('click', function(e) {
-              e.preventDefault();
-              var tbl = document.getElementById('pipelineDoneTable');
-              var visible = tbl.style.display !== 'none';
-              tbl.style.display = visible ? 'none' : 'table';
-              e.target.textContent = visible
-                ? 'Show ' + done.length + ' completed →'
-                : 'Hide completed ↑';
-            });
-          }
-        })
-        .catch(function() {
-          document.getElementById('futurePipelineWrap').innerHTML = '<p class="dev-error">Could not load pipeline.</p>';
-        });
+      fetchAllIssues('closed')
+        .then(renderClosed)
+        .catch(function() { showError('closedWrap'); });
     </script>
   </body>
 </html>
