@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import WolfLogo from './WolfLogo'
 import ThemeButtons from './ThemeButtons'
 import FontSizeButtons from './FontSizeButtons'
+import DevOverlay from './DevOverlay'
 
 const NAV_LINKS = [
   { href: '/talk-data',   label: 'talk data',          pathKey: 'talk-data' },
@@ -18,17 +19,16 @@ const NAV_LINKS = [
 export default function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [devOpen, setDevOpen] = useState(false)
   const pathname = usePathname()
-  const router = useRouter()
 
-  const isDevPage = pathname === '/development'
-
-  // Escape key closes both overlays
+  // Escape key closes all overlays
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         setMenuOpen(false)
         setSettingsOpen(false)
+        setDevOpen(false)
       }
     }
     document.addEventListener('keydown', onKey)
@@ -37,13 +37,14 @@ export default function NavBar() {
 
   // Prevent body scroll when an overlay is open
   useEffect(() => {
-    document.body.style.overflow = menuOpen || settingsOpen ? 'hidden' : ''
+    document.body.style.overflow = menuOpen || settingsOpen || devOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
-  }, [menuOpen, settingsOpen])
+  }, [menuOpen, settingsOpen, devOpen])
 
   function closeAll() {
     setMenuOpen(false)
     setSettingsOpen(false)
+    setDevOpen(false)
   }
 
   // Active page is excluded from the menu list
@@ -65,17 +66,16 @@ export default function NavBar() {
           <path d="M0,100 L0,46 L95,46 C125,46 158,0 187.5,0 C217,0 250,46 280,46 L375,46 L375,100 Z" />
         </svg>
 
-        {/* Settings button — hidden on dev page */}
-        {!isDevPage && (
-          <button
-            className="nav-btn nav-btn--left"
-            aria-label={settingsOpen ? 'Close settings' : 'Open settings'}
-            onClick={() => {
-              setSettingsOpen((o) => !o)
-              setMenuOpen(false)
-            }}
-          />
-        )}
+        {/* Settings button */}
+        <button
+          className="nav-btn nav-btn--left"
+          aria-label={settingsOpen ? 'Close settings' : 'Open settings'}
+          onClick={() => {
+            setSettingsOpen((o) => !o)
+            setMenuOpen(false)
+            setDevOpen(false)
+          }}
+        />
 
         {/* Wolf logo — opens menu */}
         <button
@@ -90,14 +90,12 @@ export default function NavBar() {
           <WolfLogo size={64} priority />
         </button>
 
-        {/* Dev page button — hidden on dev page */}
-        {!isDevPage && (
-          <button
-            className="nav-btn nav-btn--right nav-dev"
-            aria-label="Development"
-            onClick={() => router.push('/development')}
-          />
-        )}
+        {/* Dev overlay button */}
+        <button
+          className="nav-btn nav-btn--right nav-dev"
+          aria-label={devOpen ? 'Close development' : 'Open development'}
+          onClick={() => { setDevOpen((o) => !o); setMenuOpen(false); setSettingsOpen(false) }}
+        />
       </nav>
 
       {/* ── Menu overlay ── */}
@@ -131,7 +129,11 @@ export default function NavBar() {
                 style={{ borderRadius: 8 }}
               />
             </Link>
-            <Link href="/development" aria-label="Development page" onClick={closeAll}>
+            <button
+              aria-label="Open development overlay"
+              onClick={() => { closeAll(); setDevOpen(true) }}
+              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+            >
               <Image
                 src="/images/site_images/claudecode-color.png"
                 alt="Claude Code development"
@@ -140,7 +142,7 @@ export default function NavBar() {
                 className="menu-footer-icon"
                 unoptimized
               />
-            </Link>
+            </button>
           </div>
         </div>
       </nav>
@@ -163,6 +165,9 @@ export default function NavBar() {
           <FontSizeButtons />
         </div>
       </div>
+
+      {/* ── Dev overlay ── */}
+      <DevOverlay isOpen={devOpen} onClose={() => setDevOpen(false)} />
     </>
   )
 }
