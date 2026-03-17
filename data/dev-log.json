@@ -1,5 +1,13 @@
 [
   {
+    "date": "2026-03-17",
+    "commit": "96c55c6",
+    "commit_url": "https://github.com/matthewdufty123-debug/wolfman.blog/commit/96c55c6",
+    "title": "FD-009: Admin page theme integration, token link, and section parser",
+    "detail": "Admin page now uses the inverted theme (contrast-bg/contrast-text), Helvetica Neue font, and the site nav bar. Added --admin-card-bg, --admin-border, --admin-muted CSS tokens. Added a standalone GitHub token settings link. Section parser detects the three Morning Intention headings (with typo tolerance) and outputs .post-section / .post-section-label markup. Fixed generated posts to include flash-prevention script, nav.js, and theme.js. Also includes FD-005 nav/settings/font-size changes.",
+    "areas": ["admin.html", "css/style.css", "js/nav.js", "js/theme.js", "settings.html", "data/future-dev.json"]
+  },
+  {
     "date": "2026-03-16",
     "commit": "440c20c",
     "commit_url": "https://github.com/matthewdufty123-debug/wolfman.blog/commit/440c20c",

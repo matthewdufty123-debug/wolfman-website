@@ -48,10 +48,10 @@
     "date_raised": "2026-03-16",
     "title": "Setting Navigation and Font Size",
     "detail": "I would like to make a change to the navigation menu. There is currently a triabgle on the left hand side of the navigation function. Can we change this is a circle please. I want it to open the setting menu. We can remove the setting link from the menu window as the circle will be the primary method of opening the settings menu. The second change will be to add a slider to the seeting page under our theme selector. I would like to have three setting on the slider menu that will change the font of the paragragh text on the blog posts. Normal will be the current size, then large will be plus 50% and extra large will be plus 100% in size. This theme will only apply to blog posts. The development page font sizes will remain unchanged.",
-    "status": "in-progress",
-    "date_closed": null,
-    "commit": null,
-    "commit_url": null,
+    "status": "completed",
+    "date_closed": "2026-03-17",
+    "commit": "96c55c6",
+    "commit_url": "https://github.com/matthewdufty123-debug/wolfman.blog/commit/96c55c6",
     "prompt": null
   },
   {
@@ -92,10 +92,10 @@
     "date_raised": "2026-03-16",
     "title": "Integration of Admin Page to Website Theme",
     "detail": "I would like to intergration the the admin page int the them of the website. When you click to add a new blog post, the admin page is currently a stark white background with black text. I would like to change this to match the theme of the website. If the user has light mode selected, make the admin page in a dark mode theme and vise-versa. The admin page should have the same nav bar as the rest of the website and the same font. The only difference will be that it is inveresed in terms of light and dark mode. I would like a link aft the github token field that links to the https://github.com/settings/personal-access-tokens in case i need a new token. When the category of Morning Intension is selected, I want the operation to create a new page to scane for three different sections. If it find 'Todays's Intension' Then place this text under a heading calleed Todays's Intension. Then look for 'I'm grateful for' if it find it put it under a head of this name. Then finally, 'Something im great at' can go under the last heading. I might have spelt these headings wrong sometimes, in which case just place the text in as it reads.",
-    "status": "in-progress",
-    "date_closed": null,
-    "commit": null,
-    "commit_url": null,
+    "status": "completed",
+    "date_closed": "2026-03-17",
+    "commit": "96c55c6",
+    "commit_url": "https://github.com/matthewdufty123-debug/wolfman.blog/commit/96c55c6",
     "prompt": null
   },
   {
