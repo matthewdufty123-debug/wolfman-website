@@ -17,7 +17,7 @@ authentic, personal, and real.
 ## The Website
 
 **Domain:** wolfman.blog  
-**Deployment:** Git → GitHub → Netlify (auto-deploys on push)  
+**Deployment:** Git → GitHub → Vercel (auto-deploys on push)
 **Local folder:** D:\Websites\Wolfman.blog  
 **Stack:** HTML, CSS, JavaScript (vanilla to start, expanding as needed)
 
