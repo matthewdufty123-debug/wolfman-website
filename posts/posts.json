@@ -1,6 +1,12 @@
 [
   {
     "date": "2026-03-17",
+    "title": "Today's post",
+    "slug": "2026-03-17-todays-post",
+    "category": "morning-intention"
+  },
+  {
+    "date": "2026-03-17",
     "title": "Today's Walk",
     "slug": "2026-03-17-todays-walk",
     "category": "morning-walk"
