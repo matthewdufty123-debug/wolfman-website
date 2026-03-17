@@ -8,13 +8,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <script>(function(){var t=localStorage.getItem('wolfman-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <script>(function(){var t=localStorage.getItem('wolfman-theme')||'dark';document.documentElement.setAttribute('data-theme',t);var f=localStorage.getItem('wolfman-fontsize')||'normal';document.documentElement.setAttribute('data-fontsize',f);})();</script>
   </head>
   <body class="page-intentions">
 
     <main>
       <header class="intentions-header">
         <h1 class="intentions-title">Morning Intentions</h1>
+        <a href="admin.html" class="admin-link" target="_blank" rel="noopener">+ new post</a>
       </header>
       <ul class="post-list" id="postList" aria-live="polite"></ul>
     </main>

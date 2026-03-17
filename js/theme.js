@@ -28,6 +28,24 @@
     applyTheme(theme);
   }
 
+  function getFontSize() {
+    return localStorage.getItem('wolfman-fontsize') || 'normal';
+  }
+
+  function applyFontSize(size) {
+    document.documentElement.setAttribute('data-fontsize', size);
+    var sizeBtns = document.querySelectorAll('.fontsize-btn');
+    sizeBtns.forEach(function (btn) {
+      btn.classList.toggle('fontsize-btn--active', btn.dataset.size === size);
+    });
+  }
+
+  function setFontSize(size) {
+    localStorage.setItem('wolfman-fontsize', size);
+    applyFontSize(size);
+  }
+
   applyTheme(getTheme());
-  window.WolfmanTheme = { setTheme: setTheme, getTheme: getTheme };
+  applyFontSize(getFontSize());
+  window.WolfmanTheme = { setTheme: setTheme, getTheme: getTheme, setFontSize: setFontSize, getFontSize: getFontSize };
 })();

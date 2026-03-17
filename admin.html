@@ -4,40 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wolfman — Post Publisher</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script>(function(){var t=localStorage.getItem('wolfman-theme')||'dark';document.documentElement.setAttribute('data-theme',t);var f=localStorage.getItem('wolfman-fontsize')||'normal';document.documentElement.setAttribute('data-fontsize',f);})()</script>
     <style>
       *, *::before, *::after { box-sizing: border-box; }
 
       body {
         margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         font-size: 15px;
-        background: #f4f4f4;
-        color: #222;
+        background: var(--contrast-bg);
+        color: var(--contrast-text);
         padding: 2rem 1rem 4rem;
       }
 
       .wrap {
         max-width: 700px;
         margin: 0 auto;
+        padding-bottom: 9rem;
       }
 
       h1 {
         font-size: 1.25rem;
         margin: 0 0 0.25rem;
         font-weight: 600;
+        color: var(--contrast-text);
       }
 
       .subtitle {
         font-size: 0.85rem;
-        color: #666;
+        color: var(--admin-muted);
         margin: 0 0 2rem;
       }
 
       /* ── Token section ── */
 
       .token-section {
-        background: #fff;
-        border: 1px solid #ddd;
+        background: var(--admin-card-bg);
+        border: 1px solid var(--admin-border);
         border-radius: 6px;
         padding: 1rem 1.25rem;
         margin-bottom: 2rem;
@@ -59,7 +63,7 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        color: #555;
+        color: var(--admin-muted);
       }
 
       .token-status {
@@ -76,7 +80,7 @@
 
       .token-toggle {
         font-size: 0.75rem;
-        color: #888;
+        color: var(--admin-muted);
       }
 
       .token-body {
@@ -124,7 +128,7 @@
 
       .token-hint {
         font-size: 0.75rem;
-        color: #888;
+        color: var(--admin-muted);
         margin: 0.5rem 0 0;
         line-height: 1.5;
       }
@@ -145,7 +149,7 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        color: #555;
+        color: var(--admin-muted);
         margin-bottom: 0.4rem;
       }
 
@@ -182,7 +186,7 @@
 
       .hint {
         font-size: 0.78rem;
-        color: #888;
+        color: var(--admin-muted);
         margin-top: 0.3rem;
       }
 
@@ -194,8 +198,18 @@
 
       .divider {
         border: none;
-        border-top: 1px solid #ddd;
+        border-top: 1px solid var(--admin-border);
         margin: 2rem 0;
+      }
+
+      .admin-token-link {
+        font-size: 0.8rem;
+        color: var(--admin-muted);
+        margin: -1rem 0 2rem;
+      }
+
+      .admin-token-link a {
+        color: var(--admin-muted);
       }
 
       .publish-btn {
@@ -298,6 +312,13 @@
           </p>
         </div>
       </div>
+
+      <p class="admin-token-link">
+        Manage GitHub tokens →
+        <a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener">
+          github.com/settings/personal-access-tokens
+        </a>
+      </p>
 
       <!-- Post form -->
       <div class="row">
@@ -478,24 +499,68 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
+    <script>(function(){var t=localStorage.getItem('wolfman-theme')||'dark';document.documentElement.setAttribute('data-theme',t);var f=localStorage.getItem('wolfman-fontsize')||'normal';document.documentElement.setAttribute('data-fontsize',f);})()</` + `script>
   </head>
   <body class="page-post">`;
+      }
+
+      // ── Morning Intention section parser ──
+
+      var SECTION_PATTERNS = [
+        { regex: /^today.s\s+int\S*/i,              label: "Today's Intention" },
+        { regex: /^i.m\s+grat\S*\s+for/i,           label: "I'm Grateful For" },
+        { regex: /^something\s+i.m\s+great\s+at/i,  label: "Something I'm Great At" }
+      ];
+
+      function parseSections(content) {
+        var paragraphs = content.split(/\n\n+/).map(function(p) { return p.trim(); }).filter(Boolean);
+        var sections = [], current = null, orphans = [];
+        paragraphs.forEach(function(para) {
+          var hit = false;
+          for (var i = 0; i < SECTION_PATTERNS.length; i++) {
+            if (SECTION_PATTERNS[i].regex.test(para)) {
+              if (current) sections.push(current);
+              var rest = para.replace(SECTION_PATTERNS[i].regex, '').replace(/^[\s;:]+/, '').trim();
+              current = { label: SECTION_PATTERNS[i].label, paras: rest ? [rest] : [] };
+              hit = true; break;
+            }
+          }
+          if (!hit) { (current ? current.paras : orphans).push(para); }
+        });
+        if (current) sections.push(current);
+        return { sections: sections, orphans: orphans };
       }
 
       // ── Morning Intention template ──
 
       function buildIntentionHtml(title, content) {
-        const pageTitle = esc(title);
-        return `${htmlHead(pageTitle)}
+        var pageTitle = esc(title);
+        var parsed = parseSections(content);
+        var body;
+        if (parsed.sections.length > 0) {
+          body = '';
+          if (parsed.orphans.length) {
+            body += '    <div class="post-section"><div class="post-body">\n'
+                  + toParagraphs(parsed.orphans.join('\n\n')) + '\n    </div></div>\n';
+          }
+          parsed.sections.forEach(function(s) {
+            body += '    <div class="post-section">\n'
+                  + '      <p class="post-section-label">' + s.label + '</p>\n'
+                  + '      <div class="post-body">' + (s.paras.length ? '\n' + toParagraphs(s.paras.join('\n\n')) + '\n      ' : '') + '</div>\n'
+                  + '    </div>\n';
+          });
+        } else {
+          body = '    <div class="post-body">\n' + toParagraphs(content) + '\n    </div>\n';
+        }
+        return htmlHead(pageTitle) + `
 
     <article class="post">
-      <div class="post-body">
-${toParagraphs(content)}
-      </div>
-    </article>
+${body}    </article>
 
 ${colophon(pageTitle)}
 
+    <script src="../js/nav.js"><\/script>
+    <script src="../js/theme.js"><\/script>
   </body>
 </html>`;
       }
@@ -518,6 +583,8 @@ ${toParagraphs(context)}
 
 ${colophon(pageTitle)}
 
+    <script src="../js/nav.js"><\/script>
+    <script src="../js/theme.js"><\/script>
   </body>
 </html>`;
       }
@@ -696,5 +763,7 @@ ${colophon(pageTitle)}
       });
     </script>
 
+    <script src="js/nav.js"></script>
+    <script src="js/theme.js"></script>
   </body>
 </html>

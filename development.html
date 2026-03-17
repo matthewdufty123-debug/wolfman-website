@@ -44,6 +44,10 @@
       <!-- Section 3: Future Pipeline -->
       <section class="dev-section" id="future-pipeline">
         <h2 class="dev-section-title">// future pipeline</h2>
+        <div class="dev-pipeline-intro">
+          <img src="images/site_images/claudecode-color.png" class="dev-prompt-icon dev-prompt-icon--lg" alt="Claude Code">
+          Each item below has a prompt — a brief written by Matthew that Claude Code reads alongside <code>CLAUDE.md</code> to plan the work. Before any code is written, a full implementation plan is presented for review. Once confirmed, Claude Code builds it, marks the item complete, and logs the commit SHA. The pipeline is how we keep the work intentional and traceable.
+        </div>
         <div class="dev-table-wrap" id="futurePipelineWrap">
           <p class="dev-loading">Loading...</p>
         </div>
@@ -95,12 +99,18 @@
           var GITHUB_COMMITS = 'https://github.com/matthewdufty123-debug/wolfman-website';
 
           function buildLogRow(entry) {
-            return '<tr>' +
-              '<td>' + formatDate(entry.date) + '</td>' +
-              '<td>' + commitLink(entry.commit, entry.commit_url) + '</td>' +
-              '<td class="dev-col-title">' + entry.title + '</td>' +
-              '<td class="dev-col-detail">' + entry.detail + '</td>' +
-            '</tr>';
+            var hasAreas = entry.areas && entry.areas.length;
+            return '<tr class="dev-row-main">' +
+                '<td>' + formatDate(entry.date) + '</td>' +
+                '<td>' + commitLink(entry.commit, entry.commit_url) + '</td>' +
+                '<td class="dev-col-title">' + entry.title + '</td>' +
+              '</tr>' +
+              '<tr class="dev-row-detail' + (hasAreas ? '' : ' dev-row-last') + '">' +
+                '<td colspan="3">' + (entry.detail || '—') + '</td>' +
+              '</tr>' +
+              (hasAreas
+                ? '<tr class="dev-row-areas dev-row-last"><td colspan="3">' + areasHtml(entry.areas) + '</td></tr>'
+                : '');
           }
 
           function renderLogTable(entries, showExpand) {
@@ -114,7 +124,6 @@
                   '<th>Date</th>' +
                   '<th>Commit</th>' +
                   '<th>Title</th>' +
-                  '<th>Detail</th>' +
                 '</tr></thead>' +
                 '<tbody>' + rows + '</tbody>' +
               '</table>' + footer;
@@ -147,20 +156,26 @@
           var done = data.filter(function(e) { return e.status === 'completed'; });
 
           function buildPipelineRow(entry) {
-            return '<tr>' +
-              '<td class="dev-col-id">' + entry.id + '</td>' +
-              '<td>' + statusBadge(entry.status) + '</td>' +
-              '<td class="dev-col-title">' + entry.title + '</td>' +
-              '<td class="dev-prompt-cell">' + (entry.prompt || entry.detail || '—') + '</td>' +
-              '<td>' + formatDate(entry.date_closed) + '</td>' +
-              '<td>' + commitLink(entry.commit, entry.commit_url) + '</td>' +
-            '</tr>';
+            var detailText = entry.prompt || entry.detail || '—';
+            var meta = '';
+            if (entry.date_closed || entry.commit) {
+              meta = '<div class="dev-row-detail--meta">';
+              if (entry.date_closed) meta += 'Closed: ' + formatDate(entry.date_closed) + '&ensp;';
+              if (entry.commit) meta += 'Commit: ' + commitLink(entry.commit, entry.commit_url);
+              meta += '</div>';
+            }
+            return '<tr class="dev-row-main">' +
+                '<td class="dev-col-id">' + entry.id + '</td>' +
+                '<td>' + statusBadge(entry.status) + '</td>' +
+                '<td class="dev-col-title">' + entry.title + '</td>' +
+              '</tr>' +
+              '<tr class="dev-row-detail">' +
+                '<td colspan="3">' + detailText + meta + '</td>' +
+              '</tr>';
           }
 
-          var promptHeader = '<img src="images/site_images/claudecode-color.png" class="dev-prompt-icon" alt="Claude Code"> Prompt';
-
           var thead = '<thead><tr>' +
-            '<th>ID</th><th>Status</th><th>Title</th><th>' + promptHeader + '</th><th>Closed</th><th>Commit</th>' +
+            '<th>ID</th><th>Status</th><th>Title</th>' +
           '</tr></thead>';
 
           var html =
