@@ -1,3 +1,7 @@
 export default function HomePage() {
-  return <main><h1>Wolfman — coming soon</h1></main>
+  return (
+    <main className="home">
+      <h1 className="greeting">Hello, I&apos;m Matthew Wolfman</h1>
+    </main>
+  )
 }
