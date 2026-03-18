@@ -1,0 +1,72 @@
+import NextAuth from 'next-auth'
+import GitHub from 'next-auth/providers/github'
+import Google from 'next-auth/providers/google'
+import Credentials from 'next-auth/providers/credentials'
+import { DrizzleAdapter } from '@auth/drizzle-adapter'
+import bcrypt from 'bcryptjs'
+import { eq } from 'drizzle-orm'
+import { db } from '@/lib/db'
+import { users } from '@/lib/db/schema'
+import { authConfig } from './auth.config'
+
+const ADMIN_GITHUB_USERNAME = 'matthewdufty123-debug'
+
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  ...authConfig,
+  adapter: DrizzleAdapter(db),
+  session: { strategy: 'jwt' },
+  providers: [
+    GitHub({
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    }),
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    Credentials({
+      async authorize(credentials) {
+        const { email, password } = credentials as { email: string; password: string }
+        if (!email || !password) return null
+
+        const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1)
+        if (!user || !user.passwordHash) return null
+
+        const passwordMatch = await bcrypt.compare(password, user.passwordHash)
+        if (!passwordMatch) return null
+
+        return { id: user.id, email: user.email, name: user.name, role: user.role }
+      },
+    }),
+  ],
+  callbacks: {
+    ...authConfig.callbacks,
+    async signIn({ user, account, profile }) {
+      if (account?.provider === 'github') {
+        const githubUsername = (profile as { login?: string })?.login
+        if (githubUsername === ADMIN_GITHUB_USERNAME) {
+          await db
+            .update(users)
+            .set({ role: 'admin' })
+            .where(eq(users.email, user.email!))
+          user.role = 'admin'
+        }
+      }
+      return true
+    },
+    jwt({ token, user }) {
+      if (user) {
+        token.role = user.role ?? 'customer'
+        token.id = user.id
+      }
+      return token
+    },
+    session({ session, token }) {
+      if (token) {
+        session.user.role = token.role as string
+        session.user.id = token.id as string
+      }
+      return session
+    },
+  },
+})

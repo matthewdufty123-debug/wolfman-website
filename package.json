@@ -6,20 +6,34 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@auth/drizzle-adapter": "^1.11.1",
+    "@neondatabase/serverless": "^1.0.2",
+    "@stripe/stripe-js": "^8.10.0",
+    "bcryptjs": "^3.0.3",
+    "drizzle-orm": "^0.45.1",
     "gray-matter": "^4.0.3",
     "next": "^15.2.3",
+    "next-auth": "^5.0.0-beta.30",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "remark": "^15.0.1",
-    "remark-html": "^16.0.1"
+    "remark-html": "^16.0.1",
+    "stripe": "^20.4.1"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.3.1",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "^15.2.3",
     "typescript": "^5"
