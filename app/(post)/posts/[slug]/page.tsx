@@ -152,6 +152,33 @@ export default async function PostPage({
         ? <MorningWalkPost post={post} />
         : <MorningIntentionPost post={post} />
       }
+
+      <div className="post-author-review-wrap">
+        {/* Author block */}
+        <div className="post-author">
+          <img src="/images/site_images/matthew-face.jpg" alt="Matthew Wolfman" className="post-author-photo" />
+          <div>
+            <p className="post-author-name">Matthew Wolfman</p>
+            <p className="post-author-bio">Data engineer, mountain biker, photographer, wood carver. Writing every morning.</p>
+          </div>
+        </div>
+
+        {/* Claude review block */}
+        {post.review && (
+          <div className="post-claude-review">
+            <div className="post-claude-review-header">
+              <img src="/images/site_images/claudecode-color.png" alt="Claude" className="post-claude-icon" />
+              <span className="post-claude-review-label">Claude&apos;s take</span>
+            </div>
+            <div className="post-claude-review-body">
+              {post.review.split('\n\n').map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       <PostNav nextPost={nextPost} slug={slug} title={post.title} />
     </>
   )

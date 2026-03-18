@@ -2134,3 +2134,84 @@ html[data-fontsize="xlarge"] .post-body {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ── Post author + Claude review blocks ── */
+
+.post-author-review-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.post-author {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 3rem 0 0;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--nav-fade);
+}
+
+.post-author-photo {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.post-author-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0 0 0.2rem;
+  color: var(--heading);
+}
+
+.post-author-bio {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin: 0;
+  color: var(--body-text);
+}
+
+.post-claude-review {
+  margin: 2rem 0 3rem;
+  padding: 1.5rem;
+  border: 1px solid var(--nav-fade);
+  border-radius: 8px;
+  background: var(--nav-pill-bg);
+}
+
+.post-claude-review-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.post-claude-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+.post-claude-review-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+  color: var(--body-text);
+}
+
+.post-claude-review-body p {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin: 0 0 0.75rem;
+  opacity: 0.85;
+  color: var(--body-text);
+}
+
+.post-claude-review-body p:last-child {
+  margin-bottom: 0;
+}

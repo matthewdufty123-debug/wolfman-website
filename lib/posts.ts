@@ -12,6 +12,7 @@ export interface PostFrontmatter {
   excerpt?: string
   image?: string                         // og:image only — never rendered on page
   videoId?: string                       // morning-walk only
+  review?: string                        // Claude's review — shown at bottom of post
 }
 
 export interface PostMeta extends PostFrontmatter {

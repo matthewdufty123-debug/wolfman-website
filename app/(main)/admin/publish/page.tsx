@@ -39,6 +39,7 @@ function buildFrontmatter(fields: {
   excerpt?: string
   image?: string
   videoId?: string
+  review?: string
 }): string {
   const lines = [
     '---',
@@ -50,6 +51,7 @@ function buildFrontmatter(fields: {
   if (fields.excerpt) lines.push(`excerpt: "${fields.excerpt.replace(/"/g, '\\"')}"`)
   if (fields.image)   lines.push(`image: "${fields.image}"`)
   if (fields.videoId) lines.push(`videoId: "${fields.videoId}"`)
+  if (fields.review)  lines.push(`review: "${fields.review.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`)
   lines.push('---')
   return lines.join('\n')
 }
@@ -93,6 +95,10 @@ export default function AdminPage() {
   const [statusMsg, setStatusMsg] = useState('')
   const [publishing, setPublishing] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [generatingSeo, setGeneratingSeo] = useState(false)
+  const [seoError, setSeoError] = useState('')
+  const [suggestedTitle, setSuggestedTitle] = useState('')
+  const [review, setReview] = useState('')
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -111,6 +117,29 @@ export default function AdminPage() {
     } finally {
       setUploadingImage(false)
       e.target.value = ''
+    }
+  }
+
+  async function handleGenerateSeo() {
+    if (!title.trim()) { setSeoError('Add a title first.'); return }
+    if (!content.trim()) { setSeoError('Write your post content first — Claude needs something to read.'); return }
+    setSeoError('')
+    setGeneratingSeo(true)
+    try {
+      const res = await fetch('/api/admin/seo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Generation failed')
+      setExcerpt(data.excerpt)
+      setSuggestedTitle(data.suggestedTitle)
+      setReview(data.review)
+    } catch (err) {
+      setSeoError(err instanceof Error ? err.message : 'Something went wrong.')
+    } finally {
+      setGeneratingSeo(false)
     }
   }
 
@@ -178,6 +207,7 @@ export default function AdminPage() {
         title, date, category, slug: fullSlug,
         excerpt: excerpt || undefined,
         image: image || undefined,
+        review: review || undefined,
       }) + '\n\n' + content.trim() + '\n'
     } else {
       if (!walkUrl.trim() || !walkContext.trim()) {
@@ -398,22 +428,57 @@ export default function AdminPage() {
                 onChange={e => setContent(e.target.value)}
               />
             </div>
+            {suggestedTitle && (
+              <div className="admin-field">
+                <label className="admin-label">Suggested SEO Title</label>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <span style={{ flex: 1, fontSize: '0.95rem', color: 'var(--body-text)', padding: '0.6rem 0.75rem', border: '1px solid #ddd', borderRadius: 4, background: 'var(--admin-card-bg)' }}>
+                    {suggestedTitle}
+                  </span>
+                  <button type="button" className="admin-upload-btn" onClick={() => { setTitle(suggestedTitle); setSlug(titleToSlug(suggestedTitle)) }}>
+                    Use this
+                  </button>
+                </div>
+                <p className="admin-hint">{suggestedTitle.length} / 60 characters</p>
+              </div>
+            )}
+
             <div className="admin-field">
-              <label className="admin-label" htmlFor="postExcerpt">Excerpt <span style={{ fontWeight: 400, textTransform: 'none', opacity: 0.7 }}>(recommended — shown in social previews)</span></label>
-              <textarea
-                id="postExcerpt"
-                className="admin-textarea"
-                style={{ minHeight: '80px' }}
-                placeholder="One or two sentences that capture the heart of this post. Shown when shared on LinkedIn, Facebook, and in search results."
-                value={excerpt}
-                onChange={e => setExcerpt(e.target.value)}
-              />
+              <label className="admin-label" htmlFor="postExcerpt">
+                Excerpt <span style={{ fontWeight: 400, textTransform: 'none', opacity: 0.7 }}>(recommended — shown in social previews)</span>
+              </label>
+              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginBottom: '0.4rem' }}>
+                {excerpt && (
+                  <button type="button" className="admin-upload-btn" onClick={handleGenerateSeo} disabled={generatingSeo}
+                    style={{ background: '#888', cursor: generatingSeo ? 'not-allowed' : 'pointer' }}>
+                    Regenerate ↺
+                  </button>
+                )}
+                <button type="button" className="admin-upload-btn" onClick={handleGenerateSeo}
+                  disabled={generatingSeo || !content.trim()}
+                  style={{ cursor: generatingSeo || !content.trim() ? 'not-allowed' : 'pointer', opacity: !content.trim() ? 0.5 : 1 }}>
+                  {generatingSeo ? 'Asking Claude…' : 'Generate with Claude ✦'}
+                </button>
+              </div>
+              <textarea id="postExcerpt" className="admin-textarea" style={{ minHeight: '80px' }}
+                placeholder="One or two sentences that capture the heart of this post..."
+                value={excerpt} onChange={e => setExcerpt(e.target.value)} />
               <p className="admin-hint">
                 {excerpt.length > 0
                   ? `${excerpt.length} / 160 characters${excerpt.length > 160 ? ' — consider trimming' : ''}`
                   : 'If left blank, the opening paragraph of your post is used automatically.'}
               </p>
+              {seoError && <p className="admin-hint" style={{ color: '#7a2020', opacity: 1 }}>{seoError}</p>}
             </div>
+
+            {review && (
+              <div className="admin-field">
+                <label className="admin-label">Claude's Review <span style={{ fontWeight: 400, textTransform: 'none', opacity: 0.7 }}>(shown at bottom of post)</span></label>
+                <textarea className="admin-textarea" style={{ minHeight: '120px' }}
+                  value={review} onChange={e => setReview(e.target.value)} />
+                <p className="admin-hint">Edit freely. This appears at the bottom of the published post attributed to Claude.</p>
+              </div>
+            )}
           </>
         )}
 
