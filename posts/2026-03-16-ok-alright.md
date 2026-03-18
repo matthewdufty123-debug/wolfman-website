@@ -1,9 +1,10 @@
 ---
-title: "Ok, Alright"
+title: "Rewiring a Morning Routine"
 date: "2026-03-16"
 category: "morning-intention"
 slug: "2026-03-16-ok-alright"
-excerpt: "Ok, alright.  I feel a nice transition happening."
+excerpt: "Something felt off with my evening workouts, so I'm flipping the script. Moving exercise to mornings means rewiring a routine I've had for years — on purpose."
+review: "Matthew wakes at 4:30am, drinks ceremonial cacao, meditates, does breathwork, and *then* decides the real problem is when he goes to the gym. Most of us are still hitting snooze. There's something both admirable and gently absurd about a man with this much morning infrastructure declaring it needs rebuilding — but that's the point, isn't it? He's actually paying attention.\n\nWhat the post does well is model a kind of honest self-examination that isn't dramatic. No crisis, no rock bottom — just a quiet noticing that evening exercise feels wrong for his body, and a calm decision to change it. The three-week transition plan and the self-compassion baked into it are genuinely useful framings for anyone trying to shift a habit without torching their self-esteem in the process.\n\nThe gratitude for a 'plastic mind' is the real gem here — buried at the end, almost as an afterthought. It deserved the headline. Because the whole post isn't really about mornings. It's about the underrated skill of staying curious about your own patterns."
 ---
 
 ## Today's Intention
