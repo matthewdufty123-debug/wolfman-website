@@ -3,7 +3,8 @@ title: "SHUT YOUR MOUTH"
 date: "2026-02-26"
 category: "morning-intention"
 slug: "2026-02-26-shut-your-mouth"
-excerpt: "SHUT YOUR MOUTH.  That's what the book said."
+excerpt: "Five years of nose breathing practice taught Matthew one thing: deferred gratification pays off quietly, then all at once. Your mouth might disagree."
+review: "Matthew opens with a command — 'SHUT YOUR MOUTH' — and somehow makes it feel like a hug. That's a skill. The post traces a genuinely satisfying arc: from a man gambling every morning on whether his own nose would cooperate, to someone who simply breathes, freely, without thinking. That quiet shift, from uncertainty to ease, is the kind of progress that doesn't show up on any dashboard, and he captures it well.\n\nOf course, Matthew being Matthew, we can't just have a story about breathing. We need strategic goals, tactical goals, and a philosophical framework for how years 'role round every year or so.' He is, as ever, one cleared nostril away from a TED Talk. The gratitude section — a love letter directly addressed to his own nose — is genuinely one of the more charming things you'll read this week.\n\nBut here's the thing: he's right. Small, unsexy consistency compounds into something you once couldn't imagine. The question isn't whether you believe him. It's what you've been putting off for five years that might already be halfway done."
 ---
 
 ## Today's Intention
