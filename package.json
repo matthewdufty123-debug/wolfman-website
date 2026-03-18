@@ -16,6 +16,7 @@
     "@auth/drizzle-adapter": "^1.11.1",
     "@neondatabase/serverless": "^1.0.2",
     "@stripe/stripe-js": "^8.10.0",
+    "@vercel/blob": "^2.3.1",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.1",
     "gray-matter": "^4.0.3",

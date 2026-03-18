@@ -92,6 +92,27 @@ export default function AdminPage() {
   const [status, setStatus] = useState<StatusType>('idle')
   const [statusMsg, setStatusMsg] = useState('')
   const [publishing, setPublishing] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingImage(true)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: form })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Upload failed')
+      setImage(data.url)
+    } catch (err) {
+      setStatus('error')
+      setStatusMsg(err instanceof Error ? err.message : 'Image upload failed')
+    } finally {
+      setUploadingImage(false)
+      e.target.value = ''
+    }
+  }
 
   useEffect(() => {
     const saved = localStorage.getItem('wm_gh_token')
@@ -332,15 +353,33 @@ export default function AdminPage() {
         </div>
 
         <div className="admin-field">
-          <label className="admin-label" htmlFor="postImage">Social Image URL <span style={{ fontWeight: 400, textTransform: 'none', opacity: 0.7 }}>(optional — og:image only, not shown on post)</span></label>
-          <input
-            id="postImage"
-            type="url"
-            className="admin-input"
-            placeholder="/images/posts/your-image.jpg"
-            value={image}
-            onChange={e => setImage(e.target.value)}
-          />
+          <label className="admin-label" htmlFor="postImage">
+            Social Image <span style={{ fontWeight: 400, textTransform: 'none', opacity: 0.7 }}>(optional — og:image only, not shown on post)</span>
+          </label>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <input
+              id="postImage"
+              type="url"
+              className="admin-input"
+              placeholder="Upload below or paste a URL"
+              value={image}
+              onChange={e => setImage(e.target.value)}
+              style={{ flex: 1, minWidth: 200 }}
+            />
+            <label className="admin-upload-btn" style={{ cursor: uploadingImage ? 'not-allowed' : 'pointer', opacity: uploadingImage ? 0.6 : 1 }}>
+              {uploadingImage ? 'Uploading…' : 'Upload image'}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                style={{ display: 'none' }}
+                disabled={uploadingImage}
+                onChange={handleImageUpload}
+              />
+            </label>
+          </div>
+          {image && (
+            <img src={image} alt="Social preview" style={{ marginTop: '0.75rem', maxHeight: 120, maxWidth: '100%', borderRadius: 4, objectFit: 'cover' }} />
+          )}
           <p className="admin-hint">Used for social sharing previews on LinkedIn, Facebook etc. Not displayed on the post page.</p>
         </div>
 
@@ -486,6 +525,19 @@ export default function AdminPage() {
           opacity: 0.75;
           margin-top: 0.3rem;
         }
+        .admin-upload-btn {
+          display: inline-block;
+          background: #4A7FA5;
+          color: #fff;
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          font-size: 0.85rem;
+          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+          white-space: nowrap;
+          transition: background 0.2s ease;
+        }
+        .admin-upload-btn:hover { background: #3a6a8a; }
         .admin-btn-save-token {
           background: #4A7FA5;
           color: #fff;
