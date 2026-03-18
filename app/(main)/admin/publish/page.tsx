@@ -167,6 +167,7 @@ function AdminPublishInner() {
   const [editOriginalFullSlug, setEditOriginalFullSlug] = useState('')
   const [editFileSha, setEditFileSha] = useState('')
   const [loadingPostList, setLoadingPostList] = useState(false)
+  const [postListError, setPostListError] = useState('')
   const [loadingPost, setLoadingPost] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState<StatusType>('idle')
@@ -209,11 +210,18 @@ function AdminPublishInner() {
 
   async function loadEditPostList() {
     const token = localStorage.getItem('wm_gh_token') || ''
-    if (!token) return
+    if (!token) {
+      setPostListError('No GitHub token saved. Expand the token section above and save one first.')
+      return
+    }
     setLoadingPostList(true)
+    setPostListError('')
     try {
       const res = await ghFetch(`/repos/${REPO}/contents/posts`, 'GET', token)
-      if (!res.ok) throw new Error('Failed to load posts list')
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || `GitHub API error (${res.status})`)
+      }
       const files: Array<{ name: string }> = await res.json()
       const posts = files
         .filter(f => f.name.endsWith('.md'))
@@ -223,8 +231,8 @@ function AdminPublishInner() {
           return { slug: s, label: slugToLabel(s) }
         })
       setEditPostList(posts)
-    } catch {
-      // Silently fail — user can reload
+    } catch (err) {
+      setPostListError(err instanceof Error ? err.message : 'Failed to load posts list.')
     } finally {
       setLoadingPostList(false)
     }
@@ -946,7 +954,10 @@ function AdminPublishInner() {
                   {loadingPostList ? 'Loading…' : 'Refresh'}
                 </button>
               </div>
-              <p className="admin-hint">Posts sorted newest first. Selecting one loads all its fields.</p>
+              {postListError
+                ? <p className="admin-hint" style={{ color: '#A82020', opacity: 1 }}>{postListError}</p>
+                : <p className="admin-hint">Posts sorted newest first. Selecting one loads all its fields.</p>
+              }
             </div>
 
             {loadingPost && (
