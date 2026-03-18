@@ -5,7 +5,7 @@ import { orders } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import AccountNameForm from '@/components/AccountNameForm'
 import AccountPasswordForm from '@/components/AccountPasswordForm'
-import { logout } from '@/lib/actions/account'
+import SignOutButton from '@/components/SignOutButton'
 
 export default async function AccountPage() {
   const session = await auth()
@@ -68,9 +68,7 @@ export default async function AccountPage() {
 
         {/* Sign out */}
         <section className="account-section">
-          <form action={logout}>
-            <button type="submit" className="account-signout">Sign out</button>
-          </form>
+          <SignOutButton />
         </section>
       </div>
     </main>
