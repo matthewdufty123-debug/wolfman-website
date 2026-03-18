@@ -5,8 +5,8 @@ html[data-theme="dark"] {
   --body-text: #ffffff;
   --nav-fill: #193343;
   --nav-btn-icon: rgba(255, 255, 255, 0.55);
-  --nav-pill-bg: rgba(255, 255, 255, 0.90);
-  --nav-pill-icon: #193343;
+  --nav-pill-bg: rgba(25, 51, 67, 0.80);
+  --nav-pill-icon: #ffffff;
   --logo-bg: transparent;
   --menu-bg: #3D4E63;
   --menu-prompt: rgba(212, 197, 186, 0.45);
@@ -26,8 +26,8 @@ html[data-theme="light"] {
   --body-text: #333F50;
   --nav-fill: #E5CBBB;
   --nav-btn-icon: rgba(25, 51, 67, 0.55);
-  --nav-pill-bg: rgba(25, 51, 67, 0.85);
-  --nav-pill-icon: #ffffff;
+  --nav-pill-bg: rgba(255, 255, 255, 0.90);
+  --nav-pill-icon: #193343;
   --logo-bg: #ffffff;
   --menu-bg: #7A9DB5;
   --menu-prompt: rgba(238, 232, 227, 0.55);
@@ -163,10 +163,12 @@ body {
 
 .nav-btn--face {
   right: calc(50% - 88px);
+  bottom: 15px;
 }
 
 .nav-btn--cart {
   left: calc(50% - 88px);
+  bottom: 15px;
 }
 
 .nav-cart-badge {
