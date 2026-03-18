@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 const GITHUB_REPO = process.env.NEXT_PUBLIC_GITHUB_REPO ?? 'matthewdufty123-debug/wolfman-website'
 const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}`
@@ -199,6 +201,8 @@ export default function DevPageClient() {
   const [closedIssues, setClosedIssues] = useState<GitHubIssue[] | null>(null)
   const [openError, setOpenError] = useState(false)
   const [closedError, setClosedError] = useState(false)
+  const { data: session } = useSession()
+  const isAdmin = session?.user?.role === 'admin'
 
   useEffect(() => {
     cachedFetch<GitHubIssue[]>(
@@ -234,6 +238,11 @@ export default function DevPageClient() {
           >
             See my work on GitHub →
           </a>
+          {isAdmin && (
+            <Link href="/admin" className="dev-link">
+              Admin panel →
+            </Link>
+          )}
         </div>
 
         <div className="dev-collab">

@@ -4,10 +4,13 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { SlidersHorizontal, ShoppingCart, Smile, Meh, Code2 } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import WolfLogo from './WolfLogo'
 import ThemeButtons from './ThemeButtons'
 import FontSizeButtons from './FontSizeButtons'
 import DevOverlay from './DevOverlay'
+import { useCart } from '@/lib/cart'
 
 const NAV_LINKS = [
   { href: '/talk-data',   label: 'talk data',          pathKey: 'talk-data' },
@@ -21,6 +24,35 @@ export default function NavBar() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [devOpen, setDevOpen] = useState(false)
   const pathname = usePathname()
+  const { count: cartCount } = useCart()
+  const { data: session } = useSession()
+  const [navHidden, setNavHidden] = useState(false)
+  const isPostPage = pathname.startsWith('/posts/')
+
+  // Fade nav after 3s inactivity on post pages; reappear on any interaction
+  useEffect(() => {
+    if (!isPostPage) { setNavHidden(false); return }
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReduced) return
+
+    let timer: ReturnType<typeof setTimeout>
+    function resetTimer() {
+      setNavHidden(false)
+      clearTimeout(timer)
+      timer = setTimeout(() => setNavHidden(true), 3000)
+    }
+
+    resetTimer()
+    window.addEventListener('scroll', resetTimer, { passive: true })
+    window.addEventListener('mousemove', resetTimer, { passive: true })
+    window.addEventListener('touchstart', resetTimer, { passive: true })
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('scroll', resetTimer)
+      window.removeEventListener('mousemove', resetTimer)
+      window.removeEventListener('touchstart', resetTimer)
+    }
+  }, [isPostPage])
 
   // Escape key closes all overlays
   useEffect(() => {
@@ -55,7 +87,7 @@ export default function NavBar() {
   return (
     <>
       {/* ── Nav bar ── */}
-      <nav className="wolfman-nav" id="wolfmanNav">
+      <nav className={`wolfman-nav${navHidden ? ' nav--hidden' : ''}`} id="wolfmanNav">
         <svg
           className="nav-bg"
           xmlns="http://www.w3.org/2000/svg"
@@ -66,16 +98,31 @@ export default function NavBar() {
           <path d="M0,100 L0,46 L95,46 C125,46 158,0 187.5,0 C217,0 250,46 280,46 L375,46 L375,100 Z" />
         </svg>
 
-        {/* Settings button */}
+        {/* Experience button */}
         <button
           className="nav-btn nav-btn--left"
-          aria-label={settingsOpen ? 'Close settings' : 'Open settings'}
+          aria-label={settingsOpen ? 'Close experience' : 'Open experience'}
           onClick={() => {
             setSettingsOpen((o) => !o)
             setMenuOpen(false)
             setDevOpen(false)
           }}
-        />
+        >
+          <SlidersHorizontal size={20} strokeWidth={1.5} />
+        </button>
+
+        {/* Cart button */}
+        <Link
+          href={cartCount > 0 ? '/cart' : '/shop'}
+          className="nav-btn nav-btn--cart"
+          aria-label={cartCount > 0 ? `Cart — ${cartCount} item${cartCount !== 1 ? 's' : ''}` : 'Go to shop'}
+          onClick={closeAll}
+        >
+          <ShoppingCart size={20} strokeWidth={1.5} />
+          {cartCount > 0 && (
+            <span className="nav-cart-badge">{cartCount}</span>
+          )}
+        </Link>
 
         {/* Wolf logo — opens menu */}
         <button
@@ -90,12 +137,29 @@ export default function NavBar() {
           <WolfLogo size={64} priority />
         </button>
 
+        {/* Face / auth button */}
+        <Link
+          href={session ? '/account' : '/login'}
+          className="nav-btn nav-btn--face"
+          aria-label={session ? `Account — ${session.user?.name ?? 'signed in'}` : 'Sign in'}
+          onClick={closeAll}
+        >
+          {session?.user?.role === 'admin'
+            ? <WolfLogo size={28} />
+            : session
+              ? <Smile size={20} strokeWidth={1.5} />
+              : <Meh size={20} strokeWidth={1.5} />
+          }
+        </Link>
+
         {/* Dev overlay button */}
         <button
           className="nav-btn nav-btn--right nav-dev"
           aria-label={devOpen ? 'Close development' : 'Open development'}
           onClick={() => { setDevOpen((o) => !o); setMenuOpen(false); setSettingsOpen(false) }}
-        />
+        >
+          <Code2 size={20} strokeWidth={1.5} />
+        </button>
       </nav>
 
       {/* ── Menu overlay ── */}
@@ -120,6 +184,18 @@ export default function NavBar() {
                 </Link>
               </li>
             ))}
+            <li className="menu-links-divider" aria-hidden="true" />
+            <li className="menu-links-auth">
+              {session ? (
+                <Link href="/account" onClick={closeAll}>
+                  {session.user?.name ?? 'my account'}
+                </Link>
+              ) : (
+                <Link href="/login" onClick={closeAll}>
+                  sign in
+                </Link>
+              )}
+            </li>
           </ul>
           <div className="menu-footer-icons">
             <Link href="/" aria-label="Go home" onClick={closeAll}>
@@ -147,20 +223,20 @@ export default function NavBar() {
         </div>
       </nav>
 
-      {/* ── Settings overlay ── */}
+      {/* ── Experience overlay ── */}
       <div
         className={`settings-overlay${settingsOpen ? ' is-open' : ''}`}
         aria-hidden={!settingsOpen}
       >
         <button
           className="settings-close"
-          aria-label="Close settings"
+          aria-label="Close experience"
           onClick={() => setSettingsOpen(false)}
         >
           &times;
         </button>
         <div className="settings-inner">
-          <p className="settings-overlay-title">settings</p>
+          <p className="settings-overlay-title">experience</p>
           <ThemeButtons />
           <FontSizeButtons />
         </div>

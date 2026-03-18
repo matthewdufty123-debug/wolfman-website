@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Playfair_Display, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import ThemeProvider from '@/components/ThemeProvider'
+import AuthProvider from '@/components/AuthProvider'
 import { CartProvider } from '@/lib/cart'
 
 const playfair = Playfair_Display({
@@ -48,11 +49,13 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
-        <ThemeProvider>
-          <CartProvider>
-            {children}
-          </CartProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <CartProvider>
+              {children}
+            </CartProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )
