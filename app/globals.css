@@ -5,6 +5,8 @@ html[data-theme="dark"] {
   --body-text: #ffffff;
   --nav-fill: #193343;
   --nav-btn-icon: rgba(255, 255, 255, 0.55);
+  --nav-pill-bg: rgba(255, 255, 255, 0.90);
+  --nav-pill-icon: #193343;
   --logo-bg: transparent;
   --menu-bg: #3D4E63;
   --menu-prompt: rgba(212, 197, 186, 0.45);
@@ -24,6 +26,8 @@ html[data-theme="light"] {
   --body-text: #333F50;
   --nav-fill: #E5CBBB;
   --nav-btn-icon: rgba(25, 51, 67, 0.55);
+  --nav-pill-bg: rgba(25, 51, 67, 0.85);
+  --nav-pill-icon: #ffffff;
   --logo-bg: #ffffff;
   --menu-bg: #7A9DB5;
   --menu-prompt: rgba(238, 232, 227, 0.55);
@@ -141,24 +145,28 @@ body {
   color: var(--heading);
 }
 
-.nav-btn--face {
-  right: calc(50% - 88px);
-  color: var(--nav-btn-icon, rgba(255,255,255,0.55));
+.nav-btn--face,
+.nav-btn--cart {
+  width: 40px;
+  height: 40px;
+  background: var(--nav-pill-bg);
+  color: var(--nav-pill-icon);
+  border-radius: 50%;
   text-decoration: none;
+  transition: opacity 0.2s ease;
 }
 
-.nav-btn--face:hover {
-  color: var(--heading);
+.nav-btn--face:hover,
+.nav-btn--cart:hover {
+  opacity: 0.85;
+}
+
+.nav-btn--face {
+  right: calc(50% - 88px);
 }
 
 .nav-btn--cart {
   left: calc(50% - 88px);
-  color: var(--nav-btn-icon, rgba(255,255,255,0.55));
-  text-decoration: none;
-}
-
-.nav-btn--cart:hover {
-  color: var(--heading);
 }
 
 .nav-cart-badge {
