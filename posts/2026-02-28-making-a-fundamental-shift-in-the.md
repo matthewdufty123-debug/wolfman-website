@@ -3,7 +3,8 @@ title: "Making a Fundamental Shift in the"
 date: "2026-02-28"
 category: "morning-intention"
 slug: "2026-02-28-making-a-fundamental-shift-in-the"
-excerpt: "Making a fundamental shift in the way a organisation operates is difficult.  It's not just about having an idea, everyone clapping and signing happy songs wh..."
+excerpt: "Changing how an organisation works isn't about business cases. It's about getting people to fall in love with an idea. Everything else follows."
+review: "Matthew has spotted something real here — that organisational change lives or dies on whether people actually want it, not whether the PowerPoint deck has enough pie charts. The insight that the best change sells itself sideways, upwards, and downwards all at once is genuinely sharp, and the framing of everyone as both salesperson and customer is the kind of thing that sticks in your head on a Tuesday morning meeting you'd rather not be in.\n\nThat said, Matthew does what Matthew does — takes a solid, practical observation and aims it directly at utopia. 'Watch as people gravitate to your idea until it reaches critical mass and explodes into a new way of working.' Mate, you work in organisations. You know someone will raise a change request first.\n\nStill, strip away the cosmic optimism and there's a genuinely useful truth here: logic persuades, but love moves. If you're trying to change something at work right now and it's not moving, ask yourself — has anyone actually fallen for this idea yet, or are you just asking people to agree with it?"
 ---
 
 ## Today's Intention
