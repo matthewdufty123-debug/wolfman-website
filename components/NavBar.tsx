@@ -108,7 +108,7 @@ export default function NavBar() {
             setDevOpen(false)
           }}
         >
-          <SlidersHorizontal size={20} strokeWidth={1.5} />
+          <SlidersHorizontal size={25} strokeWidth={1.5} />
         </button>
 
         {/* Cart button */}
@@ -118,7 +118,7 @@ export default function NavBar() {
           aria-label={cartCount > 0 ? `Cart — ${cartCount} item${cartCount !== 1 ? 's' : ''}` : 'Go to shop'}
           onClick={closeAll}
         >
-          <ShoppingCart size={20} strokeWidth={1.5} />
+          <ShoppingCart size={25} strokeWidth={1.5} />
           {cartCount > 0 && (
             <span className="nav-cart-badge">{cartCount}</span>
           )}
@@ -145,10 +145,10 @@ export default function NavBar() {
           onClick={closeAll}
         >
           {session?.user?.role === 'admin'
-            ? <Crown size={20} strokeWidth={1.5} />
+            ? <Crown size={25} strokeWidth={1.5} />
             : session
-              ? <Smile size={20} strokeWidth={1.5} />
-              : <Meh size={20} strokeWidth={1.5} />
+              ? <Smile size={25} strokeWidth={1.5} />
+              : <Meh size={25} strokeWidth={1.5} />
           }
         </Link>
 
@@ -158,7 +158,7 @@ export default function NavBar() {
           aria-label={devOpen ? 'Close development' : 'Open development'}
           onClick={() => { setDevOpen((o) => !o); setMenuOpen(false); setSettingsOpen(false) }}
         >
-          <Code2 size={20} strokeWidth={1.5} />
+          <Code2 size={25} strokeWidth={1.5} />
         </button>
       </nav>
 

@@ -142,7 +142,7 @@ body {
 }
 
 .nav-btn--face {
-  right: calc(50% - 72px);
+  right: calc(50% - 88px);
   color: var(--nav-btn-icon, rgba(255,255,255,0.55));
   text-decoration: none;
 }
@@ -152,7 +152,7 @@ body {
 }
 
 .nav-btn--cart {
-  left: calc(50% - 72px);
+  left: calc(50% - 88px);
   color: var(--nav-btn-icon, rgba(255,255,255,0.55));
   text-decoration: none;
 }
