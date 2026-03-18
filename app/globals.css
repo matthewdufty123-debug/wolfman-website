@@ -2168,6 +2168,15 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
   flex-shrink: 0;
 }
 
+.post-author-byline {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.5;
+  margin: 0 0 0.2rem;
+  color: var(--body-text);
+}
+
 .post-author-name {
   font-weight: 600;
   font-size: 0.95rem;

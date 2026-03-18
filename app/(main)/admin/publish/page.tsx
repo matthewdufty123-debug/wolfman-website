@@ -853,13 +853,13 @@ function AdminPublishInner() {
               style={{
                 padding: '0.6rem 1.25rem',
                 border: 'none',
-                borderBottom: activeTab === tab ? '2px solid #214459' : '2px solid transparent',
+                borderBottom: activeTab === tab ? '2px solid #4A7FA5' : '2px solid transparent',
                 marginBottom: '-2px',
                 background: 'none',
                 fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
                 fontSize: '0.85rem',
                 fontWeight: activeTab === tab ? 600 : 400,
-                color: activeTab === tab ? '#214459' : 'var(--body-text)',
+                color: activeTab === tab ? '#e6edf3' : '#8b949e',
                 cursor: 'pointer',
                 letterSpacing: '0.03em',
               }}

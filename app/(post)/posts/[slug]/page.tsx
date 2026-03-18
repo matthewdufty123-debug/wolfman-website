@@ -158,6 +158,7 @@ export default async function PostPage({
         <div className="post-author">
           <img src="/images/site_images/matthew-face.jpg" alt="Matthew Wolfman" className="post-author-photo" />
           <div>
+            <p className="post-author-byline">This post was written by</p>
             <p className="post-author-name">Matthew Wolfman</p>
             <p className="post-author-bio">Data engineer, mountain biker, photographer, wood carver. Writing every morning.</p>
           </div>
