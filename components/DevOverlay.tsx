@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
 const GITHUB_REPO = process.env.NEXT_PUBLIC_GITHUB_REPO ?? 'matthewdufty123-debug/wolfman-website'
 const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}`
@@ -297,6 +299,8 @@ export default function DevOverlay({ isOpen, onClose }: DevOverlayProps) {
   const [milestones, setMilestones] = useState<GitHubMilestone[] | null>(null)
   const [openError, setOpenError] = useState(false)
   const [closedError, setClosedError] = useState(false)
+  const { data: session } = useSession()
+  const isAdmin = session?.user?.role === 'admin'
 
   useEffect(() => {
     if (!isOpen) return
@@ -338,6 +342,11 @@ export default function DevOverlay({ isOpen, onClose }: DevOverlayProps) {
           >
             Raise an Issue
           </a>
+          {isAdmin && (
+            <Link href="/admin" className="dev-raise-btn" onClick={onClose}>
+              Admin Panel
+            </Link>
+          )}
         </div>
         <h1 className="dev-page-title">wolfman.blog / development</h1>
 

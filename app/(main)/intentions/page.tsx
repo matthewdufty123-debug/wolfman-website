@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { getAllPosts } from '@/lib/posts'
+import Link from 'next/link'
 
 const CATEGORY_LABELS: Record<string, string> = {
   'morning-intention': 'Morning Intention',
@@ -19,7 +19,6 @@ export default async function IntentionsPage() {
     <>
       <header className="intentions-header">
         <h1 className="intentions-title">Morning Intentions</h1>
-        <Link href="/admin" className="admin-link">+ new post</Link>
       </header>
 
       {posts.length === 0 ? (

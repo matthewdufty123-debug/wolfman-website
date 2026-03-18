@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { SlidersHorizontal, ShoppingCart, Smile, Meh, Code2 } from 'lucide-react'
+import { SlidersHorizontal, ShoppingCart, Smile, Meh, Crown, Code2 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import WolfLogo from './WolfLogo'
 import ThemeButtons from './ThemeButtons'
@@ -145,7 +145,7 @@ export default function NavBar() {
           onClick={closeAll}
         >
           {session?.user?.role === 'admin'
-            ? <WolfLogo size={28} />
+            ? <Crown size={20} strokeWidth={1.5} />
             : session
               ? <Smile size={20} strokeWidth={1.5} />
               : <Meh size={20} strokeWidth={1.5} />
