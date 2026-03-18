@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Playfair_Display, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import ThemeProvider from '@/components/ThemeProvider'
-import NavBar from '@/components/NavBar'
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -50,7 +49,6 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <ThemeProvider>
           {children}
-          <NavBar />
         </ThemeProvider>
       </body>
     </html>

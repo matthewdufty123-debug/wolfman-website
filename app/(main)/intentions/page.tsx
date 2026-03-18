@@ -1,17 +1,9 @@
-import { readFile } from 'fs/promises'
-import path from 'path'
 import Link from 'next/link'
+import { getAllPosts } from '@/lib/posts'
 
-interface Post {
-  date: string
-  title: string
-  slug: string
-  category: string
-}
-
-interface Category {
-  id: string
-  label: string
+const CATEGORY_LABELS: Record<string, string> = {
+  'morning-intention': 'Morning Intention',
+  'morning-walk':      'Morning Walk with Matthew',
 }
 
 function formatDate(iso: string) {
@@ -21,25 +13,7 @@ function formatDate(iso: string) {
 }
 
 export default async function IntentionsPage() {
-  let posts: Post[] = []
-  let categories: Category[] = []
-
-  try {
-    const postsRaw = await readFile(path.join(process.cwd(), 'posts', 'posts.json'), 'utf-8')
-    posts = JSON.parse(postsRaw)
-  } catch {
-    // posts.json missing or malformed — render empty state
-  }
-
-  try {
-    const catsRaw = await readFile(path.join(process.cwd(), 'posts', 'categories.json'), 'utf-8')
-    categories = JSON.parse(catsRaw)
-  } catch {
-    // categories.json missing — proceed without labels
-  }
-
-  const categoryLabel = (id: string) =>
-    categories.find((c) => c.id === id)?.label ?? id
+  const posts = await getAllPosts()
 
   return (
     <>
@@ -59,7 +33,7 @@ export default async function IntentionsPage() {
               <Link href={`/posts/${post.slug}`} className="post-list-link">
                 <span className="post-list-date">{formatDate(post.date)}</span>
                 <span className="post-list-title">{post.title}</span>
-                <span className="post-list-category">{categoryLabel(post.category)}</span>
+                <span className="post-list-category">{CATEGORY_LABELS[post.category] ?? post.category}</span>
               </Link>
             </li>
           ))}

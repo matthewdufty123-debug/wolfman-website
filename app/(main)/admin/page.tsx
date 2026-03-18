@@ -1,0 +1,501 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+
+const REPO = 'matthewdufty123-debug/wolfman-website'
+const API = 'https://api.github.com'
+
+function titleToSlug(t: string) {
+  return t.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+}
+
+function extractYoutubeId(url: string): string | null {
+  const patterns = [
+    /[?&]v=([^&#]+)/,
+    /youtu\.be\/([^?&#]+)/,
+    /\/embed\/([^?&#]+)/,
+  ]
+  for (const p of patterns) {
+    const m = url.match(p)
+    if (m) return m[1]
+  }
+  return null
+}
+
+function toBase64(str: string): string {
+  return btoa(unescape(encodeURIComponent(str)))
+}
+
+function buildFrontmatter(fields: {
+  title: string
+  date: string
+  category: string
+  slug: string
+  excerpt?: string
+  videoId?: string
+}): string {
+  const lines = [
+    '---',
+    `title: "${fields.title.replace(/"/g, '\\"')}"`,
+    `date: "${fields.date}"`,
+    `category: "${fields.category}"`,
+    `slug: "${fields.slug}"`,
+  ]
+  if (fields.excerpt) lines.push(`excerpt: "${fields.excerpt.replace(/"/g, '\\"')}"`)
+  if (fields.videoId) lines.push(`videoId: "${fields.videoId}"`)
+  lines.push('---')
+  return lines.join('\n')
+}
+
+async function ghFetch(
+  urlPath: string,
+  method: string,
+  token: string,
+  body?: object
+): Promise<Response> {
+  return fetch(`${API}${urlPath}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github+json',
+      'Content-Type': 'application/json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  })
+}
+
+type StatusType = 'idle' | 'publishing' | 'success' | 'error'
+
+export default function AdminPage() {
+  const [tokenSaved, setTokenSaved] = useState(false)
+  const [tokenOpen, setTokenOpen] = useState(false)
+  const tokenInputRef = useRef<HTMLInputElement>(null)
+
+  const [date, setDate] = useState('')
+  const [title, setTitle] = useState('')
+  const [slug, setSlug] = useState('')
+  const [category, setCategory] = useState('morning-intention')
+  const [excerpt, setExcerpt] = useState('')
+  const [content, setContent] = useState('')
+  const [walkUrl, setWalkUrl] = useState('')
+  const [walkContext, setWalkContext] = useState('')
+
+  const [status, setStatus] = useState<StatusType>('idle')
+  const [statusMsg, setStatusMsg] = useState('')
+  const [publishing, setPublishing] = useState(false)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('wm_gh_token')
+    if (saved) {
+      setTokenSaved(true)
+    } else {
+      setTokenOpen(true)
+    }
+    // Default date to today
+    setDate(new Date().toISOString().slice(0, 10))
+  }, [])
+
+  function handleTitleChange(val: string) {
+    setTitle(val)
+    setSlug(titleToSlug(val))
+  }
+
+  function saveToken() {
+    const val = tokenInputRef.current?.value.trim()
+    if (!val) return
+    localStorage.setItem('wm_gh_token', val)
+    setTokenSaved(true)
+    setTokenOpen(false)
+  }
+
+  async function handlePublish() {
+    const token = localStorage.getItem('wm_gh_token') || tokenInputRef.current?.value.trim() || ''
+
+    if (!token) {
+      setTokenOpen(true)
+      tokenInputRef.current?.focus()
+      setStatus('error')
+      setStatusMsg('Please save your GitHub token first.')
+      return
+    }
+
+    if (!date || !title) {
+      setStatus('error')
+      setStatusMsg('Please fill in the date and title before publishing.')
+      return
+    }
+
+    const fullSlug = `${date}-${slug || titleToSlug(title)}`
+    const postPath = `posts/${fullSlug}.md`
+
+    let fileContent: string
+
+    if (category === 'morning-intention') {
+      if (!content.trim()) {
+        setStatus('error')
+        setStatusMsg('Please write your post content before publishing.')
+        return
+      }
+      fileContent = buildFrontmatter({ title, date, category, slug: fullSlug, excerpt: excerpt || undefined }) + '\n\n' + content.trim() + '\n'
+    } else {
+      if (!walkUrl.trim() || !walkContext.trim()) {
+        setStatus('error')
+        setStatusMsg('Please fill in the YouTube URL and context before publishing.')
+        return
+      }
+      const videoId = extractYoutubeId(walkUrl.trim())
+      if (!videoId) {
+        setStatus('error')
+        setStatusMsg('Could not extract a YouTube video ID from that URL. Please check it.')
+        return
+      }
+      fileContent = buildFrontmatter({ title, date, category, slug: fullSlug, excerpt: excerpt || undefined, videoId }) + '\n\n' + walkContext.trim() + '\n'
+    }
+
+    setPublishing(true)
+    setStatus('publishing')
+    setStatusMsg('Publishing...')
+
+    try {
+      // Check if file already exists (to get SHA for overwrite)
+      setStatusMsg('Checking for existing file...')
+      const checkRes = await ghFetch(`/repos/${REPO}/contents/${postPath}`, 'GET', token)
+
+      let sha: string | undefined
+      if (checkRes.ok) {
+        const existing = await checkRes.json()
+        sha = existing.sha
+        const overwrite = window.confirm(`A post with the slug "${fullSlug}" already exists. Overwrite it?`)
+        if (!overwrite) {
+          setStatus('idle')
+          setPublishing(false)
+          return
+        }
+        setStatus('publishing')
+        setStatusMsg('Overwriting post...')
+      } else {
+        setStatusMsg('Uploading post...')
+      }
+
+      const putRes = await ghFetch(`/repos/${REPO}/contents/${postPath}`, 'PUT', token, {
+        message: sha ? `Update post: ${title}` : `Add post: ${title}`,
+        content: toBase64(fileContent),
+        ...(sha ? { sha } : {}),
+      })
+
+      if (!putRes.ok) {
+        const err = await putRes.json()
+        throw new Error(err.message || `Failed to upload post (${putRes.status})`)
+      }
+
+      const postUrl = `https://wolfman.blog/posts/${fullSlug}`
+      setStatus('success')
+      setStatusMsg(`Published. Vercel is deploying — your post will be live in about 30 seconds.\n${postUrl}`)
+    } catch (err) {
+      setStatus('error')
+      setStatusMsg(`Something went wrong. ${err instanceof Error ? err.message : String(err)}`)
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  return (
+    <main style={{ padding: '2rem 1rem 4rem' }}>
+      <div style={{ maxWidth: 700, margin: '0 auto', paddingBottom: '9rem' }}>
+        <h1 style={{ fontSize: '1.25rem', margin: '0 0 0.25rem', fontWeight: 600 }}>
+          Wolfman — Post Publisher
+        </h1>
+        <p style={{ fontSize: '0.85rem', color: 'var(--admin-muted)', margin: '0 0 2rem' }}>
+          Write your post, click Publish. It commits to GitHub and deploys to Vercel automatically.
+        </p>
+
+        {/* Token section */}
+        <div className="admin-token-section">
+          <div
+            className="admin-token-header"
+            onClick={() => setTokenOpen(o => !o)}
+            style={{ cursor: 'pointer', userSelect: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--admin-muted)' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: tokenSaved ? '#3AB87A' : '#ccc', display: 'inline-block', flexShrink: 0 }} />
+              GitHub Token
+            </div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--admin-muted)' }}>
+              {tokenOpen ? '▾ collapse' : '▸ expand'}
+            </span>
+          </div>
+
+          {tokenOpen && (
+            <div style={{ marginTop: '1rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input
+                  ref={tokenInputRef}
+                  type="password"
+                  placeholder="github_pat_..."
+                  style={{ flex: 1, padding: '0.5rem 0.75rem', border: '1px solid #ccc', borderRadius: 4, fontFamily: 'monospace', fontSize: '0.85rem' }}
+                />
+                <button onClick={saveToken} className="admin-btn-save-token">Save</button>
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--admin-muted)', margin: '0.5rem 0 0', lineHeight: 1.5 }}>
+                Token is saved in your browser only — never sent anywhere except the GitHub API.<br />
+                Need one? github.com/settings/personal-access-tokens → Fine-grained → Repository: wolfman-website → Contents: Read and write.
+              </p>
+            </div>
+          )}
+        </div>
+
+        <p style={{ fontSize: '0.8rem', color: 'var(--admin-muted)', margin: '-1rem 0 2rem' }}>
+          Manage GitHub tokens → github.com/settings/personal-access-tokens
+        </p>
+
+        {/* Post form */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="admin-field">
+            <label className="admin-label" htmlFor="postDate">Date</label>
+            <input
+              id="postDate"
+              type="date"
+              className="admin-input"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+            />
+          </div>
+          <div className="admin-field">
+            <label className="admin-label" htmlFor="postTitle">Post Title</label>
+            <input
+              id="postTitle"
+              type="text"
+              className="admin-input"
+              placeholder="The Honda Engine"
+              value={title}
+              onChange={e => handleTitleChange(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="admin-field">
+          <label className="admin-label" htmlFor="postSlug">URL Slug</label>
+          <input
+            id="postSlug"
+            type="text"
+            className="admin-input"
+            placeholder="auto-generated from title"
+            value={slug}
+            onChange={e => setSlug(e.target.value)}
+          />
+          <p className="admin-hint">Auto-filled from title. Edit if needed. Date is prepended automatically.</p>
+        </div>
+
+        <div className="admin-field">
+          <label className="admin-label" htmlFor="postCategory">Category</label>
+          <select
+            id="postCategory"
+            className="admin-input"
+            value={category}
+            onChange={e => setCategory(e.target.value)}
+          >
+            <option value="morning-intention">Morning Intention</option>
+            <option value="morning-walk">Morning Walk with Matthew</option>
+          </select>
+        </div>
+
+        <div className="admin-field">
+          <label className="admin-label" htmlFor="postExcerpt">Excerpt <span style={{ fontWeight: 400, textTransform: 'none' }}>(optional)</span></label>
+          <input
+            id="postExcerpt"
+            type="text"
+            className="admin-input"
+            placeholder="Auto-generated from first paragraph if left blank (max 160 chars)"
+            value={excerpt}
+            onChange={e => setExcerpt(e.target.value)}
+          />
+        </div>
+
+        <hr style={{ border: 'none', borderTop: '1px solid var(--admin-border)', margin: '2rem 0' }} />
+
+        {/* Morning Intention fields */}
+        {category === 'morning-intention' && (
+          <div className="admin-field">
+            <label className="admin-label" htmlFor="postContent">Post Content</label>
+            <textarea
+              id="postContent"
+              className="admin-textarea"
+              placeholder={`Use ## headings to separate sections:\n\n## Today's Intention\n\nYour story here...\n\n## I'm Grateful For\n\nSomething specific...\n\n## Something I'm Great At\n\nOwn it.`}
+              value={content}
+              onChange={e => setContent(e.target.value)}
+            />
+          </div>
+        )}
+
+        {/* Morning Walk fields */}
+        {category === 'morning-walk' && (
+          <>
+            <div className="admin-field">
+              <label className="admin-label" htmlFor="walkUrl">YouTube URL</label>
+              <input
+                id="walkUrl"
+                type="url"
+                className="admin-input"
+                placeholder="https://www.youtube.com/watch?v=..."
+                value={walkUrl}
+                onChange={e => setWalkUrl(e.target.value)}
+              />
+            </div>
+            <div className="admin-field">
+              <label className="admin-label" htmlFor="walkContext">Context</label>
+              <textarea
+                id="walkContext"
+                className="admin-textarea"
+                placeholder="A few words about this walk..."
+                value={walkContext}
+                onChange={e => setWalkContext(e.target.value)}
+              />
+            </div>
+          </>
+        )}
+
+        <button
+          className="admin-publish-btn"
+          onClick={handlePublish}
+          disabled={publishing}
+        >
+          {publishing ? 'Publishing...' : 'Publish Post'}
+        </button>
+
+        {/* Status messages */}
+        {status !== 'idle' && (
+          <div className={`admin-status admin-status--${status}`}>
+            {status === 'publishing' && (
+              <>
+                <span className="admin-spinner" />
+                <span>{statusMsg}</span>
+              </>
+            )}
+            {status === 'success' && (
+              <span style={{ whiteSpace: 'pre-line' }}>
+                <strong>Published.</strong> {statusMsg.replace('Published. ', '')}
+              </span>
+            )}
+            {status === 'error' && (
+              <span>
+                <strong>Something went wrong.</strong> {statusMsg}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        .admin-token-section {
+          background: var(--admin-card-bg, #f8f8f8);
+          border: 1px solid var(--admin-border, #ddd);
+          border-radius: 6px;
+          padding: 1rem 1.25rem;
+          margin-bottom: 2rem;
+        }
+        .admin-field { margin-bottom: 1.5rem; }
+        .admin-label {
+          display: block;
+          font-size: 0.8rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          color: var(--admin-muted, #888);
+          margin-bottom: 0.4rem;
+        }
+        .admin-input,
+        .admin-textarea {
+          width: 100%;
+          padding: 0.6rem 0.75rem;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          font-family: inherit;
+          font-size: 0.95rem;
+          background: #fff;
+          color: #222;
+          line-height: 1.5;
+          box-sizing: border-box;
+        }
+        .admin-input:focus,
+        .admin-textarea:focus {
+          outline: none;
+          border-color: #4A7FA5;
+          box-shadow: 0 0 0 2px rgba(74,127,165,0.2);
+        }
+        .admin-textarea {
+          resize: vertical;
+          min-height: 280px;
+        }
+        .admin-hint {
+          font-size: 0.78rem;
+          color: var(--admin-muted, #888);
+          margin-top: 0.3rem;
+        }
+        .admin-btn-save-token {
+          background: #4A7FA5;
+          color: #fff;
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 4px;
+          font-size: 0.85rem;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+        .admin-btn-save-token:hover { background: #3a6a8a; }
+        .admin-publish-btn {
+          background: #214459;
+          color: #fff;
+          border: none;
+          padding: 0.75rem 2rem;
+          font-size: 1rem;
+          font-family: inherit;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: 600;
+        }
+        .admin-publish-btn:hover:not(:disabled) { background: #1a3547; }
+        .admin-publish-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .admin-status {
+          margin-top: 1.5rem;
+          padding: 1rem 1.25rem;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          line-height: 1.6;
+        }
+        .admin-status--publishing {
+          background: #eef4fb;
+          border: 1px solid #b8d0e8;
+          color: #2a5a7a;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+        .admin-status--success {
+          background: #e8f6ee;
+          border: 1px solid #b0dcc0;
+          color: #1e5c38;
+        }
+        .admin-status--error {
+          background: #fbeaea;
+          border: 1px solid #e0b0b0;
+          color: #7a2020;
+        }
+        .admin-spinner {
+          display: inline-block;
+          width: 18px;
+          height: 18px;
+          border: 2px solid #b8d0e8;
+          border-top-color: #2a5a7a;
+          border-radius: 50%;
+          animation: admin-spin 0.7s linear infinite;
+          flex-shrink: 0;
+        }
+        @keyframes admin-spin { to { transform: rotate(360deg); } }
+      `}</style>
+    </main>
+  )
+}
