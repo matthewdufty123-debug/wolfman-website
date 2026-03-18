@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     }
 
     const message = await getAnthropic().messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       system: `You are assisting Wolfman — a mindful living brand by Matthew Wolfman, a data engineer, mountain biker, photographer and wood carver based in the UK. Matthew's voice is honest, warm, self-aware, philosophical, and energetic. He shares experience — never lectures. His writing finds meaning in small, specific, real moments.
 
