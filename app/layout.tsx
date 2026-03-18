@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Playfair_Display, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import ThemeProvider from '@/components/ThemeProvider'
+import { CartProvider } from '@/lib/cart'
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -48,7 +49,9 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <ThemeProvider>
-          {children}
+          <CartProvider>
+            {children}
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1683,3 +1683,235 @@ html[data-fontsize="xlarge"] .post-body {
     display: none;
   }
 }
+
+/* ── Shop ── */
+
+.shop-main {
+  min-height: 100vh;
+  padding: 4rem 1.5rem 9rem;
+}
+
+.shop-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.shop-header {
+  margin-bottom: 2.5rem;
+}
+
+.shop-title {
+  font-size: clamp(2rem, 8vw, 3rem);
+  font-weight: 400;
+  color: var(--heading);
+  margin: 0 0 0.5rem 0;
+}
+
+.shop-subtitle {
+  font-size: 0.95rem;
+  color: var(--body-text);
+  opacity: 0.6;
+  margin: 0;
+}
+
+.shop-filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+}
+
+.shop-filter-btn {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 0.875rem;
+  color: var(--body-text);
+  text-decoration: none;
+  padding: 0.4rem 1rem;
+  border: 1px solid rgba(160, 98, 42, 0.3);
+  border-radius: 2rem;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.shop-filter-btn:hover {
+  opacity: 1;
+  border-color: #A0622A;
+}
+
+.shop-filter-btn--active {
+  opacity: 1;
+  border-color: #A0622A;
+  color: #A0622A;
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2rem;
+}
+
+.shop-card {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
+.shop-card-img-wrap {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: rgba(160, 98, 42, 0.05);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.shop-card-img {
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.shop-card:hover .shop-card-img {
+  transform: scale(1.03);
+}
+
+.shop-card-body {
+  flex: 1;
+}
+
+.shop-card-name {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--heading);
+  margin: 0 0 0.25rem 0;
+}
+
+.shop-card-price {
+  font-size: 0.875rem;
+  color: #A0622A;
+  margin: 0;
+}
+
+.shop-empty,
+.shop-error {
+  font-size: 0.95rem;
+  color: var(--body-text);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+/* ── Product detail ── */
+
+.product-main {
+  min-height: 100vh;
+  padding: 3rem 1.5rem 9rem;
+}
+
+.product-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.product-back {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: var(--body-text);
+  text-decoration: none;
+  opacity: 0.5;
+  margin-bottom: 2rem;
+  transition: opacity 0.2s ease;
+}
+
+.product-back:hover {
+  opacity: 1;
+}
+
+.product-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.product-img-wrap {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: rgba(160, 98, 42, 0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.product-img {
+  object-fit: cover;
+}
+
+.product-name {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 400;
+  color: var(--heading);
+  margin: 0 0 0.75rem 0;
+}
+
+.product-price {
+  font-size: 1.1rem;
+  color: #A0622A;
+  margin: 0 0 1.5rem 0;
+}
+
+.product-description {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--body-text);
+  opacity: 0.75;
+  margin: 0 0 2rem 0;
+}
+
+.product-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.product-select {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 0.95rem;
+  color: var(--body-text);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(160, 98, 42, 0.4);
+  padding: 0.5rem 0;
+  width: 100%;
+  outline: none;
+  cursor: pointer;
+}
+
+.product-add-btn {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #ffffff;
+  background: #214459;
+  border: none;
+  border-radius: 4px;
+  padding: 0.9rem 2rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  align-self: flex-start;
+}
+
+.product-add-btn:hover {
+  opacity: 0.85;
+}
+
+.product-add-btn:disabled {
+  background: #3AB87A;
+  opacity: 1;
+  cursor: default;
+}
+
+@media (max-width: 680px) {
+  .product-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
