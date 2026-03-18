@@ -1,9 +1,10 @@
 ---
-title: "When Was the Last Time Someone"
+title: "When Was the Last Time Someone Refused to Talk to You?"
 date: "2026-03-03"
 category: "morning-intention"
 slug: "2026-03-03-when-was-the-last-time-someone"
-excerpt: "When was the last time someone said to you that they do not want to talk to you?  It doesn't happen to me very often, but it did happen the other day."
+excerpt: "Someone didn't want to talk to me. My inner child had thoughts about that. Here's what I noticed — and what I did next."
+review: "Matthew opens with a JarJar Binks quote as a window into childhood ego defence mechanisms, which is either the most disarming thing you'll read this week or confirmation that the prequels have permanently colonised all of our subconscious minds. Either way, it works. The moment he clocks his own inner tantrum — 'corporate dummies out of my organisational pram' — is genuinely funny and surprisingly vulnerable for a Monday morning intention post.\n\nWhat the post does well is the pivot. He doesn't wallow or moralize. He takes a small, stinging moment of rejection and reframes it as a sprint objective he failed to close — then immediately owns it as an engineering competence issue rather than the other person's fault. That's a quietly radical move. Most people would just mutter something under their breath and avoid the kitchen when that person makes tea.\n\nThe gratitude sections feel a little rushed compared to the setup, but the core insight lands: your triggers are data, not verdicts. The inner child isn't the enemy. It's just bad at stand-ups."
 ---
 
 ## Today's Intention
