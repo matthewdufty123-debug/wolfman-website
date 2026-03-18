@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 type Theme = 'dark' | 'light'
 type FontSize = 'normal' | 'large' | 'xlarge'
@@ -21,17 +21,17 @@ export function useTheme(): ThemeContextValue {
 }
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Read from the DOM attribute — the inline flash-prevention script has already
-  // set it before React hydrates, so this keeps state in sync with what's painted.
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === 'undefined') return 'dark'
-    return (document.documentElement.getAttribute('data-theme') as Theme) || 'dark'
-  })
+  // Initialise with server-safe defaults so SSR and client HTML match.
+  // useEffect then syncs to whatever the flash-prevention script already painted.
+  const [theme, setThemeState] = useState<Theme>('dark')
+  const [fontSize, setFontSizeState] = useState<FontSize>('normal')
 
-  const [fontSize, setFontSizeState] = useState<FontSize>(() => {
-    if (typeof window === 'undefined') return 'normal'
-    return (document.documentElement.getAttribute('data-fontsize') as FontSize) || 'normal'
-  })
+  useEffect(() => {
+    const t = (document.documentElement.getAttribute('data-theme') as Theme) || 'dark'
+    const f = (document.documentElement.getAttribute('data-fontsize') as FontSize) || 'normal'
+    setThemeState(t)
+    setFontSizeState(f)
+  }, [])
 
   function setTheme(t: Theme) {
     document.documentElement.setAttribute('data-theme', t)
