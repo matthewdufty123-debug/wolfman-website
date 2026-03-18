@@ -534,9 +534,14 @@ export default function AdminPage() {
             {status === 'success' && (
               <>
                 <strong>Published.</strong> Vercel is deploying — live in about 30 seconds.<br />
-                <a href={statusMsg} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', fontWeight: 600 }}>
-                  {statusMsg}
-                </a>
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <a href={statusMsg} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', fontWeight: 600 }}>
+                    View post →
+                  </a>
+                  <a href="/intentions" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', opacity: 0.75 }}>
+                    Go to all posts →
+                  </a>
+                </div>
               </>
             )}
             {status === 'error' && (
