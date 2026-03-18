@@ -131,11 +131,16 @@ export default function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, content }),
       })
-      const data = await res.json()
+      let data: { excerpt?: string; suggestedTitle?: string; review?: string; error?: string }
+      try {
+        data = await res.json()
+      } catch {
+        throw new Error(`Server error (${res.status}) — Claude took too long or something went wrong. Try again.`)
+      }
       if (!res.ok) throw new Error(data.error || 'Generation failed')
-      setExcerpt(data.excerpt)
-      setSuggestedTitle(data.suggestedTitle)
-      setReview(data.review)
+      setExcerpt(data.excerpt ?? '')
+      setSuggestedTitle(data.suggestedTitle ?? '')
+      setReview(data.review ?? '')
     } catch (err) {
       setSeoError(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {
