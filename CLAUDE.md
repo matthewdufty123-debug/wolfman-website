@@ -16,10 +16,59 @@ authentic, personal, and real.
 
 ## The Website
 
-**Domain:** wolfman.blog  
+**Domain:** wolfman.blog
 **Deployment:** Git → GitHub → Vercel (auto-deploys on push)
-**Local folder:** D:\Websites\Wolfman.blog  
-**Stack:** HTML, CSS, JavaScript (vanilla to start, expanding as needed)
+**Local folder:** D:\Websites\Wolfman.blog
+
+### Tech Stack
+
+**Framework:** Next.js 15 (App Router) with TypeScript
+**Styling:** Tailwind CSS
+**Authentication:** Auth.js v5 (next-auth@beta) — JWT sessions
+- Providers: Email/password (bcrypt), GitHub OAuth, Google OAuth
+- GitHub login auto-assigns admin role for `matthewdufty123-debug`
+- Route protection via middleware (edge-compatible auth.config.ts)
+
+**Database:** Neon PostgreSQL (serverless)
+- ORM: Drizzle ORM with `@neondatabase/serverless` HTTP driver
+- Schema managed via `drizzle-kit` — deploy changes with `npm run db:push`
+- Tables: users, accounts, sessions, verificationTokens, orders, orderItems
+- Auth adapter: `@auth/drizzle-adapter` with explicit table references
+
+**Image Storage:** Vercel Blob
+- All site images, blog post images, and product images stored here
+- Upload via protected admin API route (`/api/admin/upload`) — admin only, 10MB limit
+- Public URLs used directly in Next.js `<Image>` components
+- Never commit large images to the git repo — always upload to Blob
+
+**E-commerce:** Stripe
+- Checkout sessions with shipping collection enabled
+- Webhook handler at `/api/webhooks/stripe` — saves orders to Neon, triggers fulfilment
+- Duplicate prevention via `stripePaymentIntentId` uniqueness check
+- Test keys in `.env.local`, production keys in Vercel environment variables
+
+**Print-on-demand:** Printful API
+- Product catalogue fetched server-side with 1hr cache
+- Orders auto-submitted to Printful on successful Stripe payment
+- Fulfilment failure is non-fatal — order is recorded, can be retried manually
+
+**Email:** Resend
+- Custom domain: `orders@wolfman.blog` (DKIM/SPF/DMARC verified via Porkbun DNS)
+- Order confirmation emails sent automatically on successful checkout
+- Lazy-initialised (`function getResend()`) to avoid build-time env var errors
+
+**AI:** Anthropic API (Claude)
+- Used for Claude-powered features (e.g. SEO meta generation — issue #59)
+- Key stored as `ANTHROPIC_API_KEY` in Vercel env and `.env.local`
+
+**OAuth Apps:**
+- GitHub: two apps — dev (localhost:3000) and production (wolfman.blog)
+- Google: single app with both localhost and wolfman.blog redirect URIs
+
+**Environment:**
+- Local vars: `.env.local` (pulled via `vercel env pull .env.local`)
+- Production vars: set in Vercel dashboard — source of truth for production
+- Never commit `.env.local` to git
 
 ---
 
@@ -62,8 +111,10 @@ inviting a click
 ### Shop
 - Photography canvases and prints — Matthew's own photography
 - Wellbeing themed clothing
-- Print-on-demand via Printful or Printify API integration
-- Stripe for payments
+- Print-on-demand via Printful (API integrated — products managed in Printful dashboard)
+- Stripe for payments (test mode until products are live)
+- Cart persists to localStorage across page refreshes
+- Guest checkout supported — no account required to purchase
 
 ---
 
@@ -151,14 +202,30 @@ AI-generated
 - Commit messages should be descriptive and human
 - **Closing issues:** include `closes #N` in the commit message to auto-close the GitHub issue
 - Never break the mobile reading experience
-- Images should be optimised before adding to the repo
-- Keep the folder structure clean:
-  - `/images` — site images and logos
-  - `/images/site_images` — product and photography images
-  - `/posts` — blog post HTML files (to be created)
-  - `/css` — stylesheets
-  - `/js` — javascript files
-  - `/data` — JSON data files (deprecated — see Development Log below)
+- **Images:** never commit large images to git — upload to Vercel Blob via the admin upload tool, use the returned URL in code
+- **Schema changes:** run `npm run db:push` after editing `lib/db/schema.ts` to apply changes to Neon
+
+### Next.js App Router folder structure
+```
+app/
+  (main)/           — public-facing pages (blog, shop, account, admin)
+  api/              — API routes (auth, checkout, webhooks, upload)
+  layout.tsx        — root layout with CartProvider
+components/         — shared React components
+lib/
+  db/               — Drizzle schema and database client
+  actions/          — Next.js server actions (auth, account, oauth)
+  printful.ts       — Printful API client
+  email.ts          — Resend email helpers
+  cart.tsx          — Cart context and localStorage logic
+posts/              — Markdown blog post files (.md)
+public/
+  images/           — static site images (logos, icons)
+auth.ts             — Auth.js full config (providers, adapter, callbacks)
+auth.config.ts      — Edge-compatible auth config (used by middleware)
+middleware.ts       — Route protection
+drizzle.config.ts   — Drizzle Kit config
+```
 
 ---
 
