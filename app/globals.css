@@ -1205,6 +1205,14 @@ html[data-fontsize="xlarge"] .post-body {
   font-size: clamp(2rem, 5vw, 2.25rem);
 }
 
+html[data-fontsize="large"] .post-claude-review-body p {
+  font-size: clamp(1.2rem, 3vw, 1.35rem);
+}
+
+html[data-fontsize="xlarge"] .post-claude-review-body p {
+  font-size: clamp(1.6rem, 4vw, 1.8rem);
+}
+
 /* ── Font size control ── */
 
 .fontsize-toggle {
@@ -2205,6 +2213,7 @@ html[data-fontsize="xlarge"] .post-body {
 }
 
 .post-claude-review-body p {
+  font-family: var(--font-jetbrains), 'Cascadia Mono', 'Courier New', monospace;
   font-size: 0.9rem;
   line-height: 1.7;
   margin: 0 0 0.75rem;

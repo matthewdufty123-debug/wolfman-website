@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 const REPO = 'matthewdufty123-debug/wolfman-website'
 const API = 'https://api.github.com'
@@ -31,6 +32,10 @@ function toBase64(str: string): string {
   return btoa(unescape(encodeURIComponent(str)))
 }
 
+function fromBase64(b64: string): string {
+  return decodeURIComponent(escape(atob(b64)))
+}
+
 function buildFrontmatter(fields: {
   title: string
   date: string
@@ -56,6 +61,52 @@ function buildFrontmatter(fields: {
   return lines.join('\n')
 }
 
+function parseFrontmatter(raw: string): { meta: Record<string, string>; body: string } {
+  const fmMatch = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/)
+  if (!fmMatch) return { meta: {}, body: raw }
+  const yamlStr = fmMatch[1]
+  const body = fmMatch[2]
+  const meta: Record<string, string> = {}
+  for (const line of yamlStr.split('\n')) {
+    const colonIdx = line.indexOf(':')
+    if (colonIdx === -1) continue
+    const key = line.slice(0, colonIdx).trim()
+    const rawVal = line.slice(colonIdx + 1).trim()
+    let val = rawVal
+    if (val.startsWith('"')) {
+      const inner = val.slice(1)
+      let result = ''
+      let i = 0
+      while (i < inner.length) {
+        if (inner[i] === '\\' && i + 1 < inner.length) {
+          const next = inner[i + 1]
+          if (next === '"')  { result += '"';  i += 2; continue }
+          if (next === 'n')  { result += '\n'; i += 2; continue }
+          if (next === '\\') { result += '\\'; i += 2; continue }
+        }
+        if (inner[i] === '"') break
+        result += inner[i]
+        i++
+      }
+      val = result
+    }
+    meta[key] = val
+  }
+  return { meta, body }
+}
+
+function slugToLabel(fullSlug: string): string {
+  const m = fullSlug.match(/^(\d{4}-\d{2}-\d{2})-(.+)$/)
+  if (!m) return fullSlug
+  const words = m[2].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  return `${m[1]} — ${words}`
+}
+
+function stripDatePrefix(fullSlug: string, date: string): string {
+  const prefix = `${date}-`
+  return fullSlug.startsWith(prefix) ? fullSlug.slice(prefix.length) : fullSlug
+}
+
 async function ghFetch(
   urlPath: string,
   method: string,
@@ -75,12 +126,16 @@ async function ghFetch(
 }
 
 type StatusType = 'idle' | 'publishing' | 'success' | 'error'
+type TabType = 'new' | 'edit'
 
-export default function AdminPage() {
+function AdminPublishInner() {
+  const searchParams = useSearchParams()
+
   const [tokenSaved, setTokenSaved] = useState(false)
   const [tokenOpen, setTokenOpen] = useState(false)
   const tokenInputRef = useRef<HTMLInputElement>(null)
 
+  // Shared form fields
   const [date, setDate] = useState('')
   const [title, setTitle] = useState(DEFAULT_INTENTION_TITLE)
   const [slug, setSlug] = useState(titleToSlug(DEFAULT_INTENTION_TITLE))
@@ -90,15 +145,137 @@ export default function AdminPage() {
   const [content, setContent] = useState('')
   const [walkUrl, setWalkUrl] = useState('')
   const [walkContext, setWalkContext] = useState('')
+  const [review, setReview] = useState('')
+  const [suggestedTitle, setSuggestedTitle] = useState('')
 
+  // New post status
   const [status, setStatus] = useState<StatusType>('idle')
   const [statusMsg, setStatusMsg] = useState('')
   const [publishing, setPublishing] = useState(false)
+
+  // Shared UI
   const [uploadingImage, setUploadingImage] = useState(false)
   const [generatingSeo, setGeneratingSeo] = useState(false)
   const [seoError, setSeoError] = useState('')
-  const [suggestedTitle, setSuggestedTitle] = useState('')
-  const [review, setReview] = useState('')
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<TabType>('new')
+
+  // Edit mode state
+  const [editPostList, setEditPostList] = useState<Array<{ slug: string; label: string }>>([])
+  const [editSelectedSlug, setEditSelectedSlug] = useState('')
+  const [editOriginalFullSlug, setEditOriginalFullSlug] = useState('')
+  const [editFileSha, setEditFileSha] = useState('')
+  const [loadingPostList, setLoadingPostList] = useState(false)
+  const [loadingPost, setLoadingPost] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<StatusType>('idle')
+  const [saveMsg, setSaveMsg] = useState('')
+  const [slugChanged, setSlugChanged] = useState(false)
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    const saved = localStorage.getItem('wm_gh_token')
+    if (saved) {
+      setTokenSaved(true)
+    } else {
+      setTokenOpen(true)
+    }
+    setDate(new Date().toISOString().slice(0, 10))
+
+    const editSlug = searchParams.get('edit')
+    if (editSlug) {
+      setActiveTab('edit')
+      setEditSelectedSlug(editSlug)
+    }
+  }, [searchParams])
+
+  // Load post list when edit tab becomes active and we have a token
+  useEffect(() => {
+    if (activeTab === 'edit' && editPostList.length === 0) {
+      loadEditPostList()
+    }
+  }, [activeTab]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-load post when coming from ?edit=slug and post list is ready
+  useEffect(() => {
+    if (activeTab === 'edit' && editSelectedSlug && editPostList.length > 0 && !editFileSha) {
+      loadEditPost(editSelectedSlug)
+    }
+  }, [editPostList, editSelectedSlug]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── GitHub helpers ────────────────────────────────────────────────────────
+
+  async function loadEditPostList() {
+    const token = localStorage.getItem('wm_gh_token') || ''
+    if (!token) return
+    setLoadingPostList(true)
+    try {
+      const res = await ghFetch(`/repos/${REPO}/contents/posts`, 'GET', token)
+      if (!res.ok) throw new Error('Failed to load posts list')
+      const files: Array<{ name: string }> = await res.json()
+      const posts = files
+        .filter(f => f.name.endsWith('.md'))
+        .sort((a, b) => b.name.localeCompare(a.name))
+        .map(f => {
+          const s = f.name.replace('.md', '')
+          return { slug: s, label: slugToLabel(s) }
+        })
+      setEditPostList(posts)
+    } catch {
+      // Silently fail — user can reload
+    } finally {
+      setLoadingPostList(false)
+    }
+  }
+
+  async function loadEditPost(postSlug: string) {
+    const token = localStorage.getItem('wm_gh_token') || ''
+    if (!token) return
+    setLoadingPost(true)
+    setSlugChanged(false)
+    setSaveStatus('idle')
+    try {
+      const res = await ghFetch(`/repos/${REPO}/contents/posts/${postSlug}.md`, 'GET', token)
+      if (!res.ok) throw new Error(`Could not load post "${postSlug}"`)
+      const file: { content: string; sha: string } = await res.json()
+      const raw = fromBase64(file.content.replace(/\n/g, ''))
+      const { meta, body } = parseFrontmatter(raw)
+
+      setEditFileSha(file.sha)
+      setEditOriginalFullSlug(postSlug)
+
+      setTitle(meta.title ?? '')
+      setDate(meta.date ?? '')
+      setCategory(meta.category ?? 'morning-intention')
+      setExcerpt(meta.excerpt ?? '')
+      setImage(meta.image ?? '')
+      setReview(meta.review ?? '')
+      setSuggestedTitle('')
+
+      // Derive the slug portion without date prefix
+      const titleSlugPart = stripDatePrefix(postSlug, meta.date ?? '')
+      setSlug(titleSlugPart)
+
+      if (meta.category === 'morning-walk') {
+        setWalkUrl(meta.videoId ? `https://www.youtube.com/watch?v=${meta.videoId}` : '')
+        setWalkContext(body.trim())
+        setContent('')
+      } else {
+        setContent(body.trim())
+        setWalkUrl('')
+        setWalkContext('')
+      }
+    } catch (err) {
+      setSaveStatus('error')
+      setSaveMsg(err instanceof Error ? err.message : 'Failed to load post')
+    } finally {
+      setLoadingPost(false)
+    }
+  }
+
+  // ── Form handlers ─────────────────────────────────────────────────────────
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -148,19 +325,8 @@ export default function AdminPage() {
     }
   }
 
-  useEffect(() => {
-    const saved = localStorage.getItem('wm_gh_token')
-    if (saved) {
-      setTokenSaved(true)
-    } else {
-      setTokenOpen(true)
-    }
-    setDate(new Date().toISOString().slice(0, 10))
-  }, [])
-
   function handleCategoryChange(val: string) {
     setCategory(val)
-    // Reset title to default when switching to morning-intention if title is empty
     if (val === 'morning-intention' && !title.trim()) {
       setTitle(DEFAULT_INTENTION_TITLE)
       setSlug(titleToSlug(DEFAULT_INTENTION_TITLE))
@@ -169,7 +335,17 @@ export default function AdminPage() {
 
   function handleTitleChange(val: string) {
     setTitle(val)
-    setSlug(titleToSlug(val))
+    if (activeTab === 'new') {
+      setSlug(titleToSlug(val))
+    }
+  }
+
+  function handleSlugChange(val: string) {
+    setSlug(val)
+    if (activeTab === 'edit') {
+      const newFull = `${date}-${val}`
+      setSlugChanged(newFull !== editOriginalFullSlug)
+    }
   }
 
   function saveToken() {
@@ -179,6 +355,8 @@ export default function AdminPage() {
     setTokenSaved(true)
     setTokenOpen(false)
   }
+
+  // ── Publish (new post) ────────────────────────────────────────────────────
 
   async function handlePublish() {
     const token = localStorage.getItem('wm_gh_token') || tokenInputRef.current?.value.trim() || ''
@@ -280,6 +458,336 @@ export default function AdminPage() {
     }
   }
 
+  // ── Save (edit post) ──────────────────────────────────────────────────────
+
+  async function handleSave() {
+    const token = localStorage.getItem('wm_gh_token') || ''
+    if (!token) {
+      setTokenOpen(true)
+      setSaveStatus('error')
+      setSaveMsg('Please save your GitHub token first.')
+      return
+    }
+
+    if (!editFileSha) {
+      setSaveStatus('error')
+      setSaveMsg('No post loaded. Select a post from the dropdown first.')
+      return
+    }
+
+    if (!date || !title) {
+      setSaveStatus('error')
+      setSaveMsg('Date and title are required.')
+      return
+    }
+
+    const newFullSlug = `${date}-${slug || titleToSlug(title)}`
+
+    if (slugChanged) {
+      const proceed = window.confirm(
+        `You've changed the slug from "${editOriginalFullSlug}" to "${newFullSlug}".\n\nThis will change the post URL — any existing links to the old URL will break.\n\nSave anyway?`
+      )
+      if (!proceed) return
+    }
+
+    let fileContent: string
+    const originalPath = `posts/${editOriginalFullSlug}.md`
+    const newPath = `posts/${newFullSlug}.md`
+
+    if (category === 'morning-intention') {
+      if (!content.trim()) {
+        setSaveStatus('error')
+        setSaveMsg('Post content cannot be empty.')
+        return
+      }
+      fileContent = buildFrontmatter({
+        title, date, category, slug: newFullSlug,
+        excerpt: excerpt || undefined,
+        image: image || undefined,
+        review: review || undefined,
+      }) + '\n\n' + content.trim() + '\n'
+    } else {
+      if (!walkUrl.trim() || !walkContext.trim()) {
+        setSaveStatus('error')
+        setSaveMsg('YouTube URL and context are required.')
+        return
+      }
+      const videoId = extractYoutubeId(walkUrl.trim())
+      if (!videoId) {
+        setSaveStatus('error')
+        setSaveMsg('Could not extract a YouTube video ID from that URL.')
+        return
+      }
+      fileContent = buildFrontmatter({
+        title, date, category, slug: newFullSlug,
+        excerpt: excerpt || undefined,
+        image: image || undefined,
+        videoId,
+      }) + '\n\n' + walkContext.trim() + '\n'
+    }
+
+    setSaving(true)
+    setSaveStatus('publishing')
+    setSaveMsg('Saving...')
+
+    try {
+      if (slugChanged) {
+        // Create new file at new path
+        setSaveMsg('Creating file at new path...')
+        const putRes = await ghFetch(`/repos/${REPO}/contents/${newPath}`, 'PUT', token, {
+          message: `Update post: ${title}`,
+          content: toBase64(fileContent),
+        })
+        if (!putRes.ok) {
+          const err = await putRes.json()
+          throw new Error(err.message || `Failed to create new file (${putRes.status})`)
+        }
+        // Delete old file
+        setSaveMsg('Removing old file...')
+        const delRes = await ghFetch(`/repos/${REPO}/contents/${originalPath}`, 'DELETE', token, {
+          message: `Remove old post file: ${editOriginalFullSlug}`,
+          sha: editFileSha,
+        })
+        if (!delRes.ok) {
+          // Non-fatal — new file was created, old file still exists
+          setSaveStatus('success')
+          setSaveMsg(`https://wolfman.blog/posts/${newFullSlug}`)
+          setEditOriginalFullSlug(newFullSlug)
+          setSlugChanged(false)
+          return
+        }
+      } else {
+        // Overwrite in place with existing sha
+        setSaveMsg('Saving...')
+        const putRes = await ghFetch(`/repos/${REPO}/contents/${originalPath}`, 'PUT', token, {
+          message: `Update post: ${title}`,
+          content: toBase64(fileContent),
+          sha: editFileSha,
+        })
+        if (!putRes.ok) {
+          const err = await putRes.json()
+          throw new Error(err.message || `Failed to save post (${putRes.status})`)
+        }
+        // Update sha from response
+        const putData = await putRes.json()
+        setEditFileSha(putData?.content?.sha ?? editFileSha)
+      }
+
+      setSaveStatus('success')
+      setSaveMsg(`https://wolfman.blog/posts/${newFullSlug}`)
+      setEditOriginalFullSlug(newFullSlug)
+      setSlugChanged(false)
+      // Refresh post list to reflect any slug change
+      if (slugChanged) loadEditPostList()
+    } catch (err) {
+      setSaveStatus('error')
+      setSaveMsg(err instanceof Error ? err.message : String(err))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // ── Derived ───────────────────────────────────────────────────────────────
+
+  const isEditMode = activeTab === 'edit'
+  const currentFullSlug = `${date}-${slug || titleToSlug(title)}`
+
+  // ── Shared form sections ──────────────────────────────────────────────────
+
+  const sharedForm = (
+    <>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className="admin-field">
+          <label className="admin-label" htmlFor="postDate">Date</label>
+          <input
+            id="postDate"
+            type="date"
+            className="admin-input"
+            value={date}
+            onChange={e => setDate(e.target.value)}
+          />
+        </div>
+        <div className="admin-field">
+          <label className="admin-label" htmlFor="postTitle">Post Title</label>
+          <input
+            id="postTitle"
+            type="text"
+            className="admin-input"
+            placeholder="The Honda Engine"
+            value={title}
+            onChange={e => handleTitleChange(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="admin-field">
+        <label className="admin-label" htmlFor="postSlug">URL Slug</label>
+        <input
+          id="postSlug"
+          type="text"
+          className="admin-input"
+          placeholder="auto-generated from title"
+          value={slug}
+          onChange={e => handleSlugChange(e.target.value)}
+        />
+        {isEditMode && slugChanged ? (
+          <p className="admin-hint" style={{ color: '#A82020', opacity: 1 }}>
+            ⚠ Slug changed: <strong>{editOriginalFullSlug}</strong> → <strong>{currentFullSlug}</strong>. Existing links to this post will break.
+          </p>
+        ) : (
+          <p className="admin-hint">
+            {isEditMode
+              ? `Full URL: wolfman.blog/posts/${currentFullSlug}`
+              : 'Auto-filled from title. Edit if needed. Date is prepended automatically.'}
+          </p>
+        )}
+      </div>
+
+      <div className="admin-field">
+        <label className="admin-label" htmlFor="postCategory">Category</label>
+        <select
+          id="postCategory"
+          className="admin-input"
+          value={category}
+          onChange={e => handleCategoryChange(e.target.value)}
+        >
+          <option value="morning-intention">Morning Intention</option>
+          <option value="morning-walk">Morning Walk with Matthew</option>
+        </select>
+      </div>
+
+      <div className="admin-field">
+        <label className="admin-label" htmlFor="postImage">
+          Social Image <span style={{ fontWeight: 400, textTransform: 'none', opacity: 0.7 }}>(optional — og:image only, not shown on post)</span>
+        </label>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <input
+            id="postImage"
+            type="url"
+            className="admin-input"
+            placeholder="Upload below or paste a URL"
+            value={image}
+            onChange={e => setImage(e.target.value)}
+            style={{ flex: 1, minWidth: 200 }}
+          />
+          <label className="admin-upload-btn" style={{ cursor: uploadingImage ? 'not-allowed' : 'pointer', opacity: uploadingImage ? 0.6 : 1 }}>
+            {uploadingImage ? 'Uploading…' : 'Upload image'}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              style={{ display: 'none' }}
+              disabled={uploadingImage}
+              onChange={handleImageUpload}
+            />
+          </label>
+        </div>
+        {image && (
+          <img src={image} alt="Social preview" style={{ marginTop: '0.75rem', maxHeight: 120, maxWidth: '100%', borderRadius: 4, objectFit: 'cover' }} />
+        )}
+        <p className="admin-hint">Used for social sharing previews on LinkedIn, Facebook etc. Not displayed on the post page.</p>
+      </div>
+
+      <hr style={{ border: 'none', borderTop: '1px solid var(--admin-border)', margin: '2rem 0' }} />
+
+      {/* Morning Intention fields */}
+      {category === 'morning-intention' && (
+        <>
+          <div className="admin-field">
+            <label className="admin-label" htmlFor="postContent">Post Content</label>
+            <textarea
+              id="postContent"
+              className="admin-textarea"
+              placeholder={`Use ## headings to separate sections:\n\n## Today's Intention\n\nYour story here...\n\n## I'm Grateful For\n\nSomething specific...\n\n## Something I'm Great At\n\nOwn it.`}
+              value={content}
+              onChange={e => setContent(e.target.value)}
+            />
+          </div>
+
+          {suggestedTitle && (
+            <div className="admin-field">
+              <label className="admin-label">Suggested SEO Title</label>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <span style={{ flex: 1, fontSize: '0.95rem', color: 'var(--body-text)', padding: '0.6rem 0.75rem', border: '1px solid #ddd', borderRadius: 4, background: 'var(--admin-card-bg)' }}>
+                  {suggestedTitle}
+                </span>
+                <button type="button" className="admin-upload-btn" onClick={() => { setTitle(suggestedTitle); if (!isEditMode) setSlug(titleToSlug(suggestedTitle)) }}>
+                  Use this
+                </button>
+              </div>
+              <p className="admin-hint">{suggestedTitle.length} / 60 characters</p>
+            </div>
+          )}
+
+          <div className="admin-field">
+            <label className="admin-label" htmlFor="postExcerpt">
+              Excerpt <span style={{ fontWeight: 400, textTransform: 'none', opacity: 0.7 }}>(recommended — shown in social previews)</span>
+            </label>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginBottom: '0.4rem' }}>
+              {excerpt && (
+                <button type="button" className="admin-upload-btn" onClick={handleGenerateSeo} disabled={generatingSeo}
+                  style={{ background: '#888', cursor: generatingSeo ? 'not-allowed' : 'pointer' }}>
+                  Regenerate ↺
+                </button>
+              )}
+              <button type="button" className="admin-upload-btn" onClick={handleGenerateSeo}
+                disabled={generatingSeo || !content.trim()}
+                style={{ cursor: generatingSeo || !content.trim() ? 'not-allowed' : 'pointer', opacity: !content.trim() ? 0.5 : 1 }}>
+                {generatingSeo ? 'Asking Claude…' : 'Generate with Claude ✦'}
+              </button>
+            </div>
+            <textarea id="postExcerpt" className="admin-textarea" style={{ minHeight: '80px' }}
+              placeholder="One or two sentences that capture the heart of this post..."
+              value={excerpt} onChange={e => setExcerpt(e.target.value)} />
+            <p className="admin-hint">
+              {excerpt.length > 0
+                ? `${excerpt.length} / 160 characters${excerpt.length > 160 ? ' — consider trimming' : ''}`
+                : 'If left blank, the opening paragraph of your post is used automatically.'}
+            </p>
+            {seoError && <p className="admin-hint" style={{ color: '#7a2020', opacity: 1 }}>{seoError}</p>}
+          </div>
+
+          {review && (
+            <div className="admin-field">
+              <label className="admin-label">Claude&apos;s Review <span style={{ fontWeight: 400, textTransform: 'none', opacity: 0.7 }}>(shown at bottom of post)</span></label>
+              <textarea className="admin-textarea" style={{ minHeight: '120px' }}
+                value={review} onChange={e => setReview(e.target.value)} />
+              <p className="admin-hint">Edit freely. This appears at the bottom of the published post attributed to Claude.</p>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Morning Walk fields */}
+      {category === 'morning-walk' && (
+        <>
+          <div className="admin-field">
+            <label className="admin-label" htmlFor="walkUrl">YouTube URL</label>
+            <input
+              id="walkUrl"
+              type="url"
+              className="admin-input"
+              placeholder="https://www.youtube.com/watch?v=..."
+              value={walkUrl}
+              onChange={e => setWalkUrl(e.target.value)}
+            />
+          </div>
+          <div className="admin-field">
+            <label className="admin-label" htmlFor="walkContext">Context</label>
+            <textarea
+              id="walkContext"
+              className="admin-textarea"
+              placeholder="A few words about this walk..."
+              value={walkContext}
+              onChange={e => setWalkContext(e.target.value)}
+            />
+          </div>
+        </>
+      )}
+    </>
+  )
+
+  // ── Render ────────────────────────────────────────────────────────────────
+
   return (
     <main style={{ padding: '2rem 1rem 4rem', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <div style={{ maxWidth: 700, margin: '0 auto', paddingBottom: '9rem' }}>
@@ -336,220 +844,167 @@ export default function AdminPage() {
           </a>
         </p>
 
-        {/* Post form */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div className="admin-field">
-            <label className="admin-label" htmlFor="postDate">Date</label>
-            <input
-              id="postDate"
-              type="date"
-              className="admin-input"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-            />
-          </div>
-          <div className="admin-field">
-            <label className="admin-label" htmlFor="postTitle">Post Title</label>
-            <input
-              id="postTitle"
-              type="text"
-              className="admin-input"
-              placeholder="The Honda Engine"
-              value={title}
-              onChange={e => handleTitleChange(e.target.value)}
-            />
-          </div>
+        {/* Tab toggle */}
+        <div style={{ display: 'flex', gap: 0, marginBottom: '2rem', borderBottom: '2px solid var(--admin-border, #ddd)' }}>
+          {(['new', 'edit'] as TabType[]).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                padding: '0.6rem 1.25rem',
+                border: 'none',
+                borderBottom: activeTab === tab ? '2px solid #214459' : '2px solid transparent',
+                marginBottom: '-2px',
+                background: 'none',
+                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                fontSize: '0.85rem',
+                fontWeight: activeTab === tab ? 600 : 400,
+                color: activeTab === tab ? '#214459' : 'var(--body-text)',
+                cursor: 'pointer',
+                letterSpacing: '0.03em',
+              }}
+            >
+              {tab === 'new' ? 'New Post' : 'Edit Post'}
+            </button>
+          ))}
         </div>
 
-        <div className="admin-field">
-          <label className="admin-label" htmlFor="postSlug">URL Slug</label>
-          <input
-            id="postSlug"
-            type="text"
-            className="admin-input"
-            placeholder="auto-generated from title"
-            value={slug}
-            onChange={e => setSlug(e.target.value)}
-          />
-          <p className="admin-hint">Auto-filled from title. Edit if needed. Date is prepended automatically.</p>
-        </div>
-
-        <div className="admin-field">
-          <label className="admin-label" htmlFor="postCategory">Category</label>
-          <select
-            id="postCategory"
-            className="admin-input"
-            value={category}
-            onChange={e => handleCategoryChange(e.target.value)}
-          >
-            <option value="morning-intention">Morning Intention</option>
-            <option value="morning-walk">Morning Walk with Matthew</option>
-          </select>
-        </div>
-
-        <div className="admin-field">
-          <label className="admin-label" htmlFor="postImage">
-            Social Image <span style={{ fontWeight: 400, textTransform: 'none', opacity: 0.7 }}>(optional — og:image only, not shown on post)</span>
-          </label>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <input
-              id="postImage"
-              type="url"
-              className="admin-input"
-              placeholder="Upload below or paste a URL"
-              value={image}
-              onChange={e => setImage(e.target.value)}
-              style={{ flex: 1, minWidth: 200 }}
-            />
-            <label className="admin-upload-btn" style={{ cursor: uploadingImage ? 'not-allowed' : 'pointer', opacity: uploadingImage ? 0.6 : 1 }}>
-              {uploadingImage ? 'Uploading…' : 'Upload image'}
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                style={{ display: 'none' }}
-                disabled={uploadingImage}
-                onChange={handleImageUpload}
-              />
-            </label>
-          </div>
-          {image && (
-            <img src={image} alt="Social preview" style={{ marginTop: '0.75rem', maxHeight: 120, maxWidth: '100%', borderRadius: 4, objectFit: 'cover' }} />
-          )}
-          <p className="admin-hint">Used for social sharing previews on LinkedIn, Facebook etc. Not displayed on the post page.</p>
-        </div>
-
-        <hr style={{ border: 'none', borderTop: '1px solid var(--admin-border)', margin: '2rem 0' }} />
-
-        {/* Morning Intention fields */}
-        {category === 'morning-intention' && (
+        {/* ── NEW POST TAB ── */}
+        {activeTab === 'new' && (
           <>
-            <div className="admin-field">
-              <label className="admin-label" htmlFor="postContent">Post Content</label>
-              <textarea
-                id="postContent"
-                className="admin-textarea"
-                placeholder={`Use ## headings to separate sections:\n\n## Today's Intention\n\nYour story here...\n\n## I'm Grateful For\n\nSomething specific...\n\n## Something I'm Great At\n\nOwn it.`}
-                value={content}
-                onChange={e => setContent(e.target.value)}
-              />
-            </div>
-            {suggestedTitle && (
-              <div className="admin-field">
-                <label className="admin-label">Suggested SEO Title</label>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <span style={{ flex: 1, fontSize: '0.95rem', color: 'var(--body-text)', padding: '0.6rem 0.75rem', border: '1px solid #ddd', borderRadius: 4, background: 'var(--admin-card-bg)' }}>
-                    {suggestedTitle}
+            {sharedForm}
+
+            <button
+              className="admin-publish-btn"
+              onClick={handlePublish}
+              disabled={publishing}
+            >
+              {publishing ? 'Publishing...' : 'Publish Post'}
+            </button>
+
+            {status !== 'idle' && (
+              <div className={`admin-status admin-status--${status}`}>
+                {status === 'publishing' && (
+                  <>
+                    <span className="admin-spinner" />
+                    <span>{statusMsg}</span>
+                  </>
+                )}
+                {status === 'success' && (
+                  <>
+                    <strong>Published.</strong> Vercel is deploying — live in about 30 seconds.<br />
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <a href={statusMsg} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', fontWeight: 600 }}>
+                        View post →
+                      </a>
+                      <a href="/intentions" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', opacity: 0.75 }}>
+                        Go to all posts →
+                      </a>
+                    </div>
+                  </>
+                )}
+                {status === 'error' && (
+                  <span>
+                    <strong>Something went wrong.</strong> {statusMsg}
                   </span>
-                  <button type="button" className="admin-upload-btn" onClick={() => { setTitle(suggestedTitle); setSlug(titleToSlug(suggestedTitle)) }}>
-                    Use this
-                  </button>
-                </div>
-                <p className="admin-hint">{suggestedTitle.length} / 60 characters</p>
+                )}
               </div>
             )}
+          </>
+        )}
 
+        {/* ── EDIT POST TAB ── */}
+        {activeTab === 'edit' && (
+          <>
+            {/* Post selector */}
             <div className="admin-field">
-              <label className="admin-label" htmlFor="postExcerpt">
-                Excerpt <span style={{ fontWeight: 400, textTransform: 'none', opacity: 0.7 }}>(recommended — shown in social previews)</span>
-              </label>
-              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginBottom: '0.4rem' }}>
-                {excerpt && (
-                  <button type="button" className="admin-upload-btn" onClick={handleGenerateSeo} disabled={generatingSeo}
-                    style={{ background: '#888', cursor: generatingSeo ? 'not-allowed' : 'pointer' }}>
-                    Regenerate ↺
-                  </button>
-                )}
-                <button type="button" className="admin-upload-btn" onClick={handleGenerateSeo}
-                  disabled={generatingSeo || !content.trim()}
-                  style={{ cursor: generatingSeo || !content.trim() ? 'not-allowed' : 'pointer', opacity: !content.trim() ? 0.5 : 1 }}>
-                  {generatingSeo ? 'Asking Claude…' : 'Generate with Claude ✦'}
+              <label className="admin-label" htmlFor="editPostSelect">Select Post</label>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <select
+                  id="editPostSelect"
+                  className="admin-input"
+                  value={editSelectedSlug}
+                  onChange={e => {
+                    setEditSelectedSlug(e.target.value)
+                    if (e.target.value) loadEditPost(e.target.value)
+                  }}
+                  style={{ flex: 1 }}
+                  disabled={loadingPostList}
+                >
+                  <option value="">{loadingPostList ? 'Loading posts…' : '— Select a post —'}</option>
+                  {editPostList.map(p => (
+                    <option key={p.slug} value={p.slug}>{p.label}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="admin-upload-btn"
+                  onClick={loadEditPostList}
+                  disabled={loadingPostList}
+                  style={{ cursor: loadingPostList ? 'not-allowed' : 'pointer', opacity: loadingPostList ? 0.6 : 1 }}
+                >
+                  {loadingPostList ? 'Loading…' : 'Refresh'}
                 </button>
               </div>
-              <textarea id="postExcerpt" className="admin-textarea" style={{ minHeight: '80px' }}
-                placeholder="One or two sentences that capture the heart of this post..."
-                value={excerpt} onChange={e => setExcerpt(e.target.value)} />
-              <p className="admin-hint">
-                {excerpt.length > 0
-                  ? `${excerpt.length} / 160 characters${excerpt.length > 160 ? ' — consider trimming' : ''}`
-                  : 'If left blank, the opening paragraph of your post is used automatically.'}
-              </p>
-              {seoError && <p className="admin-hint" style={{ color: '#7a2020', opacity: 1 }}>{seoError}</p>}
+              <p className="admin-hint">Posts sorted newest first. Selecting one loads all its fields.</p>
             </div>
 
-            {review && (
-              <div className="admin-field">
-                <label className="admin-label">Claude's Review <span style={{ fontWeight: 400, textTransform: 'none', opacity: 0.7 }}>(shown at bottom of post)</span></label>
-                <textarea className="admin-textarea" style={{ minHeight: '120px' }}
-                  value={review} onChange={e => setReview(e.target.value)} />
-                <p className="admin-hint">Edit freely. This appears at the bottom of the published post attributed to Claude.</p>
+            {loadingPost && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', color: '#2a5a7a', fontSize: '0.9rem' }}>
+                <span className="admin-spinner" />
+                Loading post…
               </div>
             )}
-          </>
-        )}
 
-        {/* Morning Walk fields */}
-        {category === 'morning-walk' && (
-          <>
-            <div className="admin-field">
-              <label className="admin-label" htmlFor="walkUrl">YouTube URL</label>
-              <input
-                id="walkUrl"
-                type="url"
-                className="admin-input"
-                placeholder="https://www.youtube.com/watch?v=..."
-                value={walkUrl}
-                onChange={e => setWalkUrl(e.target.value)}
-              />
-            </div>
-            <div className="admin-field">
-              <label className="admin-label" htmlFor="walkContext">Context</label>
-              <textarea
-                id="walkContext"
-                className="admin-textarea"
-                placeholder="A few words about this walk..."
-                value={walkContext}
-                onChange={e => setWalkContext(e.target.value)}
-              />
-            </div>
-          </>
-        )}
-
-        <button
-          className="admin-publish-btn"
-          onClick={handlePublish}
-          disabled={publishing}
-        >
-          {publishing ? 'Publishing...' : 'Publish Post'}
-        </button>
-
-        {/* Status messages */}
-        {status !== 'idle' && (
-          <div className={`admin-status admin-status--${status}`}>
-            {status === 'publishing' && (
+            {!loadingPost && editFileSha && (
               <>
-                <span className="admin-spinner" />
-                <span>{statusMsg}</span>
+                {sharedForm}
+
+                <button
+                  className="admin-publish-btn"
+                  onClick={handleSave}
+                  disabled={saving}
+                >
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+
+                {saveStatus !== 'idle' && (
+                  <div className={`admin-status admin-status--${saveStatus}`}>
+                    {saveStatus === 'publishing' && (
+                      <>
+                        <span className="admin-spinner" />
+                        <span>{saveMsg}</span>
+                      </>
+                    )}
+                    {saveStatus === 'success' && (
+                      <>
+                        <strong>Saved.</strong> Vercel is deploying — live in about 30 seconds.<br />
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <a href={saveMsg} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', fontWeight: 600 }}>
+                            View post →
+                          </a>
+                          <a href="/intentions" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', opacity: 0.75 }}>
+                            Go to all posts →
+                          </a>
+                        </div>
+                      </>
+                    )}
+                    {saveStatus === 'error' && (
+                      <span>
+                        <strong>Something went wrong.</strong> {saveMsg}
+                      </span>
+                    )}
+                  </div>
+                )}
               </>
             )}
-            {status === 'success' && (
-              <>
-                <strong>Published.</strong> Vercel is deploying — live in about 30 seconds.<br />
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                  <a href={statusMsg} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', fontWeight: 600 }}>
-                    View post →
-                  </a>
-                  <a href="/intentions" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', opacity: 0.75 }}>
-                    Go to all posts →
-                  </a>
-                </div>
-              </>
+
+            {!loadingPost && !editFileSha && !loadingPostList && (
+              <p style={{ color: 'var(--body-text)', opacity: 0.6, fontSize: '0.9rem', marginTop: '1rem' }}>
+                Select a post above to load it for editing.
+              </p>
             )}
-            {status === 'error' && (
-              <span>
-                <strong>Something went wrong.</strong> {statusMsg}
-              </span>
-            )}
-          </div>
+          </>
         )}
       </div>
 
@@ -611,6 +1066,7 @@ export default function AdminPage() {
           font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
           white-space: nowrap;
           transition: background 0.2s ease;
+          cursor: pointer;
         }
         .admin-upload-btn:hover { background: #3a6a8a; }
         .admin-btn-save-token {
@@ -676,5 +1132,13 @@ export default function AdminPage() {
         @keyframes admin-spin { to { transform: rotate(360deg); } }
       `}</style>
     </main>
+  )
+}
+
+export default function AdminPublishPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminPublishInner />
+    </Suspense>
   )
 }
