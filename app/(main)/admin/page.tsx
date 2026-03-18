@@ -1,553 +1,135 @@
-'use client'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { db } from '@/lib/db'
+import { orders, users } from '@/lib/db/schema'
+import { desc, count, sum, eq } from 'drizzle-orm'
+import { getAllPosts } from '@/lib/posts'
 
-import { useState, useEffect, useRef } from 'react'
+export default async function AdminDashboard() {
+  const session = await auth()
+  if (!session?.user || session.user.role !== 'admin') redirect('/')
 
-const REPO = 'matthewdufty123-debug/wolfman-website'
-const API = 'https://api.github.com'
+  const [allPosts, recentOrders, [orderStats], [userStats]] = await Promise.all([
+    getAllPosts(),
+    db.select().from(orders).orderBy(desc(orders.createdAt)).limit(5),
+    db.select({ total: count(), revenue: sum(orders.totalAmount) }).from(orders).where(eq(orders.status, 'paid')),
+    db.select({ total: count() }).from(users),
+  ])
 
-const DEFAULT_INTENTION_TITLE = "Wolfman's Morning Message"
-
-function titleToSlug(t: string) {
-  return t.toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
-}
-
-function extractYoutubeId(url: string): string | null {
-  const patterns = [
-    /[?&]v=([^&#]+)/,
-    /youtu\.be\/([^?&#]+)/,
-    /\/embed\/([^?&#]+)/,
-  ]
-  for (const p of patterns) {
-    const m = url.match(p)
-    if (m) return m[1]
-  }
-  return null
-}
-
-function toBase64(str: string): string {
-  return btoa(unescape(encodeURIComponent(str)))
-}
-
-function buildFrontmatter(fields: {
-  title: string
-  date: string
-  category: string
-  slug: string
-  excerpt?: string
-  image?: string
-  videoId?: string
-}): string {
-  const lines = [
-    '---',
-    `title: "${fields.title.replace(/"/g, '\\"')}"`,
-    `date: "${fields.date}"`,
-    `category: "${fields.category}"`,
-    `slug: "${fields.slug}"`,
-  ]
-  if (fields.excerpt) lines.push(`excerpt: "${fields.excerpt.replace(/"/g, '\\"')}"`)
-  if (fields.image)   lines.push(`image: "${fields.image}"`)
-  if (fields.videoId) lines.push(`videoId: "${fields.videoId}"`)
-  lines.push('---')
-  return lines.join('\n')
-}
-
-async function ghFetch(
-  urlPath: string,
-  method: string,
-  token: string,
-  body?: object
-): Promise<Response> {
-  return fetch(`${API}${urlPath}`, {
-    method,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/vnd.github+json',
-      'Content-Type': 'application/json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  })
-}
-
-type StatusType = 'idle' | 'publishing' | 'success' | 'error'
-
-export default function AdminPage() {
-  const [tokenSaved, setTokenSaved] = useState(false)
-  const [tokenOpen, setTokenOpen] = useState(false)
-  const tokenInputRef = useRef<HTMLInputElement>(null)
-
-  const [date, setDate] = useState('')
-  const [title, setTitle] = useState(DEFAULT_INTENTION_TITLE)
-  const [slug, setSlug] = useState(titleToSlug(DEFAULT_INTENTION_TITLE))
-  const [category, setCategory] = useState('morning-intention')
-  const [excerpt, setExcerpt] = useState('')
-  const [image, setImage] = useState('')
-  const [content, setContent] = useState('')
-  const [walkUrl, setWalkUrl] = useState('')
-  const [walkContext, setWalkContext] = useState('')
-
-  const [status, setStatus] = useState<StatusType>('idle')
-  const [statusMsg, setStatusMsg] = useState('')
-  const [publishing, setPublishing] = useState(false)
-
-  useEffect(() => {
-    const saved = localStorage.getItem('wm_gh_token')
-    if (saved) {
-      setTokenSaved(true)
-    } else {
-      setTokenOpen(true)
-    }
-    setDate(new Date().toISOString().slice(0, 10))
-  }, [])
-
-  function handleCategoryChange(val: string) {
-    setCategory(val)
-    // Reset title to default when switching to morning-intention if title is empty
-    if (val === 'morning-intention' && !title.trim()) {
-      setTitle(DEFAULT_INTENTION_TITLE)
-      setSlug(titleToSlug(DEFAULT_INTENTION_TITLE))
-    }
-  }
-
-  function handleTitleChange(val: string) {
-    setTitle(val)
-    setSlug(titleToSlug(val))
-  }
-
-  function saveToken() {
-    const val = tokenInputRef.current?.value.trim()
-    if (!val) return
-    localStorage.setItem('wm_gh_token', val)
-    setTokenSaved(true)
-    setTokenOpen(false)
-  }
-
-  async function handlePublish() {
-    const token = localStorage.getItem('wm_gh_token') || tokenInputRef.current?.value.trim() || ''
-
-    if (!token) {
-      setTokenOpen(true)
-      tokenInputRef.current?.focus()
-      setStatus('error')
-      setStatusMsg('Please save your GitHub token first.')
-      return
-    }
-
-    if (!date || !title) {
-      setStatus('error')
-      setStatusMsg('Please fill in the date and title before publishing.')
-      return
-    }
-
-    const fullSlug = `${date}-${slug || titleToSlug(title)}`
-    const postPath = `posts/${fullSlug}.md`
-
-    let fileContent: string
-
-    if (category === 'morning-intention') {
-      if (!content.trim()) {
-        setStatus('error')
-        setStatusMsg('Please write your post content before publishing.')
-        return
-      }
-      fileContent = buildFrontmatter({
-        title, date, category, slug: fullSlug,
-        excerpt: excerpt || undefined,
-        image: image || undefined,
-      }) + '\n\n' + content.trim() + '\n'
-    } else {
-      if (!walkUrl.trim() || !walkContext.trim()) {
-        setStatus('error')
-        setStatusMsg('Please fill in the YouTube URL and context before publishing.')
-        return
-      }
-      const videoId = extractYoutubeId(walkUrl.trim())
-      if (!videoId) {
-        setStatus('error')
-        setStatusMsg('Could not extract a YouTube video ID from that URL. Please check it.')
-        return
-      }
-      fileContent = buildFrontmatter({
-        title, date, category, slug: fullSlug,
-        excerpt: excerpt || undefined,
-        image: image || undefined,
-        videoId,
-      }) + '\n\n' + walkContext.trim() + '\n'
-    }
-
-    setPublishing(true)
-    setStatus('publishing')
-    setStatusMsg('Publishing...')
-
-    try {
-      setStatusMsg('Checking for existing file...')
-      const checkRes = await ghFetch(`/repos/${REPO}/contents/${postPath}`, 'GET', token)
-
-      let sha: string | undefined
-      if (checkRes.ok) {
-        const existing = await checkRes.json()
-        sha = existing.sha
-        const overwrite = window.confirm(`A post with the slug "${fullSlug}" already exists. Overwrite it?`)
-        if (!overwrite) {
-          setStatus('idle')
-          setPublishing(false)
-          return
-        }
-        setStatus('publishing')
-        setStatusMsg('Overwriting post...')
-      } else {
-        setStatusMsg('Uploading post...')
-      }
-
-      const putRes = await ghFetch(`/repos/${REPO}/contents/${postPath}`, 'PUT', token, {
-        message: sha ? `Update post: ${title}` : `Add post: ${title}`,
-        content: toBase64(fileContent),
-        ...(sha ? { sha } : {}),
-      })
-
-      if (!putRes.ok) {
-        const err = await putRes.json()
-        throw new Error(err.message || `Failed to upload post (${putRes.status})`)
-      }
-
-      const postUrl = `https://wolfman.blog/posts/${fullSlug}`
-      setStatus('success')
-      setStatusMsg(postUrl)
-    } catch (err) {
-      setStatus('error')
-      setStatusMsg(err instanceof Error ? err.message : String(err))
-    } finally {
-      setPublishing(false)
-    }
-  }
+  const totalRevenue = Number(orderStats.revenue ?? 0)
+  const totalOrders = Number(orderStats.total ?? 0)
+  const totalUsers = Number(userStats.total ?? 0)
+  const recentPosts = allPosts.slice(0, 5)
 
   return (
-    <main style={{ padding: '2rem 1rem 4rem', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
-      <div style={{ maxWidth: 700, margin: '0 auto', paddingBottom: '9rem' }}>
-        <h1 style={{ fontSize: '1.25rem', margin: '0 0 0.25rem', fontWeight: 600, color: 'var(--heading)' }}>
-          Wolfman — Post Publisher
-        </h1>
-        <p style={{ fontSize: '0.85rem', color: 'var(--body-text)', margin: '0 0 2rem', opacity: 0.75 }}>
-          Write your post, click Publish. It commits to GitHub and deploys to Vercel automatically.
-        </p>
+    <main className="dash-main">
+      <div className="dash-wrap">
 
-        {/* Token section */}
-        <div className="admin-token-section">
-          <div
-            className="admin-token-header"
-            onClick={() => setTokenOpen(o => !o)}
-            style={{ cursor: 'pointer', userSelect: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--body-text)' }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: tokenSaved ? '#3AB87A' : '#ccc', display: 'inline-block', flexShrink: 0 }} />
-              GitHub Token
-            </div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--body-text)', opacity: 0.7 }}>
-              {tokenOpen ? '▾ collapse' : '▸ expand'}
-            </span>
+        <header className="dash-header">
+          <div>
+            <h1 className="dash-title">wolfman.blog</h1>
+            <p className="dash-subtitle">admin dashboard</p>
           </div>
+          <Link href="/admin/publish" className="dash-action-btn">
+            + New post
+          </Link>
+        </header>
 
-          {tokenOpen && (
-            <div style={{ marginTop: '1rem' }}>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input
-                  ref={tokenInputRef}
-                  type="password"
-                  placeholder="github_pat_..."
-                  style={{ flex: 1, padding: '0.5rem 0.75rem', border: '1px solid #ccc', borderRadius: 4, fontFamily: 'monospace', fontSize: '0.85rem' }}
-                />
-                <button onClick={saveToken} className="admin-btn-save-token">Save</button>
-              </div>
-              <p style={{ fontSize: '0.75rem', color: 'var(--body-text)', margin: '0.5rem 0 0', lineHeight: 1.5, opacity: 0.8 }}>
-                Token is saved in your browser only — never sent anywhere except the GitHub API.<br />
-                Need one?{' '}
-                <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer" style={{ color: '#4A7FA5' }}>
-                  github.com/settings/tokens
-                </a>
-                {' '}→ Fine-grained → Repository: wolfman-website → Contents: Read and write.
-              </p>
-            </div>
+        {/* Stats */}
+        <div className="dash-stats">
+          <div className="dash-stat">
+            <span className="dash-stat-value">{allPosts.length}</span>
+            <span className="dash-stat-label">posts</span>
+          </div>
+          <div className="dash-stat">
+            <span className="dash-stat-value">{totalOrders}</span>
+            <span className="dash-stat-label">paid orders</span>
+          </div>
+          <div className="dash-stat">
+            <span className="dash-stat-value">£{(totalRevenue / 100).toFixed(2)}</span>
+            <span className="dash-stat-label">revenue</span>
+          </div>
+          <div className="dash-stat">
+            <span className="dash-stat-value">{totalUsers}</span>
+            <span className="dash-stat-label">accounts</span>
+          </div>
+        </div>
+
+        {/* Recent orders */}
+        <section className="dash-section">
+          <h2 className="dash-section-title">Recent orders</h2>
+          {recentOrders.length === 0 ? (
+            <p className="dash-empty">No orders yet.</p>
+          ) : (
+            <table className="dash-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Email</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentOrders.map((order) => (
+                  <tr key={order.id}>
+                    <td>{new Date(order.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                    <td className="dash-muted">{order.email}</td>
+                    <td>£{(order.totalAmount / 100).toFixed(2)}</td>
+                    <td>
+                      <span className={`dash-badge dash-badge--${order.status}`}>{order.status}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
-        </div>
+        </section>
 
-        <p style={{ fontSize: '0.8rem', color: 'var(--body-text)', margin: '-1rem 0 2rem', opacity: 0.75 }}>
-          Manage GitHub tokens →{' '}
-          <a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--admin-muted)' }}>
-            github.com/settings/personal-access-tokens
-          </a>
-        </p>
+        {/* Recent posts */}
+        <section className="dash-section">
+          <h2 className="dash-section-title">Recent posts</h2>
+          <table className="dash-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentPosts.map((post) => (
+                <tr key={post.slug}>
+                  <td className="dash-muted">{post.date}</td>
+                  <td>{post.title}</td>
+                  <td>
+                    <span className="dash-badge dash-badge--post">{post.category}</span>
+                  </td>
+                  <td>
+                    <Link href={`/posts/${post.slug}`} className="dash-link" target="_blank">
+                      view →
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
 
-        {/* Post form */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div className="admin-field">
-            <label className="admin-label" htmlFor="postDate">Date</label>
-            <input
-              id="postDate"
-              type="date"
-              className="admin-input"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-            />
+        {/* Quick links */}
+        <section className="dash-section">
+          <h2 className="dash-section-title">Quick links</h2>
+          <div className="dash-links">
+            <Link href="/admin/publish" className="dash-link">Post publisher</Link>
+            <Link href="/intentions" className="dash-link">All intentions</Link>
+            <Link href="https://vercel.com" className="dash-link" target="_blank">Vercel dashboard</Link>
+            <Link href="https://console.neon.tech" className="dash-link" target="_blank">Neon database</Link>
           </div>
-          <div className="admin-field">
-            <label className="admin-label" htmlFor="postTitle">Post Title</label>
-            <input
-              id="postTitle"
-              type="text"
-              className="admin-input"
-              placeholder="The Honda Engine"
-              value={title}
-              onChange={e => handleTitleChange(e.target.value)}
-            />
-          </div>
-        </div>
+        </section>
 
-        <div className="admin-field">
-          <label className="admin-label" htmlFor="postSlug">URL Slug</label>
-          <input
-            id="postSlug"
-            type="text"
-            className="admin-input"
-            placeholder="auto-generated from title"
-            value={slug}
-            onChange={e => setSlug(e.target.value)}
-          />
-          <p className="admin-hint">Auto-filled from title. Edit if needed. Date is prepended automatically.</p>
-        </div>
-
-        <div className="admin-field">
-          <label className="admin-label" htmlFor="postCategory">Category</label>
-          <select
-            id="postCategory"
-            className="admin-input"
-            value={category}
-            onChange={e => handleCategoryChange(e.target.value)}
-          >
-            <option value="morning-intention">Morning Intention</option>
-            <option value="morning-walk">Morning Walk with Matthew</option>
-          </select>
-        </div>
-
-        <div className="admin-field">
-          <label className="admin-label" htmlFor="postImage">Social Image URL <span style={{ fontWeight: 400, textTransform: 'none', opacity: 0.7 }}>(optional — og:image only, not shown on post)</span></label>
-          <input
-            id="postImage"
-            type="url"
-            className="admin-input"
-            placeholder="/images/posts/your-image.jpg"
-            value={image}
-            onChange={e => setImage(e.target.value)}
-          />
-          <p className="admin-hint">Used for social sharing previews on LinkedIn, Facebook etc. Not displayed on the post page.</p>
-        </div>
-
-        <hr style={{ border: 'none', borderTop: '1px solid var(--admin-border)', margin: '2rem 0' }} />
-
-        {/* Morning Intention fields */}
-        {category === 'morning-intention' && (
-          <>
-            <div className="admin-field">
-              <label className="admin-label" htmlFor="postContent">Post Content</label>
-              <textarea
-                id="postContent"
-                className="admin-textarea"
-                placeholder={`Use ## headings to separate sections:\n\n## Today's Intention\n\nYour story here...\n\n## I'm Grateful For\n\nSomething specific...\n\n## Something I'm Great At\n\nOwn it.`}
-                value={content}
-                onChange={e => setContent(e.target.value)}
-              />
-            </div>
-            <div className="admin-field">
-              <label className="admin-label" htmlFor="postExcerpt">Excerpt <span style={{ fontWeight: 400, textTransform: 'none', opacity: 0.7 }}>(recommended — shown in social previews)</span></label>
-              <textarea
-                id="postExcerpt"
-                className="admin-textarea"
-                style={{ minHeight: '80px' }}
-                placeholder="One or two sentences that capture the heart of this post. Shown when shared on LinkedIn, Facebook, and in search results."
-                value={excerpt}
-                onChange={e => setExcerpt(e.target.value)}
-              />
-              <p className="admin-hint">
-                {excerpt.length > 0
-                  ? `${excerpt.length} / 160 characters${excerpt.length > 160 ? ' — consider trimming' : ''}`
-                  : 'If left blank, the opening paragraph of your post is used automatically.'}
-              </p>
-            </div>
-          </>
-        )}
-
-        {/* Morning Walk fields */}
-        {category === 'morning-walk' && (
-          <>
-            <div className="admin-field">
-              <label className="admin-label" htmlFor="walkUrl">YouTube URL</label>
-              <input
-                id="walkUrl"
-                type="url"
-                className="admin-input"
-                placeholder="https://www.youtube.com/watch?v=..."
-                value={walkUrl}
-                onChange={e => setWalkUrl(e.target.value)}
-              />
-            </div>
-            <div className="admin-field">
-              <label className="admin-label" htmlFor="walkContext">Context</label>
-              <textarea
-                id="walkContext"
-                className="admin-textarea"
-                placeholder="A few words about this walk..."
-                value={walkContext}
-                onChange={e => setWalkContext(e.target.value)}
-              />
-            </div>
-          </>
-        )}
-
-        <button
-          className="admin-publish-btn"
-          onClick={handlePublish}
-          disabled={publishing}
-        >
-          {publishing ? 'Publishing...' : 'Publish Post'}
-        </button>
-
-        {/* Status messages */}
-        {status !== 'idle' && (
-          <div className={`admin-status admin-status--${status}`}>
-            {status === 'publishing' && (
-              <>
-                <span className="admin-spinner" />
-                <span>{statusMsg}</span>
-              </>
-            )}
-            {status === 'success' && (
-              <>
-                <strong>Published.</strong> Vercel is deploying — live in about 30 seconds.<br />
-                <a href={statusMsg} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', fontWeight: 600 }}>
-                  {statusMsg}
-                </a>
-              </>
-            )}
-            {status === 'error' && (
-              <span>
-                <strong>Something went wrong.</strong> {statusMsg}
-              </span>
-            )}
-          </div>
-        )}
       </div>
-
-      <style>{`
-        .admin-token-section {
-          background: var(--admin-card-bg, #f8f8f8);
-          border: 1px solid var(--admin-border, #ddd);
-          border-radius: 6px;
-          padding: 1rem 1.25rem;
-          margin-bottom: 2rem;
-        }
-        .admin-field { margin-bottom: 1.5rem; }
-        .admin-label {
-          display: block;
-          font-size: 0.8rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
-          color: var(--body-text);
-          margin-bottom: 0.4rem;
-        }
-        .admin-input,
-        .admin-textarea {
-          width: 100%;
-          padding: 0.6rem 0.75rem;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-          font-size: 0.95rem;
-          background: #fff;
-          color: #222;
-          line-height: 1.5;
-          box-sizing: border-box;
-        }
-        .admin-input:focus,
-        .admin-textarea:focus {
-          outline: none;
-          border-color: #4A7FA5;
-          box-shadow: 0 0 0 2px rgba(74,127,165,0.2);
-        }
-        .admin-textarea {
-          resize: vertical;
-          min-height: 280px;
-        }
-        .admin-hint {
-          font-size: 0.78rem;
-          color: var(--body-text);
-          opacity: 0.75;
-          margin-top: 0.3rem;
-        }
-        .admin-btn-save-token {
-          background: #4A7FA5;
-          color: #fff;
-          border: none;
-          padding: 0.5rem 1rem;
-          border-radius: 4px;
-          font-size: 0.85rem;
-          cursor: pointer;
-          white-space: nowrap;
-          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        }
-        .admin-btn-save-token:hover { background: #3a6a8a; }
-        .admin-publish-btn {
-          background: #214459;
-          color: #fff;
-          border: none;
-          padding: 0.75rem 2rem;
-          font-size: 1rem;
-          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: 600;
-        }
-        .admin-publish-btn:hover:not(:disabled) { background: #1a3547; }
-        .admin-publish-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .admin-status {
-          margin-top: 1.5rem;
-          padding: 1rem 1.25rem;
-          border-radius: 6px;
-          font-size: 0.9rem;
-          line-height: 1.6;
-        }
-        .admin-status--publishing {
-          background: #eef4fb;
-          border: 1px solid #b8d0e8;
-          color: #2a5a7a;
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-        }
-        .admin-status--success {
-          background: #e8f6ee;
-          border: 1px solid #b0dcc0;
-          color: #1e5c38;
-        }
-        .admin-status--error {
-          background: #fbeaea;
-          border: 1px solid #e0b0b0;
-          color: #7a2020;
-        }
-        .admin-spinner {
-          display: inline-block;
-          width: 18px;
-          height: 18px;
-          border: 2px solid #b8d0e8;
-          border-top-color: #2a5a7a;
-          border-radius: 50%;
-          animation: admin-spin 0.7s linear infinite;
-          flex-shrink: 0;
-        }
-        @keyframes admin-spin { to { transform: rotate(360deg); } }
-      `}</style>
     </main>
   )
 }
