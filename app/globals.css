@@ -145,30 +145,24 @@ body {
   color: var(--heading);
 }
 
-.nav-btn--face,
-.nav-btn--cart {
-  width: 40px;
-  height: 40px;
-  background: var(--nav-pill-bg);
-  color: var(--nav-pill-icon);
-  border-radius: 50%;
-  text-decoration: none;
-  transition: opacity 0.2s ease;
-}
-
-.nav-btn--face:hover,
-.nav-btn--cart:hover {
-  opacity: 0.85;
-}
-
 .nav-btn--face {
   right: calc(50% - 88px);
-  bottom: 15px;
+  color: var(--nav-btn-icon, rgba(255,255,255,0.55));
+  text-decoration: none;
+}
+
+.nav-btn--face:hover {
+  color: var(--heading);
 }
 
 .nav-btn--cart {
   left: calc(50% - 88px);
-  bottom: 15px;
+  color: var(--nav-btn-icon, rgba(255,255,255,0.55));
+  text-decoration: none;
+}
+
+.nav-btn--cart:hover {
+  color: var(--heading);
 }
 
 .nav-cart-badge {
