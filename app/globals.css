@@ -602,7 +602,7 @@ body {
 }
 
 .dev-col-title {
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .dev-col-detail {
