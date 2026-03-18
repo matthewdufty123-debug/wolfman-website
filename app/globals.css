@@ -979,6 +979,85 @@ body {
   border-radius: 4px;
 }
 
+/* ── Post bottom navigation ── */
+
+.post-nav {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem calc(7rem + 100px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border-top: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.post-nav-share-row {
+  display: flex;
+  justify-content: center;
+}
+
+.post-nav-links-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.post-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--body-text);
+  text-decoration: none;
+  font-size: 0.85rem;
+  opacity: 0.65;
+  transition: opacity 0.15s ease;
+  max-width: 45%;
+}
+
+.post-nav-btn:hover {
+  opacity: 1;
+}
+
+.post-nav-btn--right {
+  text-align: right;
+  justify-content: flex-end;
+}
+
+.post-nav-btn--disabled {
+  cursor: default;
+  opacity: 0.3;
+}
+
+.post-nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Share button */
+.post-nav-share {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--body-text);
+  opacity: 0.65;
+  transition: opacity 0.15s ease;
+  padding: 0;
+}
+
+.post-nav-share:hover {
+  opacity: 1;
+}
+
+.post-nav-share-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
 /* ── Settings page ── */
 
 .settings-main {
