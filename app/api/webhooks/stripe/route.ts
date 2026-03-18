@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { db } from '@/lib/db'
 import { orders, orderItems } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
+import { sendOrderConfirmation } from '@/lib/email'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -59,6 +60,22 @@ export async function POST(request: Request) {
           unitPrice: item.unitPrice,
         }))
       )
+    }
+
+    // Send confirmation email
+    const email = session.customer_email ?? session.customer_details?.email
+    if (email) {
+      await sendOrderConfirmation({
+        to: email,
+        orderItems: cartItems.map(i => ({
+          productName: i.productName,
+          variantName: i.variantName,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice,
+        })),
+        totalAmount: session.amount_total ?? 0,
+        orderId: order.id,
+      })
     }
 
     // Trigger Printful fulfilment
