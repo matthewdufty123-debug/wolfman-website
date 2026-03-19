@@ -31,11 +31,14 @@ type TabType = 'new' | 'edit'
 const ROUTINE_ITEMS = [
   { key: 'sunlight',     label: '☀️  Sunlight' },
   { key: 'breathwork',   label: '🌬️  Breathwork' },
-  { key: 'cacao',        label: '🍫  Cacao' },
-  { key: 'meditation',   label: '🧘  Meditation' },
+  { key: 'cacao',        label: '🍵  Ceremonial Drink' },
+  { key: 'meditation',   label: '🧘  Still Meditation' },
   { key: 'coldShower',   label: '🚿  Cold Shower' },
-  { key: 'walk',         label: '🚶  Walk' },
+  { key: 'walk',         label: '🚶  Outside Walk' },
   { key: 'animalLove',   label: '🐾  Animal Love' },
+  { key: 'caffeine',     label: '☕  Drink Caffeine' },
+  { key: 'yoga',         label: '🤸  Yoga Movement' },
+  { key: 'workout',      label: '💪  Workout' },
 ] as const
 
 type RoutineKey = typeof ROUTINE_ITEMS[number]['key']
@@ -75,6 +78,7 @@ function AdminPublishInner() {
   const [routineChecklist, setRoutineChecklist] = useState<RoutineChecklist>({
     sunlight: false, breathwork: false, cacao: false, meditation: false,
     coldShower: false, walk: false, animalLove: false,
+    caffeine: false, yoga: false, workout: false,
   })
 
   // New post status
