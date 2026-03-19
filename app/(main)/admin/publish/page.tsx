@@ -28,6 +28,19 @@ function extractYoutubeId(url: string): string | null {
 type StatusType = 'idle' | 'publishing' | 'success' | 'error'
 type TabType = 'new' | 'edit'
 
+const ROUTINE_ITEMS = [
+  { key: 'sunlight',     label: '☀️  Sunlight' },
+  { key: 'breathwork',   label: '🌬️  Breathwork' },
+  { key: 'cacao',        label: '🍫  Cacao' },
+  { key: 'meditation',   label: '🧘  Meditation' },
+  { key: 'coldShower',   label: '🚿  Cold Shower' },
+  { key: 'walk',         label: '🚶  Walk' },
+  { key: 'animalLove',   label: '🐾  Animal Love' },
+] as const
+
+type RoutineKey = typeof ROUTINE_ITEMS[number]['key']
+type RoutineChecklist = Record<RoutineKey, boolean>
+
 interface PostSummary {
   id: string
   slug: string
@@ -55,6 +68,14 @@ function AdminPublishInner() {
   const [walkContext, setWalkContext] = useState('')
   const [review, setReview] = useState('')
   const [suggestedTitle, setSuggestedTitle] = useState('')
+
+  // Morning state (new posts only)
+  const [brainScale, setBrainScale] = useState(3)
+  const [bodyScale, setBodyScale] = useState(3)
+  const [routineChecklist, setRoutineChecklist] = useState<RoutineChecklist>({
+    sunlight: false, breathwork: false, cacao: false, meditation: false,
+    coldShower: false, walk: false, animalLove: false,
+  })
 
   // New post status
   const [status, setStatus] = useState<StatusType>('idle')
@@ -262,7 +283,12 @@ function AdminPublishInner() {
       const res = await fetch('/api/admin/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: fullSlug, title, date, category, content: postContent, excerpt: excerpt || undefined, image: image || undefined, videoId, review: review || undefined }),
+        body: JSON.stringify({
+          slug: fullSlug, title, date, category, content: postContent,
+          excerpt: excerpt || undefined, image: image || undefined,
+          videoId, review: review || undefined,
+          morning: { brainScale, bodyScale, routineChecklist },
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || `Failed to publish (${res.status})`)
@@ -458,6 +484,101 @@ function AdminPublishInner() {
           <div className="admin-field">
             <label className="admin-label" htmlFor="walkContext">Context</label>
             <textarea id="walkContext" className="admin-textarea" placeholder="A few words about this walk..." value={walkContext} onChange={e => setWalkContext(e.target.value)} />
+          </div>
+        </>
+      )}
+
+      {/* Morning State — new posts only */}
+      {!isEditMode && (
+        <>
+          <hr style={{ border: 'none', borderTop: '1px solid var(--admin-border)', margin: '2rem 0' }} />
+          <div style={{ marginBottom: '1.5rem' }}>
+            <p className="admin-label" style={{ marginBottom: '0.75rem' }}>Morning State</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--body-text)', opacity: 0.7, margin: '0 0 1.25rem' }}>
+              Captured once at publish time — how you arrived at this day.
+            </p>
+
+            {/* Routine checklist */}
+            <div className="admin-field">
+              <label className="admin-label">Morning Routine</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
+                {ROUTINE_ITEMS.map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setRoutineChecklist(prev => ({ ...prev, [key]: !prev[key] }))}
+                    style={{
+                      padding: '0.4rem 0.85rem',
+                      borderRadius: 20,
+                      border: `2px solid ${routineChecklist[key] ? '#3AB87A' : '#ccc'}`,
+                      background: routineChecklist[key] ? '#e8f6ee' : 'var(--admin-card-bg, #f8f8f8)',
+                      color: routineChecklist[key] ? '#1e5c38' : 'var(--body-text)',
+                      fontSize: '0.85rem',
+                      cursor: 'pointer',
+                      fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                      transition: 'all 0.15s ease',
+                      fontWeight: routineChecklist[key] ? 600 : 400,
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Brain scale */}
+            <div className="admin-field">
+              <label className="admin-label">Brain Activity</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--body-text)', opacity: 0.7, minWidth: 64 }}>Peaceful</span>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setBrainScale(n)}
+                      style={{
+                        width: 36, height: 36, borderRadius: '50%',
+                        border: `2px solid ${brainScale === n ? '#4A7FA5' : '#ccc'}`,
+                        background: brainScale === n ? '#4A7FA5' : 'var(--admin-card-bg, #f8f8f8)',
+                        color: brainScale === n ? '#fff' : 'var(--body-text)',
+                        fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
+                        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                        transition: 'all 0.15s ease',
+                      }}
+                    >{n}</button>
+                  ))}
+                </div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--body-text)', opacity: 0.7, minWidth: 48 }}>Manic</span>
+              </div>
+            </div>
+
+            {/* Body scale */}
+            <div className="admin-field">
+              <label className="admin-label">Body Energy</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--body-text)', opacity: 0.7, minWidth: 64 }}>Lethargic</span>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setBodyScale(n)}
+                      style={{
+                        width: 36, height: 36, borderRadius: '50%',
+                        border: `2px solid ${bodyScale === n ? '#A0622A' : '#ccc'}`,
+                        background: bodyScale === n ? '#A0622A' : 'var(--admin-card-bg, #f8f8f8)',
+                        color: bodyScale === n ? '#fff' : 'var(--body-text)',
+                        fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
+                        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                        transition: 'all 0.15s ease',
+                      }}
+                    >{n}</button>
+                  ))}
+                </div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--body-text)', opacity: 0.7, minWidth: 48 }}>Buzzing</span>
+              </div>
+            </div>
           </div>
         </>
       )}

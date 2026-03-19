@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
-import { posts } from '@/lib/db/schema'
+import { posts, morningState } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
 async function requireAdmin() {
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   if (!session) return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
 
   const body = await request.json()
-  const { slug, title, date, category, content, excerpt, image, videoId, review } = body
+  const { slug, title, date, category, content, excerpt, image, videoId, review, morning } = body
 
   if (!slug || !title || !date || !content) {
     return NextResponse.json({ error: 'slug, title, date and content are required' }, { status: 400 })
@@ -54,6 +54,16 @@ export async function POST(request: Request) {
     authorId: session.user.id ?? null,
     publishedAt: new Date(),
   }).returning({ id: posts.id, slug: posts.slug })
+
+  // Save morning state if provided
+  if (morning && post) {
+    await db.insert(morningState).values({
+      postId: post.id,
+      brainScale: morning.brainScale,
+      bodyScale: morning.bodyScale,
+      routineChecklist: morning.routineChecklist,
+    })
+  }
 
   return NextResponse.json(post, { status: 201 })
 }
