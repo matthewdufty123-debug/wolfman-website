@@ -1004,6 +1004,11 @@ body {
   list-style: none;
 }
 
+.post-list-routine {
+  display: block;
+  margin-top: 0.5rem;
+}
+
 .post-list-category {
   font-size: 0.7rem;
   font-weight: 700;
@@ -1011,7 +1016,7 @@ body {
   letter-spacing: 0.1em;
   color: #A0622A;
   display: block;
-  margin-top: 0.25rem;
+  margin-top: 0.4rem;
 }
 
 /* ── Morning Walk post ── */
