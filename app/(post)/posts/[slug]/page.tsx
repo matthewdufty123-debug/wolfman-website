@@ -4,7 +4,7 @@ import { getAllSlugs, getAllPosts, getPostBySlug, ProcessedPost, ParsedSection, 
 import { notFound } from 'next/navigation'
 import ShareButton from '@/components/ShareButton'
 import EveningReflection from '@/components/EveningReflection'
-import { RoutineIconSet } from '@/components/RoutineIcons'
+import MorningRitualIconBar from '@/components/MorningRitualIconBar'
 import { db } from '@/lib/db'
 import { morningState, eveningReflection, dayScores } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
@@ -171,7 +171,8 @@ function MorningStateBlock({ ms }: { ms: MorningStateRow }) {
       <p className="post-day-block-label">How the morning started</p>
 
       <div className="post-day-routine-icons">
-        <RoutineIconSet checklist={checklist} size={20} mode="full" gap={0} fullWidth />
+        <span className="post-day-ritual-label">Morning Rituals</span>
+        <MorningRitualIconBar checklist={checklist} size={20} />
       </div>
 
       <div className="post-day-scales">

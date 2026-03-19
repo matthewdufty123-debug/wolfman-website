@@ -99,16 +99,17 @@ function IconAnimalLove({ size = 18, color = 'currentColor' }: { size?: number; 
 
 export const ROUTINE_ICON_MAP: Record<string, {
   label: string
+  description: string
   Icon: React.FC<{ size?: number; color?: string }>
   color: string
 }> = {
-  sunlight:    { label: 'Sunlight',     Icon: IconSunlight,    color: '#C8B020' },
-  breathwork:  { label: 'Breathwork',   Icon: IconBreathwork,  color: '#70C0C8' },
-  cacao:       { label: 'Cacao',        Icon: IconCacao,       color: '#A0622A' },
-  meditation:  { label: 'Meditation',   Icon: IconMeditation,  color: '#4A7FA5' },
-  coldShower:  { label: 'Cold Shower',  Icon: IconColdShower,  color: '#2A6AB0' },
-  walk:        { label: 'Walk',         Icon: IconWalk,        color: '#3AB87A' },
-  animalLove:  { label: 'Animal Love',  Icon: IconAnimalLove,  color: '#C87840' },
+  sunlight:    { label: 'Sunlight',     description: 'Morning light exposure to anchor your circadian rhythm',         Icon: IconSunlight,    color: '#C8B020' },
+  breathwork:  { label: 'Breathwork',   description: 'Conscious breathing to regulate the nervous system',             Icon: IconBreathwork,  color: '#70C0C8' },
+  cacao:       { label: 'Cacao',        description: 'Ceremonial cacao to open the heart and sharpen focus',           Icon: IconCacao,       color: '#A0622A' },
+  meditation:  { label: 'Meditation',   description: 'Sitting in stillness to observe the mind before the day',        Icon: IconMeditation,  color: '#4A7FA5' },
+  coldShower:  { label: 'Cold Shower',  description: 'Cold exposure to activate presence and sharpen the body',        Icon: IconColdShower,  color: '#2A6AB0' },
+  walk:        { label: 'Walk',         description: 'Moving through nature to ground and clear the mind',             Icon: IconWalk,        color: '#3AB87A' },
+  animalLove:  { label: 'Animal Love',  description: 'Connecting with animals for a moment of pure presence',         Icon: IconAnimalLove,  color: '#C87840' },
 }
 
 // ── Composed components ───────────────────────────────────────────────────────
@@ -166,7 +167,7 @@ export function RoutineIconSet({ checklist, size = 20, mode = 'full', gap = 6, f
               border: `1.5px solid ${done ? color : '#ddd'}`,
               transition: 'all 0.15s ease',
               flexShrink: 0,
-              opacity: done ? 1 : 0.4,
+              opacity: done ? 1 : 0.25,
             }}
           >
             <Icon size={size} color={done ? color : '#999'} />

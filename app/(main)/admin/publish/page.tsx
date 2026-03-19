@@ -500,7 +500,7 @@ function AdminPublishInner() {
 
             {/* Routine checklist */}
             <div className="admin-field">
-              <label className="admin-label">Morning Routine</label>
+              <label className="admin-label">Morning Rituals</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
                 {ROUTINE_ITEMS.map(({ key, label }) => (
                   <button
