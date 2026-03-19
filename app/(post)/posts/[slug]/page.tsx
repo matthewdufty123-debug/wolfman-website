@@ -333,24 +333,26 @@ export default async function PostPage({
           </div>
         </div>
 
-        {/* Claude review block (legacy — only shown if no dayScores yet) */}
-        {post.review && !ds && (
-          <div className="post-claude-review">
-            <div className="post-claude-review-header">
-              <img src="/images/site_images/claudecode-color.png" alt="Claude" className="post-claude-icon" />
-              <span className="post-claude-review-label">Claude&apos;s take</span>
-            </div>
-            <div className="post-claude-review-body">
-              {post.review.split('\n\n').map((para, i) => (
-                <p key={i}>{para}</p>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Merged morning + evening block */}
       {(ms || er) && <DayBlock ms={ms} er={er} />}
+
+      {/* Claude review block (legacy — only shown if no dayScores yet) */}
+      {post.review && !ds && (
+        <div className="post-claude-review">
+          <div className="post-claude-review-header">
+            <img src="/images/site_images/claudecode-color.png" alt="Claude" className="post-claude-icon" />
+            <span className="post-claude-review-label">Claude&apos;s take</span>
+          </div>
+          <div className="post-claude-review-body">
+            {post.review.split('\n\n').map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </div>
+        </div>
+      )}
+
       {ds && post.id && <ClaudesTakeBlock ds={ds} allScores={scatterData} postId={post.id} />}
 
       <PostNav nextPost={nextPost} slug={slug} title={post.title} />
