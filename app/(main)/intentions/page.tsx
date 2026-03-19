@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getAllPosts } from '@/lib/posts'
 import { db } from '@/lib/db'
 import { morningState } from '@/lib/db/schema'
