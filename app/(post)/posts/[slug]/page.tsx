@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { getAllSlugs, getAllPosts, getPostBySlug, ProcessedPost, ParsedSection, PostMeta } from '@/lib/posts'
 import { notFound } from 'next/navigation'
 import ShareButton from '@/components/ShareButton'
+import EveningReflection from '@/components/EveningReflection'
 
 export async function generateStaticParams() {
   const slugs = await getAllSlugs()
@@ -181,6 +182,9 @@ export default async function PostPage({
       </div>
 
       <PostNav nextPost={nextPost} slug={slug} title={post.title} />
+
+      {/* Evening reflection — admin only, invisible to readers */}
+      {post.id && <EveningReflection postId={post.id} />}
     </>
   )
 }

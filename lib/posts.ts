@@ -5,6 +5,7 @@ import { posts as postsTable } from '@/lib/db/schema'
 import { desc, eq } from 'drizzle-orm'
 
 export interface PostMeta {
+  id?: string                            // DB id — present for DB posts, absent for archived filesystem posts
   slug: string
   title: string
   date: string                           // "YYYY-MM-DD"
@@ -97,6 +98,7 @@ async function processPostContent(meta: PostMeta, content: string): Promise<Proc
 
 function rowToMeta(row: typeof postsTable.$inferSelect): PostMeta {
   return {
+    id:       row.id,
     slug:     row.slug,
     title:    row.title,
     date:     row.date,
