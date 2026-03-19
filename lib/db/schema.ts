@@ -6,7 +6,10 @@ export const users = pgTable('users', {
   emailVerified: timestamp('email_verified', { mode: 'date' }),
   passwordHash: text('password_hash'),
   name: text('name'),
-  image: text('image'),
+  displayName: text('display_name'),    // public-facing name shown on posts/profile
+  bio: text('bio'),                     // short personal bio shown on profile
+  image: text('image'),                 // OAuth provider avatar (auto-set)
+  avatar: text('avatar'),               // user-uploaded avatar (takes precedence over image)
   role: text('role').notNull().default('customer'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
