@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(node migrate.js)",
+      "Bash(node:*)",
+      "Bash(npx next:*)",
+      "Bash(gh api:*)",
+      "Bash(vercel:*)",
+      "Bash(curl -s \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues?state=open&per_page=50\")",
+      "Bash(find:*)",
+      "Bash(npx tsc:*)",
+      "Bash(ls:*)",
+      "Bash(grep -E \"\\\\.\\(tsx|ts\\)$\")",
+      "Bash(curl -s \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues?state=open&per_page=100\")",
+      "Bash(curl -s \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues/69\")",
+      "Bash(gh issue:*)",
+      "Bash(source .env.local)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X GET \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website\" -H \"Authorization: token $GITHUB_TOKEN\")",
+      "Bash(curl -s \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues?state=open&per_page=100\" -H \"Authorization: token $GITHUB_TOKEN\")",
+      "Bash(python -c \"import json,sys; issues=json.load\\(sys.stdin\\); print\\(f''''Total: {len\\(issues\\)}''''\\); [print\\(f''''#{i[\"\"number\"\"]} {i[\"\"title\"\"]}''''\\) for i in issues]\")",
+      "Bash(curl -s \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues/69\" -H \"Authorization: token $GITHUB_TOKEN\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X PATCH \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues/69\" -H \"Authorization: token $GITHUB_TOKEN\" -H \"Content-Type: application/json\" -d '{\"\"labels\"\": [\"\"enhancement\"\", \"\"in-progress\"\", \"\"Milestone-02 - Blog\"\"]}')",
+      "Bash(curl -s -o /dev/null -X POST \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues/69/comments\" -H \"Authorization: token $GITHUB_TOKEN\" -H \"Content-Type: application/json\" -d '{\"\"body\"\": \"\"Closing — implemented.\\\\n\\\\nAdded `/api/admin/github-token` — a protected GET route that returns `GITHUB_TOKEN` from Vercel env vars to admin users only \\(401 for anyone else\\).\\\\n\\\\nThe publish page now auto-fetches the token on load if nothing is in localStorage. On success it stores it in localStorage and shows the green indicator. If the fetch fails \\(not logged in, token not configured\\) it falls back to opening the manual token input as before.\\\\n\\\\nThe token never needs to be entered manually again as long as Matthew is signed in.\"\"}')",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X PATCH \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues/69\" -H \"Authorization: token $GITHUB_TOKEN\" -H \"Content-Type: application/json\" -d '{\"\"state\"\": \"\"closed\"\", \"\"labels\"\": [\"\"enhancement\"\", \"\"Milestone-02 - Blog\"\"]}')",
+      "Bash(git pull:*)",
+      "Bash(curl -s \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues?state=open&labels=Milestone-02%20-%20Blog&per_page=50\" -H \"Authorization: token $GITHUB_TOKEN\")",
+      "Bash(curl -s \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues?state=open&per_page=50\" -H \"Authorization: token $GITHUB_TOKEN\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X PATCH \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues/72\" -H \"Authorization: token $GITHUB_TOKEN\" -H \"Content-Type: application/json\" -d '{\"\"labels\"\": [\"\"enhancement\"\", \"\"in-progress\"\", \"\"Milestone-02 - Blog\"\"]}')",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X PATCH \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues/72\" -H \"Authorization: token $GITHUB_TOKEN\" -H \"Content-Type: application/json\" -d '{\"\"state\"\": \"\"closed\"\", \"\"labels\"\": [\"\"enhancement\"\", \"\"Milestone-02 - Blog\"\"]}')",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X PATCH \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues/71\" -H \"Authorization: token $GITHUB_TOKEN\" -H \"Content-Type: application/json\" -d '{\"\"labels\"\": [\"\"enhancement\"\", \"\"in-progress\"\", \"\"Milestone-02 - Blog\"\"]}')",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X PATCH \"https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues/71\" -H \"Authorization: token $GITHUB_TOKEN\" -H \"Content-Type: application/json\" -d '{\"\"state\"\": \"\"closed\"\", \"\"labels\"\": [\"\"enhancement\"\", \"\"Milestone-02 - Blog\"\"]}')",
+      "Bash(git checkout:*)",
+      "Bash(git rm:*)"
+    ]
+  }
+}
