@@ -142,14 +142,14 @@ function MorningWalkPost({ post }: { post: ProcessedPost }) {
 
 function ScalePips({ value, max = 5, color }: { value: number; max?: number; color: string }) {
   return (
-    <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+    <div style={{ display: 'flex', gap: 6, width: '100%' }}>
       {Array.from({ length: max }, (_, i) => (
         <div
           key={i}
           style={{
-            width: 28,
-            height: 8,
-            borderRadius: 4,
+            flex: 1,
+            height: 10,
+            borderRadius: 5,
             background: i < value ? color : '#e8e8e8',
           }}
         />
@@ -171,23 +171,25 @@ function MorningStateBlock({ ms }: { ms: MorningStateRow }) {
       <p className="post-day-block-label">How the morning started</p>
 
       <div className="post-day-routine-icons">
-        <RoutineIconSet checklist={checklist} size={20} mode="full" gap={6} />
+        <RoutineIconSet checklist={checklist} size={20} mode="full" gap={0} fullWidth />
       </div>
 
       <div className="post-day-scales">
-        <div className="post-day-scale-row">
-          <div className="post-day-scale-meta">
-            <span className="post-day-scale-name">Mind</span>
-            <span className="post-day-scale-range">Peaceful → Manic</span>
-          </div>
+        <div className="post-day-scale-col">
+          <span className="post-day-scale-name">My Thinking Mind</span>
           <ScalePips value={ms.brainScale} color="#4A7FA5" />
-        </div>
-        <div className="post-day-scale-row">
-          <div className="post-day-scale-meta">
-            <span className="post-day-scale-name">Body</span>
-            <span className="post-day-scale-range">Lethargic → Buzzing</span>
+          <div className="post-day-scale-labels">
+            <span>Peaceful</span>
+            <span>Manic</span>
           </div>
+        </div>
+        <div className="post-day-scale-col">
+          <span className="post-day-scale-name">Body Energy</span>
           <ScalePips value={ms.bodyScale} color="#A0622A" />
+          <div className="post-day-scale-labels">
+            <span>Lethargic</span>
+            <span>Buzzing</span>
+          </div>
         </div>
       </div>
     </div>
@@ -319,6 +321,9 @@ export default async function PostPage({
           </div>
         </div>
 
+        {/* Morning state — right after author photo and name */}
+        {ms && <MorningStateBlock ms={ms} />}
+
         {/* Claude review block (legacy field) */}
         {post.review && (
           <div className="post-claude-review">
@@ -335,8 +340,7 @@ export default async function PostPage({
         )}
       </div>
 
-      {/* Day data — only renders when data exists */}
-      {ms && <MorningStateBlock ms={ms} />}
+      {/* Evening + Claude's Take — only renders when data exists */}
       {er && <EveningReflectionBlock er={er} />}
       {ds && <ClaudesTakeBlock ds={ds} />}
 

@@ -244,12 +244,11 @@ export default function EveningReflection({ postId }: Props) {
             {saved ? '✓ Saved' : saving ? 'Saving…' : hasExisting ? 'Update Reflection' : 'Save Reflection'}
           </button>
 
-          {/* Claude's Take section */}
-          {hasExisting && (
-            <>
-              <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '0 0 1.5rem' }} />
+          {/* Claude's Take section — always available, even before evening reflection */}
+          <>
+            <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '1.5rem 0' }} />
 
-              {dayScore ? (
+            {dayScore ? (
                 <>
                   <p style={{ ...labelStyle, marginBottom: '0.75rem' }}>✨ Claude&apos;s Take</p>
 
@@ -302,8 +301,7 @@ export default function EveningReflection({ postId }: Props) {
               )}
 
               {takeError && <p style={{ color: '#7a2020', fontSize: '0.82rem', marginTop: '0.75rem' }}>{takeError}</p>}
-            </>
-          )}
+          </>
         </div>
       </div>
 

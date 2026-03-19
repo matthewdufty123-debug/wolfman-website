@@ -617,9 +617,12 @@ function AdminPublishInner() {
         {activeTab === 'new' && (
           <>
             {sharedForm}
-            <button className="admin-publish-btn" onClick={handlePublish} disabled={publishing}>
-              {publishing ? 'Publishing...' : 'Publish Post'}
-            </button>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <button className="admin-publish-btn" onClick={handlePublish} disabled={publishing}>
+                {publishing ? 'Publishing...' : 'Publish Post'}
+              </button>
+              <a href="/admin" className="admin-cancel-btn">← Back to Admin</a>
+            </div>
             {status !== 'idle' && (
               <div className={`admin-status admin-status--${status}`}>
                 {status === 'publishing' && (<><span className="admin-spinner" /><span>{statusMsg}</span></>)}
@@ -669,9 +672,12 @@ function AdminPublishInner() {
             {!loadingPost && editSelectedId && (
               <>
                 {sharedForm}
-                <button className="admin-publish-btn" onClick={handleSave} disabled={saving}>
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </button>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <button className="admin-publish-btn" onClick={handleSave} disabled={saving}>
+                    {saving ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <a href="/admin" className="admin-cancel-btn">← Back to Admin</a>
+                </div>
                 {saveStatus !== 'idle' && (
                   <div className={`admin-status admin-status--${saveStatus}`}>
                     {saveStatus === 'publishing' && (<><span className="admin-spinner" /><span>{saveMsg}</span></>)}
@@ -711,6 +717,8 @@ function AdminPublishInner() {
         .admin-publish-btn { background: #214459; color: #fff; border: none; padding: 0.75rem 2rem; font-size: 1rem; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; border-radius: 4px; cursor: pointer; font-weight: 600; }
         .admin-publish-btn:hover:not(:disabled) { background: #1a3547; }
         .admin-publish-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .admin-cancel-btn { color: var(--body-text); font-size: 0.85rem; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; opacity: 0.65; text-decoration: none; padding: 0.5rem 0; }
+        .admin-cancel-btn:hover { opacity: 1; }
         .admin-status { margin-top: 1.5rem; padding: 1rem 1.25rem; border-radius: 6px; font-size: 0.9rem; line-height: 1.6; }
         .admin-status--publishing { background: #eef4fb; border: 1px solid #b8d0e8; color: #2a5a7a; display: flex; align-items: center; gap: 0.75rem; }
         .admin-status--success { background: #e8f6ee; border: 1px solid #b0dcc0; color: #1e5c38; }

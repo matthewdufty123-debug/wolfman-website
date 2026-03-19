@@ -130,16 +130,25 @@ interface RoutineIconSetProps {
   // 'full' shows all 7 with greyed-out state; 'done-only' shows only completed
   mode?: 'full' | 'done-only'
   gap?: number
+  // fullWidth: evenly spaces icons across the full container width
+  fullWidth?: boolean
 }
 
-export function RoutineIconSet({ checklist, size = 20, mode = 'full', gap = 6 }: RoutineIconSetProps) {
+export function RoutineIconSet({ checklist, size = 20, mode = 'full', gap = 6, fullWidth = false }: RoutineIconSetProps) {
   const items = Object.entries(ROUTINE_ICON_MAP)
   const filtered = mode === 'done-only' ? items.filter(([key]) => checklist[key]) : items
 
   if (filtered.length === 0) return null
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap, flexWrap: 'wrap' }}>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: fullWidth ? 0 : gap,
+      flexWrap: 'wrap',
+      justifyContent: fullWidth ? 'space-evenly' : 'flex-start',
+      width: fullWidth ? '100%' : undefined,
+    }}>
       {filtered.map(([key, { label, Icon, color }]) => {
         const done = Boolean(checklist[key])
         return (
@@ -157,9 +166,10 @@ export function RoutineIconSet({ checklist, size = 20, mode = 'full', gap = 6 }:
               border: `1.5px solid ${done ? color : '#ddd'}`,
               transition: 'all 0.15s ease',
               flexShrink: 0,
+              opacity: done ? 1 : 0.4,
             }}
           >
-            <Icon size={size} color={done ? color : '#ccc'} />
+            <Icon size={size} color={done ? color : '#999'} />
           </div>
         )
       })}

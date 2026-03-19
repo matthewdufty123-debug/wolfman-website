@@ -2274,21 +2274,14 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 .post-day-scales {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1.25rem;
 }
 
-.post-day-scale-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.post-day-scale-meta {
+.post-day-scale-col {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  min-width: 60px;
+  gap: 0.45rem;
+  width: 100%;
 }
 
 .post-day-scale-name {
@@ -2297,7 +2290,12 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
   color: var(--body-text);
 }
 
-.post-day-scale-range {
+.post-day-scale-labels {
+  display: flex;
+  justify-content: space-between;
+}
+
+.post-day-scale-labels span {
   font-size: 0.65rem;
   color: var(--body-text);
   opacity: 0.5;
