@@ -2448,6 +2448,12 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
   margin-bottom: 0;
 }
 
+.post-day-section-divider {
+  border: none;
+  border-top: 1px solid rgba(74, 127, 165, 0.12);
+  margin: 1.25rem 0;
+}
+
 /* Dark mode overrides */
 html[data-theme="dark"] .post-day-block {
   border-color: rgba(229, 203, 187, 0.1);

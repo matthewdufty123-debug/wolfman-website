@@ -75,7 +75,7 @@ export async function PUT(request: Request) {
   if (!session) return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
 
   const body = await request.json()
-  const { id, slug, title, date, category, content, excerpt, image, videoId, review } = body
+  const { id, slug, title, date, category, content, excerpt, image, videoId, review, morning } = body
 
   if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 })
 
@@ -108,6 +108,18 @@ export async function PUT(request: Request) {
     .returning({ id: posts.id, slug: posts.slug })
 
   if (!updated) return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+
+  // Upsert morning state if provided
+  if (morning) {
+    const [existing] = await db.select({ id: morningState.id }).from(morningState).where(eq(morningState.postId, id))
+    if (existing) {
+      await db.update(morningState)
+        .set({ brainScale: morning.brainScale, bodyScale: morning.bodyScale, happyScale: morning.happyScale ?? null, routineChecklist: morning.routineChecklist })
+        .where(eq(morningState.postId, id))
+    } else {
+      await db.insert(morningState).values({ postId: id, brainScale: morning.brainScale, bodyScale: morning.bodyScale, happyScale: morning.happyScale ?? null, routineChecklist: morning.routineChecklist })
+    }
+  }
 
   return NextResponse.json(updated)
 }

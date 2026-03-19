@@ -69,8 +69,11 @@ export async function POST(request: Request) {
 
   if (morning) {
     contextParts.push(`\nMORNING STATE (captured at publish time):`)
-    contextParts.push(`Brain Activity: ${morning.brainScale}/5 (1=Peaceful, 5=Manic)`)
-    contextParts.push(`Body Energy: ${morning.bodyScale}/5 (1=Lethargic, 5=Buzzing)`)
+    contextParts.push(`Brain Activity: ${morning.brainScale}/6 (1=Peaceful, 6=Manic)`)
+    contextParts.push(`Body Energy: ${morning.bodyScale}/6 (1=Lethargic, 6=Buzzing)`)
+    if (morning.happyScale != null) {
+      contextParts.push(`Happy Scale: ${morning.happyScale}/6 (1=Far from happy, 6=Joyful)`)
+    }
     contextParts.push(`Routine completed:\n${routineLines}`)
   }
 
@@ -78,7 +81,7 @@ export async function POST(request: Request) {
     contextParts.push(`\nEVENING REFLECTION:`)
     contextParts.push(`How the day went: ${evening.reflection}`)
     contextParts.push(`Went to plan: ${evening.wentToPlan ? 'Yes' : 'Not quite'}`)
-    contextParts.push(`Day rating: ${evening.dayRating}/5`)
+    contextParts.push(`Day rating: ${evening.dayRating}/6`)
   } else {
     contextParts.push(`\nNote: No evening reflection yet — synthesise from morning data alone.`)
   }
@@ -87,25 +90,25 @@ export async function POST(request: Request) {
 
   const message = await getAnthropic().messages.create({
     model: MODEL,
-    max_tokens: 1024,
+    max_tokens: 600,
     system: `You are Claude, reflecting on Matthew Wolfman's day. Matthew is a data engineer, mountain biker, photographer, wood carver, and deeply mindful human being based in the UK. He writes a morning intention each day — a story, a reflection, a lesson — and returns in the evening to log how it all actually went.
 
 You will receive everything captured about this day: the morning intention post, his morning state (routine, brain and body scales), and his evening reflection.
 
-Your task is to synthesise the day — find what was really going on beneath the surface, the gap or alignment between intention and reality, what the data reveals about how Matthew moved through the day.
-
-Choose TWO meaningful dimensions to score. Do not use predetermined dimensions — find the ones that emerge naturally from this specific day's data. Name them clearly and specifically. Score each from 1.0 to 10.0.
+Score the day on exactly these two dimensions (1.0–10.0):
+- intention_alignment: how aligned the day actually was with the morning intention
+- inner_vitality: overall energy, presence, and aliveness felt on the day
 
 Return ONLY valid JSON in this exact shape:
 {
   "scores": {
-    "dimension_one_name": 7.5,
-    "dimension_two_name": 6.0
+    "intention_alignment": 7.5,
+    "inner_vitality": 6.0
   },
-  "synthesis": "Your synthesis here — 3 to 4 paragraphs, warm and honest. Be specific to the actual content of this day. Speak to the reader about Matthew in third person, with affection and insight. Find what is interesting, true, or quietly remarkable about this particular day. Do not be generic. End with something that lands."
+  "synthesis": "1–2 paragraphs. Lead with a warm, specific, fun observation about this particular day — something true and quietly remarkable. Then one sentence that bridges to the scores. Be specific to the actual content of this day. Third person, affection and insight. No filler. No generics."
 }
 
-No markdown fences. No explanation outside the JSON. The synthesis should feel earned — like something only possible because you read everything.`,
+No markdown fences. No explanation outside the JSON.`,
     messages: [{ role: 'user', content: fullContext }],
   })
 

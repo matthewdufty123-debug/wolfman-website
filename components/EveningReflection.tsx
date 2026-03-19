@@ -202,7 +202,7 @@ export default function EveningReflection({ postId }: Props) {
           <div style={{ marginBottom: '1.5rem' }}>
             <label style={labelStyle}>Day rating</label>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              {[1, 2, 3, 4, 5].map(n => (
+              {[1, 2, 3, 4, 5, 6].map(n => (
                 <button
                   key={n}
                   type="button"

@@ -181,12 +181,47 @@ function AdminPublishInner() {
         setWalkUrl('')
         setWalkContext('')
       }
+
+      // Load morning state if present
+      if (post.morning) {
+        setBrainScale(post.morning.brainScale ?? 3)
+        setBodyScale(post.morning.bodyScale ?? 3)
+        setHappyScale(post.morning.happyScale ?? 3)
+        setRoutineChecklist(post.morning.routineChecklist ?? {
+          sunlight: false, breathwork: false, cacao: false, meditation: false,
+          coldShower: false, walk: false, animalLove: false,
+          caffeine: false, yoga: false, workout: false,
+        })
+      } else {
+        setBrainScale(3); setBodyScale(3); setHappyScale(3)
+        setRoutineChecklist({
+          sunlight: false, breathwork: false, cacao: false, meditation: false,
+          coldShower: false, walk: false, animalLove: false,
+          caffeine: false, yoga: false, workout: false,
+        })
+      }
     } catch (err) {
       setSaveStatus('error')
       setSaveMsg(err instanceof Error ? err.message : 'Failed to load post')
     } finally {
       setLoadingPost(false)
     }
+  }
+
+  function resetNewPost() {
+    setDate(new Date().toISOString().slice(0, 10))
+    setTitle(DEFAULT_INTENTION_TITLE)
+    setSlug(titleToSlug(DEFAULT_INTENTION_TITLE))
+    setCategory('morning-intention')
+    setExcerpt(''); setImage(''); setContent(''); setReview(''); setSuggestedTitle('')
+    setWalkUrl(''); setWalkContext('')
+    setBrainScale(3); setBodyScale(3); setHappyScale(3)
+    setRoutineChecklist({
+      sunlight: false, breathwork: false, cacao: false, meditation: false,
+      coldShower: false, walk: false, animalLove: false,
+      caffeine: false, yoga: false, workout: false,
+    })
+    setStatus('idle'); setStatusMsg('')
   }
 
   // ── Form handlers ─────────────────────────────────────────────────────────
@@ -342,7 +377,7 @@ function AdminPublishInner() {
       const res = await fetch('/api/admin/posts', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: editSelectedId, slug: newFullSlug, title, date, category, content: postContent, excerpt: excerpt || undefined, image: image || undefined, videoId, review: review || undefined }),
+        body: JSON.stringify({ id: editSelectedId, slug: newFullSlug, title, date, category, content: postContent, excerpt: excerpt || undefined, image: image || undefined, videoId, review: review || undefined, morning: { brainScale, bodyScale, happyScale, routineChecklist } }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || `Failed to save (${res.status})`)
@@ -493,15 +528,14 @@ function AdminPublishInner() {
         </>
       )}
 
-      {/* Morning State — new posts only */}
-      {!isEditMode && (
-        <>
-          <hr style={{ border: 'none', borderTop: '1px solid var(--admin-border)', margin: '2rem 0' }} />
-          <div style={{ marginBottom: '1.5rem' }}>
-            <p className="admin-label" style={{ marginBottom: '0.75rem' }}>Morning State</p>
-            <p style={{ fontSize: '0.8rem', color: 'var(--body-text)', opacity: 0.7, margin: '0 0 1.25rem' }}>
-              Captured once at publish time — how you arrived at this day.
-            </p>
+      {/* Morning State */}
+      <>
+        <hr style={{ border: 'none', borderTop: '1px solid var(--admin-border)', margin: '2rem 0' }} />
+        <div style={{ marginBottom: '1.5rem' }}>
+          <p className="admin-label" style={{ marginBottom: '0.75rem' }}>Morning State</p>
+          <p style={{ fontSize: '0.8rem', color: 'var(--body-text)', opacity: 0.7, margin: '0 0 1.25rem' }}>
+            {isEditMode ? 'Edit morning state for this post.' : 'Captured once at publish time — how you arrived at this day.'}
+          </p>
 
             {/* Routine checklist */}
             <div className="admin-field">
@@ -613,7 +647,6 @@ function AdminPublishInner() {
             </div>
           </div>
         </>
-      )}
     </>
   )
 
@@ -632,7 +665,7 @@ function AdminPublishInner() {
         {/* Tab toggle */}
         <div style={{ display: 'flex', gap: 0, marginBottom: '2rem', borderBottom: '2px solid var(--admin-border, #ddd)' }}>
           {(['new', 'edit'] as TabType[]).map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)} style={{
+            <button key={tab} onClick={() => { setActiveTab(tab); if (tab === 'new') resetNewPost() }} style={{
               padding: '0.6rem 1.25rem', border: 'none',
               borderBottom: activeTab === tab ? '2px solid #4A7FA5' : '2px solid transparent',
               marginBottom: '-2px', background: 'none',

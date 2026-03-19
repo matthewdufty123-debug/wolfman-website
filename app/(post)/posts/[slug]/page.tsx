@@ -6,8 +6,9 @@ import ShareButton from '@/components/ShareButton'
 import EveningReflection from '@/components/EveningReflection'
 import MorningRitualIconBar from '@/components/MorningRitualIconBar'
 import MorningScaleBar from '@/components/MorningScaleBar'
+import DayScoreScatter from '@/components/DayScoreScatter'
 import { db } from '@/lib/db'
-import { morningState, eveningReflection, dayScores } from '@/lib/db/schema'
+import { posts as postsTable, morningState, eveningReflection, dayScores } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
 // Allow slugs not in generateStaticParams to be dynamically rendered (posts published after a build)
@@ -152,87 +153,10 @@ type MorningStateRow = {
   routineChecklist: unknown
 }
 
-function MorningStateBlock({ ms }: { ms: MorningStateRow }) {
-  const checklist = ms.routineChecklist as Record<string, boolean>
-  return (
-    <div className="post-day-block">
-      <p className="post-day-block-label">How the morning started</p>
-
-      <div className="post-day-routine-icons">
-        <span className="post-day-ritual-label">Morning Rituals</span>
-        <MorningRitualIconBar checklist={checklist} size={20} />
-      </div>
-
-      <div className="post-day-scales">
-        <div className="post-day-scale-col">
-          <span className="post-day-scale-name">My Thoughts</span>
-          <MorningScaleBar scaleName="My Thoughts" value={ms.brainScale} labels={BRAIN_LABELS} color="#4A7FA5" />
-          <div className="post-day-scale-labels">
-            <span>Peaceful</span>
-            <span>Manic</span>
-          </div>
-        </div>
-        <div className="post-day-scale-col">
-          <span className="post-day-scale-name">Body Energy</span>
-          <MorningScaleBar scaleName="Body Energy" value={ms.bodyScale} labels={BODY_LABELS} color="#A0622A" />
-          <div className="post-day-scale-labels">
-            <span>Lethargic</span>
-            <span>Buzzing</span>
-          </div>
-        </div>
-        {ms.happyScale != null && (
-          <div className="post-day-scale-col">
-            <span className="post-day-scale-name">Happy Scale</span>
-            <MorningScaleBar scaleName="Happy Scale" value={ms.happyScale} labels={HAPPY_LABELS} color="#3AB87A" />
-            <div className="post-day-scale-labels">
-              <span>Far from happy</span>
-              <span>Joyful</span>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
 type EveningReflectionRow = {
   reflection: string
   wentToPlan: boolean
   dayRating: number
-}
-
-function EveningReflectionBlock({ er }: { er: EveningReflectionRow }) {
-  return (
-    <div className="post-day-block">
-      <p className="post-day-block-label">How the day unfolded</p>
-
-      <div className="post-day-reflection-text">
-        {er.reflection.split('\n\n').map((para, i) => (
-          <p key={i}>{para}</p>
-        ))}
-      </div>
-
-      <div className="post-day-evening-meta">
-        <div
-          className="post-day-went-to-plan"
-          data-yes={er.wentToPlan}
-        >
-          {er.wentToPlan ? '✓ Went to plan' : '~ Not quite to plan'}
-        </div>
-
-        <div className="post-day-rating">
-          {[1, 2, 3, 4, 5].map(n => (
-            <div
-              key={n}
-              className="post-day-rating-pip"
-              data-active={n <= er.dayRating}
-            />
-          ))}
-          <span className="post-day-rating-label">{er.dayRating}/5</span>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 type DayScoreRow = {
@@ -247,7 +171,7 @@ const COMPLETENESS_LABELS: Record<string, string> = {
   post_morning_evening:  'from full day data',
 }
 
-function ClaudesTakeBlock({ ds }: { ds: DayScoreRow }) {
+function ClaudesTakeBlock({ ds, allScores, postId }: { ds: DayScoreRow; allScores: ScatterPoint[]; postId: string }) {
   const scores = ds.scores as Record<string, number>
   const completenessLabel = COMPLETENESS_LABELS[ds.dataCompleteness] ?? ds.dataCompleteness
   return (
@@ -255,6 +179,12 @@ function ClaudesTakeBlock({ ds }: { ds: DayScoreRow }) {
       <div className="post-day-claudes-take-header">
         <p className="post-day-block-label" style={{ margin: 0 }}>✦ Claude&apos;s Take</p>
         <span className="post-day-completeness">{completenessLabel}</span>
+      </div>
+
+      <div className="post-day-synthesis">
+        {ds.synthesis.split('\n\n').map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
       </div>
 
       <div className="post-day-scores">
@@ -266,11 +196,83 @@ function ClaudesTakeBlock({ ds }: { ds: DayScoreRow }) {
         ))}
       </div>
 
-      <div className="post-day-synthesis">
-        {ds.synthesis.split('\n\n').map((para, i) => (
-          <p key={i}>{para}</p>
-        ))}
-      </div>
+      {allScores.length > 1 && (
+        <DayScoreScatter data={allScores} todayPostId={postId} />
+      )}
+    </div>
+  )
+}
+
+type ScatterPoint = { date: string; postId: string; x: number; y: number }
+
+function DayBlock({ ms, er }: { ms: MorningStateRow | null; er: EveningReflectionRow | null }) {
+  if (!ms && !er) return null
+  return (
+    <div className="post-day-block">
+      {ms && (
+        <>
+          <p className="post-day-block-label">How the morning started</p>
+
+          <div className="post-day-routine-icons">
+            <span className="post-day-ritual-label">Morning Rituals</span>
+            <MorningRitualIconBar checklist={ms.routineChecklist as Record<string, boolean>} size={20} />
+          </div>
+
+          <div className="post-day-scales">
+            <div className="post-day-scale-col">
+              <span className="post-day-scale-name">My Thoughts</span>
+              <MorningScaleBar scaleName="My Thoughts" value={ms.brainScale} labels={BRAIN_LABELS} color="#4A7FA5" />
+              <div className="post-day-scale-labels">
+                <span>Peaceful</span>
+                <span>Manic</span>
+              </div>
+            </div>
+            <div className="post-day-scale-col">
+              <span className="post-day-scale-name">Body Energy</span>
+              <MorningScaleBar scaleName="Body Energy" value={ms.bodyScale} labels={BODY_LABELS} color="#A0622A" />
+              <div className="post-day-scale-labels">
+                <span>Lethargic</span>
+                <span>Buzzing</span>
+              </div>
+            </div>
+            {ms.happyScale != null && (
+              <div className="post-day-scale-col">
+                <span className="post-day-scale-name">Happy Scale</span>
+                <MorningScaleBar scaleName="Happy Scale" value={ms.happyScale} labels={HAPPY_LABELS} color="#3AB87A" />
+                <div className="post-day-scale-labels">
+                  <span>Far from happy</span>
+                  <span>Joyful</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {er && (
+        <>
+          {ms && <div className="post-day-section-divider" />}
+          <p className="post-day-block-label">How the day ended</p>
+
+          <div className="post-day-reflection-text">
+            {er.reflection.split('\n\n').map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </div>
+
+          <div className="post-day-evening-meta">
+            <div className="post-day-went-to-plan" data-yes={er.wentToPlan}>
+              {er.wentToPlan ? '✓ Went to plan' : '~ Not quite to plan'}
+            </div>
+            <div className="post-day-rating">
+              {[1, 2, 3, 4, 5, 6].map(n => (
+                <div key={n} className="post-day-rating-pip" data-active={n <= er.dayRating} />
+              ))}
+              <span className="post-day-rating-label">{er.dayRating}/6</span>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -288,13 +290,24 @@ export default async function PostPage({
   if (!post) notFound()
 
   // Fetch day data for DB-backed posts
-  const [ms, er, ds] = post.id
+  const [ms, er, ds, allDayScores] = post.id
     ? await Promise.all([
         db.select().from(morningState).where(eq(morningState.postId, post.id)).then(r => r[0] ?? null),
         db.select().from(eveningReflection).where(eq(eveningReflection.postId, post.id)).then(r => r[0] ?? null),
         db.select().from(dayScores).where(eq(dayScores.postId, post.id)).then(r => r[0] ?? null),
+        db.select({ date: postsTable.date, postId: dayScores.postId, scores: dayScores.scores })
+          .from(dayScores)
+          .innerJoin(postsTable, eq(dayScores.postId, postsTable.id))
+          .orderBy(postsTable.date),
       ])
-    : [null, null, null]
+    : [null, null, null, []]
+
+  // Build scatter chart data from all day scores that have both fixed dimensions
+  const scatterData: ScatterPoint[] = (allDayScores ?? []).flatMap(row => {
+    const s = row.scores as Record<string, number>
+    if (typeof s.intention_alignment !== 'number' || typeof s.inner_vitality !== 'number') return []
+    return [{ date: row.date, postId: row.postId, x: s.intention_alignment, y: s.inner_vitality }]
+  })
 
   // Posts sorted newest-first; next = the next older post
   const currentIndex = allPosts.findIndex(p => p.slug === slug)
@@ -320,11 +333,8 @@ export default async function PostPage({
           </div>
         </div>
 
-        {/* Morning state — right after author photo and name */}
-        {ms && <MorningStateBlock ms={ms} />}
-
-        {/* Claude review block (legacy field) */}
-        {post.review && (
+        {/* Claude review block (legacy — only shown if no dayScores yet) */}
+        {post.review && !ds && (
           <div className="post-claude-review">
             <div className="post-claude-review-header">
               <img src="/images/site_images/claudecode-color.png" alt="Claude" className="post-claude-icon" />
@@ -339,9 +349,9 @@ export default async function PostPage({
         )}
       </div>
 
-      {/* Evening + Claude's Take — only renders when data exists */}
-      {er && <EveningReflectionBlock er={er} />}
-      {ds && <ClaudesTakeBlock ds={ds} />}
+      {/* Merged morning + evening block */}
+      {(ms || er) && <DayBlock ms={ms} er={er} />}
+      {ds && post.id && <ClaudesTakeBlock ds={ds} allScores={scatterData} postId={post.id} />}
 
       <PostNav nextPost={nextPost} slug={slug} title={post.title} />
 

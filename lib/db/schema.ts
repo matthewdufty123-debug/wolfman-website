@@ -100,7 +100,7 @@ export const eveningReflection = pgTable('evening_reflection', {
   postId: uuid('post_id').notNull().unique().references(() => posts.id, { onDelete: 'cascade' }),
   reflection: text('reflection').notNull(),
   wentToPlan: boolean('went_to_plan').notNull(),
-  dayRating: smallint('day_rating').notNull(),   // 1–5
+  dayRating: smallint('day_rating').notNull(),   // 1–6
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
