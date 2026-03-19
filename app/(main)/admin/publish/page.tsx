@@ -75,6 +75,7 @@ function AdminPublishInner() {
   // Morning state (new posts only)
   const [brainScale, setBrainScale] = useState(3)
   const [bodyScale, setBodyScale] = useState(3)
+  const [happyScale, setHappyScale] = useState(3)
   const [routineChecklist, setRoutineChecklist] = useState<RoutineChecklist>({
     sunlight: false, breathwork: false, cacao: false, meditation: false,
     coldShower: false, walk: false, animalLove: false,
@@ -291,7 +292,7 @@ function AdminPublishInner() {
           slug: fullSlug, title, date, category, content: postContent,
           excerpt: excerpt || undefined, image: image || undefined,
           videoId, review: review || undefined,
-          morning: { brainScale, bodyScale, routineChecklist },
+          morning: { brainScale, bodyScale, happyScale, routineChecklist },
         }),
       })
       const data = await res.json()
@@ -530,13 +531,13 @@ function AdminPublishInner() {
               </div>
             </div>
 
-            {/* Brain scale */}
+            {/* Brain scale (My Thoughts) */}
             <div className="admin-field">
-              <label className="admin-label">Brain Activity</label>
+              <label className="admin-label">My Thoughts</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--body-text)', opacity: 0.7, minWidth: 64 }}>Peaceful</span>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  {[1, 2, 3, 4, 5].map(n => (
+                  {[1, 2, 3, 4, 5, 6].map(n => (
                     <button
                       key={n}
                       type="button"
@@ -563,7 +564,7 @@ function AdminPublishInner() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--body-text)', opacity: 0.7, minWidth: 64 }}>Lethargic</span>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  {[1, 2, 3, 4, 5].map(n => (
+                  {[1, 2, 3, 4, 5, 6].map(n => (
                     <button
                       key={n}
                       type="button"
@@ -581,6 +582,33 @@ function AdminPublishInner() {
                   ))}
                 </div>
                 <span style={{ fontSize: '0.8rem', color: 'var(--body-text)', opacity: 0.7, minWidth: 48 }}>Buzzing</span>
+              </div>
+            </div>
+
+            {/* Happy scale */}
+            <div className="admin-field">
+              <label className="admin-label">Happy Scale</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--body-text)', opacity: 0.7, minWidth: 64 }}>Far from happy</span>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  {[1, 2, 3, 4, 5, 6].map(n => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setHappyScale(n)}
+                      style={{
+                        width: 36, height: 36, borderRadius: '50%',
+                        border: `2px solid ${happyScale === n ? '#3AB87A' : '#ccc'}`,
+                        background: happyScale === n ? '#3AB87A' : 'var(--admin-card-bg, #f8f8f8)',
+                        color: happyScale === n ? '#fff' : 'var(--body-text)',
+                        fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer',
+                        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+                        transition: 'all 0.15s ease',
+                      }}
+                    >{n}</button>
+                  ))}
+                </div>
+                <span style={{ fontSize: '0.8rem', color: 'var(--body-text)', opacity: 0.7, minWidth: 48 }}>Joyful</span>
               </div>
             </div>
           </div>

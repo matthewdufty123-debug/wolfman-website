@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import ShareButton from '@/components/ShareButton'
 import EveningReflection from '@/components/EveningReflection'
 import MorningRitualIconBar from '@/components/MorningRitualIconBar'
+import MorningScaleBar from '@/components/MorningScaleBar'
 import { db } from '@/lib/db'
 import { morningState, eveningReflection, dayScores } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
@@ -140,27 +141,14 @@ function MorningWalkPost({ post }: { post: ProcessedPost }) {
 
 // ── Day data display components ────────────────────────────────────────────────
 
-function ScalePips({ value, max = 5, color }: { value: number; max?: number; color: string }) {
-  return (
-    <div style={{ display: 'flex', gap: 6, width: '100%' }}>
-      {Array.from({ length: max }, (_, i) => (
-        <div
-          key={i}
-          style={{
-            flex: 1,
-            height: 10,
-            borderRadius: 5,
-            background: i < value ? color : '#e8e8e8',
-          }}
-        />
-      ))}
-    </div>
-  )
-}
+const BRAIN_LABELS: [string,string,string,string,string,string] = ['Peaceful','Quiet','Active','Busy','Racing','Manic']
+const BODY_LABELS:  [string,string,string,string,string,string] = ['Lethargic','Slow','Steady','Energised','Strong','Buzzing']
+const HAPPY_LABELS: [string,string,string,string,string,string] = ['Far from happy','Low','Okay','Good','Happy','Joyful']
 
 type MorningStateRow = {
   brainScale: number
   bodyScale: number
+  happyScale?: number | null
   routineChecklist: unknown
 }
 
@@ -177,8 +165,8 @@ function MorningStateBlock({ ms }: { ms: MorningStateRow }) {
 
       <div className="post-day-scales">
         <div className="post-day-scale-col">
-          <span className="post-day-scale-name">My Thinking Mind</span>
-          <ScalePips value={ms.brainScale} color="#4A7FA5" />
+          <span className="post-day-scale-name">My Thoughts</span>
+          <MorningScaleBar scaleName="My Thoughts" value={ms.brainScale} labels={BRAIN_LABELS} color="#4A7FA5" />
           <div className="post-day-scale-labels">
             <span>Peaceful</span>
             <span>Manic</span>
@@ -186,12 +174,22 @@ function MorningStateBlock({ ms }: { ms: MorningStateRow }) {
         </div>
         <div className="post-day-scale-col">
           <span className="post-day-scale-name">Body Energy</span>
-          <ScalePips value={ms.bodyScale} color="#A0622A" />
+          <MorningScaleBar scaleName="Body Energy" value={ms.bodyScale} labels={BODY_LABELS} color="#A0622A" />
           <div className="post-day-scale-labels">
             <span>Lethargic</span>
             <span>Buzzing</span>
           </div>
         </div>
+        {ms.happyScale != null && (
+          <div className="post-day-scale-col">
+            <span className="post-day-scale-name">Happy Scale</span>
+            <MorningScaleBar scaleName="Happy Scale" value={ms.happyScale} labels={HAPPY_LABELS} color="#3AB87A" />
+            <div className="post-day-scale-labels">
+              <span>Far from happy</span>
+              <span>Joyful</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

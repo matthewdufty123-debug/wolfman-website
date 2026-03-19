@@ -61,6 +61,7 @@ export async function POST(request: Request) {
       postId: post.id,
       brainScale: morning.brainScale,
       bodyScale: morning.bodyScale,
+      happyScale: morning.happyScale ?? null,
       routineChecklist: morning.routineChecklist,
     })
   }

@@ -2557,3 +2557,65 @@ html[data-theme="dark"] .post-day-score-card {
 .ritual-back-link:hover {
   opacity: 0.85;
 }
+
+/* ── Morning Stats page ── */
+
+.stats-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 9rem;
+}
+
+.stats-back-link {
+  display: inline-block;
+  font-size: 0.82rem;
+  color: var(--body-text);
+  text-decoration: none;
+  opacity: 0.55;
+  margin-bottom: 1.5rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  transition: opacity 0.15s ease;
+}
+
+.stats-back-link:hover {
+  opacity: 0.9;
+}
+
+.stats-title {
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-weight: 400;
+  color: var(--heading);
+  margin: 0 0 0.5rem;
+  line-height: 1.2;
+}
+
+.stats-subtitle {
+  font-size: 0.9rem;
+  color: var(--body-text);
+  opacity: 0.55;
+  margin: 0 0 2.5rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.stats-chart-card {
+  margin-bottom: 2.5rem;
+  padding: 1.25rem 1rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(74, 127, 165, 0.15);
+  background: var(--bg, #F9F6F5);
+}
+
+.stats-chart-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--body-text);
+  opacity: 0.5;
+  margin: 0 0 1rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+html[data-theme="dark"] .stats-chart-card {
+  border-color: rgba(229, 203, 187, 0.1);
+}

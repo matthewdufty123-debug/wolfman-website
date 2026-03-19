@@ -80,14 +80,16 @@ export const posts = pgTable('posts', {
 })
 
 // Captured at publish time — how Matthew arrived at the day
-// Brain: 1 (Peaceful) → 5 (Manic)
-// Body:  1 (Lethargic) → 5 (Buzzing)
+// Brain (My Thoughts): 1 (Peaceful) → 6 (Manic)
+// Body:  1 (Lethargic) → 6 (Buzzing)
+// Happy: 1 (Far from happy) → 6 (Joyful)
 // Routine: { sunlight, breathwork, cacao, meditation, coldShower, walk, animalLove } — true/false
 export const morningState = pgTable('morning_state', {
   id: uuid('id').primaryKey().defaultRandom(),
   postId: uuid('post_id').notNull().unique().references(() => posts.id, { onDelete: 'cascade' }),
-  brainScale: smallint('brain_scale').notNull(),   // 1–5
-  bodyScale: smallint('body_scale').notNull(),     // 1–5
+  brainScale: smallint('brain_scale').notNull(),   // 1–6
+  bodyScale: smallint('body_scale').notNull(),     // 1–6
+  happyScale: smallint('happy_scale'),             // 1–6, nullable (added later)
   routineChecklist: jsonb('routine_checklist').notNull().default({}),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
