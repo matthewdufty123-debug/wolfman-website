@@ -69,6 +69,7 @@ export const posts = pgTable('posts', {
   excerpt: text('excerpt'),
   image: text('image'),
   videoId: text('video_id'),
+  review: text('review'),
   authorId: uuid('author_id').references(() => users.id),
   publishedAt: timestamp('published_at').notNull().defaultNow(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
