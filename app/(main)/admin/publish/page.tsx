@@ -181,7 +181,18 @@ function AdminPublishInner() {
     if (saved) {
       setTokenSaved(true)
     } else {
-      setTokenOpen(true)
+      // Try to fetch the token from the server (only works when logged in as admin)
+      fetch('/api/admin/github-token')
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data?.token) {
+            localStorage.setItem('wm_gh_token', data.token)
+            setTokenSaved(true)
+          } else {
+            setTokenOpen(true)
+          }
+        })
+        .catch(() => setTokenOpen(true))
     }
     setDate(new Date().toISOString().slice(0, 10))
 
