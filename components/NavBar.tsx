@@ -9,6 +9,7 @@ import { useSession } from 'next-auth/react'
 import WolfLogo from './WolfLogo'
 import ThemeButtons from './ThemeButtons'
 import FontSizeButtons from './FontSizeButtons'
+import FontFamilyButtons from './FontFamilyButtons'
 import DevOverlay from './DevOverlay'
 import { useCart } from '@/lib/cart'
 
@@ -237,6 +238,7 @@ export default function NavBar() {
           <p className="settings-overlay-title">experience</p>
           <ThemeButtons />
           <FontSizeButtons />
+          <FontFamilyButtons />
         </div>
       </div>
 

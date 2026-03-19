@@ -52,6 +52,59 @@ function splitMarkdownSections(content: string): Array<{ heading: string | null;
   return sections
 }
 
+// Normalise text for fuzzy section-header matching:
+// lowercase, strip apostrophes/special chars, collapse whitespace
+function normalizeForMatch(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[\u2018\u2019\u201A\u201B''`]/g, '') // fancy + straight apostrophes
+    .replace(/[^a-z ]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+// Pre-compute normalised keys from SECTION_MAP
+const INLINE_SECTION_KEYS = Object.entries(SECTION_MAP).map(([key, canonical]) => ({
+  normalized: normalizeForMatch(key),
+  canonical,
+}))
+
+// Try to match a line starting with "Section heading; rest of content"
+// Returns { label, rest } on match, null otherwise
+function matchInlineSectionHeader(line: string): { label: string; rest: string } | null {
+  const semiIdx = line.indexOf(';')
+  if (semiIdx === -1) return null
+  const candidate = normalizeForMatch(line.slice(0, semiIdx))
+  const rest = line.slice(semiIdx + 1).trim()
+  for (const { normalized, canonical } of INLINE_SECTION_KEYS) {
+    if (candidate === normalized) return { label: canonical, rest }
+  }
+  return null
+}
+
+// Parse legacy "Heading; content" inline format (paragraphs separated by blank lines)
+function splitInlineSections(content: string): Array<{ heading: string; body: string }> | null {
+  const paragraphs = content.split(/\n\n+/)
+  const result: Array<{ heading: string; body: string }> = []
+  let current: { heading: string; body: string } | null = null
+
+  for (const para of paragraphs) {
+    const trimmed = para.trim()
+    if (!trimmed) continue
+    const match = matchInlineSectionHeader(trimmed)
+    if (match) {
+      if (current) result.push(current)
+      current = { heading: match.label, body: match.rest }
+    } else if (current) {
+      current.body += '\n\n' + trimmed
+    }
+    // paragraphs before any matched header are skipped (pre-content / title lines)
+  }
+
+  if (current) result.push(current)
+  return result.length > 0 ? result : null
+}
+
 async function markdownToHtml(markdown: string): Promise<string> {
   const result = await remark().use(html, { sanitize: false }).process(markdown)
   return result.toString()
@@ -74,6 +127,7 @@ async function processPostContent(meta: PostMeta, content: string): Promise<Proc
   const base: ProcessedPost = { ...meta, bodyHtml }
 
   if (meta.category === 'morning-intention') {
+    // Try modern ## heading format first
     const rawSections = splitMarkdownSections(content)
     const namedSections = rawSections.filter(s => s.heading !== null)
     if (namedSections.length > 0) {
@@ -84,6 +138,18 @@ async function processPostContent(meta: PostMeta, content: string): Promise<Proc
           const sectionHtml = await markdownToHtml(s.body)
           return { label, html: sectionHtml }
         })
+      )
+      return { ...base, sections }
+    }
+
+    // Fallback: legacy "Heading; content" inline format
+    const inlineSections = splitInlineSections(content)
+    if (inlineSections) {
+      const sections: ParsedSection[] = await Promise.all(
+        inlineSections.map(async s => ({
+          label: s.heading,
+          html: await markdownToHtml(s.body),
+        }))
       )
       return { ...base, sections }
     }

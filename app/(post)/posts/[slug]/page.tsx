@@ -1,9 +1,7 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import { getAllSlugs, getAllPosts, getPostBySlug, ProcessedPost, ParsedSection, PostMeta } from '@/lib/posts'
+import { getAllSlugs, getAllPosts, getPostBySlug, ProcessedPost, ParsedSection } from '@/lib/posts'
 import { notFound } from 'next/navigation'
-import ShareButton from '@/components/ShareButton'
-import EveningReflection from '@/components/EveningReflection'
+import PostFooter from '@/components/PostFooter'
 import MorningRitualIconBar from '@/components/MorningRitualIconBar'
 import MorningScaleBar from '@/components/MorningScaleBar'
 import DayScoreScatter from '@/components/DayScoreScatter'
@@ -48,48 +46,13 @@ export async function generateMetadata(
   }
 }
 
-function IconBack() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="15 18 9 12 15 6" />
-    </svg>
-  )
-}
-
-function IconNext() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="9 18 15 12 9 6" />
-    </svg>
-  )
-}
-
-function PostNav({ nextPost, slug, title }: { nextPost: PostMeta | null; slug: string; title: string }) {
-  const url = `https://wolfman.blog/posts/${slug}`
-  return (
-    <nav className="post-nav">
-      <div className="post-nav-share-row">
-        <ShareButton title={title} url={url} />
-      </div>
-      <div className="post-nav-links-row">
-        <Link href="/intentions" className="post-nav-btn" aria-label="Back to Morning Intentions">
-          <IconBack />
-          <span className="post-nav-label">All posts</span>
-        </Link>
-        {nextPost ? (
-          <Link href={`/posts/${nextPost.slug}`} className="post-nav-btn post-nav-btn--right" aria-label={`Next: ${nextPost.title}`}>
-            <span className="post-nav-label">{nextPost.title}</span>
-            <IconNext />
-          </Link>
-        ) : (
-          <span className="post-nav-btn post-nav-btn--right post-nav-btn--disabled" aria-hidden="true">
-            <span className="post-nav-label">No older posts</span>
-            <IconNext />
-          </span>
-        )}
-      </div>
-    </nav>
-  )
+function formatPostDate(dateStr: string): string {
+  const [year, month, day] = dateStr.split('-').map(Number)
+  const months = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December']
+  const suffix = [1,21,31].includes(day) ? 'st' : [2,22].includes(day) ? 'nd'
+               : [3,23].includes(day) ? 'rd' : 'th'
+  return `${day}${suffix} ${months[month-1]} ${year}`
 }
 
 function MorningIntentionPost({ post }: { post: ProcessedPost }) {
@@ -309,8 +272,9 @@ export default async function PostPage({
     return [{ date: row.date, postId: row.postId, x: s.intention_alignment, y: s.inner_vitality }]
   })
 
-  // Posts sorted newest-first; next = the next older post
+  // Posts sorted newest-first; prevPost = newer, nextPost = older
   const currentIndex = allPosts.findIndex(p => p.slug === slug)
+  const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null
   const nextPost = currentIndex !== -1 && currentIndex < allPosts.length - 1
     ? allPosts[currentIndex + 1]
     : null
@@ -321,6 +285,12 @@ export default async function PostPage({
         ? <MorningWalkPost post={post} />
         : <MorningIntentionPost post={post} />
       }
+
+      <div className="post-reading-end">
+        <p className="post-reading-end-label">You have been reading</p>
+        <p className="post-reading-end-title">{post.title}</p>
+        <p className="post-reading-end-date">Posted {formatPostDate(post.date)}</p>
+      </div>
 
       <div className="post-author-review-wrap">
         {/* Author block */}
@@ -355,10 +325,13 @@ export default async function PostPage({
 
       {ds && post.id && <ClaudesTakeBlock ds={ds} allScores={scatterData} postId={post.id} />}
 
-      <PostNav nextPost={nextPost} slug={slug} title={post.title} />
-
-      {/* Evening reflection — admin only, invisible to readers */}
-      {post.id && <EveningReflection postId={post.id} />}
+      <PostFooter
+        prevPost={prevPost}
+        nextPost={nextPost}
+        slug={slug}
+        title={post.title}
+        postId={post.id ?? null}
+      />
     </>
   )
 }

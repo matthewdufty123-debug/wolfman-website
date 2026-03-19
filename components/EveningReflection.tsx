@@ -5,6 +5,8 @@ import { useSession } from 'next-auth/react'
 
 interface Props {
   postId: string
+  open?: boolean         // when provided: controlled open state from parent
+  onClose?: () => void   // called when panel should close
 }
 
 interface DayScore {
@@ -13,14 +15,16 @@ interface DayScore {
   generatedAt: string
 }
 
-export default function EveningReflection({ postId }: Props) {
+export default function EveningReflection({ postId, open: openProp, onClose }: Props) {
   const { data: session } = useSession()
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isOpen = openProp !== undefined ? openProp : internalOpen
+  const handleClose = () => onClose ? onClose() : setInternalOpen(false)
+
   const [reflection, setReflection] = useState('')
   const [wentToPlan, setWentToPlan] = useState<boolean | null>(null)
   const [dayRating, setDayRating] = useState(3)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
   const [hasExisting, setHasExisting] = useState(false)
   const [dayScore, setDayScore] = useState<DayScore | null>(null)
@@ -31,7 +35,7 @@ export default function EveningReflection({ postId }: Props) {
 
   // Load existing reflection and day score when panel opens
   useEffect(() => {
-    if (!open || !isAdmin) return
+    if (!isOpen || !isAdmin) return
     fetch(`/api/admin/evening-reflection?postId=${postId}`)
       .then(r => r.json())
       .then(data => {
@@ -48,10 +52,11 @@ export default function EveningReflection({ postId }: Props) {
       .then(r => r.json())
       .then(data => { if (data) setDayScore(data) })
       .catch(() => {})
-  }, [open, postId, isAdmin])
+  }, [isOpen, postId, isAdmin])
 
   if (!isAdmin) return null
 
+  // Save reflection then auto-generate Claude's Take
   async function handleSubmit() {
     if (!reflection.trim()) { setError('Write something first.'); return }
     if (wentToPlan === null) { setError('Did it go to plan?'); return }
@@ -64,11 +69,28 @@ export default function EveningReflection({ postId }: Props) {
         body: JSON.stringify({ postId, reflection: reflection.trim(), wentToPlan, dayRating }),
       })
       if (!res.ok) throw new Error('Failed to save')
-      setSaved(true)
       setHasExisting(true)
-      setTimeout(() => setSaved(false), 2000)
-      // Auto-generate Claude's Take after every reflection save
       handleGenerateTake()
+    } catch {
+      setError('Something went wrong. Try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Save then close (used after dayScore exists)
+  async function handleSaveAndClose() {
+    if (!reflection.trim()) { setError('Write something first.'); return }
+    if (wentToPlan === null) { setError('Did it go to plan?'); return }
+    setError('')
+    setSaving(true)
+    try {
+      await fetch('/api/admin/evening-reflection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId, reflection: reflection.trim(), wentToPlan, dayRating }),
+      })
+      handleClose()
     } catch {
       setError('Something went wrong. Try again.')
     } finally {
@@ -97,30 +119,32 @@ export default function EveningReflection({ postId }: Props) {
 
   return (
     <>
-      {/* Floating trigger button */}
-      <button
-        onClick={() => setOpen(true)}
-        aria-label="Evening reflection"
-        style={{
-          position: 'fixed', bottom: '5.5rem', right: '1.25rem',
-          width: 48, height: 48, borderRadius: '50%',
-          background: '#214459', color: '#fff', border: 'none',
-          cursor: 'pointer', fontSize: '1.25rem',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.25)', zIndex: 40,
-          transition: 'transform 0.15s ease',
-        }}
-        onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.08)')}
-        onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-        title={hasExisting ? 'Edit evening reflection' : 'Add evening reflection'}
-      >
-        {dayScore ? '✨' : hasExisting ? '✏️' : '🌙'}
-      </button>
+      {/* Floating trigger button — only shown in uncontrolled mode */}
+      {openProp === undefined && (
+        <button
+          onClick={() => setInternalOpen(true)}
+          aria-label="Evening reflection"
+          style={{
+            position: 'fixed', bottom: '5.5rem', right: '1.25rem',
+            width: 48, height: 48, borderRadius: '50%',
+            background: '#214459', color: '#fff', border: 'none',
+            cursor: 'pointer', fontSize: '1.25rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.25)', zIndex: 40,
+            transition: 'transform 0.15s ease',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.08)')}
+          onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+          title={dayScore ? 'View Claude\'s Take' : hasExisting ? 'Edit evening reflection' : 'Add evening reflection'}
+        >
+          {dayScore ? '✨' : hasExisting ? '✏️' : '🌙'}
+        </button>
+      )}
 
       {/* Backdrop */}
-      {open && (
+      {isOpen && (
         <div
-          onClick={() => setOpen(false)}
+          onClick={handleClose}
           style={{
             position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
             zIndex: 50, animation: 'er-fade-in 0.2s ease',
@@ -139,7 +163,7 @@ export default function EveningReflection({ postId }: Props) {
           borderRadius: '16px 16px 0 0',
           padding: '1.5rem 1.25rem 2.5rem',
           zIndex: 51, maxHeight: '90vh', overflowY: 'auto',
-          transform: open ? 'translateY(0)' : 'translateY(100%)',
+          transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
           transition: 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
           boxShadow: '0 -4px 32px rgba(0,0,0,0.15)',
         }}
@@ -152,7 +176,7 @@ export default function EveningReflection({ postId }: Props) {
             🌙 Evening Reflection
           </h2>
           <button
-            onClick={() => setOpen(false)}
+            onClick={handleClose}
             style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.25rem', color: 'var(--body-text)', padding: '0.25rem' }}
             aria-label="Close"
           >✕</button>
@@ -227,80 +251,76 @@ export default function EveningReflection({ postId }: Props) {
 
           {error && <p style={{ color: '#7a2020', fontSize: '0.85rem', marginBottom: '1rem' }}>{error}</p>}
 
+          {/* Single adaptive button */}
           <button
-            onClick={handleSubmit}
-            disabled={saving || saved}
+            onClick={dayScore ? handleSaveAndClose : handleSubmit}
+            disabled={saving || generatingTake}
             style={{
               width: '100%', padding: '0.85rem',
-              background: saved ? '#3AB87A' : '#214459',
+              background: saving || generatingTake ? '#888' : '#214459',
               color: '#fff', border: 'none', borderRadius: 8,
               fontSize: '1rem', fontWeight: 600,
-              cursor: saving || saved ? 'default' : 'pointer',
+              cursor: saving || generatingTake ? 'not-allowed' : 'pointer',
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               transition: 'background 0.2s ease',
               marginBottom: '1.5rem',
             }}
           >
-            {saved ? '✓ Saved' : saving ? 'Saving…' : hasExisting ? 'Update Reflection' : 'Save Reflection'}
+            {saving || generatingTake
+              ? 'Working…'
+              : dayScore
+              ? 'Save & Close'
+              : hasExisting ? 'Update & Ask Claude ✦' : 'Save & Ask Claude ✦'}
           </button>
 
-          {/* Claude's Take section — always available, even before evening reflection */}
+          {/* Claude's Take section */}
           <>
             <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '1.5rem 0' }} />
 
             {dayScore ? (
-                <>
-                  <p style={{ ...labelStyle, marginBottom: '0.75rem' }}>✨ Claude&apos;s Take</p>
+              <>
+                <p style={{ ...labelStyle, marginBottom: '0.75rem' }}>✨ Claude&apos;s Take</p>
 
-                  {/* Scores */}
-                  <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
-                    {Object.entries(dayScore.scores).map(([dim, score]) => (
-                      <div key={dim} style={{
-                        flex: 1, padding: '0.75rem', borderRadius: 8,
-                        background: 'var(--admin-card-bg, #f8f8f8)',
-                        border: '1px solid #eee', textAlign: 'center',
-                      }}>
-                        <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#214459', lineHeight: 1 }}>
-                          {score.toFixed(1)}
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--body-text)', opacity: 0.7, marginTop: '0.3rem', lineHeight: 1.3 }}>
-                          {dim}
-                        </div>
+                {/* Scores */}
+                <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+                  {Object.entries(dayScore.scores).map(([dim, score]) => (
+                    <div key={dim} style={{
+                      flex: 1, padding: '0.75rem', borderRadius: 8,
+                      background: 'var(--admin-card-bg, #f8f8f8)',
+                      border: '1px solid #eee', textAlign: 'center',
+                    }}>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#214459', lineHeight: 1 }}>
+                        {score.toFixed(1)}
                       </div>
-                    ))}
-                  </div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--body-text)', opacity: 0.7, marginTop: '0.3rem', lineHeight: 1.3 }}>
+                        {dim}
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
-                  {/* Synthesis */}
-                  <div style={{ fontSize: '0.88rem', color: 'var(--body-text)', lineHeight: 1.7, marginBottom: '1rem' }}>
-                    {dayScore.synthesis.split('\n\n').map((para, i) => (
-                      <p key={i} style={{ margin: '0 0 0.75rem' }}>{para}</p>
-                    ))}
-                  </div>
+                {/* Synthesis */}
+                <div style={{ fontSize: '0.88rem', color: 'var(--body-text)', lineHeight: 1.7, marginBottom: '1rem' }}>
+                  {dayScore.synthesis.split('\n\n').map((para, i) => (
+                    <p key={i} style={{ margin: '0 0 0.75rem' }}>{para}</p>
+                  ))}
+                </div>
 
-                  <button
-                    onClick={handleGenerateTake}
-                    disabled={generatingTake}
-                    style={generateBtnStyle(generatingTake)}
-                  >
-                    {generatingTake ? 'Asking Claude…' : 'Regenerate ↺'}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--body-text)', opacity: 0.75, marginBottom: '1rem' }}>
-                    Ready for Claude to synthesise your day?
-                  </p>
-                  <button
-                    onClick={handleGenerateTake}
-                    disabled={generatingTake}
-                    style={generateBtnStyle(generatingTake)}
-                  >
-                    {generatingTake ? 'Asking Claude…' : 'Generate Claude\'s Take ✦'}
-                  </button>
-                </>
-              )}
+                <button
+                  onClick={handleGenerateTake}
+                  disabled={generatingTake}
+                  style={generateBtnStyle(generatingTake)}
+                >
+                  {generatingTake ? 'Asking Claude…' : 'Regenerate ↺'}
+                </button>
+              </>
+            ) : (
+              <p style={{ fontSize: '0.85rem', color: 'var(--body-text)', opacity: 0.75, marginBottom: '1rem' }}>
+                Ready for Claude to synthesise your day?
+              </p>
+            )}
 
-              {takeError && <p style={{ color: '#7a2020', fontSize: '0.82rem', marginTop: '0.75rem' }}>{takeError}</p>}
+            {takeError && <p style={{ color: '#7a2020', fontSize: '0.82rem', marginTop: '0.75rem' }}>{takeError}</p>}
           </>
         </div>
       </div>

@@ -4,12 +4,15 @@ import { createContext, useContext, useEffect, useState } from 'react'
 
 type Theme = 'dark' | 'light'
 type FontSize = 'normal' | 'large' | 'xlarge'
+type FontFamily = 'serif' | 'sans'
 
 interface ThemeContextValue {
   theme: Theme
   setTheme: (t: Theme) => void
   fontSize: FontSize
   setFontSize: (s: FontSize) => void
+  fontFamily: FontFamily
+  setFontFamily: (f: FontFamily) => void
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
@@ -25,12 +28,15 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   // useEffect then syncs to whatever the flash-prevention script already painted.
   const [theme, setThemeState] = useState<Theme>('dark')
   const [fontSize, setFontSizeState] = useState<FontSize>('normal')
+  const [fontFamily, setFontFamilyState] = useState<FontFamily>('serif')
 
   useEffect(() => {
     const t = (document.documentElement.getAttribute('data-theme') as Theme) || 'dark'
     const f = (document.documentElement.getAttribute('data-fontsize') as FontSize) || 'normal'
+    const ff = (document.documentElement.getAttribute('data-fontfamily') as FontFamily) || 'serif'
     setThemeState(t)
     setFontSizeState(f)
+    setFontFamilyState(ff)
   }, [])
 
   function setTheme(t: Theme) {
@@ -45,8 +51,14 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     setFontSizeState(s)
   }
 
+  function setFontFamily(f: FontFamily) {
+    document.documentElement.setAttribute('data-fontfamily', f)
+    localStorage.setItem('wolfman-fontfamily', f)
+    setFontFamilyState(f)
+  }
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, fontSize, setFontSize }}>
+    <ThemeContext.Provider value={{ theme, setTheme, fontSize, setFontSize, fontFamily, setFontFamily }}>
       {children}
     </ThemeContext.Provider>
   )

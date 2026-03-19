@@ -1089,6 +1089,55 @@ body {
   text-overflow: ellipsis;
 }
 
+.post-nav-all-posts {
+  display: flex;
+  justify-content: center;
+}
+
+.post-nav-admin {
+  border-top: 1px solid rgba(74, 127, 165, 0.15);
+  padding-top: 1.25rem;
+}
+
+.post-nav-admin-label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.4;
+  margin-bottom: 0.75rem;
+  color: var(--body-text);
+  text-align: center;
+}
+
+.post-nav-admin-btns {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.post-nav-admin-btn {
+  flex: 1;
+  padding: 0.6rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(74, 127, 165, 0.25);
+  background: none;
+  color: var(--body-text);
+  font-size: 0.78rem;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.post-nav-admin-btn:hover {
+  background: rgba(74, 127, 165, 0.08);
+}
+
 /* Share button */
 .post-nav-share {
   display: flex;
@@ -1200,6 +1249,12 @@ body {
   }
 }
 
+/* ── Post font family variant ── */
+
+html[data-fontfamily="sans"] .post-body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
 /* ── Post font size variants (blog posts only) ── */
 
 html[data-fontsize="large"] .post-body {
@@ -1257,6 +1312,52 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
   .fontsize-toggle {
     flex-direction: column;
   }
+}
+
+/* ── Font family control ── */
+
+.fontfamily-toggle {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.fontfamily-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--body-text, #ffffff);
+  opacity: 0.45;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.fontfamily-btn:hover {
+  opacity: 0.75;
+}
+
+.fontfamily-btn--active {
+  opacity: 1;
+  color: var(--heading, #E5CBBB);
+  border-color: var(--heading, #E5CBBB);
+}
+
+.fontfamily-btn-sample {
+  font-size: 1.4rem;
+  line-height: 1;
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+.fontfamily-btn-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 /* ── Auth pages (login / register) ── */
@@ -2192,6 +2293,38 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 .post-author-bio {
   font-size: 0.8rem;
   opacity: 0.7;
+  margin: 0;
+  color: var(--body-text);
+}
+
+.post-reading-end {
+  max-width: 640px;
+  margin: 3rem auto 0;
+  padding: 2rem 1.5rem 1.5rem;
+  text-align: center;
+  border-top: 1px solid var(--nav-fade);
+}
+
+.post-reading-end-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.4;
+  margin: 0 0 0.75rem;
+  color: var(--body-text);
+}
+
+.post-reading-end-title {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: clamp(1.3rem, 4vw, 1.9rem);
+  color: var(--heading);
+  margin: 0 0 0.5rem;
+  line-height: 1.35;
+}
+
+.post-reading-end-date {
+  font-size: 0.78rem;
+  opacity: 0.45;
   margin: 0;
   color: var(--body-text);
 }
