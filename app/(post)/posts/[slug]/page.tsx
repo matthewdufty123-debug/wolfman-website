@@ -234,13 +234,24 @@ function EveningReflectionBlock({ er }: { er: EveningReflectionRow }) {
 type DayScoreRow = {
   scores: unknown
   synthesis: string
+  dataCompleteness: string
+}
+
+const COMPLETENESS_LABELS: Record<string, string> = {
+  post_only:             'from intention alone',
+  post_morning:          'from intention + morning state',
+  post_morning_evening:  'from full day data',
 }
 
 function ClaudesTakeBlock({ ds }: { ds: DayScoreRow }) {
   const scores = ds.scores as Record<string, number>
+  const completenessLabel = COMPLETENESS_LABELS[ds.dataCompleteness] ?? ds.dataCompleteness
   return (
     <div className="post-day-block post-day-block--claudes-take">
-      <p className="post-day-block-label">✦ Claude&apos;s Take</p>
+      <div className="post-day-claudes-take-header">
+        <p className="post-day-block-label" style={{ margin: 0 }}>✦ Claude&apos;s Take</p>
+        <span className="post-day-completeness">{completenessLabel}</span>
+      </div>
 
       <div className="post-day-scores">
         {Object.entries(scores).map(([dim, score]) => (

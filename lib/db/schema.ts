@@ -107,11 +107,13 @@ export const eveningReflection = pgTable('evening_reflection', {
 // scoring model to evolve without schema changes. The model field allows
 // regeneration with newer Claude versions while preserving history.
 // Example scores: { "intention_alignment": 4.2, "inner_vitality": 3.8 }
+// data_completeness values: 'post_only' | 'post_morning' | 'post_morning_evening'
 export const dayScores = pgTable('day_scores', {
   id: uuid('id').primaryKey().defaultRandom(),
   postId: uuid('post_id').notNull().unique().references(() => posts.id, { onDelete: 'cascade' }),
   scores: jsonb('scores').notNull().default({}),
   synthesis: text('synthesis').notNull(),
   model: text('model').notNull(),
+  dataCompleteness: text('data_completeness').notNull().default('post_only'),
   generatedAt: timestamp('generated_at').notNull().defaultNow(),
 })

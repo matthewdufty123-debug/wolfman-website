@@ -67,6 +67,8 @@ export default function EveningReflection({ postId }: Props) {
       setSaved(true)
       setHasExisting(true)
       setTimeout(() => setSaved(false), 2000)
+      // Auto-generate Claude's Take after every reflection save
+      handleGenerateTake()
     } catch {
       setError('Something went wrong. Try again.')
     } finally {

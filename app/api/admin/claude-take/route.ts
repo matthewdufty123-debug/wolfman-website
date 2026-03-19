@@ -49,6 +49,12 @@ export async function POST(request: Request) {
   const [morning] = await db.select().from(morningState).where(eq(morningState.postId, postId))
   const [evening] = await db.select().from(eveningReflection).where(eq(eveningReflection.postId, postId))
 
+  const dataCompleteness = morning && evening
+    ? 'post_morning_evening'
+    : morning
+    ? 'post_morning'
+    : 'post_only'
+
   // Build the context string — richer data = richer synthesis
   const routineLines = morning
     ? Object.entries(morning.routineChecklist as Record<string, boolean>)
@@ -124,13 +130,13 @@ No markdown fences. No explanation outside the JSON. The synthesis should feel e
   if (existing) {
     ;[result] = await db
       .update(dayScores)
-      .set({ scores: parsed.scores, synthesis: parsed.synthesis, model: MODEL, generatedAt: new Date() })
+      .set({ scores: parsed.scores, synthesis: parsed.synthesis, model: MODEL, dataCompleteness, generatedAt: new Date() })
       .where(eq(dayScores.postId, postId))
       .returning()
   } else {
     ;[result] = await db
       .insert(dayScores)
-      .values({ postId, scores: parsed.scores, synthesis: parsed.synthesis, model: MODEL })
+      .values({ postId, scores: parsed.scores, synthesis: parsed.synthesis, model: MODEL, dataCompleteness })
       .returning()
   }
 
