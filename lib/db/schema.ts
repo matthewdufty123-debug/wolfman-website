@@ -11,6 +11,7 @@ export const users = pgTable('users', {
   image: text('image'),                 // OAuth provider avatar (auto-set)
   avatar: text('avatar'),               // user-uploaded avatar (takes precedence over image)
   role: text('role').notNull().default('customer'),
+  preferences: jsonb('preferences').notNull().default({}),  // { theme?, fontSize?, fontFamily? }
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
@@ -74,6 +75,7 @@ export const posts = pgTable('posts', {
   videoId: text('video_id'),
   review: text('review'),
   authorId: uuid('author_id').references(() => users.id),
+  status: text('status').notNull().default('draft'),  // 'draft' | 'published'
   publishedAt: timestamp('published_at').notNull().defaultNow(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
