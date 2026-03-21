@@ -10,18 +10,25 @@ export async function GET() {
   threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
   const cutoff = threeMonthsAgo.toISOString().slice(0, 10)
 
-  const rows = await db
-    .select({
-      date: posts.date,
-      brainScale: morningState.brainScale,
-      bodyScale: morningState.bodyScale,
-      happyScale: morningState.happyScale,
-      routineChecklist: morningState.routineChecklist,
-    })
-    .from(morningState)
-    .innerJoin(posts, eq(morningState.postId, posts.id))
-    .where(gte(posts.date, cutoff))
-    .orderBy(posts.date)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let rows: any[]
+  try {
+    rows = await db
+      .select({
+        date: posts.date,
+        brainScale: morningState.brainScale,
+        bodyScale: morningState.bodyScale,
+        happyScale: morningState.happyScale,
+        routineChecklist: morningState.routineChecklist,
+      })
+      .from(morningState)
+      .innerJoin(posts, eq(morningState.postId, posts.id))
+      .where(gte(posts.date, cutoff))
+      .orderBy(posts.date)
+  } catch (err) {
+    console.error('[morning-stats] DB query failed:', err)
+    return NextResponse.json({ error: 'Failed to load morning stats.' }, { status: 500 })
+  }
 
   const data = rows.map(r => {
     const checklist = r.routineChecklist as Record<string, boolean>

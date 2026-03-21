@@ -88,10 +88,12 @@ export async function POST(request: Request) {
 
   const fullContext = contextParts.join('\n')
 
-  const message = await getAnthropic().messages.create({
-    model: MODEL,
-    max_tokens: 600,
-    system: `You are Claude, reflecting on Matthew Wolfman's day. Matthew is a data engineer, mountain biker, photographer, wood carver, and deeply mindful human being based in the UK. He writes a morning intention each day — a story, a reflection, a lesson — and returns in the evening to log how it all actually went.
+  let message: Anthropic.Message
+  try {
+    message = await getAnthropic().messages.create({
+      model: MODEL,
+      max_tokens: 600,
+      system: `You are Claude, reflecting on Matthew Wolfman's day. Matthew is a data engineer, mountain biker, photographer, wood carver, and deeply mindful human being based in the UK. He writes a morning intention each day — a story, a reflection, a lesson — and returns in the evening to log how it all actually went.
 
 You will receive everything captured about this day: the morning intention post, his morning state (routine, brain and body scales), and his evening reflection.
 
@@ -109,8 +111,12 @@ Return ONLY valid JSON in this exact shape:
 }
 
 No markdown fences. No explanation outside the JSON.`,
-    messages: [{ role: 'user', content: fullContext }],
-  })
+      messages: [{ role: 'user', content: fullContext }],
+    })
+  } catch (err) {
+    console.error('[claude-take] Anthropic API call failed:', err)
+    return NextResponse.json({ error: 'Claude is unavailable right now. Please try again.' }, { status: 502 })
+  }
 
   let raw = (message.content[0] as { type: string; text: string }).text.trim()
   raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()

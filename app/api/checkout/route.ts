@@ -28,28 +28,34 @@ export async function POST(request: Request) {
     quantity: item.quantity,
   }))
 
-  const checkoutSession = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    line_items: lineItems,
-    mode: 'payment',
-    success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/cart`,
-    customer_email: session?.user?.email ?? undefined,
-    shipping_address_collection: {
-      allowed_countries: ['GB', 'US', 'CA', 'AU', 'DE', 'FR', 'NL', 'SE', 'NO', 'DK'],
-    },
-    metadata: {
-      userId: session?.user?.id ?? '',
-      items: JSON.stringify(items.map(i => ({
-        variantId: i.variantId,
-        productId: i.productId,
-        productName: i.productName,
-        variantName: i.variantName,
-        quantity: i.quantity,
-        unitPrice: Math.round(i.price * 100),
-      }))),
-    },
-  })
+  let checkoutSession: Stripe.Checkout.Session
+  try {
+    checkoutSession = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: lineItems,
+      mode: 'payment',
+      success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/cart`,
+      customer_email: session?.user?.email ?? undefined,
+      shipping_address_collection: {
+        allowed_countries: ['GB', 'US', 'CA', 'AU', 'DE', 'FR', 'NL', 'SE', 'NO', 'DK'],
+      },
+      metadata: {
+        userId: session?.user?.id ?? '',
+        items: JSON.stringify(items.map(i => ({
+          variantId: i.variantId,
+          productId: i.productId,
+          productName: i.productName,
+          variantName: i.variantName,
+          quantity: i.quantity,
+          unitPrice: Math.round(i.price * 100),
+        }))),
+      },
+    })
+  } catch (err) {
+    console.error('[checkout] Stripe session creation failed:', err)
+    return NextResponse.json({ error: 'Unable to create checkout session. Please try again.' }, { status: 502 })
+  }
 
   return NextResponse.json({ url: checkoutSession.url })
 }
