@@ -338,10 +338,10 @@ All work is organised into three phases, each subdivided into stages. Issues car
 | P2S3 | Notifications | #91, #89, #90 |
 | P2S4 | Admin Panel | #92, #93, #94, #95 |
 | P2S5 | Rewards System | #101 |
-| P3S1 | Public Content & Sharing | (new issues when ready) |
-| P3S2 | Talk Data | (re-raise as fresh issues) |
-| P3S3 | Shop & Commerce | (new issues when ready) |
-| P3S4 | Completion | (anything remaining) |
+| P3S1 | Public Content & Sharing | #102 (draft — scope first) |
+| P3S2 | Talk Data | #103 (draft — scope first) |
+| P3S3 | Shop & Commerce | #104 (draft — scope first) |
+| P3S4 | Completion | #105 (draft — scope first) |
 
 **Current phase: P1 — Public Alpha.** Work through stages P1S1 → P1S5 in order.
 Within a stage, pick issues in the order listed above unless dependencies or Matthew's direction say otherwise.
