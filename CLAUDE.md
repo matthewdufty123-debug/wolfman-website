@@ -65,8 +65,9 @@ authentic, personal, and real.
 - Lazy-initialised (`function getResend()`) to avoid build-time env var errors
 
 **AI:** Anthropic API (Claude)
-- **Claude's Take** — auto-generates a day synthesis (scores + narrative) when an evening reflection is saved. Scores stored as flexible JSONB so the model can evolve without schema changes. API route: `/api/admin/claude-take`
-- **SEO meta generation** — planned for post pages (see open issues)
+- **Claude's Take** — auto-generates a day synthesis (scores + narrative). Generated at Review time via `/api/posts/[id]/review` (all users) or `/api/admin/claude-take` (admin). Updated again when evening reflection is saved. Scores stored as flexible JSONB.
+- **Review → Publish flow** — PostForm "Review" button saves draft, calls `/api/posts/[id]/review`, Claude generates: SEO excerpt (stored silently), refined title (pre-fills form), Claude's Take (scores + synthesis stored in `day_scores`). Button then flips to "Publish".
+- **SEO meta generation** (admin) — `/api/admin/seo` generates excerpt + suggestedTitle + review for Matthew's posts
 - Key stored as `ANTHROPIC_API_KEY` in Vercel env and `.env.local`
 
 **OAuth Apps:**
@@ -110,10 +111,10 @@ inviting a click
 - This experience is sacred. Never compromise it.
 
 ### Morning Data & Stats
-- **Morning State** — captured at publish time: brain scale, body scale, happy scale (all 1–6), plus routine checklist (10 rituals: sunlight, breathwork, cacao, meditation, cold shower, walk, animal love, caffeine, yoga, workout)
-- **Evening Reflection** — logged at end of day: reflection text, wentToPlan, dayRating (1–6)
-- **Claude's Take** — auto-generated synthesis after evening reflection is saved
-- **Morning Stats page** (`/morning-stats`) — charts and scatter plots across all posts
+- **Morning State** — captured at publish time via PostForm: brain activity scale, body energy scale, happy scale (all 1–6), plus routine checklist (10 rituals: sunlight, breathwork, cacao, meditation, cold shower, walk, animal love, caffeine, yoga, workout)
+- **Evening Reflection** — logged at end of day: reflection text, wentToPlan, dayRating (1–6). Available to any post owner via PostFooter.
+- **Claude's Take** — generated at Review time (post content + morning state) and optionally regenerated when evening reflection is saved. Stored in `day_scores`.
+- **Morning Stats page** (`/morning-stats`) — charts and scatter plots across all posts (currently shows Matthew's data; per-user view is open issue #82)
 - **Morning Ritual pages** (`/morning-ritual`, `/morning-ritual/[key]`) — filter posts by ritual
 
 ### Home Page
@@ -234,9 +235,8 @@ AI-generated
 app/
   (main)/                   — public-facing pages
     about/                  — About page (stub)
-    account/                — User profile
-    admin/                  — Admin tools
-      publish/              — Publish new post
+    account/                — User profile (name, avatar, password)
+    admin/                  — Admin dashboard (stats, orders, posts)
     cart/                   — Shopping cart
     checkout/               — Stripe checkout + success
     intentions/             — Intentions archive
@@ -244,21 +244,31 @@ app/
     morning-ritual/         — Ritual overview + [key] filter page
     morning-stats/          — Stats dashboard (charts, scatter)
     register/               — Register page
-    settings/               — User settings
+    settings/               — User settings (theme, font — persisted to DB)
     shop/                   — Shop listing + [id] product page
   (post)/                   — Separate route group for sacred reading experience
     posts/[slug]/           — Individual blog post page (no chrome)
+    write/                  — New post form (all authenticated users)
+    edit/[id]/              — Edit post form (post owner only)
   api/
     admin/
-      claude-take/          — Generate Claude's Take for a post
-      evening-reflection/   — Save/update evening reflection
+      claude-take/          — Generate Claude's Take (admin/Matthew's posts)
+      evening-reflection/   — Save/update evening reflection (admin)
       github-token/         — GitHub token helper
-      posts/                — Post CRUD + [id]
-      seo/                  — SEO meta generation
+      posts/                — Post CRUD + [id] (admin)
+      seo/                  — SEO meta generation (admin)
       upload/               — Vercel Blob upload (admin only, 10MB)
     auth/[...nextauth]/     — Auth.js handler
     checkout/               — Stripe checkout session creation
+    claude-take/            — Generate Claude's Take (post owner)
+    evening-reflection/     — Save/update evening reflection (post owner)
     morning-stats/          — Morning stats data API
+    posts/                  — User post CRUD (authenticated users)
+      [id]/                 — Individual post CRUD (owner only)
+        review/             — Claude review: excerpt + title + Claude's Take
+    user/
+      avatar/               — Avatar upload (Vercel Blob)
+      settings/             — Read/write user preferences (theme, font)
     webhooks/stripe/        — Stripe webhook handler
   layout.tsx                — Root layout with CartProvider
 
@@ -267,23 +277,27 @@ components/                 — Shared React components
   AccountPasswordForm.tsx   — Password change form
   AddToCartButton.tsx       — Shop add-to-cart
   AuthForm.tsx / AuthProvider.tsx
+  AvatarUpload.tsx          — Avatar upload with preview
   DayScoreScatter.tsx       — Scatter chart for day scores
   DevOverlay.tsx / DevPageClient.tsx
-  EveningReflection.tsx     — Evening reflection form + display
+  EveningReflection.tsx     — Evening reflection form + display (post owner)
   FontFamilyButtons.tsx / FontSizeButtons.tsx — Reader font controls
   MorningRitualIconBar.tsx  — Ritual icons on post page
-  MorningScaleBar.tsx       — Brain/body/happy scale display
-  NavBar.tsx                — Site navigation
-  PostFooter.tsx            — "You have been reading..." + wolf logo
+  MorningScaleBar.tsx       — Brain activity/body/happy scale display
+  NavBar.tsx                — Bottom bell-curve site navigation with login modal
+  PostFooter.tsx            — "You have been reading..." + wolf logo + owner actions
+  PostForm.tsx              — Write/edit form with Review→Publish Claude flow
   RoutineIcons.tsx          — Morning routine icon set
   ShareButton.tsx           — Post sharing
   StatsCharts.tsx           — Charts for morning stats page
-  ThemeButtons.tsx / ThemeProvider.tsx — Reader theme controls
+  ThemeButtons.tsx / ThemeProvider.tsx — Reader theme controls (DB-persisted)
+  TopBar.tsx                — Fixed top utility bar: + new post, BETA FEEDBACK, edit
   WolfLogo.tsx              — Animated wolf logo
 
 lib/
   db/                       — Drizzle schema and database client
   actions/                  — Next.js server actions (auth, account, oauth)
+  post-context.tsx          — React context: shares post ownership from page → TopBar
   posts.ts                  — Post fetching/parsing utilities
   printful.ts               — Printful API client
   email.ts                  — Resend email helpers
@@ -321,25 +335,29 @@ All work is organised into three phases, each subdivided into stages. Issues car
 
 **Stage map:**
 
-| Stage | Name | Key issues |
-|-------|------|------------|
-| P1S1 | Cleanup & Housekeeping | #98, #99 |
-| P1S2 | Core UX & Navigation | #44, #83, #64 |
-| P1S3 | Post Creation for All Users | #80, #84, #85, #81 |
-| P1S4 | User Profile & Settings | #68, #86, #82 |
-| P1S5 | About & SEO | #47, #48, #49, #50, #45, #46 |
-| P2S1 | Beta Infrastructure | #87, #96, #97, #88 |
-| P2S2 | Scoring System & Terminology | #100 |
-| P2S3 | Notifications | #91, #89, #90 |
-| P2S4 | Admin Panel | #92, #93, #94, #95 |
-| P2S5 | Rewards System | #101 |
-| P3S1 | Public Content & Sharing | #102 (draft — scope first) |
-| P3S2 | Talk Data | #103 (draft — scope first) |
-| P3S3 | Shop & Commerce | #104 (draft — scope first) |
-| P3S4 | Completion | #105 (draft — scope first) |
+| Stage | Name | Key issues | Status |
+|-------|------|------------|--------|
+| P1S1 | Cleanup & Housekeeping | #98 ✅, #99 ✅ | **Complete** |
+| P1S2 | Core UX & Navigation | #83 ✅, #64 ✅, #44 ❌ | **In progress** — #44 remaining |
+| P1S3 | Post Creation for All Users | #80 ✅, #84 ✅, #85 ✅, #81 ✅ | **Complete** |
+| P1S4 | User Profile & Settings | #68 ✅, #86 ✅, #82 ❌ | **In progress** — #82 remaining |
+| P1S5 | About & SEO | #47, #48, #49, #50, #45, #46 | Not started |
+| P2S1 | Beta Infrastructure | #87, #96, #97, #88 | Not started |
+| P2S2 | Scoring System & Terminology | #100 (draft) | Not started |
+| P2S3 | Notifications | #91, #89, #90 | Not started |
+| P2S4 | Admin Panel | #92, #93, #94, #95 | Not started |
+| P2S5 | Rewards System | #101 (draft) | Not started |
+| P3S1 | Public Content & Sharing | #102 (draft — scope first) | Not started |
+| P3S2 | Talk Data | #103 (draft — scope first) | Not started |
+| P3S3 | Shop & Commerce | #104 (draft — scope first) | Not started |
+| P3S4 | Completion | #105 (draft — scope first) | Not started |
 
-**Current phase: P1 — Public Alpha.** Work through stages P1S1 → P1S5 in order.
-Within a stage, pick issues in the order listed above unless dependencies or Matthew's direction say otherwise.
+**Current phase: P1 — Public Alpha.**
+- P1S1 and P1S3 are complete.
+- P1S2: #44 (home page hero) is the only remaining issue.
+- P1S4: #82 (per-user private stats page) is the only remaining issue.
+- Next session: finish #44, then #82, then move to P1S5 (About & SEO).
+- Note: `/feedback` page does not yet exist — the BETA FEEDBACK top bar button is a dead link until #88 (P2S1) is built.
 
 ### Session startup — do this every time before any work begins
 
