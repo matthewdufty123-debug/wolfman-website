@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { getAllSlugs, getAllPosts, getPostBySlug, ProcessedPost, ParsedSection } from '@/lib/posts'
 import { notFound } from 'next/navigation'
+import { auth } from '@/auth'
 import PostFooter from '@/components/PostFooter'
 import MorningRitualIconBar from '@/components/MorningRitualIconBar'
 import MorningScaleBar from '@/components/MorningScaleBar'
@@ -248,9 +249,12 @@ export default async function PostPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const [post, allPosts] = await Promise.all([getPostBySlug(slug), getAllPosts()])
+  const [post, allPosts, session] = await Promise.all([getPostBySlug(slug), getAllPosts(), auth()])
 
   if (!post) notFound()
+
+  // Draft posts are only visible to their author
+  if (post.status === 'draft' && session?.user?.id !== post.authorId) notFound()
 
   // Fetch day data for DB-backed posts
   const [ms, er, ds, allDayScores] = post.id
@@ -331,6 +335,7 @@ export default async function PostPage({
         slug={slug}
         title={post.title}
         postId={post.id ?? null}
+        authorId={post.authorId ?? null}
       />
     </>
   )

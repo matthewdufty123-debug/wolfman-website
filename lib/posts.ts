@@ -14,6 +14,8 @@ export interface PostMeta {
   image?: string                         // og:image only — never rendered on page
   videoId?: string                       // morning-walk only
   review?: string                        // Claude's review — shown at bottom of post
+  status?: string                        // 'draft' | 'published'
+  authorId?: string | null               // author's user id
 }
 
 export interface ParsedSection {
@@ -173,6 +175,8 @@ function rowToMeta(row: typeof postsTable.$inferSelect): PostMeta {
     image:    row.image    ?? undefined,
     videoId:  row.videoId  ?? undefined,
     review:   row.review   ?? undefined,
+    status:   row.status,
+    authorId: row.authorId ?? null,
   }
 }
 
@@ -180,7 +184,7 @@ function rowToMeta(row: typeof postsTable.$inferSelect): PostMeta {
 
 export async function getAllPosts(): Promise<PostMeta[]> {
   try {
-    const rows = await db.select().from(postsTable).orderBy(desc(postsTable.date))
+    const rows = await db.select().from(postsTable).where(eq(postsTable.status, 'published')).orderBy(desc(postsTable.date))
     return rows.map(rowToMeta)
   } catch {
     return []

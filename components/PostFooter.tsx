@@ -14,6 +14,7 @@ interface Props {
   slug: string
   title: string
   postId: string | null
+  authorId: string | null
 }
 
 function IconBack() {
@@ -32,9 +33,10 @@ function IconNext() {
   )
 }
 
-export default function PostFooter({ prevPost, nextPost, slug, title, postId }: Props) {
+export default function PostFooter({ prevPost, nextPost, slug, title, postId, authorId }: Props) {
   const { data: session } = useSession()
   const isAdmin = session?.user?.role === 'admin'
+  const isOwner = session?.user?.id != null && session.user.id === authorId
   const [eveningOpen, setEveningOpen] = useState(false)
   const url = `https://wolfman.blog/posts/${slug}`
 
@@ -91,9 +93,24 @@ export default function PostFooter({ prevPost, nextPost, slug, title, postId }: 
         </div>
       )}
 
-      {isAdmin && postId && (
+      {/* Owner evening reflection button (non-admin authors) */}
+      {isOwner && !isAdmin && postId && (
+        <div className="post-nav-admin">
+          <div className="post-nav-admin-btns">
+            <button onClick={() => setEveningOpen(true)} className="post-nav-admin-btn">
+              🌙 Evening
+            </button>
+            <Link href={`/edit/${postId}`} className="post-nav-admin-btn">
+              ✏️ Edit
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {isOwner && postId && (
         <EveningReflection
           postId={postId}
+          authorId={authorId}
           open={eveningOpen}
           onClose={() => { setEveningOpen(false); window.location.reload() }}
         />

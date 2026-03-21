@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 
 interface Props {
   postId: string
+  authorId: string | null
   open?: boolean         // when provided: controlled open state from parent
   onClose?: () => void   // called when panel should close
 }
@@ -15,7 +16,7 @@ interface DayScore {
   generatedAt: string
 }
 
-export default function EveningReflection({ postId, open: openProp, onClose }: Props) {
+export default function EveningReflection({ postId, authorId, open: openProp, onClose }: Props) {
   const { data: session } = useSession()
   const [internalOpen, setInternalOpen] = useState(false)
   const isOpen = openProp !== undefined ? openProp : internalOpen
@@ -31,12 +32,12 @@ export default function EveningReflection({ postId, open: openProp, onClose }: P
   const [generatingTake, setGeneratingTake] = useState(false)
   const [takeError, setTakeError] = useState('')
 
-  const isAdmin = session?.user?.role === 'admin'
+  const isOwner = session?.user?.id != null && session.user.id === authorId
 
   // Load existing reflection and day score when panel opens
   useEffect(() => {
-    if (!isOpen || !isAdmin) return
-    fetch(`/api/admin/evening-reflection?postId=${postId}`)
+    if (!isOpen || !isOwner) return
+    fetch(`/api/evening-reflection?postId=${postId}`)
       .then(r => r.json())
       .then(data => {
         if (data) {
@@ -48,13 +49,13 @@ export default function EveningReflection({ postId, open: openProp, onClose }: P
       })
       .catch(() => {})
 
-    fetch(`/api/admin/claude-take?postId=${postId}`)
+    fetch(`/api/claude-take?postId=${postId}`)
       .then(r => r.json())
       .then(data => { if (data) setDayScore(data) })
       .catch(() => {})
-  }, [isOpen, postId, isAdmin])
+  }, [isOpen, postId, isOwner])
 
-  if (!isAdmin) return null
+  if (!isOwner) return null
 
   // Save reflection then auto-generate Claude's Take
   async function handleSubmit() {
@@ -63,7 +64,7 @@ export default function EveningReflection({ postId, open: openProp, onClose }: P
     setError('')
     setSaving(true)
     try {
-      const res = await fetch('/api/admin/evening-reflection', {
+      const res = await fetch('/api/evening-reflection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ postId, reflection: reflection.trim(), wentToPlan, dayRating }),
@@ -85,7 +86,7 @@ export default function EveningReflection({ postId, open: openProp, onClose }: P
     setError('')
     setSaving(true)
     try {
-      await fetch('/api/admin/evening-reflection', {
+      await fetch('/api/evening-reflection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ postId, reflection: reflection.trim(), wentToPlan, dayRating }),
@@ -102,7 +103,7 @@ export default function EveningReflection({ postId, open: openProp, onClose }: P
     setGeneratingTake(true)
     setTakeError('')
     try {
-      const res = await fetch('/api/admin/claude-take', {
+      const res = await fetch('/api/claude-take', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ postId }),
