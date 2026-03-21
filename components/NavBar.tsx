@@ -31,6 +31,7 @@ export default function NavBar() {
   const { count: cartCount } = useCart()
   const { data: session } = useSession()
   const [navHidden, setNavHidden] = useState(false)
+  const isPostPage = pathname.startsWith('/posts/')
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('')
@@ -40,22 +41,30 @@ export default function NavBar() {
 
   const avatarUrl = session?.user?.avatar ?? session?.user?.image ?? null
 
-  // Fade nav on scroll down, reveal on scroll up (all pages)
+  // Fade nav after 3s inactivity on post pages; reappear on any interaction
   useEffect(() => {
+    if (!isPostPage) { setNavHidden(false); return }
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (prefersReduced) return
 
-    let lastY = window.scrollY
-    function onScroll() {
-      const y = window.scrollY
-      if (y < 60) { setNavHidden(false); lastY = y; return }
-      setNavHidden(y > lastY)
-      lastY = y
+    let timer: ReturnType<typeof setTimeout>
+    function resetTimer() {
+      setNavHidden(false)
+      clearTimeout(timer)
+      timer = setTimeout(() => setNavHidden(true), 3000)
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    resetTimer()
+    window.addEventListener('scroll', resetTimer, { passive: true })
+    window.addEventListener('mousemove', resetTimer, { passive: true })
+    window.addEventListener('touchstart', resetTimer, { passive: true })
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('scroll', resetTimer)
+      window.removeEventListener('mousemove', resetTimer)
+      window.removeEventListener('touchstart', resetTimer)
+    }
+  }, [isPostPage])
 
   // Escape key closes all overlays
   useEffect(() => {
@@ -112,6 +121,15 @@ export default function NavBar() {
     <>
       {/* ── Nav bar ── */}
       <nav className={`wolfman-nav${navHidden ? ' nav--hidden' : ''}`} id="wolfmanNav">
+        <svg
+          className="nav-bg"
+          xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="none"
+          viewBox="0 0 375 100"
+          aria-hidden="true"
+        >
+          <path d="M0,100 L0,46 L95,46 C125,46 158,0 187.5,0 C217,0 250,46 280,46 L375,46 L375,100 Z" />
+        </svg>
 
         {/* Experience button */}
         <button
@@ -124,7 +142,7 @@ export default function NavBar() {
             setLoginOpen(false)
           }}
         >
-          <SlidersHorizontal size={20} strokeWidth={1.5} />
+          <SlidersHorizontal size={22} strokeWidth={1.5} />
         </button>
 
         {/* Cart button */}
@@ -134,7 +152,7 @@ export default function NavBar() {
           aria-label={cartCount > 0 ? `Cart — ${cartCount} item${cartCount !== 1 ? 's' : ''}` : 'Go to shop'}
           onClick={closeAll}
         >
-          <ShoppingCart size={20} strokeWidth={1.5} />
+          <ShoppingCart size={22} strokeWidth={1.5} />
           {cartCount > 0 && (
             <span className="nav-cart-badge">{cartCount}</span>
           )}
@@ -151,7 +169,7 @@ export default function NavBar() {
             setLoginOpen(false)
           }}
         >
-          <WolfLogo size={40} priority />
+          <WolfLogo size={64} priority />
         </button>
 
         {/* Face / auth button */}
@@ -172,7 +190,7 @@ export default function NavBar() {
                 unoptimized
               />
             ) : (
-              <Smile size={20} strokeWidth={1.5} />
+              <Smile size={22} strokeWidth={1.5} />
             )}
           </Link>
         ) : (
@@ -186,7 +204,7 @@ export default function NavBar() {
               setDevOpen(false)
             }}
           >
-            <Meh size={20} strokeWidth={1.5} />
+            <Meh size={22} strokeWidth={1.5} />
           </button>
         )}
 
@@ -196,7 +214,7 @@ export default function NavBar() {
           aria-label={devOpen ? 'Close development' : 'Open development'}
           onClick={() => { setDevOpen((o) => !o); setMenuOpen(false); setSettingsOpen(false); setLoginOpen(false) }}
         >
-          <Code2 size={20} strokeWidth={1.5} />
+          <Code2 size={22} strokeWidth={1.5} />
         </button>
       </nav>
 
