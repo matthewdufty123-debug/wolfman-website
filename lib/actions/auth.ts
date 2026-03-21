@@ -24,6 +24,19 @@ export async function login(_prev: ActionState, formData: FormData): Promise<Act
   }
 }
 
+// Modal login: returns result instead of redirecting — caller handles session refresh
+export async function loginForModal(email: string, password: string): Promise<{ success: true } | { error: string }> {
+  try {
+    await signIn('credentials', { email, password, redirect: false })
+    return { success: true }
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return { error: 'Invalid email or password.' }
+    }
+    return { error: 'Something went wrong. Please try again.' }
+  }
+}
+
 export async function register(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const name = formData.get('name') as string
   const email = formData.get('email') as string
