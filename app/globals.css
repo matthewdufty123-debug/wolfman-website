@@ -2967,6 +2967,325 @@ html[data-theme="dark"] .stats-chart-card {
   display: block;
 }
 
+/* ── PostForm (write + edit pages) ── */
+.pf-wrap {
+  min-height: 100vh;
+  background: var(--bg, #333F50);
+  color: var(--body-text, #fff);
+  padding: 1.5rem 1.25rem 4rem;
+  max-width: 680px;
+  margin: 0 auto;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.pf-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.pf-back {
+  background: none;
+  border: none;
+  color: var(--heading, #E5CBBB);
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  line-height: 1;
+}
+
+.pf-prompt {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1.1rem;
+  color: var(--heading, #E5CBBB);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.pf-field {
+  margin-bottom: 1.5rem;
+}
+
+.pf-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--body-text);
+  opacity: 0.5;
+  margin-bottom: 0.4rem;
+}
+
+.pf-input {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.07);
+  color: var(--body-text);
+  font-size: 0.95rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+.pf-input--title {
+  font-size: 1.15rem;
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+.pf-input:focus,
+.pf-textarea:focus {
+  outline: none;
+  border-color: var(--heading, #E5CBBB);
+}
+
+.pf-textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.07);
+  color: var(--body-text);
+  font-size: 0.9rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  resize: vertical;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.pf-section {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+}
+
+.pf-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--heading, #E5CBBB);
+  margin: 0 0 1rem;
+}
+
+.pf-scale {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.pf-scale-label {
+  font-size: 0.8rem;
+  color: var(--body-text);
+  opacity: 0.7;
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.pf-scale-pills {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.pf-scale-pill {
+  width: 36px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: transparent;
+  color: var(--body-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  transition: all 0.12s ease;
+}
+
+.pf-scale-pill--active {
+  color: #fff;
+}
+
+.pf-rituals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.pf-ritual-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: transparent;
+  color: var(--body-text);
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  transition: all 0.12s ease;
+  opacity: 0.55;
+}
+
+.pf-ritual-btn--done {
+  opacity: 1;
+}
+
+.pf-ritual-label {
+  white-space: nowrap;
+}
+
+.pf-error {
+  font-size: 0.82rem;
+  color: #C87840;
+  margin-bottom: 0.75rem;
+}
+
+.pf-save-msg {
+  font-size: 0.82rem;
+  color: #3AB87A;
+  margin-bottom: 0.75rem;
+}
+
+.pf-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.pf-btn {
+  flex: 1;
+  padding: 0.85rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.pf-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.pf-btn--draft {
+  background: rgba(255,255,255,0.1);
+  color: var(--body-text);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.pf-btn--publish {
+  background: #214459;
+  color: #fff;
+}
+
+.pf-btn--draft:hover:not(:disabled),
+.pf-btn--publish:hover:not(:disabled) { opacity: 0.8; }
+
+.pf-delete-wrap {
+  margin-top: 2.5rem;
+  text-align: center;
+}
+
+.pf-delete-trigger {
+  background: none;
+  border: none;
+  color: var(--body-text);
+  opacity: 0.3;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  text-decoration: underline;
+}
+
+.pf-delete-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--body-text);
+  opacity: 0.7;
+}
+
+.pf-delete-yes {
+  background: #A82020;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.pf-delete-no {
+  background: none;
+  border: none;
+  color: var(--body-text);
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  text-decoration: underline;
+  opacity: 0.6;
+}
+
+/* Write page draft list */
+.write-drafts {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 1.25rem 4rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.write-drafts-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--body-text);
+  opacity: 0.4;
+  margin: 0 0 0.75rem;
+}
+
+.write-drafts-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.write-draft-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: var(--body-text);
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.write-draft-card:hover { background: rgba(255,255,255,0.08); }
+
+.write-draft-title {
+  font-size: 0.9rem;
+}
+
+.write-draft-date {
+  font-size: 0.75rem;
+  opacity: 0.45;
+}
+
 /* ── Settings sync note ── */
 .settings-sync-note {
   font-size: 0.78rem;
