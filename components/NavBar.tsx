@@ -14,7 +14,6 @@ import DevOverlay from './DevOverlay'
 import { useCart } from '@/lib/cart'
 
 const NAV_LINKS = [
-  { href: '/talk-data',   label: 'talk data',          pathKey: 'talk-data' },
   { href: '/intentions',  label: 'set an intention',   pathKey: 'intentions' },
   { href: '/shop',        label: 'buy something cool', pathKey: 'shop' },
   { href: '/about',       label: 'discover Wolfman',   pathKey: 'about' },

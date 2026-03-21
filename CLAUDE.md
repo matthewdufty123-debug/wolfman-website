@@ -127,10 +127,6 @@ inviting a click
 - Warm, personal, honest
 - Not yet built — open issues #47–#50
 
-### Talk Data (stub)
-- `/talk-data` — placeholder page, Milestone 11
-- Full data engineering showcase planned: Power BI embeds, Databricks notebooks, interactive visualisations
-
 ### Shop
 - Photography canvases and prints — Matthew's own photography
 - Wellbeing themed clothing
@@ -250,7 +246,6 @@ app/
     register/               — Register page
     settings/               — User settings
     shop/                   — Shop listing + [id] product page
-    talk-data/              — Talk Data stub (Milestone 11)
   (post)/                   — Separate route group for sacred reading experience
     posts/[slug]/           — Individual blog post page (no chrome)
   api/

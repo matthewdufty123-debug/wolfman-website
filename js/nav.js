@@ -19,7 +19,6 @@
       <div class="menu-inner">
         <p class="menu-prompt">What shall we do?</p>
         <ul class="menu-links">
-          <li class="nav-talk-data"><a href="${basePath}talk-data.html">talk data</a></li>
           <li class="nav-intentions"><a href="${basePath}intentions.html">set an intention</a></li>
           <li class="nav-shop"><a href="${basePath}shop.html">buy something cool</a></li>
           <li class="nav-about"><a href="${basePath}about.html">discover Wolfman</a></li>
