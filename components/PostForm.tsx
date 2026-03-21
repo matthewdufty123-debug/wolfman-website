@@ -6,6 +6,10 @@ import { ROUTINE_ICON_MAP } from './RoutineIcons'
 
 const RITUAL_KEYS = Object.keys(ROUTINE_ICON_MAP)
 
+const BRAIN_LABELS = ['Peaceful', 'Quiet', 'Active', 'Busy', 'Racing', 'Manic']
+const BODY_LABELS  = ['Lethargic', 'Slow', 'Steady', 'Energised', 'Strong', 'Buzzing']
+const HAPPY_LABELS = ['Far from happy', 'Low', 'Okay', 'Good', 'Happy', 'Joyful']
+
 type MorningState = {
   brainScale: number
   bodyScale: number
@@ -41,7 +45,9 @@ function buildContent(intention: string, grateful: string, greatAt: string): str
   return `## Today's Intention\n\n${intention}\n\n## I'm Grateful For\n\n${grateful}\n\n## Something I'm Great At\n\n${greatAt}`
 }
 
-function ScaleSelector({ label, value, onChange, color }: { label: string; value: number; onChange: (n: number) => void; color: string }) {
+function ScaleSelector({ label, value, onChange, color, labels }: {
+  label: string; value: number; onChange: (n: number) => void; color: string; labels: string[]
+}) {
   return (
     <div className="pf-scale">
       <span className="pf-scale-label">{label}</span>
@@ -56,6 +62,7 @@ function ScaleSelector({ label, value, onChange, color }: { label: string; value
           >{n}</button>
         ))}
       </div>
+      <p className="pf-scale-value" style={{ color }}>{labels[value - 1]}</p>
     </div>
   )
 }
@@ -77,14 +84,18 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
 
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
+  const [reviewing, setReviewing] = useState(false)
+  const [reviewed, setReviewed] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
   const [error, setError] = useState('')
   const [isDirty, setIsDirty] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
+  const [fullscreenKey, setFullscreenKey] = useState<'intention' | 'grateful' | 'greatAt' | null>(null)
 
   const lastSavedRef = useRef<PostFormData | null>(null)
 
   function markDirty() { setIsDirty(true); setSaveMsg('') }
+  function markDirtyAndUnreview() { markDirty(); setReviewed(false) }
 
   const currentData = useCallback((): PostFormData => ({
     title, date, intention, grateful, greatAt, morning,
@@ -105,7 +116,6 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
     try {
       let id = postId
       if (!id) {
-        // Create
         const res = await fetch('/api/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -116,7 +126,6 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
         id = result.id
         setPostId(id)
       } else {
-        // Update
         const res = await fetch(`/api/posts/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -127,8 +136,10 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
       lastSavedRef.current = data
       setIsDirty(false)
       if (showFeedback) setSaveMsg('Saved.')
+      return id
     } catch {
       if (showFeedback) setError('Could not save. Try again.')
+      return null
     }
   }
 
@@ -137,6 +148,37 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
     setError('')
     await saveDraft(currentData(), true)
     setSaving(false)
+  }
+
+  async function handleReview() {
+    const data = currentData()
+    if (!data.title.trim()) { setError('Add a title first.'); return }
+    if (!data.intention.trim()) { setError('Write your intention first.'); return }
+
+    setReviewing(true)
+    setError('')
+
+    // Ensure post is saved first
+    const id = await saveDraft(data, false)
+    if (!id) { setError('Could not save before review. Try again.'); setReviewing(false); return }
+
+    const content = buildContent(data.intention, data.grateful, data.greatAt)
+    try {
+      const res = await fetch(`/api/posts/${id}/review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: data.title, content }),
+      })
+      if (!res.ok) throw new Error('Review failed')
+      const result = await res.json()
+      if (result.suggestedTitle) setTitle(result.suggestedTitle)
+      setReviewed(true)
+      setSaveMsg("Claude's reviewed your post. Ready to publish.")
+    } catch {
+      setError('Review failed. Try again.')
+    } finally {
+      setReviewing(false)
+    }
   }
 
   async function handlePublish() {
@@ -192,6 +234,12 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
     setMorning(m => ({ ...m, routineChecklist: { ...m.routineChecklist, [key]: !m.routineChecklist[key] } }))
   }
 
+  const sections = [
+    { key: 'intention' as const, label: "Today's Intention", placeholder: 'A story, observation or reflection that leads to a lesson or intention for the day…', value: intention, set: setIntention },
+    { key: 'grateful'  as const, label: "I'm Grateful For",  placeholder: 'Something specific, vivid and personal. Never generic.',                          value: grateful,  set: setGrateful  },
+    { key: 'greatAt'   as const, label: "Something I'm Great At", placeholder: 'A strength, owned with confidence and without apology.',                      value: greatAt,   set: setGreatAt   },
+  ]
+
   return (
     <div className="pf-wrap">
       {/* Header */}
@@ -219,25 +267,29 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
           className="pf-input pf-input--title"
           placeholder="Give this day a title…"
           value={title}
-          onChange={e => { setTitle(e.target.value); markDirty() }}
+          onChange={e => { setTitle(e.target.value); markDirtyAndUnreview() }}
         />
       </div>
 
       {/* Content sections */}
-      {([
-        { key: 'intention', label: "Today's Intention", placeholder: 'A story, observation or reflection that leads to a lesson or intention for the day…', value: intention, set: setIntention },
-        { key: 'grateful', label: "I'm Grateful For", placeholder: 'Something specific, vivid and personal. Never generic.', value: grateful, set: setGrateful },
-        { key: 'greatAt', label: "Something I'm Great At", placeholder: 'A strength, owned with confidence and without apology.', value: greatAt, set: setGreatAt },
-      ] as const).map(({ key, label, placeholder, value, set }) => (
+      {sections.map(({ key, label, placeholder, value, set }) => (
         <div key={key} className="pf-field">
           <label className="pf-label">{label}</label>
-          <textarea
-            className="pf-textarea"
-            placeholder={placeholder}
-            value={value}
-            rows={6}
-            onChange={e => { (set as (v: string) => void)(e.target.value); markDirty() }}
-          />
+          <div className="pf-textarea-wrap">
+            <textarea
+              className="pf-textarea"
+              placeholder={placeholder}
+              value={value}
+              rows={9}
+              onChange={e => { set(e.target.value); markDirtyAndUnreview() }}
+            />
+            <button
+              type="button"
+              className="pf-expand-btn"
+              aria-label={`Expand ${label}`}
+              onClick={() => setFullscreenKey(key)}
+            >⤢</button>
+          </div>
         </div>
       ))}
 
@@ -246,21 +298,24 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
         <p className="pf-section-title">Morning State</p>
 
         <ScaleSelector
-          label="My Thoughts"
+          label="Brain Activity"
           value={morning.brainScale}
           color="#4A7FA5"
+          labels={BRAIN_LABELS}
           onChange={n => { setMorning(m => ({ ...m, brainScale: n })); markDirty() }}
         />
         <ScaleSelector
           label="Body Energy"
           value={morning.bodyScale}
           color="#A0622A"
+          labels={BODY_LABELS}
           onChange={n => { setMorning(m => ({ ...m, bodyScale: n })); markDirty() }}
         />
         <ScaleSelector
           label="Happy Scale"
           value={morning.happyScale}
           color="#3AB87A"
+          labels={HAPPY_LABELS}
           onChange={n => { setMorning(m => ({ ...m, happyScale: n })); markDirty() }}
         />
 
@@ -295,17 +350,27 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
         <button
           className="pf-btn pf-btn--draft"
           onClick={handleSaveDraft}
-          disabled={saving || publishing}
+          disabled={saving || reviewing || publishing}
         >
           {saving ? 'Saving…' : 'Save Draft'}
         </button>
-        <button
-          className="pf-btn pf-btn--publish"
-          onClick={handlePublish}
-          disabled={saving || publishing}
-        >
-          {publishing ? 'Publishing…' : 'Publish'}
-        </button>
+        {!reviewed ? (
+          <button
+            className="pf-btn pf-btn--review"
+            onClick={handleReview}
+            disabled={saving || reviewing || publishing}
+          >
+            {reviewing ? 'Reviewing…' : 'Review'}
+          </button>
+        ) : (
+          <button
+            className="pf-btn pf-btn--publish"
+            onClick={handlePublish}
+            disabled={saving || reviewing || publishing}
+          >
+            {publishing ? 'Publishing…' : 'Publish'}
+          </button>
+        )}
       </div>
 
       {/* Delete (edit mode only) */}
@@ -324,6 +389,34 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
           )}
         </div>
       )}
+
+      {/* Fullscreen overlay */}
+      {fullscreenKey && (() => {
+        const map = {
+          intention: { label: "Today's Intention", value: intention, set: setIntention },
+          grateful:  { label: "I'm Grateful For",  value: grateful,  set: setGrateful  },
+          greatAt:   { label: "Something I'm Great At", value: greatAt, set: setGreatAt },
+        }
+        const { label, value, set } = map[fullscreenKey]
+        return (
+          <div className="pf-fullscreen">
+            <div className="pf-fullscreen-header">
+              <span className="pf-fullscreen-label">{label}</span>
+              <button
+                type="button"
+                className="pf-fullscreen-done"
+                onClick={() => setFullscreenKey(null)}
+              >Done</button>
+            </div>
+            <textarea
+              className="pf-fullscreen-textarea"
+              value={value}
+              autoFocus
+              onChange={e => { set(e.target.value); markDirtyAndUnreview() }}
+            />
+          </div>
+        )
+      })()}
     </div>
   )
 }

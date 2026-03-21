@@ -48,6 +48,7 @@ html[data-theme="light"] {
 body {
   margin: 0;
   padding-top: 40px; /* clearance for fixed top utility bar */
+  padding-bottom: 120px; /* clearance for fixed bottom bell-curve nav */
   background: var(--bg, #333F50);
   font-family: var(--font-playfair), Georgia, serif;
   min-height: 100vh;
@@ -3206,6 +3207,16 @@ html[data-theme="dark"] .stats-chart-card {
   color: #fff;
 }
 
+.pf-scale-value {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  min-height: 1.2em;
+}
+
 .pf-rituals {
   display: flex;
   flex-wrap: wrap;
@@ -3280,8 +3291,70 @@ html[data-theme="dark"] .stats-chart-card {
   color: #fff;
 }
 
+.pf-btn--review {
+  background: #A0622A;
+  color: #fff;
+}
+
 .pf-btn--draft:hover:not(:disabled),
-.pf-btn--publish:hover:not(:disabled) { opacity: 0.8; }
+.pf-btn--publish:hover:not(:disabled),
+.pf-btn--review:hover:not(:disabled) { opacity: 0.8; }
+
+/* ── Textarea expand + fullscreen overlay ── */
+.pf-textarea-wrap {
+  position: relative;
+}
+
+.pf-expand-btn {
+  position: absolute;
+  top: 6px; right: 6px;
+  background: none; border: none; cursor: pointer;
+  color: var(--nav-btn-icon, rgba(255,255,255,0.35));
+  font-size: 1rem; line-height: 1;
+  padding: 2px 5px;
+  transition: color 0.15s;
+}
+.pf-expand-btn:hover { color: var(--heading); }
+
+.pf-fullscreen {
+  position: fixed; inset: 0;
+  z-index: 200;
+  display: flex; flex-direction: column;
+  background: var(--bg, #333F50);
+}
+
+.pf-fullscreen-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+.pf-fullscreen-label {
+  font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: var(--nav-btn-icon, rgba(255,255,255,0.5));
+}
+
+.pf-fullscreen-done {
+  background: var(--nav-fill, #193343); border: none;
+  color: #fff; font-size: 0.85rem; font-weight: 600;
+  padding: 6px 18px; border-radius: 6px; cursor: pointer;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.pf-fullscreen-textarea {
+  flex: 1;
+  width: 100%;
+  resize: none; border: none; outline: none;
+  background: transparent;
+  color: var(--body-text, #e8ddd0);
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1.05rem; line-height: 1.8;
+  padding: 20px 24px;
+  box-sizing: border-box;
+}
 
 .pf-delete-wrap {
   margin-top: 2.5rem;

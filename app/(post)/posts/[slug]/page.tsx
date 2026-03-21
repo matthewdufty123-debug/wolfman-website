@@ -185,8 +185,8 @@ function DayBlock({ ms, er }: { ms: MorningStateRow | null; er: EveningReflectio
 
           <div className="post-day-scales">
             <div className="post-day-scale-col">
-              <span className="post-day-scale-name">My Thoughts</span>
-              <MorningScaleBar scaleName="My Thoughts" value={ms.brainScale} labels={BRAIN_LABELS} color="#4A7FA5" />
+              <span className="post-day-scale-name">Brain Activity</span>
+              <MorningScaleBar scaleName="Brain Activity" value={ms.brainScale} labels={BRAIN_LABELS} color="#4A7FA5" />
               <div className="post-day-scale-labels">
                 <span>Peaceful</span>
                 <span>Manic</span>

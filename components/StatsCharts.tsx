@@ -120,7 +120,7 @@ export default function StatsCharts({ data }: { data: StatRow[] }) {
         </ResponsiveContainer>
       </ChartCard>
 
-      <ChartCard title="My Thoughts">
+      <ChartCard title="Brain Activity">
         <ResponsiveContainer width="100%" height={180}>
           <LineChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(74,127,165,0.1)" vertical={false} />
