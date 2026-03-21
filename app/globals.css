@@ -47,6 +47,7 @@ html[data-theme="light"] {
 
 body {
   margin: 0;
+  padding-top: 40px; /* clearance for fixed top utility bar */
   background: var(--bg, #333F50);
   font-family: var(--font-playfair), Georgia, serif;
   min-height: 100vh;
@@ -211,6 +212,50 @@ body {
   42%  { transform: scale(1); }
   100% { transform: scale(1); }
 }
+
+/* ── Top utility bar ── */
+.top-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 40px;
+  z-index: 49;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--nav-fill, #193343);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.top-bar--hidden {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+.top-bar-btn {
+  position: absolute;
+  top: 0; height: 40px; width: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--nav-btn-icon, rgba(255,255,255,0.55));
+  transition: color 0.15s ease;
+}
+.top-bar-btn:hover { color: var(--heading); }
+.top-bar-btn--left  { left: 0.5rem; }
+.top-bar-btn--right { right: 0.5rem; }
+
+.top-bar-feedback {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--nav-btn-icon, rgba(255,255,255,0.55));
+  text-decoration: none;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  transition: color 0.15s ease;
+}
+.top-bar-feedback:hover { color: var(--heading); }
 
 /* ── Bottom sheet menu ── */
 .menu-overlay {

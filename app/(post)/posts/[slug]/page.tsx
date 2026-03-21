@@ -3,6 +3,7 @@ import { getAllSlugs, getAllPosts, getPostBySlug, ProcessedPost, ParsedSection }
 import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
 import PostFooter from '@/components/PostFooter'
+import { PostContextSetter } from '@/lib/post-context'
 import MorningRitualIconBar from '@/components/MorningRitualIconBar'
 import MorningScaleBar from '@/components/MorningScaleBar'
 import DayScoreScatter from '@/components/DayScoreScatter'
@@ -285,6 +286,7 @@ export default async function PostPage({
 
   return (
     <>
+      <PostContextSetter postId={post.id ?? ''} authorId={post.authorId ?? null} />
       {post.category === 'morning-walk'
         ? <MorningWalkPost post={post} />
         : <MorningIntentionPost post={post} />
