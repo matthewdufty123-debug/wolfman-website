@@ -370,6 +370,11 @@ Within a stage, pick issues in the order listed above unless dependencies or Mat
 | `bug` | Red `#d73a4a` | Something broken |
 | `enhancement` | Green `#a2eeef` | New feature or improvement |
 | `P1S1`–`P3S4` | Phase colour | Stage assignment (Blue=Alpha, Yellow=Beta, Grey=Production) |
+| `draft` | Lavender `#D4C5F9` | Needs scoping — do not implement until fully defined |
+
+> **Draft issues must never be actioned.** If an issue carries the `draft` label, stop and prompt
+> Matthew to finish scoping it before any implementation begins. Draft issues are placeholders —
+> the brief is incomplete. Examples: #100 (scoring system), #101 (rewards system).
 
 ---
 
