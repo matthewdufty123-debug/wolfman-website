@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { ROUTINE_ICON_MAP } from '@/components/RoutineIcons'
 
@@ -11,44 +11,62 @@ interface Props {
 
 export default function MorningRitualIconBar({ checklist, size = 20 }: Props) {
   const [activeKey, setActiveKey] = useState<string | null>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
 
-  const items = Object.entries(ROUTINE_ICON_MAP)
+  useEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setVisible(true)
+      return
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect() } },
+      { threshold: 0.2 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  // Only show completed rituals
+  const items = Object.entries(ROUTINE_ICON_MAP).filter(([key]) => Boolean(checklist[key]))
   const active = activeKey ? ROUTINE_ICON_MAP[activeKey] : null
-  const isDone = activeKey ? Boolean(checklist[activeKey]) : false
+
+  if (items.length === 0) return null
 
   return (
     <>
-      {/* Icon row */}
-      <div style={{ display: 'flex', justifyContent: 'space-evenly', width: '100%' }}>
-        {items.map(([key, { label, Icon, color }]) => {
-          const done = Boolean(checklist[key])
-          return (
-            <button
-              key={key}
-              onClick={() => setActiveKey(key)}
-              aria-label={label}
-              style={{
-                width: size + 8,
-                height: size + 8,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: done ? `${color}22` : 'transparent',
-                border: `1.5px solid ${done ? color : '#ddd'}`,
-                flexShrink: 0,
-                opacity: done ? 1 : 0.25,
-                cursor: 'pointer',
-                padding: 0,
-                transition: 'opacity 0.15s ease, transform 0.1s ease',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = done ? '0.85' : '0.45')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = done ? '1' : '0.25')}
-            >
-              <Icon size={size} color={done ? color : '#999'} />
-            </button>
-          )
-        })}
+      {/* Icon row — completed only */}
+      <div ref={wrapRef} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, width: '100%' }}>
+        {items.map(([key, { label, Icon, color }], i) => (
+          <button
+            key={key}
+            onClick={() => setActiveKey(key)}
+            aria-label={label}
+            style={{
+              width: size + 8,
+              height: size + 8,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: `${color}22`,
+              border: `1.5px solid ${color}`,
+              flexShrink: 0,
+              cursor: 'pointer',
+              padding: 0,
+              opacity: visible ? 1 : 0,
+              transform: visible ? 'none' : 'translateX(-14px)',
+              transition: 'opacity 1.3s ease, transform 1.3s ease',
+              transitionDelay: `${i * 40}ms`,
+            }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = '0.75')}
+            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+          >
+            <Icon size={size} color={color} />
+          </button>
+        ))}
       </div>
 
       {/* Popup */}
@@ -101,11 +119,10 @@ export default function MorningRitualIconBar({ checklist, size = 20 }: Props) {
               <div style={{
                 width: 60, height: 60, borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: isDone ? `${active.color}22` : 'transparent',
-                border: `2px solid ${isDone ? active.color : '#ddd'}`,
-                opacity: isDone ? 1 : 0.35,
+                background: `${active.color}22`,
+                border: `2px solid ${active.color}`,
               }}>
-                <active.Icon size={34} color={isDone ? active.color : '#999'} />
+                <active.Icon size={34} color={active.color} />
               </div>
             </div>
 
@@ -119,7 +136,7 @@ export default function MorningRitualIconBar({ checklist, size = 20 }: Props) {
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             }}>{active.label}</p>
 
-            {/* Done/not status */}
+            {/* Done status */}
             <p style={{
               margin: '0 0 0.875rem',
               textAlign: 'center',
@@ -127,11 +144,10 @@ export default function MorningRitualIconBar({ checklist, size = 20 }: Props) {
               fontWeight: 600,
               textTransform: 'uppercase',
               letterSpacing: '0.07em',
-              color: isDone ? active.color : 'var(--body-text)',
-              opacity: isDone ? 0.9 : 0.4,
+              color: active.color,
               fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
             }}>
-              {isDone ? '✓ Completed this morning' : 'Not completed this morning'}
+              ✓ Completed this morning
             </p>
 
             {/* Description */}
