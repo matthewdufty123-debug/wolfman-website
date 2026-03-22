@@ -6,7 +6,6 @@ import PostFooter from '@/components/PostFooter'
 import { PostContextSetter } from '@/lib/post-context'
 import MorningRitualIconBar from '@/components/MorningRitualIconBar'
 import MorningScaleBar from '@/components/MorningScaleBar'
-import DayScoreScatter from '@/components/DayScoreScatter'
 import { db } from '@/lib/db'
 import { posts as postsTable, morningState, eveningReflection, dayScores, users as usersTable } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
@@ -136,7 +135,7 @@ const COMPLETENESS_LABELS: Record<string, string> = {
   post_morning_evening:  'from full day data',
 }
 
-function ClaudesTakeBlock({ ds, allScores, postId }: { ds: DayScoreRow; allScores: ScatterPoint[]; postId: string }) {
+function ClaudesTakeBlock({ ds, postId }: { ds: DayScoreRow; postId: string }) {
   const scores = ds.scores as Record<string, number>
   const completenessLabel = COMPLETENESS_LABELS[ds.dataCompleteness] ?? ds.dataCompleteness
   return (
@@ -161,14 +160,9 @@ function ClaudesTakeBlock({ ds, allScores, postId }: { ds: DayScoreRow; allScore
         ))}
       </div>
 
-      {allScores.length > 1 && (
-        <DayScoreScatter data={allScores} todayPostId={postId} />
-      )}
     </div>
   )
 }
-
-type ScatterPoint = { date: string; postId: string; x: number; y: number }
 
 function DayBlock({ ms, er }: { ms: MorningStateRow | null; er: EveningReflectionRow | null }) {
   if (!ms && !er) return null
@@ -272,24 +266,13 @@ export default async function PostPage({
   }
 
   // Fetch day data for DB-backed posts
-  const [ms, er, ds, allDayScores] = post.id
+  const [ms, er, ds] = post.id
     ? await Promise.all([
         db.select().from(morningState).where(eq(morningState.postId, post.id)).then(r => r[0] ?? null),
         db.select().from(eveningReflection).where(eq(eveningReflection.postId, post.id)).then(r => r[0] ?? null),
         db.select().from(dayScores).where(eq(dayScores.postId, post.id)).then(r => r[0] ?? null),
-        db.select({ date: postsTable.date, postId: dayScores.postId, scores: dayScores.scores })
-          .from(dayScores)
-          .innerJoin(postsTable, eq(dayScores.postId, postsTable.id))
-          .orderBy(postsTable.date),
       ])
-    : [null, null, null, []]
-
-  // Build scatter chart data from all day scores that have both fixed dimensions
-  const scatterData: ScatterPoint[] = (allDayScores ?? []).flatMap(row => {
-    const s = row.scores as Record<string, number>
-    if (typeof s.intention_alignment !== 'number' || typeof s.inner_vitality !== 'number') return []
-    return [{ date: row.date, postId: row.postId, x: s.intention_alignment, y: s.inner_vitality }]
-  })
+    : [null, null, null]
 
   // Posts sorted newest-first; prevPost = newer, nextPost = older
   const currentIndex = allPosts.findIndex(p => p.slug === slug)
@@ -343,7 +326,7 @@ export default async function PostPage({
         </div>
       )}
 
-      {ds && post.id && <ClaudesTakeBlock ds={ds} allScores={scatterData} postId={post.id} />}
+      {ds && post.id && <ClaudesTakeBlock ds={ds} postId={post.id} />}
 
       <PostFooter
         prevPost={prevPost}

@@ -7,6 +7,7 @@ import {
   XAxis, YAxis,
   CartesianGrid, Tooltip,
 } from 'recharts'
+import MorningZoneScatter, { type ZonePoint } from './MorningZoneScatter'
 
 export interface StatRow {
   date: string
@@ -81,7 +82,7 @@ function RitualTooltip({ active, payload, label }: RitualTooltipProps) {
   )
 }
 
-export default function StatsCharts({ data }: { data: StatRow[] }) {
+export default function StatsCharts({ data, scatterData = [] }: { data: StatRow[]; scatterData?: ZonePoint[] }) {
   if (!data.length) {
     return (
       <p style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", color: 'var(--body-text)', opacity: 0.5, fontStyle: 'italic' }}>
@@ -108,6 +109,12 @@ export default function StatsCharts({ data }: { data: StatRow[] }) {
 
   return (
     <div>
+      {scatterData.length > 0 && (
+        <ChartCard title="Morning Zone">
+          <MorningZoneScatter data={scatterData} />
+        </ChartCard>
+      )}
+
       <ChartCard title="Morning Rituals completed">
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>

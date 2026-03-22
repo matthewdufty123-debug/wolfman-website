@@ -2,8 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { db } from '@/lib/db'
 import { morningState, posts, users } from '@/lib/db/schema'
-import { and, eq, gte } from 'drizzle-orm'
+import { and, eq, gte, desc } from 'drizzle-orm'
 import StatsCharts, { StatRow } from '@/components/StatsCharts'
+import type { ZonePoint } from '@/components/MorningZoneScatter'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,12 +44,40 @@ export default async function MorningStatsPage() {
     }
   })
 
+  // Last 30 posts with all three scales — for the Morning Zone scatter
+  const scatterRows = await db
+    .select({
+      postId: morningState.postId,
+      date: posts.date,
+      brainScale: morningState.brainScale,
+      bodyScale: morningState.bodyScale,
+      happyScale: morningState.happyScale,
+    })
+    .from(morningState)
+    .innerJoin(posts, eq(morningState.postId, posts.id))
+    .innerJoin(users, eq(posts.authorId, users.id))
+    .where(eq(users.role, 'admin'))
+    .orderBy(desc(posts.date))
+    .limit(30)
+
+  // Reverse to oldest-first so opacity fades correctly (newest = most vivid)
+  const scatterData: ZonePoint[] = scatterRows
+    .filter(r => r.happyScale != null)
+    .reverse()
+    .map(r => ({
+      postId: r.postId,
+      date: r.date,
+      brainScale: r.brainScale,
+      bodyScale: r.bodyScale,
+      happyScale: r.happyScale!,
+    }))
+
   return (
     <main className="stats-page">
       <Link href="/intentions" className="stats-back-link">← All posts</Link>
       <h1 className="stats-title">Morning Stats</h1>
       <p className="stats-subtitle">The last 3 months — how the mornings have been arriving.</p>
-      <StatsCharts data={data} />
+      <StatsCharts data={data} scatterData={scatterData} />
     </main>
   )
 }
