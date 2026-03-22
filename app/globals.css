@@ -3456,6 +3456,102 @@ html[data-theme="dark"] .stats-chart-card {
   opacity: 0.45;
 }
 
+/* ── Beta page ── */
+
+.beta-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1.5rem 9rem;
+}
+
+.beta-card {
+  width: 100%;
+  max-width: 600px;
+}
+
+.beta-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #A0622A;
+  margin: 0 0 0.75rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.beta-title {
+  font-size: clamp(2rem, 7vw, 3rem);
+  font-weight: 400;
+  color: var(--heading, #E5CBBB);
+  margin: 0 0 1.5rem;
+  line-height: 1.2;
+}
+
+.beta-intro {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--body-text);
+  margin: 0 0 2rem;
+}
+
+.beta-countdown-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1.25rem 1.5rem;
+  border-left: 3px solid #4A7FA5;
+  margin: 0 0 2.5rem;
+}
+
+.beta-countdown {
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #4A7FA5;
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+.beta-end-date {
+  font-size: 0.78rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--body-text);
+  opacity: 0.5;
+  margin: 0;
+}
+
+.beta-section {
+  margin-bottom: 2rem;
+}
+
+.beta-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #A0622A;
+  margin: 0 0 0.6rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.beta-section-body {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--body-text);
+  margin: 0;
+}
+
+.beta-link {
+  color: #4A7FA5;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.beta-link:hover {
+  color: #A0622A;
+}
+
 /* ── Settings sync note ── */
 .settings-sync-note {
   font-size: 0.78rem;

@@ -19,6 +19,7 @@ const NAV_LINKS = [
   { href: '/intentions',  label: 'set an intention',   pathKey: 'intentions' },
   { href: '/shop',        label: 'buy something cool', pathKey: 'shop' },
   { href: '/about',       label: 'discover Wolfman',   pathKey: 'about' },
+  { href: '/beta',        label: 'about the beta',     pathKey: 'beta' },
 ]
 
 export default function NavBar() {
