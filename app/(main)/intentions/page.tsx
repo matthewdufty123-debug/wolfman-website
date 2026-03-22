@@ -51,7 +51,7 @@ export default async function IntentionsPage() {
                   <span className="post-list-title">{post.title}</span>
                   {checklist && (
                     <span className="post-list-routine">
-                      <AnimatedRoutineIcons checklist={checklist} size={13} />
+                      <AnimatedRoutineIcons checklist={checklist} size={20} />
                     </span>
                   )}
                   <span className="post-list-category">{CATEGORY_LABELS[post.category] ?? post.category}</span>

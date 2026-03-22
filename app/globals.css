@@ -3467,7 +3467,7 @@ html[data-theme="dark"] .stats-chart-card {
 .animated-icon {
   opacity: 0;
   transform: translateX(-14px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 1.3s ease, transform 1.3s ease;
   transition-delay: calc(var(--icon-index, 0) * 40ms);
 }
 
