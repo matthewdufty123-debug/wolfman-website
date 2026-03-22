@@ -3,7 +3,7 @@
 import { signIn } from '@/auth'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 import { redirect } from 'next/navigation'
 import { AuthError } from 'next-auth'
@@ -48,6 +48,11 @@ export async function register(_prev: ActionState, formData: FormData): Promise<
 
   if (password.length < 8) {
     return { error: 'Password must be at least 8 characters.' }
+  }
+
+  const [{ count }] = await db.select({ count: sql<number>`COUNT(*)` }).from(users)
+  if (Number(count) >= 51) {
+    return { error: 'registration_closed' }
   }
 
   const [existing] = await db.select().from(users).where(eq(users.email, email)).limit(1)

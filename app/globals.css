@@ -3552,6 +3552,74 @@ html[data-theme="dark"] .stats-chart-card {
   color: #A0622A;
 }
 
+/* ── Registration beta terms block ── */
+
+.beta-register-terms {
+  background: rgba(74, 127, 165, 0.08);
+  border: 1px solid rgba(74, 127, 165, 0.2);
+  border-radius: 6px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.beta-register-terms-headline {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #4A7FA5;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  margin: 0 0 0.75rem;
+}
+
+.beta-register-terms-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.beta-register-terms-list li {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--body-text);
+  padding-left: 1rem;
+  position: relative;
+}
+
+.beta-register-terms-list li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: #4A7FA5;
+  opacity: 0.6;
+}
+
+.beta-register-terms-list strong {
+  font-weight: 600;
+}
+
+.beta-register-terms-link {
+  font-size: 0.78rem;
+  color: #4A7FA5;
+  text-decoration: none;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.beta-register-terms-link:hover {
+  text-decoration: underline;
+}
+
+.beta-register-closed-body {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--body-text);
+  margin: 0 0 1rem;
+}
+
 /* ── Settings sync note ── */
 .settings-sync-note {
   font-size: 0.78rem;
