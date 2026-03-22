@@ -84,7 +84,7 @@ export default function PostFooter({ prevPost, nextPost, slug, title, postId, au
       </div>
 
       <div className="post-nav-all-posts">
-        <Link href="/intentions" className="post-nav-btn">All posts</Link>
+        <Link href="/" className="post-nav-btn">All journals</Link>
       </div>
 
       {isAdmin && postId && (

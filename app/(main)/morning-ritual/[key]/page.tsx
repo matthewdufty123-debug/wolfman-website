@@ -71,7 +71,7 @@ export default async function MorningRitualPage({
 
       {completedPosts.length === 0 ? (
         <ul className="post-list">
-          <li className="post-list-empty">No posts yet for this ritual.</li>
+          <li className="post-list-empty">No journals yet for this ritual.</li>
         </ul>
       ) : (
         <ul className="post-list">
@@ -87,7 +87,7 @@ export default async function MorningRitualPage({
       )}
 
       <div style={{ maxWidth: 640, margin: '2rem auto 0', padding: '0 1.5rem' }}>
-        <Link href="/intentions" className="ritual-back-link">← All Morning Intentions</Link>
+        <Link href="/" className="ritual-back-link">← All Journals</Link>
       </div>
     </>
   )

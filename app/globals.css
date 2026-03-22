@@ -4003,6 +4003,167 @@ html[data-theme="dark"] .stats-chart-card {
   text-underline-offset: 3px;
 }
 
+/* ── Journal Feed ── */
+
+.feed-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 0 8rem;
+}
+
+.feed-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(74,127,165,0.15);
+  padding: 3rem 1.5rem 0;
+  margin-bottom: 0;
+}
+
+.feed-tab {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.45;
+  padding: 0.6rem 0;
+  margin-right: 2rem;
+  border-bottom: 2px solid transparent;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.feed-tab:hover {
+  opacity: 0.8;
+}
+
+.feed-tab--active {
+  opacity: 1;
+  border-bottom-color: #4A7FA5;
+  color: var(--body-text, #4A4A4A);
+}
+
+.feed-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 1.5rem;
+}
+
+.feed-card {
+  padding: 1.4rem 0;
+  border-bottom: 1px solid rgba(74,127,165,0.1);
+}
+
+.feed-card:last-child {
+  border-bottom: none;
+}
+
+.feed-card-author {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  margin-bottom: 0.55rem;
+}
+
+.feed-card-author-name {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.feed-card-author:hover .feed-card-author-name {
+  opacity: 1;
+}
+
+.feed-card-link {
+  display: block;
+  text-decoration: none;
+  color: var(--body-text, #4A4A4A);
+}
+
+.feed-card-date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.75rem;
+  color: #909090;
+  margin-bottom: 0.3rem;
+}
+
+.feed-card-draft-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: rgba(160,98,42,0.12);
+  color: #A0622A;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+}
+
+.feed-card-title {
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  font-weight: 400;
+  margin: 0 0 0.3rem;
+  line-height: 1.4;
+  transition: color 0.15s ease;
+}
+
+.feed-card-link:hover .feed-card-title {
+  color: #A0622A;
+}
+
+.feed-card-excerpt {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.55;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.feed-card-rituals {
+  margin-top: 0.7rem;
+  opacity: 0.7;
+}
+
+.feed-empty {
+  padding: 4rem 1.5rem 2rem;
+  text-align: center;
+}
+
+.feed-empty-headline {
+  font-size: 1.2rem;
+  color: var(--heading, #193343);
+  margin: 0 0 0.75rem;
+}
+
+.feed-empty-body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.9rem;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.6;
+  margin: 0 0 1.5rem;
+  line-height: 1.6;
+}
+
+.feed-empty-link {
+  display: inline-block;
+  background: #214459;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
 /* ── Settings sync note ── */
 .settings-sync-note {
   font-size: 0.78rem;

@@ -16,10 +16,10 @@ import { signInWithGoogle, signInWithGitHub } from '@/lib/actions/oauth'
 import { loginForModal } from '@/lib/actions/auth'
 
 const NAV_LINKS = [
-  { href: '/intentions',  label: 'set an intention',   pathKey: 'intentions' },
-  { href: '/shop',        label: 'buy something cool', pathKey: 'shop' },
-  { href: '/about',       label: 'discover Wolfman',   pathKey: 'about' },
-  { href: '/beta',        label: 'about the beta',     pathKey: 'beta' },
+  { href: '/write',  label: 'set an intention',   pathKey: 'write' },
+  { href: '/shop',   label: 'buy something cool', pathKey: 'shop' },
+  { href: '/about',  label: 'discover Wolfman',   pathKey: 'about' },
+  { href: '/beta',   label: 'about the beta',     pathKey: 'beta' },
 ]
 
 export default function NavBar() {

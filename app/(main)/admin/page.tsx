@@ -32,7 +32,7 @@ export default async function AdminDashboard() {
             <p className="dash-subtitle">admin dashboard</p>
           </div>
           <Link href="/write" className="dash-action-btn">
-            + New post
+            + New journal
           </Link>
         </header>
 
@@ -40,7 +40,7 @@ export default async function AdminDashboard() {
         <div className="dash-stats">
           <div className="dash-stat">
             <span className="dash-stat-value">{allPosts.length}</span>
-            <span className="dash-stat-label">posts</span>
+            <span className="dash-stat-label">journals</span>
           </div>
           <div className="dash-stat">
             <span className="dash-stat-value">{totalOrders}</span>
@@ -122,7 +122,7 @@ export default async function AdminDashboard() {
         <section className="dash-section">
           <h2 className="dash-section-title">Quick links</h2>
           <div className="dash-links">
-            <Link href="/write" className="dash-link">Write a post</Link>
+            <Link href="/write" className="dash-link">Write a journal</Link>
             <Link href="/intentions" className="dash-link">All intentions</Link>
             <Link href="https://vercel.com" className="dash-link" target="_blank">Vercel dashboard</Link>
             <Link href="https://console.neon.tech" className="dash-link" target="_blank">Neon database</Link>

@@ -173,7 +173,7 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
       const result = await res.json()
       if (result.suggestedTitle) setTitle(result.suggestedTitle)
       setReviewed(true)
-      setSaveMsg("Claude's reviewed your post. Ready to publish.")
+      setSaveMsg("Claude's reviewed your journal. Ready to publish.")
     } catch {
       setError('Review failed. Try again.')
     } finally {
@@ -378,7 +378,7 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
         <div className="pf-delete-wrap">
           {!showDelete ? (
             <button className="pf-delete-trigger" onClick={() => setShowDelete(true)}>
-              Delete this post
+              Delete this journal
             </button>
           ) : (
             <div className="pf-delete-confirm">

@@ -49,7 +49,7 @@ export default function TopBar() {
         <button
           className="top-bar-btn top-bar-btn--left"
           onClick={() => router.push('/write')}
-          aria-label="New post"
+          aria-label="New journal"
         >
           <Plus size={16} strokeWidth={2} />
         </button>
@@ -64,7 +64,7 @@ export default function TopBar() {
         <button
           className="top-bar-btn top-bar-btn--right"
           onClick={() => router.push(`/edit/${post.postId}`)}
-          aria-label="Edit post"
+          aria-label="Edit journal"
         >
           <Pencil size={15} strokeWidth={1.5} />
         </button>

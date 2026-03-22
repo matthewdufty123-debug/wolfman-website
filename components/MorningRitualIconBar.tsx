@@ -177,7 +177,7 @@ export default function MorningRitualIconBar({ checklist, size = 30 }: Props) {
                 fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
               }}
             >
-              See all posts with this ritual →
+              See all journals with this ritual →
             </Link>
           </div>
         </>
