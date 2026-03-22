@@ -278,13 +278,13 @@ export default async function ProfilePage(
           {scatterData.length > 0 && (
             <div className="stats-chart-card">
               <p className="stats-chart-title">Morning Zone</p>
-              <MorningZoneScatter data={scatterData} />
+              <MorningZoneScatter data={scatterData} username={username} />
             </div>
           )}
 
           {/* Trend charts */}
           {chartData.length > 0
-            ? <StatsCharts data={chartData} dateToSlug={dateToSlug} />
+            ? <StatsCharts data={chartData} dateToSlug={dateToSlug} username={username} />
             : (
               <p className="journal-no-chart">
                 No mood or ritual data yet — it will appear here once morning state is added to journals.

@@ -84,7 +84,7 @@ function RitualTooltip({ active, payload, label }: RitualTooltipProps) {
   )
 }
 
-export default function StatsCharts({ data, scatterData = [], dateToSlug = {} }: { data: StatRow[]; scatterData?: ZonePoint[]; dateToSlug?: Record<string, string> }) {
+export default function StatsCharts({ data, scatterData = [], dateToSlug = {}, username }: { data: StatRow[]; scatterData?: ZonePoint[]; dateToSlug?: Record<string, string>; username?: string }) {
   const router = useRouter()
   if (!data.length) {
     return (
@@ -114,7 +114,7 @@ export default function StatsCharts({ data, scatterData = [], dateToSlug = {} }:
     <div>
       {scatterData.length > 0 && (
         <ChartCard title="Morning Zone">
-          <MorningZoneScatter data={scatterData} />
+          <MorningZoneScatter data={scatterData} username={username} />
         </ChartCard>
       )}
 
@@ -130,7 +130,7 @@ export default function StatsCharts({ data, scatterData = [], dateToSlug = {} }:
               fill="#4A7FA5"
               radius={[3,3,0,0]}
               style={{ cursor: 'pointer' }}
-              onClick={(d: unknown) => { const s = dateToSlug[(d as StatRow).date]; if (s) router.push(`/posts/${s}`) }}
+              onClick={(d: unknown) => { const s = dateToSlug[(d as StatRow).date]; if (s) router.push(username ? `/${username}/${s}` : `/posts/${s}`) }}
             />
           </BarChart>
         </ResponsiveContainer>
@@ -143,7 +143,7 @@ export default function StatsCharts({ data, scatterData = [], dateToSlug = {} }:
             <XAxis {...xAxisProps} />
             <YAxis {...yAxisProps} domain={[1, 6]} ticks={[1,2,3,4,5,6]} />
             <Tooltip content={<ScaleTooltip labelMap={BRAIN_LABELS} />} />
-            <Line dataKey="brainScale" stroke="#4A7FA5" strokeWidth={2} dot={{ r: 3, fill: '#4A7FA5' }} activeDot={{ r: 5, cursor: 'pointer', onClick: (_: unknown, p: unknown) => { const s = dateToSlug[(p as { payload: StatRow }).payload.date]; if (s) router.push(`/posts/${s}`) } }} connectNulls />
+            <Line dataKey="brainScale" stroke="#4A7FA5" strokeWidth={2} dot={{ r: 3, fill: '#4A7FA5' }} activeDot={{ r: 5, cursor: 'pointer', onClick: (_: unknown, p: unknown) => { const s = dateToSlug[(p as { payload: StatRow }).payload.date]; if (s) router.push(username ? `/${username}/${s}` : `/posts/${s}`) } }} connectNulls />
           </LineChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -155,7 +155,7 @@ export default function StatsCharts({ data, scatterData = [], dateToSlug = {} }:
             <XAxis {...xAxisProps} />
             <YAxis {...yAxisProps} domain={[1, 6]} ticks={[1,2,3,4,5,6]} />
             <Tooltip content={<ScaleTooltip labelMap={BODY_LABELS} />} />
-            <Line dataKey="bodyScale" stroke="#A0622A" strokeWidth={2} dot={{ r: 3, fill: '#A0622A' }} activeDot={{ r: 5, cursor: 'pointer', onClick: (_: unknown, p: unknown) => { const s = dateToSlug[(p as { payload: StatRow }).payload.date]; if (s) router.push(`/posts/${s}`) } }} connectNulls />
+            <Line dataKey="bodyScale" stroke="#A0622A" strokeWidth={2} dot={{ r: 3, fill: '#A0622A' }} activeDot={{ r: 5, cursor: 'pointer', onClick: (_: unknown, p: unknown) => { const s = dateToSlug[(p as { payload: StatRow }).payload.date]; if (s) router.push(username ? `/${username}/${s}` : `/posts/${s}`) } }} connectNulls />
           </LineChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -167,7 +167,7 @@ export default function StatsCharts({ data, scatterData = [], dateToSlug = {} }:
             <XAxis {...xAxisProps} />
             <YAxis {...yAxisProps} domain={[1, 6]} ticks={[1,2,3,4,5,6]} />
             <Tooltip content={<ScaleTooltip labelMap={HAPPY_LABELS} />} />
-            <Line dataKey="happyScale" stroke="#3AB87A" strokeWidth={2} dot={{ r: 3, fill: '#3AB87A' }} activeDot={{ r: 5, cursor: 'pointer', onClick: (_: unknown, p: unknown) => { const s = dateToSlug[(p as { payload: StatRow }).payload.date]; if (s) router.push(`/posts/${s}`) } }} connectNulls />
+            <Line dataKey="happyScale" stroke="#3AB87A" strokeWidth={2} dot={{ r: 3, fill: '#3AB87A' }} activeDot={{ r: 5, cursor: 'pointer', onClick: (_: unknown, p: unknown) => { const s = dateToSlug[(p as { payload: StatRow }).payload.date]; if (s) router.push(username ? `/${username}/${s}` : `/posts/${s}`) } }} connectNulls />
           </LineChart>
         </ResponsiveContainer>
       </ChartCard>

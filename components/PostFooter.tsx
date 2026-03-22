@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react'
 import ShareButton from './ShareButton'
 import EveningReflection from './EveningReflection'
 
-interface PostMeta { slug: string; title: string; date: string }
+interface PostMeta { slug: string; title: string; date: string; authorUsername?: string | null }
 
 interface Props {
   prevPost: PostMeta | null
@@ -15,6 +15,7 @@ interface Props {
   title: string
   postId: string | null
   authorId: string | null
+  authorUsername?: string | null
 }
 
 function IconBack() {
@@ -33,12 +34,14 @@ function IconNext() {
   )
 }
 
-export default function PostFooter({ prevPost, nextPost, slug, title, postId, authorId }: Props) {
+export default function PostFooter({ prevPost, nextPost, slug, title, postId, authorId, authorUsername }: Props) {
   const { data: session } = useSession()
   const isAdmin = session?.user?.role === 'admin'
   const isOwner = session?.user?.id != null && session.user.id === authorId
   const [eveningOpen, setEveningOpen] = useState(false)
-  const url = `https://wolfman.blog/posts/${slug}`
+  const url = authorUsername
+    ? `https://wolfman.blog/${authorUsername}/${slug}`
+    : `https://wolfman.blog/posts/${slug}`
 
   return (
     <nav className="post-nav">
@@ -49,7 +52,11 @@ export default function PostFooter({ prevPost, nextPost, slug, title, postId, au
       <div className="post-nav-links-row">
         {/* Left = newer post */}
         {prevPost ? (
-          <Link href={`/posts/${prevPost.slug}`} className="post-nav-btn" aria-label={`Newer: ${prevPost.title}`}>
+          <Link
+            href={prevPost.authorUsername ? `/${prevPost.authorUsername}/${prevPost.slug}` : `/posts/${prevPost.slug}`}
+            className="post-nav-btn"
+            aria-label={`Newer: ${prevPost.title}`}
+          >
             <IconBack />
             <span className="post-nav-label">{prevPost.title}</span>
           </Link>
@@ -60,7 +67,11 @@ export default function PostFooter({ prevPost, nextPost, slug, title, postId, au
         )}
         {/* Right = older post */}
         {nextPost ? (
-          <Link href={`/posts/${nextPost.slug}`} className="post-nav-btn post-nav-btn--right" aria-label={`Older: ${nextPost.title}`}>
+          <Link
+            href={nextPost.authorUsername ? `/${nextPost.authorUsername}/${nextPost.slug}` : `/posts/${nextPost.slug}`}
+            className="post-nav-btn post-nav-btn--right"
+            aria-label={`Older: ${nextPost.title}`}
+          >
             <span className="post-nav-label">{nextPost.title}</span>
             <IconNext />
           </Link>

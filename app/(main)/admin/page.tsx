@@ -108,7 +108,7 @@ export default async function AdminDashboard() {
                     <span className="dash-badge dash-badge--post">{post.category}</span>
                   </td>
                   <td>
-                    <Link href={`/posts/${post.slug}`} className="dash-link" target="_blank">
+                    <Link href={post.authorUsername ? `/${post.authorUsername}/${post.slug}` : `/posts/${post.slug}`} className="dash-link" target="_blank">
                       view →
                     </Link>
                   </td>

@@ -46,6 +46,7 @@ type PreparedPoint = ZonePoint & {
   opacity: number
   isToday: boolean
   slug: string
+  username?: string
 }
 
 interface DotProps {
@@ -97,7 +98,7 @@ function ZoneTooltip({ active, payload }: TooltipProps) {
         Happy: {p.happyScale} — {HAPPY_LABELS[p.happyScale]}
       </div>
       <a
-        href={`/posts/${p.slug}`}
+        href={p.username ? `/${p.username}/${p.slug}` : `/posts/${p.slug}`}
         style={{
           display: 'block',
           marginTop: '0.6rem',
@@ -117,7 +118,7 @@ function ZoneTooltip({ active, payload }: TooltipProps) {
   )
 }
 
-export default function MorningZoneScatter({ data, todayPostId }: { data: ZonePoint[]; todayPostId?: string }) {
+export default function MorningZoneScatter({ data, todayPostId, username }: { data: ZonePoint[]; todayPostId?: string; username?: string }) {
   if (!data.length) return null
 
   // data arrives sorted oldest-first; opacity increases with index (oldest = dim, newest = vivid)
@@ -127,6 +128,7 @@ export default function MorningZoneScatter({ data, todayPostId }: { data: ZonePo
     jy: point.brainScale + hashJitter(point.postId, 'y'),
     opacity: data.length <= 1 ? 1 : 0.15 + (0.85 * i / (data.length - 1)),
     isToday: point.postId === todayPostId,
+    username,
   }))
 
   return (

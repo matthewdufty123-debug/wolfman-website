@@ -16,6 +16,7 @@ export interface PostMeta {
   review?: string                        // Claude's review — shown at bottom of post
   status?: string                        // 'draft' | 'published'
   authorId?: string | null               // author's user id
+  authorUsername?: string | null         // author's username for URL building
 }
 
 export interface ParsedSection {
@@ -185,12 +186,15 @@ function rowToMeta(row: typeof postsTable.$inferSelect): PostMeta {
 export async function getAllPosts(): Promise<PostMeta[]> {
   try {
     const rows = await db
-      .select(getTableColumns(postsTable))
+      .select({
+        ...getTableColumns(postsTable),
+        authorUsername: usersTable.username,
+      })
       .from(postsTable)
       .innerJoin(usersTable, eq(postsTable.authorId, usersTable.id))
       .where(and(eq(postsTable.status, 'published'), eq(usersTable.role, 'admin')))
       .orderBy(desc(postsTable.date))
-    return rows.map(rowToMeta)
+    return rows.map(row => ({ ...rowToMeta(row), authorUsername: row.authorUsername ?? null }))
   } catch {
     return []
   }
@@ -210,6 +214,19 @@ export async function getAllSlugs(): Promise<string[]> {
   try {
     const rows = await db.select({ slug: postsTable.slug }).from(postsTable)
     return rows.map(r => r.slug)
+  } catch {
+    return []
+  }
+}
+
+export async function getAllSlugsWithUsernames(): Promise<{ username: string; slug: string }[]> {
+  try {
+    const rows = await db
+      .select({ slug: postsTable.slug, username: usersTable.username })
+      .from(postsTable)
+      .innerJoin(usersTable, eq(postsTable.authorId, usersTable.id))
+      .where(eq(postsTable.status, 'published'))
+    return rows.filter(r => r.username).map(r => ({ username: r.username!, slug: r.slug }))
   } catch {
     return []
   }

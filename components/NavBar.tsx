@@ -32,7 +32,10 @@ export default function NavBar() {
   const { count: cartCount } = useCart()
   const { data: session } = useSession()
   const [navHidden, setNavHidden] = useState(false)
-  const isPostPage = pathname.startsWith('/posts/')
+  const segments = pathname.split('/').filter(Boolean)
+  const KNOWN_PREFIXES = new Set(['admin', 'edit', 'write', 'account', 'settings', 'shop', 'cart', 'checkout', 'login', 'register', 'about', 'morning-ritual', 'morning-stats', 'intentions', 'feedback', 'beta', 'discover', 'api'])
+  const isPostPage = pathname.startsWith('/posts/') ||
+    (segments.length === 2 && !KNOWN_PREFIXES.has(segments[0]))
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('')

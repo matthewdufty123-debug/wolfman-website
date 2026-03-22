@@ -13,7 +13,7 @@ export default function TopBar() {
   const { data: session } = useSession()
   const { post } = usePostContext()
   const [navHidden, setNavHidden] = useState(false)
-  const isPostPage = pathname.startsWith('/posts/')
+  const isPostPage = !!post?.postId || pathname.startsWith('/posts/')
 
   // Exact same inactivity fade as bottom nav
   useEffect(() => {

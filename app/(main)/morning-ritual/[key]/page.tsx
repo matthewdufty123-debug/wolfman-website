@@ -32,6 +32,7 @@ export default async function MorningRitualPage({
       title: posts.title,
       date: posts.date,
       category: posts.category,
+      authorUsername: users.username,
     })
     .from(morningState)
     .innerJoin(posts, eq(morningState.postId, posts.id))
@@ -76,7 +77,7 @@ export default async function MorningRitualPage({
         <ul className="post-list">
           {completedPosts.map(post => (
             <li key={post.slug} className="post-list-item">
-              <Link href={`/posts/${post.slug}`} className="post-list-link">
+              <Link href={post.authorUsername ? `/${post.authorUsername}/${post.slug}` : `/posts/${post.slug}`} className="post-list-link">
                 <span className="post-list-date">{formatDate(post.date)}</span>
                 <span className="post-list-title">{post.title}</span>
               </Link>
