@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 
 interface Props {
@@ -13,10 +13,26 @@ interface Props {
 
 export default function MorningScaleBar({ scaleName, value, labels, color, statsLink = '/morning-stats' }: Props) {
   const [open, setOpen] = useState(false)
+  const [revealed, setRevealed] = useState(false)
+  const containerRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setRevealed(true); observer.disconnect() } },
+      { threshold: 0.5 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const activeLabel = labels[value - 1]
 
   return (
     <>
       <button
+        ref={containerRef}
         onClick={() => setOpen(true)}
         style={{
           display: 'block',
@@ -27,22 +43,41 @@ export default function MorningScaleBar({ scaleName, value, labels, color, stats
           cursor: 'pointer',
           textAlign: 'left',
         }}
-        aria-label={`${scaleName}: ${labels[value - 1]}. Tap to see details.`}
+        aria-label={`${scaleName}: ${activeLabel}. Tap to see details.`}
       >
         {/* Pip bar */}
         <div style={{ display: 'flex', gap: 6, width: '100%' }}>
-          {labels.map((_, i) => (
-            <div
-              key={i}
-              style={{
-                flex: 1,
-                height: 10,
-                borderRadius: 5,
-                background: i < value ? color : '#e8e8e8',
-                transition: 'background 0.2s ease',
-              }}
-            />
-          ))}
+          {labels.map((_, i) => {
+            const isActive = revealed && i === value - 1
+            return (
+              <div
+                key={i}
+                style={{
+                  flex: 1,
+                  height: 10,
+                  borderRadius: 5,
+                  background: isActive ? color : '#e8e8e8',
+                  transition: `background 0.4s ease ${0.1 + i * 0.06}s`,
+                }}
+              />
+            )
+          })}
+        </div>
+
+        {/* Description word */}
+        <div style={{
+          textAlign: 'center',
+          marginTop: 6,
+          fontSize: '0.78rem',
+          fontWeight: 600,
+          color: color,
+          fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+          opacity: revealed ? 1 : 0,
+          transform: revealed ? 'translateY(0)' : 'translateY(4px)',
+          transition: 'opacity 0.4s ease 0.5s, transform 0.4s ease 0.5s',
+          letterSpacing: '0.02em',
+        }}>
+          {activeLabel}
         </div>
       </button>
 

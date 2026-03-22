@@ -187,30 +187,38 @@ function DayBlock({ ms, er }: { ms: MorningStateRow | null; er: EveningReflectio
             <div className="post-day-scale-col">
               <span className="post-day-scale-name">Brain Activity</span>
               <MorningScaleBar scaleName="Brain Activity" value={ms.brainScale} labels={BRAIN_LABELS} color="#4A7FA5" />
-              <div className="post-day-scale-labels">
-                <span>Peaceful</span>
-                <span>Manic</span>
-              </div>
             </div>
             <div className="post-day-scale-col">
               <span className="post-day-scale-name">Body Energy</span>
               <MorningScaleBar scaleName="Body Energy" value={ms.bodyScale} labels={BODY_LABELS} color="#A0622A" />
-              <div className="post-day-scale-labels">
-                <span>Lethargic</span>
-                <span>Buzzing</span>
-              </div>
             </div>
             {ms.happyScale != null && (
               <div className="post-day-scale-col">
                 <span className="post-day-scale-name">Happy Scale</span>
                 <MorningScaleBar scaleName="Happy Scale" value={ms.happyScale} labels={HAPPY_LABELS} color="#3AB87A" />
-                <div className="post-day-scale-labels">
-                  <span>Far from happy</span>
-                  <span>Joyful</span>
-                </div>
               </div>
             )}
           </div>
+
+          <a
+            href="/morning-stats"
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              background: '#214459',
+              color: '#fff',
+              borderRadius: 10,
+              padding: '0.85rem 1.5rem',
+              fontSize: '0.95rem',
+              fontWeight: 600,
+              textDecoration: 'none',
+              marginTop: '1.5rem',
+              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+              letterSpacing: '0.01em',
+            }}
+          >
+            View morning stats →
+          </a>
         </>
       )}
 
