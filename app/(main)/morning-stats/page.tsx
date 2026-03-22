@@ -21,6 +21,7 @@ export default async function MorningStatsPage() {
   const rows = await db
     .select({
       date: posts.date,
+      slug: posts.slug,
       brainScale: morningState.brainScale,
       bodyScale: morningState.bodyScale,
       happyScale: morningState.happyScale,
@@ -37,6 +38,7 @@ export default async function MorningStatsPage() {
     const ritualCount = Object.values(checklist).filter(Boolean).length
     return {
       date: r.date,
+      slug: r.slug,
       brainScale: r.brainScale,
       bodyScale: r.bodyScale,
       happyScale: r.happyScale ?? null,
@@ -44,11 +46,15 @@ export default async function MorningStatsPage() {
     }
   })
 
+  const dateToSlug: Record<string, string> = {}
+  rows.forEach(r => { dateToSlug[r.date] = r.slug })
+
   // Last 30 posts with all three scales — for the Morning Zone scatter
   const scatterRows = await db
     .select({
       postId: morningState.postId,
       date: posts.date,
+      slug: posts.slug,
       brainScale: morningState.brainScale,
       bodyScale: morningState.bodyScale,
       happyScale: morningState.happyScale,
@@ -67,6 +73,7 @@ export default async function MorningStatsPage() {
     .map(r => ({
       postId: r.postId,
       date: r.date,
+      slug: r.slug,
       brainScale: r.brainScale,
       bodyScale: r.bodyScale,
       happyScale: r.happyScale!,
@@ -77,7 +84,7 @@ export default async function MorningStatsPage() {
       <Link href="/intentions" className="stats-back-link">← All posts</Link>
       <h1 className="stats-title">Morning Stats</h1>
       <p className="stats-subtitle">The last 3 months — how the mornings have been arriving.</p>
-      <StatsCharts data={data} scatterData={scatterData} />
+      <StatsCharts data={data} scatterData={scatterData} dateToSlug={dateToSlug} />
     </main>
   )
 }

@@ -14,6 +14,7 @@ import {
 export interface ZonePoint {
   postId: string
   date: string
+  slug: string
   brainScale: number
   bodyScale: number
   happyScale: number
@@ -44,6 +45,7 @@ type PreparedPoint = ZonePoint & {
   jy: number
   opacity: number
   isToday: boolean
+  slug: string
 }
 
 interface DotProps {
@@ -87,7 +89,6 @@ function ZoneTooltip({ active, payload }: TooltipProps) {
       fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
       color: 'var(--body-text, #4A4A4A)',
       boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
-      pointerEvents: 'none',
     }}>
       <div style={{ fontWeight: 700, marginBottom: '0.35rem' }}>{fmtDate(p.date)}</div>
       <div>Brain: {p.brainScale} — {BRAIN_LABELS[p.brainScale]}</div>
@@ -95,6 +96,23 @@ function ZoneTooltip({ active, payload }: TooltipProps) {
       <div style={{ marginTop: '0.25rem', color: colour, fontWeight: 600 }}>
         Happy: {p.happyScale} — {HAPPY_LABELS[p.happyScale]}
       </div>
+      <a
+        href={`/posts/${p.slug}`}
+        style={{
+          display: 'block',
+          marginTop: '0.6rem',
+          textAlign: 'center',
+          background: '#214459',
+          color: '#fff',
+          borderRadius: 6,
+          padding: '0.4rem 0.75rem',
+          fontSize: '0.75rem',
+          fontWeight: 600,
+          textDecoration: 'none',
+        }}
+      >
+        Open journal →
+      </a>
     </div>
   )
 }
@@ -134,20 +152,20 @@ export default function MorningZoneScatter({ data, todayPostId }: { data: ZonePo
             dataKey="jx"
             domain={[0.5, 6.5]}
             ticks={[1, 2, 3, 4, 5, 6]}
-            tick={{ fontSize: 10, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", fill: 'currentColor', opacity: 0.5 }}
+            tick={{ fontSize: 12, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", fill: 'currentColor' }}
             tickLine={false}
             axisLine={false}
-            label={{ value: 'Body Energy →', position: 'insideBottom', offset: -14, fontSize: 10, opacity: 0.5, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+            label={{ value: 'Body Energy', position: 'insideBottom', offset: -14, fontSize: 12, fill: 'currentColor', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
           />
           <YAxis
             type="number"
             dataKey="jy"
             domain={[0.5, 6.5]}
             ticks={[1, 2, 3, 4, 5, 6]}
-            tick={{ fontSize: 10, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", fill: 'currentColor', opacity: 0.5 }}
+            tick={{ fontSize: 12, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", fill: 'currentColor' }}
             tickLine={false}
             axisLine={false}
-            label={{ value: '↑ Brain Activity', angle: -90, position: 'insideLeft', offset: 16, fontSize: 10, opacity: 0.5, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
+            label={{ value: 'Brain Activity', angle: -90, position: 'insideLeft', offset: 16, fontSize: 12, fill: 'currentColor', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
           />
           <Tooltip content={<ZoneTooltip />} cursor={false} />
           <Scatter

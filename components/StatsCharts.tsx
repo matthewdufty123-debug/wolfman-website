@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import {
   ResponsiveContainer,
   BarChart, Bar,
@@ -11,6 +12,7 @@ import MorningZoneScatter, { type ZonePoint } from './MorningZoneScatter'
 
 export interface StatRow {
   date: string
+  slug?: string
   brainScale: number
   bodyScale: number
   happyScale: number | null
@@ -82,7 +84,8 @@ function RitualTooltip({ active, payload, label }: RitualTooltipProps) {
   )
 }
 
-export default function StatsCharts({ data, scatterData = [] }: { data: StatRow[]; scatterData?: ZonePoint[] }) {
+export default function StatsCharts({ data, scatterData = [], dateToSlug = {} }: { data: StatRow[]; scatterData?: ZonePoint[]; dateToSlug?: Record<string, string> }) {
+  const router = useRouter()
   if (!data.length) {
     return (
       <p style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", color: 'var(--body-text)', opacity: 0.5, fontStyle: 'italic' }}>
@@ -122,7 +125,13 @@ export default function StatsCharts({ data, scatterData = [] }: { data: StatRow[
             <XAxis {...xAxisProps} />
             <YAxis {...yAxisProps} domain={[0, 10]} ticks={[0,2,4,6,8,10]} />
             <Tooltip content={<RitualTooltip />} cursor={{ fill: 'rgba(74,127,165,0.06)' }} />
-            <Bar dataKey="ritualCount" fill="#4A7FA5" radius={[3,3,0,0]} />
+            <Bar
+              dataKey="ritualCount"
+              fill="#4A7FA5"
+              radius={[3,3,0,0]}
+              style={{ cursor: 'pointer' }}
+              onClick={(d: unknown) => { const s = dateToSlug[(d as StatRow).date]; if (s) router.push(`/posts/${s}`) }}
+            />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -134,7 +143,7 @@ export default function StatsCharts({ data, scatterData = [] }: { data: StatRow[
             <XAxis {...xAxisProps} />
             <YAxis {...yAxisProps} domain={[1, 6]} ticks={[1,2,3,4,5,6]} />
             <Tooltip content={<ScaleTooltip labelMap={BRAIN_LABELS} />} />
-            <Line dataKey="brainScale" stroke="#4A7FA5" strokeWidth={2} dot={{ r: 3, fill: '#4A7FA5' }} activeDot={{ r: 5 }} connectNulls />
+            <Line dataKey="brainScale" stroke="#4A7FA5" strokeWidth={2} dot={{ r: 3, fill: '#4A7FA5' }} activeDot={{ r: 5, cursor: 'pointer', onClick: (_: unknown, p: unknown) => { const s = dateToSlug[(p as { payload: StatRow }).payload.date]; if (s) router.push(`/posts/${s}`) } }} connectNulls />
           </LineChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -146,7 +155,7 @@ export default function StatsCharts({ data, scatterData = [] }: { data: StatRow[
             <XAxis {...xAxisProps} />
             <YAxis {...yAxisProps} domain={[1, 6]} ticks={[1,2,3,4,5,6]} />
             <Tooltip content={<ScaleTooltip labelMap={BODY_LABELS} />} />
-            <Line dataKey="bodyScale" stroke="#A0622A" strokeWidth={2} dot={{ r: 3, fill: '#A0622A' }} activeDot={{ r: 5 }} connectNulls />
+            <Line dataKey="bodyScale" stroke="#A0622A" strokeWidth={2} dot={{ r: 3, fill: '#A0622A' }} activeDot={{ r: 5, cursor: 'pointer', onClick: (_: unknown, p: unknown) => { const s = dateToSlug[(p as { payload: StatRow }).payload.date]; if (s) router.push(`/posts/${s}`) } }} connectNulls />
           </LineChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -158,7 +167,7 @@ export default function StatsCharts({ data, scatterData = [] }: { data: StatRow[
             <XAxis {...xAxisProps} />
             <YAxis {...yAxisProps} domain={[1, 6]} ticks={[1,2,3,4,5,6]} />
             <Tooltip content={<ScaleTooltip labelMap={HAPPY_LABELS} />} />
-            <Line dataKey="happyScale" stroke="#3AB87A" strokeWidth={2} dot={{ r: 3, fill: '#3AB87A' }} activeDot={{ r: 5 }} connectNulls />
+            <Line dataKey="happyScale" stroke="#3AB87A" strokeWidth={2} dot={{ r: 3, fill: '#3AB87A' }} activeDot={{ r: 5, cursor: 'pointer', onClick: (_: unknown, p: unknown) => { const s = dateToSlug[(p as { payload: StatRow }).payload.date]; if (s) router.push(`/posts/${s}`) } }} connectNulls />
           </LineChart>
         </ResponsiveContainer>
       </ChartCard>
