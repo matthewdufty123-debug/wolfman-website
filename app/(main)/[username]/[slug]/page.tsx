@@ -257,6 +257,9 @@ export default async function PostPage({
 
   if (!post) notFound()
 
+  // Guard against posts with no author
+  if (!post.authorId) notFound()
+
   // Fetch author info and verify the URL username matches
   const [author] = await db
     .select({
@@ -270,7 +273,7 @@ export default async function PostPage({
       role: usersTable.role,
     })
     .from(usersTable)
-    .where(eq(usersTable.id, post.authorId!))
+    .where(eq(usersTable.id, post.authorId))
     .limit(1)
 
   if (!author || author.username !== username) notFound()
