@@ -5,7 +5,7 @@ import { db } from '@/lib/db'
 import { morningState } from '@/lib/db/schema'
 import { inArray } from 'drizzle-orm'
 import Link from 'next/link'
-import { RoutineIconBar } from '@/components/RoutineIcons'
+import AnimatedRoutineIcons from '@/components/AnimatedRoutineIcons'
 
 const CATEGORY_LABELS: Record<string, string> = {
   'morning-intention': 'Morning Intention',
@@ -51,7 +51,7 @@ export default async function IntentionsPage() {
                   <span className="post-list-title">{post.title}</span>
                   {checklist && (
                     <span className="post-list-routine">
-                      <RoutineIconBar checklist={checklist} size={13} />
+                      <AnimatedRoutineIcons checklist={checklist} size={13} />
                     </span>
                   )}
                   <span className="post-list-category">{CATEGORY_LABELS[post.category] ?? post.category}</span>

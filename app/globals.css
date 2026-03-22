@@ -3456,6 +3456,34 @@ html[data-theme="dark"] .stats-chart-card {
   opacity: 0.45;
 }
 
+/* ── Animated ritual icons (intentions list scroll-in) ── */
+
+.animated-icons-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.animated-icon {
+  opacity: 0;
+  transform: translateX(-14px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition-delay: calc(var(--icon-index, 0) * 40ms);
+}
+
+.animated-icon.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated-icon {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* ── Beta page ── */
 
 .beta-page {
