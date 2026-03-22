@@ -8,7 +8,7 @@ import MorningRitualIconBar from '@/components/MorningRitualIconBar'
 import MorningScaleBar from '@/components/MorningScaleBar'
 import DayScoreScatter from '@/components/DayScoreScatter'
 import { db } from '@/lib/db'
-import { posts as postsTable, morningState, eveningReflection, dayScores } from '@/lib/db/schema'
+import { posts as postsTable, morningState, eveningReflection, dayScores, users as usersTable } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
 // Allow slugs not in generateStaticParams to be dynamically rendered (posts published after a build)
@@ -256,6 +256,12 @@ export default async function PostPage({
 
   // Draft posts are only visible to their author
   if (post.status === 'draft' && session?.user?.id !== post.authorId) notFound()
+
+  // Non-admin users' posts are private — only the author can view them
+  if (post.authorId && session?.user?.id !== post.authorId) {
+    const [author] = await db.select({ role: usersTable.role }).from(usersTable).where(eq(usersTable.id, post.authorId))
+    if (!author || author.role !== 'admin') notFound()
+  }
 
   // Fetch day data for DB-backed posts
   const [ms, er, ds, allDayScores] = post.id

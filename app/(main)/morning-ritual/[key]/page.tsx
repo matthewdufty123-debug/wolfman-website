@@ -3,8 +3,8 @@ export const dynamic = 'force-dynamic'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { db } from '@/lib/db'
-import { posts, morningState } from '@/lib/db/schema'
-import { eq, desc, sql } from 'drizzle-orm'
+import { posts, morningState, users } from '@/lib/db/schema'
+import { and, eq, desc, sql } from 'drizzle-orm'
 import { ROUTINE_ICON_MAP } from '@/components/RoutineIcons'
 
 function formatDate(iso: string) {
@@ -25,7 +25,7 @@ export default async function MorningRitualPage({
 
   const { Icon, label, description, color } = ritual
 
-  // All posts where this ritual was completed
+  // All posts where this ritual was completed (admin/Matthew's posts only — user posts are private)
   const completedPosts = await db
     .select({
       slug: posts.slug,
@@ -35,7 +35,8 @@ export default async function MorningRitualPage({
     })
     .from(morningState)
     .innerJoin(posts, eq(morningState.postId, posts.id))
-    .where(sql`(${morningState.routineChecklist}->>${key})::boolean = true`)
+    .innerJoin(users, eq(posts.authorId, users.id))
+    .where(and(sql`(${morningState.routineChecklist}->>${key})::boolean = true`, eq(users.role, 'admin')))
     .orderBy(desc(posts.date))
 
   // Count completions in the last 3 months

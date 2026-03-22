@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { db } from '@/lib/db'
-import { morningState, posts } from '@/lib/db/schema'
-import { eq, gte } from 'drizzle-orm'
+import { morningState, posts, users } from '@/lib/db/schema'
+import { and, eq, gte } from 'drizzle-orm'
 import StatsCharts, { StatRow } from '@/components/StatsCharts'
 
 export const dynamic = 'force-dynamic'
@@ -27,7 +27,8 @@ export default async function MorningStatsPage() {
     })
     .from(morningState)
     .innerJoin(posts, eq(morningState.postId, posts.id))
-    .where(gte(posts.date, cutoff))
+    .innerJoin(users, eq(posts.authorId, users.id))
+    .where(and(gte(posts.date, cutoff), eq(users.role, 'admin')))
     .orderBy(posts.date)
 
   const data: StatRow[] = rows.map(r => {

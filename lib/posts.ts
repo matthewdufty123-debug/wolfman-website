@@ -1,8 +1,8 @@
 import { remark } from 'remark'
 import html from 'remark-html'
 import { db } from '@/lib/db'
-import { posts as postsTable } from '@/lib/db/schema'
-import { desc, eq } from 'drizzle-orm'
+import { posts as postsTable, users as usersTable } from '@/lib/db/schema'
+import { and, desc, eq, getTableColumns } from 'drizzle-orm'
 
 export interface PostMeta {
   id?: string                            // DB id — present for DB posts, absent for archived filesystem posts
@@ -184,7 +184,12 @@ function rowToMeta(row: typeof postsTable.$inferSelect): PostMeta {
 
 export async function getAllPosts(): Promise<PostMeta[]> {
   try {
-    const rows = await db.select().from(postsTable).where(eq(postsTable.status, 'published')).orderBy(desc(postsTable.date))
+    const rows = await db
+      .select(getTableColumns(postsTable))
+      .from(postsTable)
+      .innerJoin(usersTable, eq(postsTable.authorId, usersTable.id))
+      .where(and(eq(postsTable.status, 'published'), eq(usersTable.role, 'admin')))
+      .orderBy(desc(postsTable.date))
     return rows.map(rowToMeta)
   } catch {
     return []

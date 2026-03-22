@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { morningState, posts } from '@/lib/db/schema'
-import { eq, gte } from 'drizzle-orm'
+import { morningState, posts, users } from '@/lib/db/schema'
+import { and, eq, gte } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +23,8 @@ export async function GET() {
       })
       .from(morningState)
       .innerJoin(posts, eq(morningState.postId, posts.id))
-      .where(gte(posts.date, cutoff))
+      .innerJoin(users, eq(posts.authorId, users.id))
+      .where(and(gte(posts.date, cutoff), eq(users.role, 'admin')))
       .orderBy(posts.date)
   } catch (err) {
     console.error('[morning-stats] DB query failed:', err)
