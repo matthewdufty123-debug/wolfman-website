@@ -9,7 +9,7 @@ interface Props {
   size?: number
 }
 
-export default function MorningRitualIconBar({ checklist, size = 20 }: Props) {
+export default function MorningRitualIconBar({ checklist, size = 30 }: Props) {
   const [activeKey, setActiveKey] = useState<string | null>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
@@ -58,7 +58,7 @@ export default function MorningRitualIconBar({ checklist, size = 20 }: Props) {
               padding: 0,
               opacity: visible ? 1 : 0,
               transform: visible ? 'none' : 'translateX(-14px)',
-              transition: 'opacity 1.3s ease, transform 1.3s ease',
+              transition: 'opacity 2.3s ease, transform 2.3s ease',
               transitionDelay: `${i * 40}ms`,
             }}
             onMouseEnter={e => (e.currentTarget.style.opacity = '0.75')}
