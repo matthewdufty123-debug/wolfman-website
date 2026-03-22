@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
+import { put } from '@vercel/blob'
 
 const REPO = 'matthewdufty123-debug/wolfman-website'
 const BETA_MILESTONE = 12
+const MAX_SCREENSHOT_SIZE = 5 * 1024 * 1024 // 5MB
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 export async function POST(req: Request) {
   const session = await auth()
@@ -10,13 +13,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
   }
 
-  const body = await req.json()
-  const { category, message, anonymous, pageUrl } = body as {
-    category: string
-    message: string
-    anonymous: boolean
-    pageUrl?: string
-  }
+  const form = await req.formData()
+  const category = form.get('category') as string
+  const message = form.get('message') as string
+  const anonymous = form.get('anonymous') === 'true'
+  const pageUrl = form.get('pageUrl') as string | null
+  const screenshot = form.get('screenshot') as File | null
 
   if (!category || !message?.trim()) {
     return NextResponse.json({ error: 'Category and message are required.' }, { status: 400 })
@@ -25,6 +27,21 @@ export async function POST(req: Request) {
   const token = process.env.GITHUB_TOKEN
   if (!token) {
     return NextResponse.json({ error: 'GitHub token not configured.' }, { status: 500 })
+  }
+
+  // Upload screenshot to Vercel Blob if provided
+  let screenshotUrl: string | null = null
+  if (screenshot && screenshot.size > 0) {
+    if (!ALLOWED_IMAGE_TYPES.includes(screenshot.type)) {
+      return NextResponse.json({ error: 'Screenshot must be a JPEG, PNG, WebP, or GIF.' }, { status: 400 })
+    }
+    if (screenshot.size > MAX_SCREENSHOT_SIZE) {
+      return NextResponse.json({ error: 'Screenshot must be under 5MB.' }, { status: 400 })
+    }
+    const ext = screenshot.name.split('.').pop() ?? 'png'
+    const filename = `feedback/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const blob = await put(filename, screenshot, { access: 'public', contentType: screenshot.type })
+    screenshotUrl = blob.url
   }
 
   const shortMessage = message.trim().slice(0, 60)
@@ -44,7 +61,9 @@ export async function POST(req: Request) {
     if (pageUrl) bodyLines.push(`**Page:** ${pageUrl}`)
   }
 
-  const issueBody = bodyLines.join('\n')
+  if (screenshotUrl) {
+    bodyLines.push('', `**Screenshot:**`, `![screenshot](${screenshotUrl})`)
+  }
 
   const res = await fetch(`https://api.github.com/repos/${REPO}/issues`, {
     method: 'POST',
@@ -55,7 +74,7 @@ export async function POST(req: Request) {
     },
     body: JSON.stringify({
       title,
-      body: issueBody,
+      body: bodyLines.join('\n'),
       labels: ['beta-feedback'],
       milestone: BETA_MILESTONE,
     }),
