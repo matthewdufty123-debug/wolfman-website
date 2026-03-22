@@ -8,6 +8,7 @@ import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { users, accounts, sessions, verificationTokens } from '@/lib/db/schema'
 import { authConfig } from './auth.config'
+import { generateUniqueUsername } from '@/lib/username'
 
 const ADMIN_GITHUB_USERNAME = 'matthewdufty123-debug'
 
@@ -44,6 +45,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+  events: {
+    async createUser({ user }) {
+      if (user.id && user.name) {
+        const username = await generateUniqueUsername(user.name)
+        await db.update(users).set({ username }).where(eq(users.id, user.id))
+      }
+    },
+  },
   callbacks: {
     ...authConfig.callbacks,
     async signIn({ user, account, profile }) {

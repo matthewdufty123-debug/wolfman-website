@@ -5,19 +5,28 @@ import { orders, users } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import AccountNameForm from '@/components/AccountNameForm'
 import AccountPasswordForm from '@/components/AccountPasswordForm'
+import AccountUsernameForm from '@/components/AccountUsernameForm'
 import SignOutButton from '@/components/SignOutButton'
 import AvatarUpload from '@/components/AvatarUpload'
+import { generateUniqueUsername } from '@/lib/username'
 
 export default async function AccountPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
   const [user, userOrders] = await Promise.all([
-    db.select({ avatar: users.avatar }).from(users).where(eq(users.id, session.user.id)).then(r => r[0]),
+    db.select({ avatar: users.avatar, username: users.username }).from(users).where(eq(users.id, session.user.id)).then(r => r[0]),
     db.select().from(orders).where(eq(orders.userId, session.user.id)).orderBy(desc(orders.createdAt)),
   ])
 
   const avatar = user?.avatar ?? session.user.image ?? null
+
+  // Backfill username for existing users who pre-date the username system
+  let username = user?.username ?? null
+  if (!username && session.user.name) {
+    username = await generateUniqueUsername(session.user.name)
+    await db.update(users).set({ username }).where(eq(users.id, session.user.id))
+  }
 
   return (
     <main className="account-main">
@@ -58,6 +67,13 @@ export default async function AccountPage() {
               ))}
             </ul>
           )}
+        </section>
+
+        {/* Username */}
+        <section className="account-section">
+          <h2 className="account-section-title">Your username</h2>
+          <p className="account-section-hint">This is your public handle — it appears in your profile URL.</p>
+          <AccountUsernameForm currentUsername={username ?? ''} />
         </section>
 
         {/* Update name */}

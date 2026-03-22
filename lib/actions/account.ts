@@ -6,6 +6,7 @@ import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 import { revalidatePath } from 'next/cache'
+import { isValidUsername, isUsernameAvailable } from '@/lib/username'
 
 type ActionState = { error?: string; success?: string } | undefined
 
@@ -40,6 +41,25 @@ export async function updatePassword(_prev: ActionState, formData: FormData): Pr
   const passwordHash = await bcrypt.hash(next, 12)
   await db.update(users).set({ passwordHash }).where(eq(users.id, session.user.id))
   return { success: 'Password updated.' }
+}
+
+export async function updateUsername(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const session = await auth()
+  if (!session?.user?.id) return { error: 'Not authenticated.' }
+
+  const username = (formData.get('username') as string)?.trim().toLowerCase()
+  if (!username) return { error: 'Username cannot be empty.' }
+
+  if (!isValidUsername(username)) {
+    return { error: 'Username must be 2–30 characters, lowercase letters, numbers and hyphens only, and cannot start or end with a hyphen.' }
+  }
+
+  const available = await isUsernameAvailable(username, session.user.id)
+  if (!available) return { error: 'That username is already taken.' }
+
+  await db.update(users).set({ username }).where(eq(users.id, session.user.id))
+  revalidatePath('/account')
+  return { success: 'Username updated.' }
 }
 
 export async function logout() {

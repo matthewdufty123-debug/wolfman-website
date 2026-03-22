@@ -11,6 +11,7 @@ export const users = pgTable('users', {
   image: text('image'),                 // OAuth provider avatar (auto-set)
   avatar: text('avatar'),               // user-uploaded avatar (takes precedence over image)
   role: text('role').notNull().default('customer'),
+  username: text('username').unique(),  // URL-safe handle for /[username] routes
   preferences: jsonb('preferences').notNull().default({}),  // { theme?, fontSize?, fontFamily? }
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })

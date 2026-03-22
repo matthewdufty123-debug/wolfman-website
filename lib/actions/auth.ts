@@ -7,6 +7,7 @@ import { eq, sql } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 import { redirect } from 'next/navigation'
 import { AuthError } from 'next-auth'
+import { generateUniqueUsername } from '@/lib/username'
 
 type ActionState = { error: string } | undefined
 
@@ -61,7 +62,8 @@ export async function register(_prev: ActionState, formData: FormData): Promise<
   }
 
   const passwordHash = await bcrypt.hash(password, 12)
-  await db.insert(users).values({ name, email, passwordHash, role: 'customer' })
+  const username = await generateUniqueUsername(name)
+  await db.insert(users).values({ name, email, passwordHash, role: 'customer', username })
 
   redirect('/login?registered=1')
 }
