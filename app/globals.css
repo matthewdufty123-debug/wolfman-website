@@ -243,8 +243,9 @@ body {
   transition: color 0.15s ease;
 }
 .top-bar-btn:hover { color: var(--heading); }
-.top-bar-btn--left  { left: 0.5rem; }
-.top-bar-btn--right { right: 0.5rem; }
+.top-bar-btn--left    { left: 0.5rem; }
+.top-bar-btn--right   { right: 0.5rem; }
+.top-bar-btn--journal { left: 3rem; }
 
 .top-bar-feedback {
   font-size: 0.65rem;
@@ -3454,6 +3455,111 @@ html[data-theme="dark"] .stats-chart-card {
 .write-draft-date {
   font-size: 0.75rem;
   opacity: 0.45;
+}
+
+/* ── Journal page ── */
+
+.journal-page {
+  min-height: 100vh;
+  padding: 2rem 1.5rem 9rem;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.journal-header {
+  margin-bottom: 2rem;
+}
+
+.journal-title {
+  font-size: clamp(2rem, 7vw, 3rem);
+  font-weight: 400;
+  color: var(--heading, #E5CBBB);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.journal-stats-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (min-width: 480px) {
+  .journal-stats-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.journal-stat-card {
+  padding: 1.25rem 1rem;
+  border: 1px solid rgba(74, 127, 165, 0.15);
+  border-radius: 6px;
+}
+
+.journal-stat-value {
+  font-size: 2rem;
+  font-weight: 400;
+  color: #4A7FA5;
+  line-height: 1;
+  margin: 0 0 0.3rem;
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+.journal-stat-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--body-text);
+  opacity: 0.5;
+  margin: 0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.journal-no-chart {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--body-text);
+  opacity: 0.5;
+  font-style: italic;
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+.journal-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.journal-empty-headline {
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--heading, #E5CBBB);
+  margin: 0;
+}
+
+.journal-empty-body {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--body-text);
+  margin: 0;
+  opacity: 0.75;
+}
+
+.journal-empty-link {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #4A7FA5;
+  text-decoration: none;
+  margin-top: 0.25rem;
+}
+
+.journal-empty-link:hover {
+  text-decoration: underline;
 }
 
 /* ── Animated ritual icons (intentions list scroll-in) ── */

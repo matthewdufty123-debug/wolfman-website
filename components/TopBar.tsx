@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Plus, Pencil } from 'lucide-react'
+import { Plus, Pencil, BarChart2 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { usePostContext } from '@/lib/post-context'
 
@@ -53,6 +53,11 @@ export default function TopBar() {
         >
           <Plus size={16} strokeWidth={2} />
         </button>
+      )}
+      {session && (
+        <Link href="/journal" className="top-bar-btn top-bar-btn--journal" aria-label="Your journal">
+          <BarChart2 size={15} strokeWidth={1.5} />
+        </Link>
       )}
       <Link href="/feedback" className="top-bar-feedback">BETA FEEDBACK</Link>
       {isOwner && post && (
