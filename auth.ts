@@ -74,22 +74,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id
         // Fetch extended profile fields at sign-in time
         const [row] = await db
-          .select({ displayName: users.displayName, bio: users.bio, avatar: users.avatar })
+          .select({ displayName: users.displayName, bio: users.bio, avatar: users.avatar, onboardingComplete: users.onboardingComplete })
           .from(users)
           .where(eq(users.id, user.id!))
-        token.displayName = row?.displayName ?? null
-        token.bio         = row?.bio         ?? null
-        token.avatar      = row?.avatar      ?? null
+        token.displayName        = row?.displayName        ?? null
+        token.bio                = row?.bio                ?? null
+        token.avatar             = row?.avatar             ?? null
+        token.onboardingComplete = row?.onboardingComplete ?? false
       }
       return token
     },
     session({ session, token }) {
       if (token) {
-        session.user.role        = token.role        as string
-        session.user.id          = token.id          as string
-        session.user.displayName = token.displayName as string | null
-        session.user.bio         = token.bio         as string | null
-        session.user.avatar      = token.avatar      as string | null
+        session.user.role             = token.role             as string
+        session.user.id               = token.id               as string
+        session.user.displayName      = token.displayName      as string | null
+        session.user.bio              = token.bio              as string | null
+        session.user.avatar           = token.avatar           as string | null
+        session.user.onboardingComplete = token.onboardingComplete as boolean
       }
       return session
     },

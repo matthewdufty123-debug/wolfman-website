@@ -10,6 +10,7 @@ export const metadata: Metadata = noindexMetadata('My account')
 import AccountNameForm from '@/components/AccountNameForm'
 import AccountPasswordForm from '@/components/AccountPasswordForm'
 import AccountUsernameForm from '@/components/AccountUsernameForm'
+import AccountCommunityForm from '@/components/AccountCommunityForm'
 import SignOutButton from '@/components/SignOutButton'
 import AvatarUpload from '@/components/AvatarUpload'
 import { generateUniqueUsername } from '@/lib/username'
@@ -19,7 +20,7 @@ export default async function AccountPage() {
   if (!session?.user) redirect('/login')
 
   const [user, userOrders] = await Promise.all([
-    db.select({ avatar: users.avatar, username: users.username }).from(users).where(eq(users.id, session.user.id)).then(r => r[0]),
+    db.select({ avatar: users.avatar, username: users.username, communityEnabled: users.communityEnabled, defaultPublic: users.defaultPublic }).from(users).where(eq(users.id, session.user.id)).then(r => r[0]),
     db.select().from(orders).where(eq(orders.userId, session.user.id)).orderBy(desc(orders.createdAt)),
   ])
 
@@ -84,6 +85,16 @@ export default async function AccountPage() {
         <section className="account-section">
           <h2 className="account-section-title">Your name</h2>
           <AccountNameForm currentName={session.user.name ?? ''} />
+        </section>
+
+        {/* Community settings */}
+        <section className="account-section">
+          <h2 className="account-section-title">Community</h2>
+          <p className="account-section-hint">Control whether your journals appear in the community feed.</p>
+          <AccountCommunityForm
+            communityEnabled={user?.communityEnabled ?? false}
+            defaultPublic={user?.defaultPublic ?? false}
+          />
         </section>
 
         {/* Change password */}

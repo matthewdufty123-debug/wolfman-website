@@ -31,6 +31,10 @@ interface PostFormProps {
   postId?: string
   initialData?: Partial<PostFormData>
   onDelete?: () => void
+  communityEnabled?: boolean
+  defaultPublic?: boolean
+  initialIsPublic?: boolean
+  username?: string | null
 }
 
 function defaultChecklist(): Record<string, boolean> {
@@ -67,7 +71,7 @@ function ScaleSelector({ label, value, onChange, color, labels }: {
   )
 }
 
-export default function PostForm({ mode, postId: initialPostId, initialData, onDelete }: PostFormProps) {
+export default function PostForm({ mode, postId: initialPostId, initialData, onDelete, communityEnabled = false, defaultPublic = false, initialIsPublic, username }: PostFormProps) {
   const router = useRouter()
   const [postId, setPostId] = useState<string | null>(initialPostId ?? null)
   const [title, setTitle] = useState(initialData?.title ?? '')
@@ -81,6 +85,8 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
     happyScale: initialData?.morning?.happyScale ?? 3,
     routineChecklist: initialData?.morning?.routineChecklist ?? defaultChecklist(),
   })
+
+  const [isPublic, setIsPublic] = useState<boolean>(initialIsPublic ?? defaultPublic)
 
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
@@ -195,7 +201,7 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
         const res = await fetch('/api/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: data.title, date: data.date, content, status: 'published', morning: data.morning }),
+          body: JSON.stringify({ title: data.title, date: data.date, content, status: 'published', morning: data.morning, isPublic }),
         })
         if (!res.ok) throw new Error('Publish failed')
         const result = await res.json()
@@ -204,13 +210,13 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
         const res = await fetch(`/api/posts/${postId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: data.title, date: data.date, content, status: 'published', morning: data.morning }),
+          body: JSON.stringify({ title: data.title, date: data.date, content, status: 'published', morning: data.morning, isPublic }),
         })
         if (!res.ok) throw new Error('Publish failed')
         const result = await res.json()
         slug = result.slug
       }
-      router.push(`/posts/${slug}`)
+      router.push(username ? `/${username}/${slug}` : `/posts/${slug}`)
     } catch {
       setError('Could not publish. Try again.')
     } finally {
@@ -340,6 +346,22 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
           })}
         </div>
       </div>
+
+      {/* Visibility toggle — only shown when community is enabled */}
+      {communityEnabled && (
+        <div className="pf-visibility">
+          <button
+            type="button"
+            className={`pf-visibility-btn${isPublic ? ' is-public' : ' is-private'}`}
+            onClick={() => setIsPublic(p => !p)}
+          >
+            {isPublic ? '🌍 Public' : '🔒 Private'}
+          </button>
+          <span className="pf-visibility-hint">
+            {isPublic ? 'This journal will appear in the community feed.' : 'Only you can see this journal.'}
+          </span>
+        </div>
+      )}
 
       {/* Error / save messages */}
       {error && <p className="pf-error">{error}</p>}

@@ -4222,3 +4222,284 @@ html[data-theme="dark"] .stats-chart-card {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   text-align: center;
 }
+
+/* ── Onboarding page ── */
+.onboarding-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 3rem 1rem 4rem;
+  background: var(--bg, #fff);
+}
+
+.onboarding-card {
+  width: 100%;
+  max-width: 540px;
+}
+
+.onboarding-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin: 0.5rem 0 0.5rem;
+  line-height: 1.25;
+}
+
+.onboarding-subtitle {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.95rem;
+  color: var(--body-text);
+  opacity: 0.7;
+  margin: 0 0 2rem;
+}
+
+.onboarding-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.onboarding-question {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.onboarding-question--sub {
+  padding-left: 1rem;
+  border-left: 3px solid #4A7FA5;
+}
+
+.onboarding-question-label {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--heading, #193343);
+  margin: 0;
+}
+
+.onboarding-question-hint {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  color: var(--body-text);
+  opacity: 0.65;
+  margin: 0 0 0.75rem;
+}
+
+.onboarding-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.onboarding-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.1rem;
+  border: 2px solid rgba(74,127,165,0.25);
+  border-radius: 10px;
+  background: var(--card-bg, #f9f9f9);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.onboarding-option:hover {
+  border-color: #4A7FA5;
+}
+
+.onboarding-option.is-active {
+  border-color: #214459;
+  background: rgba(33,68,89,0.06);
+}
+
+.onboarding-option-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.onboarding-option-label {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--heading, #193343);
+}
+
+.onboarding-error {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.85rem;
+  color: #A82020;
+  margin: 0;
+}
+
+.onboarding-submit {
+  align-self: flex-start;
+  background: #214459;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.85rem 2rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.onboarding-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Onboarding banner (home page) ── */
+.onboarding-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: rgba(33,68,89,0.07);
+  border: 1px solid rgba(33,68,89,0.2);
+  border-radius: 10px;
+  padding: 0.85rem 1.1rem;
+  margin-bottom: 1.25rem;
+}
+
+.onboarding-banner-text {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.88rem;
+  color: var(--heading, #193343);
+  margin: 0;
+}
+
+.onboarding-banner-link {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #214459;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.onboarding-banner-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Community toggles (account page) ── */
+.community-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.community-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.community-toggle-row--sub {
+  padding-left: 1rem;
+  border-left: 3px solid #4A7FA5;
+}
+
+.community-toggle-label {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.9rem;
+  color: var(--body-text);
+}
+
+.community-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: #ccc;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.community-toggle.is-on {
+  background: #214459;
+}
+
+.community-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.community-toggle.is-on .community-toggle-knob {
+  transform: translateX(20px);
+}
+
+.community-toggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.community-saved {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  color: #3AB87A;
+  margin: 0;
+}
+
+.community-error {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  color: #A82020;
+  margin: 0;
+}
+
+/* ── PostForm visibility toggle ── */
+.pf-visibility {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.pf-visibility-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pf-visibility-btn.is-public {
+  background: rgba(58,184,122,0.12);
+  border-color: #3AB87A;
+  color: #2a7a52;
+}
+
+.pf-visibility-btn.is-private {
+  background: rgba(74,127,165,0.1);
+  border-color: rgba(74,127,165,0.4);
+  color: var(--body-text);
+}
+
+.pf-visibility-hint {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.78rem;
+  color: var(--body-text);
+  opacity: 0.6;
+}

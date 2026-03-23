@@ -143,7 +143,7 @@ export default async function FeedPage({
       checklist: stateMap.get(r.id)?.routineChecklist as Record<string, boolean> | undefined,
     }))
   } else {
-    // Community: admin-role (Matthew's) published journals — P1 scope
+    // Community: published posts where user has opted in to community sharing
     const rows = await db
       .select({
         id: posts.id,
@@ -161,7 +161,11 @@ export default async function FeedPage({
       })
       .from(posts)
       .innerJoin(users, eq(posts.authorId, users.id))
-      .where(and(eq(posts.status, 'published'), eq(users.role, 'admin')))
+      .where(and(
+        eq(posts.status, 'published'),
+        eq(posts.isPublic, true),
+        eq(users.communityEnabled, true),
+      ))
       .orderBy(desc(posts.date))
 
     const ids = rows.map(r => r.id)
@@ -176,8 +180,21 @@ export default async function FeedPage({
     }))
   }
 
+  const showOnboardingBanner = session?.user?.id && !session.user.onboardingComplete
+
   return (
     <main className="feed-page">
+      {showOnboardingBanner && (
+        <div className="onboarding-banner">
+          <p className="onboarding-banner-text">
+            Finish setting up your journal — it only takes a moment.
+          </p>
+          <Link href="/onboarding" className="onboarding-banner-link">
+            Complete setup →
+          </Link>
+        </div>
+      )}
+
       <div className="feed-tabs">
         <Link href="/" className={`feed-tab${!isMine ? ' feed-tab--active' : ''}`}>
           Community

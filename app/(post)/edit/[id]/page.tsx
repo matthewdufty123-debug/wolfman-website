@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import { redirect, notFound } from 'next/navigation'
 import { db } from '@/lib/db'
-import { posts, morningState } from '@/lib/db/schema'
+import { posts, morningState, users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import EditPageClient from './EditPageClient'
 
@@ -30,11 +30,14 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
   const session = await auth()
   if (!session?.user?.id) redirect('/login')
 
-  const [post] = await db.select().from(posts).where(eq(posts.id, id))
+  const [[post], [ms], [user]] = await Promise.all([
+    db.select().from(posts).where(eq(posts.id, id)),
+    db.select().from(morningState).where(eq(morningState.postId, id)),
+    db.select({ communityEnabled: users.communityEnabled, defaultPublic: users.defaultPublic, username: users.username })
+      .from(users).where(eq(users.id, session.user.id)),
+  ])
   if (!post) notFound()
   if (post.authorId !== session.user.id && session.user.role !== 'admin') notFound()
-
-  const [ms] = await db.select().from(morningState).where(eq(morningState.postId, id))
 
   const { intention, grateful, greatAt } = parseContent(post.content)
 
@@ -52,5 +55,14 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
     } : undefined,
   }
 
-  return <EditPageClient postId={id} initialData={initialData} />
+  return (
+    <EditPageClient
+      postId={id}
+      initialData={initialData}
+      communityEnabled={user?.communityEnabled ?? false}
+      defaultPublic={user?.defaultPublic ?? false}
+      initialIsPublic={post.isPublic}
+      username={user?.username ?? null}
+    />
+  )
 }

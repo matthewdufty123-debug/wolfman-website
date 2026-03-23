@@ -72,5 +72,6 @@ export async function register(_prev: ActionState, formData: FormData): Promise<
   const username = await generateUniqueUsername(name)
   await db.insert(users).values({ name, email, passwordHash, role: 'customer', username })
 
-  redirect('/login?registered=1')
+  // Auto sign-in and redirect to onboarding
+  await signIn('credentials', { email, password, redirectTo: '/onboarding' })
 }

@@ -8,6 +8,7 @@ declare module 'next-auth' {
       displayName: string | null
       bio: string | null
       avatar: string | null
+      onboardingComplete: boolean
     } & DefaultSession['user']
   }
 

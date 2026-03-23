@@ -34,13 +34,14 @@ export async function PUT(
   if (error) return NextResponse.json({ error }, { status })
 
   const body = await request.json()
-  const { title, date, content, excerpt, status: reqStatus, morning } = body
+  const { title, date, content, excerpt, status: reqStatus, morning, isPublic } = body
 
   const updateData: Record<string, unknown> = { updatedAt: new Date() }
   if (title) updateData.title = title
   if (date) updateData.date = date
   if (content) updateData.content = content
   if (excerpt !== undefined) updateData.excerpt = excerpt || null
+  if (isPublic !== undefined) updateData.isPublic = Boolean(isPublic)
   if (reqStatus === 'published') {
     updateData.status = 'published'
     updateData.publishedAt = new Date()

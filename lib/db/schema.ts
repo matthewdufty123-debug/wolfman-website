@@ -13,6 +13,9 @@ export const users = pgTable('users', {
   role: text('role').notNull().default('customer'),
   username: text('username').unique(),  // URL-safe handle for /[username] routes
   preferences: jsonb('preferences').notNull().default({}),  // { theme?, fontSize?, fontFamily? }
+  communityEnabled: boolean('community_enabled').notNull().default(false),   // opted in to community posting
+  defaultPublic: boolean('default_public').notNull().default(false),         // new posts public by default
+  onboardingComplete: boolean('onboarding_complete').notNull().default(false), // completed onboarding flow
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
@@ -77,6 +80,7 @@ export const posts = pgTable('posts', {
   review: text('review'),
   authorId: uuid('author_id').references(() => users.id),
   status: text('status').notNull().default('draft'),  // 'draft' | 'published'
+  isPublic: boolean('is_public').notNull().default(false),  // visible in community feed
   publishedAt: timestamp('published_at').notNull().defaultNow(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),

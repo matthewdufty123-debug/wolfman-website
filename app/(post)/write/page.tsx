@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
-import { posts } from '@/lib/db/schema'
+import { posts, users } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import Link from 'next/link'
 import WritePageClient from './WritePageClient'
@@ -10,16 +10,22 @@ export default async function WritePage() {
   const session = await auth()
   if (!session?.user?.id) redirect('/login')
 
-  // Load existing drafts
-  const drafts = await db
-    .select({ id: posts.id, title: posts.title, date: posts.date, createdAt: posts.createdAt })
-    .from(posts)
-    .where(and(eq(posts.authorId, session.user.id), eq(posts.status, 'draft')))
-    .orderBy(desc(posts.createdAt))
+  const [user, drafts] = await Promise.all([
+    db.select({ communityEnabled: users.communityEnabled, defaultPublic: users.defaultPublic, username: users.username })
+      .from(users).where(eq(users.id, session.user.id)).then(r => r[0]),
+    db.select({ id: posts.id, title: posts.title, date: posts.date, createdAt: posts.createdAt })
+      .from(posts)
+      .where(and(eq(posts.authorId, session.user.id), eq(posts.status, 'draft')))
+      .orderBy(desc(posts.createdAt)),
+  ])
 
   return (
     <>
-      <WritePageClient />
+      <WritePageClient
+        communityEnabled={user?.communityEnabled ?? false}
+        defaultPublic={user?.defaultPublic ?? false}
+        username={user?.username ?? null}
+      />
 
       {drafts.length > 0 && (
         <div className="write-drafts">
