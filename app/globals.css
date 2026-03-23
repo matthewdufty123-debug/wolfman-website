@@ -894,6 +894,124 @@ body {
   }
 }
 
+/* ── Dev panel — stats row, collapsible groups, charts ── */
+
+.dev-stats-row {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+.dev-stats-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(74, 127, 165, 0.08);
+  border: 1px solid rgba(74, 127, 165, 0.2);
+  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  min-width: 80px;
+  flex: 1;
+}
+
+.dev-stats-num {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #4A7FA5;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.dev-stats-label {
+  font-size: 0.7rem;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dev-stats-section {
+  margin-bottom: 1.5rem;
+}
+
+.dev-stats-toggle {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #21262d;
+  margin-bottom: 0;
+}
+
+.dev-group {
+  margin-bottom: 0.5rem;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.dev-group-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: rgba(255,255,255,0.02);
+  border: none;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  gap: 0.75rem;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.dev-group-header:hover {
+  background: rgba(74, 127, 165, 0.06);
+}
+
+.dev-group-name {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #4A7FA5;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dev-group-count {
+  font-size: 0.72rem;
+  color: #8b949e;
+  flex: 1;
+}
+
+.dev-group-expand {
+  font-size: 1rem;
+  color: #8b949e;
+  line-height: 1;
+}
+
+.dev-stats-charts {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  padding: 1rem 0;
+}
+
+.dev-chart-block {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.dev-chart-title {
+  font-size: 0.72rem;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.75rem;
+}
+
 /* ── Post reading experience ── */
 
 .post {
