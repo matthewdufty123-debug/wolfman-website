@@ -1,7 +1,11 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { login } from '@/lib/actions/auth'
 import { signInWithGitHub, signInWithGoogle } from '@/lib/actions/oauth'
 import AuthForm from '@/components/AuthForm'
+import { noindexMetadata } from '@/lib/metadata'
+
+export const metadata: Metadata = noindexMetadata('Sign in')
 
 export default function LoginPage() {
   return (

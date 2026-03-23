@@ -1,11 +1,24 @@
 export const dynamic = 'force-dynamic'
 
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { db } from '@/lib/db'
 import { posts, morningState, users } from '@/lib/db/schema'
 import { and, eq, desc, sql } from 'drizzle-orm'
 import { ROUTINE_ICON_MAP } from '@/components/RoutineIcons'
+import { siteMetadata } from '@/lib/metadata'
+
+export async function generateMetadata({ params }: { params: Promise<{ key: string }> }): Promise<Metadata> {
+  const { key } = await params
+  const ritual = ROUTINE_ICON_MAP[key]
+  if (!ritual) return { title: 'Ritual not found — Wolfman' }
+  return siteMetadata({
+    title: ritual.label,
+    description: ritual.description,
+    path: `/morning-ritual/${key}`,
+  })
+}
 
 function formatDate(iso: string) {
   const d = new Date(iso + 'T00:00:00')

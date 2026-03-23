@@ -1,8 +1,12 @@
+import type { Metadata } from 'next'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import ThemeButtons from '@/components/ThemeButtons'
 import FontSizeButtons from '@/components/FontSizeButtons'
 import FontFamilyButtons from '@/components/FontFamilyButtons'
+import { noindexMetadata } from '@/lib/metadata'
+
+export const metadata: Metadata = noindexMetadata('Settings')
 
 export default async function SettingsPage() {
   const session = await auth()

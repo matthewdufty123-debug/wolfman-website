@@ -1,8 +1,12 @@
+import type { Metadata } from 'next'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { orders, users } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
+import { noindexMetadata } from '@/lib/metadata'
+
+export const metadata: Metadata = noindexMetadata('My account')
 import AccountNameForm from '@/components/AccountNameForm'
 import AccountPasswordForm from '@/components/AccountPasswordForm'
 import AccountUsernameForm from '@/components/AccountUsernameForm'

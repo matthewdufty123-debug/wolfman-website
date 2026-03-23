@@ -1,5 +1,14 @@
 export const dynamic = 'force-dynamic'
 
+import type { Metadata } from 'next'
+import { siteMetadata } from '@/lib/metadata'
+
+export const metadata: Metadata = siteMetadata({
+  title: 'Morning Intentions',
+  description: 'Daily morning intentions from Matthew Wolfman — mindful living, honest reflection, and the small moments that make a life.',
+  path: '/',
+})
+
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'

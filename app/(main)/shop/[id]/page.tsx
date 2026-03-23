@@ -1,10 +1,24 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getProduct, getProducts } from '@/lib/printful'
 import AddToCartButton from '@/components/AddToCartButton'
+import { siteMetadata } from '@/lib/metadata'
 
 export const revalidate = 3600
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const product = await getProduct(Number(id))
+  if (!product) return { title: 'Product not found — Wolfman' }
+  return siteMetadata({
+    title: product.name,
+    description: product.description || `${product.name} — available in the Wolfman shop.`,
+    path: `/shop/${id}`,
+    image: product.thumbnail_url,
+  })
+}
 
 export async function generateStaticParams() {
   try {

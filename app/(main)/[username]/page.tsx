@@ -15,13 +15,35 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { username } = await params
   const [user] = await db
-    .select({ displayName: users.displayName, name: users.name })
+    .select({ displayName: users.displayName, name: users.name, bio: users.bio, avatar: users.avatar, image: users.image })
     .from(users)
     .where(eq(users.username, username))
     .limit(1)
   if (!user) return { title: 'Profile not found — Wolfman' }
   const displayName = user.displayName ?? user.name ?? username
-  return { title: `${displayName} — Wolfman` }
+  const description = user.bio ?? `${displayName}'s morning intentions and habit data on Wolfman.`
+  const avatarUrl = user.avatar ?? user.image ?? undefined
+  const url = `https://wolfman.blog/${username}`
+  const fullTitle = `${displayName} — Wolfman`
+  return {
+    title: fullTitle,
+    description,
+    openGraph: {
+      title: fullTitle,
+      description,
+      url,
+      siteName: 'Wolfman',
+      type: 'profile',
+      ...(avatarUrl ? { images: [{ url: avatarUrl, width: 400, height: 400, alt: displayName }] } : {}),
+    },
+    twitter: {
+      card: avatarUrl ? 'summary' : 'summary',
+      title: fullTitle,
+      description,
+      ...(avatarUrl ? { images: [avatarUrl] } : {}),
+    },
+    alternates: { canonical: url },
+  }
 }
 
 // ── Streak calculation ────────────────────────────────────────────────────────

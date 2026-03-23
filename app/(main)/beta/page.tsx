@@ -2,10 +2,13 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import BetaCountdown from '@/components/BetaCountdown'
 
-export const metadata: Metadata = {
-  title: 'Beta — Wolfman',
+import { siteMetadata } from '@/lib/metadata'
+
+export const metadata: Metadata = siteMetadata({
+  title: 'Public Beta',
   description: 'What the Wolfman public beta is, how long it runs, and what happens to your data.',
-}
+  path: '/beta',
+})
 
 export default function BetaPage() {
   return (

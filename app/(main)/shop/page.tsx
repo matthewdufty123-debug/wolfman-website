@@ -1,7 +1,15 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getProducts } from '@/lib/printful'
 import type { PrintfulProductSummary } from '@/lib/printful'
+import { siteMetadata } from '@/lib/metadata'
+
+export const metadata: Metadata = siteMetadata({
+  title: 'Shop',
+  description: 'Photography canvases, prints, and mindful living clothing. All designed by Matthew Wolfman.',
+  path: '/shop',
+})
 
 export const revalidate = 3600
 
