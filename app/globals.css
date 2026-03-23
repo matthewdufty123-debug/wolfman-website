@@ -4036,6 +4036,94 @@ html[data-theme="dark"] .stats-chart-card {
   flex-shrink: 0;
 }
 
+.feedback-topics {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.feedback-topic-pill {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.76rem;
+  font-weight: 500;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(74, 127, 165, 0.25);
+  background: transparent;
+  color: var(--body-text);
+  cursor: pointer;
+  opacity: 0.75;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+}
+
+.feedback-topic-pill:hover {
+  border-color: #4A7FA5;
+  color: #4A7FA5;
+  opacity: 1;
+}
+
+.feedback-topic-pill.is-active {
+  background: rgba(74, 127, 165, 0.15);
+  border-color: #4A7FA5;
+  color: #4A7FA5;
+  opacity: 1;
+}
+
+.feedback-advanced-toggle {
+  margin-top: 0.6rem;
+}
+
+.feedback-advanced-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.76rem;
+  color: rgba(144, 144, 144, 0.8);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.feedback-advanced-btn:hover {
+  color: #909090;
+}
+
+.feedback-advanced {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  background: rgba(74, 127, 165, 0.06);
+  border: 1px solid rgba(74, 127, 165, 0.15);
+}
+
+.feedback-advanced-note {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #909090;
+  margin: 0;
+}
+
+.feedback-dev-link {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(74, 127, 165, 0.15);
+  text-align: center;
+}
+
+.feedback-dev-anchor {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.8rem;
+  color: #909090;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.feedback-dev-anchor:hover {
+  color: #4A7FA5;
+}
+
 .feedback-again-btn {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.78rem;
