@@ -894,6 +894,124 @@ body {
   }
 }
 
+/* ── Dev panel — stats row, collapsible groups, charts ── */
+
+.dev-stats-row {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+.dev-stats-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(74, 127, 165, 0.08);
+  border: 1px solid rgba(74, 127, 165, 0.2);
+  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  min-width: 80px;
+  flex: 1;
+}
+
+.dev-stats-num {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #4A7FA5;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.dev-stats-label {
+  font-size: 0.7rem;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dev-stats-section {
+  margin-bottom: 1.5rem;
+}
+
+.dev-stats-toggle {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #21262d;
+  margin-bottom: 0;
+}
+
+.dev-group {
+  margin-bottom: 0.5rem;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.dev-group-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: rgba(255,255,255,0.02);
+  border: none;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  gap: 0.75rem;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.dev-group-header:hover {
+  background: rgba(74, 127, 165, 0.06);
+}
+
+.dev-group-name {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #4A7FA5;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dev-group-count {
+  font-size: 0.72rem;
+  color: #8b949e;
+  flex: 1;
+}
+
+.dev-group-expand {
+  font-size: 1rem;
+  color: #8b949e;
+  line-height: 1;
+}
+
+.dev-stats-charts {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  padding: 1rem 0;
+}
+
+.dev-chart-block {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.dev-chart-title {
+  font-size: 0.72rem;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.75rem;
+}
+
 /* ── Post reading experience ── */
 
 .post {
@@ -4034,6 +4152,94 @@ html[data-theme="dark"] .stats-chart-card {
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
+}
+
+.feedback-topics {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.feedback-topic-pill {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.76rem;
+  font-weight: 500;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(74, 127, 165, 0.25);
+  background: transparent;
+  color: var(--body-text);
+  cursor: pointer;
+  opacity: 0.75;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+}
+
+.feedback-topic-pill:hover {
+  border-color: #4A7FA5;
+  color: #4A7FA5;
+  opacity: 1;
+}
+
+.feedback-topic-pill.is-active {
+  background: rgba(74, 127, 165, 0.15);
+  border-color: #4A7FA5;
+  color: #4A7FA5;
+  opacity: 1;
+}
+
+.feedback-advanced-toggle {
+  margin-top: 0.6rem;
+}
+
+.feedback-advanced-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.76rem;
+  color: rgba(144, 144, 144, 0.8);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.feedback-advanced-btn:hover {
+  color: #909090;
+}
+
+.feedback-advanced {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  background: rgba(74, 127, 165, 0.06);
+  border: 1px solid rgba(74, 127, 165, 0.15);
+}
+
+.feedback-advanced-note {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #909090;
+  margin: 0;
+}
+
+.feedback-dev-link {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(74, 127, 165, 0.15);
+  text-align: center;
+}
+
+.feedback-dev-anchor {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.8rem;
+  color: #909090;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.feedback-dev-anchor:hover {
+  color: #4A7FA5;
 }
 
 .feedback-again-btn {

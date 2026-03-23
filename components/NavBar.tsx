@@ -33,7 +33,7 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
   const { data: session } = useSession()
   const [navHidden, setNavHidden] = useState(false)
   const segments = pathname.split('/').filter(Boolean)
-  const KNOWN_PREFIXES = new Set(['admin', 'edit', 'write', 'account', 'settings', 'shop', 'cart', 'checkout', 'login', 'register', 'about', 'morning-ritual', 'morning-stats', 'intentions', 'feedback', 'beta', 'discover', 'api'])
+  const KNOWN_PREFIXES = new Set(['admin', 'edit', 'write', 'account', 'settings', 'shop', 'cart', 'checkout', 'login', 'register', 'about', 'morning-ritual', 'morning-stats', 'intentions', 'feedback', 'beta', 'dev', 'discover', 'api'])
   const isPostPage = pathname.startsWith('/posts/') ||
     (segments.length === 2 && !KNOWN_PREFIXES.has(segments[0]))
 

@@ -1,13 +1,17 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Link from 'next/link'
 import BetaCountdown from '@/components/BetaCountdown'
 
 const CATEGORIES = ['Bug', 'Idea', 'Question']
+const TOPICS = ['Journal', 'Stats', 'Design', 'Performance', 'SEO', 'Shop', 'Auth', 'Mobile', 'Admin']
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
 
 export default function FeedbackPageClient() {
   const [category, setCategory] = useState('Idea')
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([])
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [message, setMessage] = useState('')
   const [anonymous, setAnonymous] = useState(false)
   const [screenshot, setScreenshot] = useState<File | null>(null)
@@ -15,6 +19,12 @@ export default function FeedbackPageClient() {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  function toggleTopic(t: string) {
+    setSelectedTopics(prev =>
+      prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]
+    )
+  }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null
@@ -46,6 +56,7 @@ export default function FeedbackPageClient() {
     form.append('message', message)
     form.append('anonymous', String(anonymous))
     form.append('pageUrl', window.location.href)
+    form.append('topics', selectedTopics.join(','))
     if (screenshot) form.append('screenshot', screenshot)
 
     try {
@@ -67,6 +78,8 @@ export default function FeedbackPageClient() {
       setStatus('success')
       setMessage('')
       setCategory('Idea')
+      setSelectedTopics([])
+      setShowAdvanced(false)
       setAnonymous(false)
       clearScreenshot()
     } catch {
@@ -112,6 +125,42 @@ export default function FeedbackPageClient() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Topic area (optional, multi-select) */}
+            <div className="feedback-field">
+              <p className="feedback-label">
+                Topic area <span className="feedback-label-optional">(optional)</span>
+              </p>
+              <div className="feedback-topics">
+                {TOPICS.map(t => (
+                  <button
+                    key={t}
+                    type="button"
+                    className={`feedback-topic-pill${selectedTopics.includes(t) ? ' is-active' : ''}`}
+                    onClick={() => toggleTopic(t)}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+              <div className="feedback-advanced-toggle">
+                <button
+                  type="button"
+                  className="feedback-advanced-btn"
+                  onClick={() => setShowAdvanced(o => !o)}
+                >
+                  {showAdvanced ? '− Less options' : '+ More options'}
+                </button>
+              </div>
+              {showAdvanced && (
+                <div className="feedback-advanced">
+                  <p className="feedback-advanced-note">
+                    Topic tags help us triage your feedback into the right area of the backlog.
+                    Matthew reads everything regardless.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Message */}
@@ -177,7 +226,12 @@ export default function FeedbackPageClient() {
             </button>
           </form>
         )}
+      <div className="feedback-dev-link">
+        <Link href="/dev" className="feedback-dev-anchor">
+          See what&apos;s in the pipeline →
+        </Link>
       </div>
+    </div>
     </main>
   )
 }

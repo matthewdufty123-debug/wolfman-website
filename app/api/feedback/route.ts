@@ -19,6 +19,10 @@ export async function POST(req: Request) {
   const anonymous = form.get('anonymous') === 'true'
   const pageUrl = form.get('pageUrl') as string | null
   const screenshot = form.get('screenshot') as File | null
+  const topicsRaw = form.get('topics') as string | null
+  const topicLabels = topicsRaw
+    ? topicsRaw.split(',').map(t => t.trim().toLowerCase()).filter(Boolean)
+    : []
 
   if (!category || !message?.trim()) {
     return NextResponse.json({ error: 'Category and message are required.' }, { status: 400 })
@@ -75,7 +79,7 @@ export async function POST(req: Request) {
     body: JSON.stringify({
       title,
       body: bodyLines.join('\n'),
-      labels: ['beta-feedback'],
+      labels: ['beta-feedback', category.toLowerCase(), ...topicLabels],
       milestone: BETA_MILESTONE,
     }),
   })
