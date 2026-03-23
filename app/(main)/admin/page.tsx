@@ -34,9 +34,6 @@ export default async function AdminDashboard() {
             <h1 className="dash-title">wolfman.blog</h1>
             <p className="dash-subtitle">admin dashboard</p>
           </div>
-          <Link href="/write" className="dash-action-btn">
-            + New journal
-          </Link>
         </header>
 
         {/* Stats */}
