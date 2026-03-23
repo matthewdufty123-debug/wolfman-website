@@ -1884,6 +1884,55 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
   gap: 0.75rem;
 }
 
+/* Site config form */
+.dash-config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.dash-config-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.dash-config-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted, #909090);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.dash-config-hint {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.dash-config-select,
+.dash-config-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: var(--bg, #fff);
+  color: var(--text, #4A4A4A);
+  width: 100%;
+  max-width: 480px;
+}
+.dash-config-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.dash-config-saved {
+  font-size: 0.85rem;
+  color: #3AB87A;
+  font-weight: 600;
+}
+.dash-config-error {
+  font-size: 0.85rem;
+  color: #A82020;
+}
+
 @media (max-width: 600px) {
   .dash-stats {
     grid-template-columns: repeat(2, 1fr);

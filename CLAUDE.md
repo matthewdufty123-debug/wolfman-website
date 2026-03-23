@@ -34,7 +34,7 @@ authentic, personal, and real.
 - Schema managed via `drizzle-kit` — deploy changes with `npm run db:push`
 - Auth adapter: `@auth/drizzle-adapter` with explicit table references
 - Tables:
-  - `users` — id, email, passwordHash, name, displayName, bio, image, avatar, role
+  - `users` — id, email, passwordHash, name, displayName, bio, image, avatar, role, username
   - `accounts`, `sessions`, `verificationTokens` — Auth.js adapter tables
   - `orders`, `orderItems` — Stripe/Printful e-commerce
   - `posts` — blog posts (DB-backed; the `posts/` markdown directory is empty and unused)
@@ -83,12 +83,12 @@ authentic, personal, and real.
 
 ## Site Structure
 
-### Blog — Morning Intentions
-The heart of the site. Matthew writes a daily morning intention post
+### Blog — Morning Intentions (Journals)
+The heart of the site. Matthew writes a daily morning intention journal
 and shares it here first, then links to it from LinkedIn, Facebook,
-and Instagram.
+and Instagram. User-facing copy uses "journal" not "post" throughout.
 
-Each post has three sections:
+Each journal has three sections:
 - **Today's Intention** — a story, observation or reflection that
 leads to a lesson or intention for the day
 - **I'm Grateful For** — something specific, vivid and personal.
@@ -96,8 +96,9 @@ Could be a Honda engine, a walk, a moment. Never generic.
 - **Something I'm Great At** — a strength, owned with confidence
 and without apology
 
-Posts are stored in the Neon `posts` table (DB-backed, not markdown files).
-Each post can have an associated `morning_state`, `evening_reflection`, and `day_scores` record.
+Journals are stored in the Neon `posts` table (DB-backed, not markdown files — the table is named `posts` internally but presented as "journals" in the UI).
+Each journal can have an associated `morning_state`, `evening_reflection`, and `day_scores` record.
+Canonical URL: `/[username]/[slug]`
 
 **Reading experience — this is critical:**
 - When a post opens, the reader sees NOTHING but the text
@@ -114,14 +115,16 @@ inviting a click
 - **Morning State** — captured at publish time via PostForm: brain activity scale, body energy scale, happy scale (all 1–6), plus routine checklist (10 rituals: sunlight, breathwork, cacao, meditation, cold shower, walk, animal love, caffeine, yoga, workout)
 - **Evening Reflection** — logged at end of day: reflection text, wentToPlan, dayRating (1–6). Available to any post owner via PostFooter.
 - **Claude's Take** — generated at Review time (post content + morning state) and optionally regenerated when evening reflection is saved. Stored in `day_scores`.
-- **Morning Stats page** (`/morning-stats`) — charts and scatter plots across all posts (currently shows Matthew's data; per-user view is open issue #82)
-- **Morning Ritual pages** (`/morning-ritual`, `/morning-ritual/[key]`) — filter posts by ritual
+- **Stats & Profile page** (`/[username]`) — per-user charts, Morning Zone scatter, headline stats (total journals, current streak, longest streak, this month). Owner sees edit affordance; visitors see public view. `/morning-stats` and `/journal` redirect here for logged-in users, else to `/login`.
+- **Morning Ritual pages** (`/morning-ritual`, `/morning-ritual/[key]`) — filter journals by ritual
 
 ### Home Page
-- Minimal. Almost empty.
-- A beautiful script font displays: "Hello, I'm Matthew Wolfman"
-- Nothing else above the fold
-- Below: gentle navigation to Blog, About, Shop
+- Two-tab **Journal Feed** (built as of #115):
+  - **Community tab** (default) — Matthew's published journals with author card, title, date, excerpt, and ritual icons
+  - **My Journals tab** (`?view=mine`) — logged-in user's own journals including drafts; redirects to `/login` if unauthenticated
+  - Empty states for both tabs
+- `/intentions` redirects here (301)
+- This replaced the old "Hello, I'm Matthew Wolfman" minimal hero (#44 superseded by #115)
 
 ### About
 - Matthew's story — who he is, how he lives, what Wolfman means
@@ -137,9 +140,11 @@ inviting a click
 - Guest checkout supported — no account required to purchase
 
 ### Auth & Account Pages
-- `/login`, `/register` — public auth pages
-- `/account` — user profile (name, display name, bio, avatar, password)
+- `/login`, `/register` — public auth pages (register includes beta terms summary)
+- `/account` — user profile (username with live availability check, name, display name, bio, avatar, password)
 - `/settings` — user settings
+- `/beta` — beta information, terms, data policy, and countdown
+- `/feedback` — beta feedback form (submits to GitHub Issues API)
 
 ---
 
@@ -212,7 +217,7 @@ always match this voice. Nothing generic. Nothing corporate.
 
 ## Content Guidelines
 
-- Blog posts are written by Matthew and pasted in — never 
+- Journal entries are written by Matthew (and beta users) and pasted in — never
 AI-generated
 - Product descriptions should feel like Matthew wrote them
 - Image alt text should be descriptive and warm, not mechanical
@@ -234,22 +239,27 @@ AI-generated
 ```
 app/
   (main)/                   — public-facing pages
+    [username]/             — Public profile page: avatar, stats, scatter, streak
+      [slug]/               — Canonical journal post page (sacred reading experience, no chrome)
     about/                  — About page (stub)
-    account/                — User profile (name, avatar, password)
-    admin/                  — Admin dashboard (stats, orders, posts)
+    account/                — User profile (username, name, avatar, password)
+    admin/                  — Admin dashboard (stats, orders, journals)
+    beta/                   — Beta info, terms, data policy, countdown
     cart/                   — Shopping cart
     checkout/               — Stripe checkout + success
-    intentions/             — Intentions archive
+    feedback/               — Beta feedback form (GitHub Issues integration)
+    intentions/             — 301 redirect → /
     login/                  — Login page
     morning-ritual/         — Ritual overview + [key] filter page
-    morning-stats/          — Stats dashboard (charts, scatter)
-    register/               — Register page
+    morning-stats/          — Redirects logged-in users → /[username], else → /login
+    journal/                — Redirects logged-in users → /[username], else → /login
+    register/               — Register page (includes beta terms summary)
     settings/               — User settings (theme, font — persisted to DB)
     shop/                   — Shop listing + [id] product page
-  (post)/                   — Separate route group for sacred reading experience
-    posts/[slug]/           — Individual blog post page (no chrome)
-    write/                  — New post form (all authenticated users)
-    edit/[id]/              — Edit post form (post owner only)
+  (post)/                   — Route group for write/edit overlays
+    posts/[slug]/           — Legacy URL — 301 redirects to /[username]/[slug]
+    write/                  — New journal form (all authenticated users)
+    edit/[id]/              — Edit journal form (post owner only)
   api/
     admin/
       claude-take/          — Generate Claude's Take (admin/Matthew's posts)
@@ -262,6 +272,7 @@ app/
     checkout/               — Stripe checkout session creation
     claude-take/            — Generate Claude's Take (post owner)
     evening-reflection/     — Save/update evening reflection (post owner)
+    feedback/               — Beta feedback → GitHub Issues API
     morning-stats/          — Morning stats data API
     posts/                  — User post CRUD (authenticated users)
       [id]/                 — Individual post CRUD (owner only)
@@ -269,12 +280,14 @@ app/
     user/
       avatar/               — Avatar upload (Vercel Blob)
       settings/             — Read/write user preferences (theme, font)
+      username/             — Username availability check (GET ?u=foo)
     webhooks/stripe/        — Stripe webhook handler
   layout.tsx                — Root layout with CartProvider
 
 components/                 — Shared React components
   AccountNameForm.tsx       — Profile name editing
   AccountPasswordForm.tsx   — Password change form
+  AccountUsernameForm.tsx   — Username editing with live availability check
   AddToCartButton.tsx       — Shop add-to-cart
   AuthForm.tsx / AuthProvider.tsx
   AvatarUpload.tsx          — Avatar upload with preview
@@ -284,24 +297,26 @@ components/                 — Shared React components
   FontFamilyButtons.tsx / FontSizeButtons.tsx — Reader font controls
   MorningRitualIconBar.tsx  — Ritual icons on post page
   MorningScaleBar.tsx       — Brain activity/body/happy scale display
+  MorningZoneScatter.tsx    — Morning Zone scatter (body vs brain vs happiness)
   NavBar.tsx                — Bottom bell-curve site navigation with login modal
   PostFooter.tsx            — "You have been reading..." + wolf logo + owner actions
   PostForm.tsx              — Write/edit form with Review→Publish Claude flow
   RoutineIcons.tsx          — Morning routine icon set
   ShareButton.tsx           — Post sharing
-  StatsCharts.tsx           — Charts for morning stats page
+  StatsCharts.tsx           — Trend charts for profile/stats pages
   ThemeButtons.tsx / ThemeProvider.tsx — Reader theme controls (DB-persisted)
-  TopBar.tsx                — Fixed top utility bar: + new post, BETA FEEDBACK, edit
+  TopBar.tsx                — Fixed top utility bar: + new journal, BETA FEEDBACK, edit
   WolfLogo.tsx              — Animated wolf logo
 
 lib/
   db/                       — Drizzle schema and database client
   actions/                  — Next.js server actions (auth, account, oauth)
   post-context.tsx          — React context: shares post ownership from page → TopBar
-  posts.ts                  — Post fetching/parsing utilities
+  posts.ts                  — Post fetching/parsing utilities (includes authorUsername in PostMeta)
   printful.ts               — Printful API client
   email.ts                  — Resend email helpers
   cart.tsx                  — Cart context and localStorage logic
+  username.ts               — Username utilities: slugifyName, isValidUsername, generateUniqueUsername, isUsernameAvailable
 
 posts/                      — Empty directory (posts are DB-backed, not markdown)
 public/
@@ -338,11 +353,11 @@ All work is organised into three phases, each subdivided into stages. Issues car
 | Stage | Name | Key issues | Status |
 |-------|------|------------|--------|
 | P1S1 | Cleanup & Housekeeping | #98 ✅, #99 ✅ | **Complete** |
-| P1S2 | Core UX & Navigation | #83 ✅, #64 ✅, #44 ❌ | **In progress** — #44 remaining |
-| P1S3 | Post Creation for All Users | #80 ✅, #84 ✅, #85 ✅, #81 ✅ | **Complete** |
-| P1S4 | User Profile & Settings | #68 ✅, #86 ✅, #82 ❌ | **In progress** — #82 remaining |
+| P1S2 | Core UX & Navigation | #83 ✅, #64 ✅, #44 ✅, #115 ✅ | **Complete** |
+| P1S3 | Journal Creation for All Users | #80 ✅, #84 ✅, #85 ✅, #81 ✅ | **Complete** |
+| P1S4 | User Profile & Settings | #68 ✅, #86 ✅, #82 ✅, #113 ✅, #116 ✅, #117 ✅, #118 ✅ | **Complete** |
 | P1S5 | About & SEO | #47, #48, #49, #50, #45, #46 | Not started |
-| P2S1 | Beta Infrastructure | #87, #96, #97, #88 | Not started |
+| P2S1 | Beta Infrastructure | #88 ✅, #96 ✅, #97 ✅, #87 ❌, #114 ❌ | **In progress** — #87 (user cap) and #114 (opt-in feed) remaining |
 | P2S2 | Scoring System & Terminology | #100 (draft) | Not started |
 | P2S3 | Notifications | #91, #89, #90 | Not started |
 | P2S4 | Admin Panel | #92, #93, #94, #95 | Not started |
@@ -352,12 +367,11 @@ All work is organised into three phases, each subdivided into stages. Issues car
 | P3S3 | Shop & Commerce | #104 (draft — scope first) | Not started |
 | P3S4 | Completion | #105 (draft — scope first) | Not started |
 
-**Current phase: P1 — Public Alpha.**
-- P1S1 and P1S3 are complete.
-- P1S2: #44 (home page hero) is the only remaining issue.
-- P1S4: #82 (per-user private stats page) is the only remaining issue.
-- Next session: finish #44, then #82, then move to P1S5 (About & SEO).
-- Note: `/feedback` page does not yet exist — the BETA FEEDBACK top bar button is a dead link until #88 (P2S1) is built.
+**Current phase: P1 complete — now in P2.**
+- P1S1 through P1S4 are all complete.
+- P1S5 (About & SEO) is not started — #47–#50, #45, #46.
+- P2S1 is in progress: #88 ✅ (feedback form), #96 ✅ (/beta page), #97 ✅ (register terms), #87 ❌ (user cap), #114 ❌ (opt-in feed visibility).
+- Next session: decide whether to complete P2S1 first (#87, #114), or start P1S5 (About & SEO).
 
 ### Session startup — do this every time before any work begins
 

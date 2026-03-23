@@ -36,7 +36,6 @@ function IconNext() {
 
 export default function PostFooter({ prevPost, nextPost, slug, title, postId, authorId, authorUsername }: Props) {
   const { data: session } = useSession()
-  const isAdmin = session?.user?.role === 'admin'
   const isOwner = session?.user?.id != null && session.user.id === authorId
   const [eveningOpen, setEveningOpen] = useState(false)
   const url = authorUsername
@@ -87,33 +86,12 @@ export default function PostFooter({ prevPost, nextPost, slug, title, postId, au
         <Link href="/" className="post-nav-btn">All journals</Link>
       </div>
 
-      {isAdmin && postId && (
-        <div className="post-nav-admin">
-          <span className="post-nav-admin-label">Admin</span>
-          <div className="post-nav-admin-btns">
-            <button onClick={() => setEveningOpen(true)} className="post-nav-admin-btn">
-              🌙 Evening
-            </button>
-            <Link href={`/admin/publish?edit=${slug}`} className="post-nav-admin-btn">
-              ✏️ Edit
-            </Link>
-            <Link href="/admin/publish" className="post-nav-admin-btn">
-              ＋ New
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* Owner evening reflection button (non-admin authors) */}
-      {isOwner && !isAdmin && postId && (
+      {isOwner && postId && (
         <div className="post-nav-admin">
           <div className="post-nav-admin-btns">
             <button onClick={() => setEveningOpen(true)} className="post-nav-admin-btn">
-              🌙 Evening
+              🌙 Evening reflection
             </button>
-            <Link href={`/edit/${postId}`} className="post-nav-admin-btn">
-              ✏️ Edit
-            </Link>
           </div>
         </div>
       )}

@@ -5,16 +5,19 @@ import { db } from '@/lib/db'
 import { orders, users } from '@/lib/db/schema'
 import { desc, count, sum, eq } from 'drizzle-orm'
 import { getAllPosts } from '@/lib/posts'
+import { getSiteConfig } from '@/lib/site-config'
+import SiteConfigPanel from '@/components/SiteConfigPanel'
 
 export default async function AdminDashboard() {
   const session = await auth()
   if (!session?.user || session.user.role !== 'admin') redirect('/')
 
-  const [allPosts, recentOrders, [orderStats], [userStats]] = await Promise.all([
+  const [allPosts, recentOrders, [orderStats], [userStats], currentSiteConfig] = await Promise.all([
     getAllPosts(),
     db.select().from(orders).orderBy(desc(orders.createdAt)).limit(5),
     db.select({ total: count(), revenue: sum(orders.totalAmount) }).from(orders).where(eq(orders.status, 'paid')),
     db.select({ total: count() }).from(users),
+    getSiteConfig(),
   ])
 
   const totalRevenue = Number(orderStats.revenue ?? 0)
@@ -117,6 +120,9 @@ export default async function AdminDashboard() {
             </tbody>
           </table>
         </section>
+
+        {/* Site status */}
+        <SiteConfigPanel initial={currentSiteConfig} />
 
         {/* Quick links */}
         <section className="dash-section">

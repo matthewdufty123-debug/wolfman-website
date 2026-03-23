@@ -3,11 +3,12 @@
 import { signIn } from '@/auth'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
-import { eq, sql } from 'drizzle-orm'
+import { eq, count } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 import { redirect } from 'next/navigation'
 import { AuthError } from 'next-auth'
 import { generateUniqueUsername } from '@/lib/username'
+import { getSiteConfig, isRegistrationOpen, isCapReached } from '@/lib/site-config'
 
 type ActionState = { error: string } | undefined
 
@@ -51,9 +52,15 @@ export async function register(_prev: ActionState, formData: FormData): Promise<
     return { error: 'Password must be at least 8 characters.' }
   }
 
-  const [{ count }] = await db.select({ count: sql<number>`COUNT(*)` }).from(users)
-  if (Number(count) >= 51) {
-    return { error: 'registration_closed' }
+  const [config, [{ total }]] = await Promise.all([
+    getSiteConfig(),
+    db.select({ total: count() }).from(users),
+  ])
+  if (!isRegistrationOpen(config.status)) {
+    return { error: 'Registration is not open yet.' }
+  }
+  if (isCapReached(config.userCap, Number(total))) {
+    return { error: 'Registration is currently closed — the beta is full.' }
   }
 
   const [existing] = await db.select().from(users).where(eq(users.email, email)).limit(1)

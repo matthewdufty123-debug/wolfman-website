@@ -22,7 +22,7 @@ const NAV_LINKS = [
   { href: '/beta',   label: 'about the beta',     pathKey: 'beta' },
 ]
 
-export default function NavBar() {
+export default function NavBar({ registrationOpen }: { registrationOpen: boolean }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [devOpen, setDevOpen] = useState(false)
@@ -374,12 +374,14 @@ export default function NavBar() {
             </button>
           </form>
 
-          <p className="login-register-prompt">
-            No account?{' '}
-            <Link href="/register" onClick={closeAll}>
-              Register here
-            </Link>
-          </p>
+          {registrationOpen && (
+            <p className="login-register-prompt">
+              No account?{' '}
+              <Link href="/register" onClick={closeAll}>
+                Register here
+              </Link>
+            </p>
+          )}
         </div>
       </div>
 

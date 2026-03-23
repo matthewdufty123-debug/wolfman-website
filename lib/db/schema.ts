@@ -108,6 +108,21 @@ export const eveningReflection = pgTable('evening_reflection', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
+// ── Site configuration ─────────────────────────────────────────────────────
+// Singleton row (id always 1). Controls registration, messaging and UI mode.
+// status: closed_alpha | closed_beta | open_beta | live
+// userCap: max registrations (null = unlimited). Applies in open_beta and live.
+export const siteConfig = pgTable('site_config', {
+  id: integer('id').primaryKey().default(1),
+  status: text('status').notNull().default('closed_alpha'),
+  userCap: integer('user_cap'),           // null = no cap
+  statusMessage: text('status_message'),  // optional custom closed/full message
+  betaOpensAt: timestamp('beta_opens_at'), // drives countdowns when status = closed_beta
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  updatedBy: text('updated_by'),          // admin user ID who last changed it
+})
+
+// ── Claude-generated synthesis ────────────────────────────────────────────
 // Claude-generated synthesis — scores stored as flexible JSONB to allow the
 // scoring model to evolve without schema changes. The model field allows
 // regeneration with newer Claude versions while preserving history.

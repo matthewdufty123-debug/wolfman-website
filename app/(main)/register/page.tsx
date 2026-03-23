@@ -1,23 +1,60 @@
 import Link from 'next/link'
 import { register } from '@/lib/actions/auth'
 import AuthForm from '@/components/AuthForm'
-import { db } from '@/lib/db'
-import { users } from '@/lib/db/schema'
-import { sql } from 'drizzle-orm'
+import { getRegistrationState } from '@/lib/site-config'
 
 export default async function RegisterPage() {
-  const [{ count }] = await db.select({ count: sql<number>`COUNT(*)` }).from(users)
-  const isClosed = Number(count) >= 51
+  const { config, registrationOpen, capReached } = await getRegistrationState()
 
-  if (isClosed) {
+  // Closed alpha / closed beta — registration not open yet
+  if (!registrationOpen) {
+    const message = config.statusMessage ?? (
+      config.status === 'closed_alpha'
+        ? 'wolfman.blog is currently in private alpha. Registration is not open yet.'
+        : 'wolfman.blog is coming soon. Registration is not open yet.'
+    )
+    return (
+      <main className="auth-main">
+        <div className="auth-card">
+          <h1 className="auth-title">Registration is not open yet.</h1>
+          <p className="beta-register-closed-body">{message}</p>
+          {config.betaOpensAt && (
+            <p className="beta-register-closed-body">
+              The beta opens on <strong>{new Date(config.betaOpensAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>.
+            </p>
+          )}
+          <p className="beta-register-closed-body">
+            Keep an eye on{' '}
+            <a
+              href="https://www.linkedin.com/in/matthewwolfman"
+              className="beta-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Matthew&apos;s LinkedIn
+            </a>
+            {' '}for updates.
+          </p>
+          <p className="beta-register-closed-body" style={{ marginTop: '2rem' }}>
+            <Link href="/beta" className="beta-link">Learn more about the beta →</Link>
+          </p>
+          <p className="beta-register-closed-body">
+            Already have an account?{' '}
+            <Link href="/login" className="beta-link">Sign in →</Link>
+          </p>
+        </div>
+      </main>
+    )
+  }
+
+  // Open but cap reached
+  if (capReached) {
+    const message = config.statusMessage ?? 'The wolfman.blog beta has reached its limit of testers. Thank you for your interest — it means a lot.'
     return (
       <main className="auth-main">
         <div className="auth-card">
           <h1 className="auth-title">Registration is closed.</h1>
-          <p className="beta-register-closed-body">
-            The wolfman.blog beta has reached its limit of 51 testers. Thank you for your
-            interest — it means a lot.
-          </p>
+          <p className="beta-register-closed-body">{message}</p>
           <p className="beta-register-closed-body">
             The beta runs until <strong>1 June 2026</strong>. If it continues, registration
             may reopen. Keep an eye on{' '}
@@ -39,12 +76,12 @@ export default async function RegisterPage() {
     )
   }
 
+  // Registration is open
   return (
     <main className="auth-main">
       <div className="auth-card">
         <h1 className="auth-title">Create an account.</h1>
 
-        {/* Beta terms summary */}
         <div className="beta-register-terms">
           <p className="beta-register-terms-headline">You&apos;re joining the public beta.</p>
           <ul className="beta-register-terms-list">
