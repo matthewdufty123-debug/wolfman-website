@@ -334,14 +334,6 @@ export default function DevOverlay({ isOpen, onClose }: DevOverlayProps) {
 
         {/* Header row */}
         <div className="dev-overlay-header">
-          <a
-            href={`https://github.com/${GITHUB_REPO}/issues/new`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="dev-raise-btn"
-          >
-            Raise an Issue
-          </a>
           {isAdmin && (
             <Link href="/admin" className="dev-raise-btn" onClick={onClose}>
               Admin Panel
