@@ -2028,13 +2028,17 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 .dash-config-select,
 .dash-config-input {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d0d0d0;
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 6px;
   font-size: 0.9rem;
-  background: var(--bg, #fff);
-  color: var(--text, #4A4A4A);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
   width: 100%;
   max-width: 480px;
+}
+.dash-config-select option {
+  background: #214459;
+  color: #fff;
 }
 .dash-config-actions {
   display: flex;
