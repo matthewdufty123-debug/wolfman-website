@@ -231,6 +231,7 @@ export default function FeedbackPageClient() {
           See what&apos;s in the pipeline →
         </Link>
       </div>
+    </div>
     </main>
   )
 }
