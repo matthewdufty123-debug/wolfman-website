@@ -10,7 +10,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:seed-wolfbot": "tsx lib/db/seed-wolfbot.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",

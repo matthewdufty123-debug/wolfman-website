@@ -1,4 +1,4 @@
-import { pgTable, text, integer, timestamp, uuid, boolean, date, smallint, jsonb } from 'drizzle-orm/pg-core'
+import { pgTable, text, integer, timestamp, uuid, boolean, date, smallint, jsonb, serial } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -124,6 +124,21 @@ export const siteConfig = pgTable('site_config', {
   betaOpensAt: timestamp('beta_opens_at'), // drives countdowns when status = closed_beta
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   updatedBy: text('updated_by'),          // admin user ID who last changed it
+})
+
+// ── Wolfbot configuration ─────────────────────────────────────────────────
+// Key-value config store for Wolfbot — the pixel art mascot.
+// All values are JSONB for maximum flexibility as the config schema evolves.
+// Admin-only read/write. Never exposed via public routes.
+// Categories: identity | palette | sprite | emotions | events | pages
+export const wolfbotConfig = pgTable('wolfbot_config', {
+  id:          serial('id').primaryKey(),
+  key:         text('key').notNull().unique(),
+  category:    text('category').notNull(),
+  label:       text('label').notNull(),
+  value:       jsonb('value').notNull(),
+  description: text('description'),
+  updatedAt:   timestamp('updated_at', { withTimezone: true }).defaultNow(),
 })
 
 // ── Claude-generated synthesis ────────────────────────────────────────────
