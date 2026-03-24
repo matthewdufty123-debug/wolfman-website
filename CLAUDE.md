@@ -357,7 +357,7 @@ All work is organised into three phases, each subdivided into stages. Issues car
 | P1S3 | Journal Creation for All Users | #80 ✅, #84 ✅, #85 ✅, #81 ✅ | **Complete** |
 | P1S4 | User Profile & Settings | #68 ✅, #86 ✅, #82 ✅, #113 ✅, #116 ✅, #117 ✅, #118 ✅ | **Complete** |
 | P1S5 | About & SEO | #47, #48, #49, #50, #45, #46 | Not started |
-| P2S1 | Beta Infrastructure | #88 ✅, #96 ✅, #97 ✅, #87 ❌, #114 ❌ | **In progress** — #87 (user cap) and #114 (opt-in feed) remaining |
+| P2S1 | Beta Infrastructure | #88 ✅, #96 ✅, #97 ✅, #87 ✅, #114 ✅ | **Complete** |
 | P2S2 | Scoring System & Terminology | #100 (draft) | Not started |
 | P2S3 | Notifications | #91, #89, #90 | Not started |
 | P2S4 | Admin Panel | #92, #93, #94, #95 | Not started |
@@ -370,8 +370,8 @@ All work is organised into three phases, each subdivided into stages. Issues car
 **Current phase: P1 complete — now in P2.**
 - P1S1 through P1S4 are all complete.
 - P1S5 (About & SEO) is not started — #47–#50, #45, #46.
-- P2S1 is in progress: #88 ✅ (feedback form), #96 ✅ (/beta page), #97 ✅ (register terms), #87 ❌ (user cap), #114 ❌ (opt-in feed visibility).
-- Next session: decide whether to complete P2S1 first (#87, #114), or start P1S5 (About & SEO).
+- P2S1 is complete: all six issues closed including #87 (user cap) and #114 (community feed/opt-in visibility).
+- Next up: P2S2–P2S5 and P1S5 remain open. #132 (Wolfbot) is a standalone P2 Beta issue being built now.
 
 ### Session startup — do this every time before any work begins
 

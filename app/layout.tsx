@@ -4,6 +4,7 @@ import './globals.css'
 import ThemeProvider from '@/components/ThemeProvider'
 import AuthProvider from '@/components/AuthProvider'
 import { CartProvider } from '@/lib/cart'
+import { Analytics } from '@vercel/analytics/next'
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -58,6 +59,7 @@ export default function RootLayout({
             </CartProvider>
           </ThemeProvider>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   )
