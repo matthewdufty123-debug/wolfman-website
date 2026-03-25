@@ -316,7 +316,7 @@ components/                 — Shared React components
   MorningRitualIconBar.tsx  — Ritual icons on post page
   MorningScaleBar.tsx       — Brain activity/body/happy scale display
   MorningZoneScatter.tsx    — Morning Zone scatter (body vs brain vs happiness)
-  NavBar.tsx                — Bottom bell-curve site navigation with login modal
+  NavBar.tsx                — Bottom circular dome navigation: wolf button opens a full-screen dome (120vw circle anchored at viewport bottom) with 5 arc-positioned icons, WOLF|BOT robot face placeholder (greeting/bored states, auto-closes at 10s), and "WOLF|BOT ONLINE" status strip. Login modal also handled here.
   PostFooter.tsx            — "You have been reading..." + wolf logo + owner actions
   PostForm.tsx              — Write/edit form with Review→Publish Claude flow
   RoutineIcons.tsx          — Morning routine icon set
@@ -385,6 +385,7 @@ All work is organised by **milestone**, then **label**. No stage codes — miles
 
 **Current status (25 March 2026):**
 - Closed Alpha Development (#15): active queue — bugs, launch prep, branding, About page, IA consolidation. Must ship by 30 April.
+- Navigation dome redesign shipped to production: issues #157, #158, #159, #160, #163 all closed. Circular dome nav with WOLF|BOT face placeholder is live on wolfman.blog. Issue #161 (real WOLF|BOT face assets) remains open.
 - Releases 0.1–0.9: planned, scoped, and milestoned. Beta runs 1 May – 31 August 2026. Release 0.9 (Legal) must complete before production go-live.
 
 ### Feature freeze
