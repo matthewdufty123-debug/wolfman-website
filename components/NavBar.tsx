@@ -124,7 +124,7 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
   return (
     <>
       {/* ── Nav bar (wolf logo only) ── */}
-      <nav className={`wolfman-nav${navHidden ? ' nav--hidden' : ''}`} id="wolfmanNav">
+      <nav className={`wolfman-nav${navHidden ? ' nav--hidden' : ''}${wolfPanelOpen ? ' wolfman-nav--panel-open' : ''}`} id="wolfmanNav">
         <svg
           className="nav-bg"
           xmlns="http://www.w3.org/2000/svg"
@@ -137,7 +137,7 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
 
         {/* Wolf logo — toggles wolf panel */}
         <button
-          className="nav-btn nav-btn--center wolf-btn"
+          className={`nav-btn nav-btn--center wolf-btn`}
           id="wolfBtn"
           aria-label={wolfPanelOpen ? 'Close navigation' : 'Open navigation'}
           onClick={() => {
@@ -164,7 +164,7 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
           viewBox="0 0 375 260"
           aria-hidden="true"
         >
-          <path d="M0,260 L0,160 C75,160 110,60 187.5,30 C265,60 300,160 375,160 L375,260 Z" />
+          <path d="M0,260 L0,190 C60,190 100,50 187.5,30 C275,50 315,190 375,190 L375,260 Z" />
         </svg>
 
         <div className="wolf-panel-icons">
@@ -174,19 +174,19 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
             aria-label="Experience settings"
             onClick={() => { setSettingsOpen(true); setWolfPanelOpen(false) }}
           >
-            <SlidersHorizontal size={20} strokeWidth={1.5} />
+            <SlidersHorizontal size={24} strokeWidth={1.5} />
             <span>experience</span>
           </button>
 
           {/* 2 — Features */}
           <Link className="wolf-panel-btn wpb-2" href="/features" onClick={closeAll} aria-label="Features">
-            <Layers size={20} strokeWidth={1.5} />
+            <Layers size={24} strokeWidth={1.5} />
             <span>features</span>
           </Link>
 
           {/* 3 — Home */}
           <Link className="wolf-panel-btn wpb-3" href="/" onClick={closeAll} aria-label="Home">
-            <Home size={20} strokeWidth={1.5} />
+            <Home size={24} strokeWidth={1.5} />
             <span>home</span>
           </Link>
 
@@ -196,7 +196,7 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
             aria-label="WOLF|BOT"
             onClick={() => setWolfbotOpen((o) => !o)}
           >
-            <Bot size={24} strokeWidth={1.5} />
+            <Bot size={28} strokeWidth={1.5} />
             <span>wolf|bot</span>
           </button>
 
@@ -218,7 +218,7 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
                   unoptimized
                 />
               ) : (
-                <User size={20} strokeWidth={1.5} />
+                <User size={24} strokeWidth={1.5} />
               )}
               <span>{session.user?.name?.split(' ')[0]?.toLowerCase() ?? 'account'}</span>
             </Link>
@@ -228,7 +228,7 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
               aria-label="Sign in"
               onClick={() => { setLoginOpen(true); setWolfPanelOpen(false) }}
             >
-              <User size={20} strokeWidth={1.5} />
+              <User size={24} strokeWidth={1.5} />
               <span>sign in</span>
             </button>
           )}
@@ -239,7 +239,7 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
             aria-label="More pages"
             onClick={() => { setMorePagesOpen(true); setWolfPanelOpen(false) }}
           >
-            <LayoutList size={20} strokeWidth={1.5} />
+            <LayoutList size={24} strokeWidth={1.5} />
             <span>more</span>
           </button>
         </div>
