@@ -4,7 +4,7 @@ import DevPageClient from '@/components/DevPageClient'
 
 export const metadata: Metadata = siteMetadata({
   title: 'Development log',
-  description: "An open log of how wolfman.blog is built and where it's going.",
+  description: 'Live technical development log — GitHub issues, milestones, open branches, and how wolfman.blog is built.',
   path: '/dev',
 })
 

@@ -4,13 +4,12 @@ import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { SlidersHorizontal, ShoppingCart, Smile, Meh, Code2 } from 'lucide-react'
+import { SlidersHorizontal, ShoppingCart, Smile, Meh } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import WolfLogo from './WolfLogo'
 import ThemeButtons from './ThemeButtons'
 import FontSizeButtons from './FontSizeButtons'
 import FontFamilyButtons from './FontFamilyButtons'
-import DevOverlay from './DevOverlay'
 import { useCart } from '@/lib/cart'
 import { signInWithGoogle, signInWithGitHub } from '@/lib/actions/oauth'
 import { loginForModal } from '@/lib/actions/auth'
@@ -25,7 +24,6 @@ const NAV_LINKS = [
 export default function NavBar({ registrationOpen }: { registrationOpen: boolean }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [devOpen, setDevOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
@@ -33,7 +31,7 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
   const { data: session } = useSession()
   const [navHidden, setNavHidden] = useState(false)
   const segments = pathname.split('/').filter(Boolean)
-  const KNOWN_PREFIXES = new Set(['admin', 'edit', 'write', 'account', 'settings', 'shop', 'cart', 'checkout', 'login', 'register', 'about', 'morning-ritual', 'morning-stats', 'intentions', 'feedback', 'beta', 'dev', 'discover', 'api'])
+  const KNOWN_PREFIXES = new Set(['admin', 'edit', 'write', 'account', 'settings', 'shop', 'cart', 'checkout', 'login', 'register', 'about', 'morning-ritual', 'morning-stats', 'intentions', 'feedback', 'beta', 'dev', 'features', 'terms', 'discover', 'api'])
   const isPostPage = pathname.startsWith('/posts/') ||
     (segments.length === 2 && !KNOWN_PREFIXES.has(segments[0]))
 
@@ -76,7 +74,6 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
       if (e.key === 'Escape') {
         setMenuOpen(false)
         setSettingsOpen(false)
-        setDevOpen(false)
         setLoginOpen(false)
       }
     }
@@ -86,14 +83,13 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
 
   // Prevent body scroll when an overlay is open
   useEffect(() => {
-    document.body.style.overflow = menuOpen || settingsOpen || devOpen || loginOpen ? 'hidden' : ''
+    document.body.style.overflow = menuOpen || settingsOpen || loginOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
-  }, [menuOpen, settingsOpen, devOpen, loginOpen])
+  }, [menuOpen, settingsOpen, loginOpen])
 
   function closeAll() {
     setMenuOpen(false)
     setSettingsOpen(false)
-    setDevOpen(false)
     setLoginOpen(false)
   }
 
@@ -142,7 +138,6 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
           onClick={() => {
             setSettingsOpen((o) => !o)
             setMenuOpen(false)
-            setDevOpen(false)
             setLoginOpen(false)
           }}
         >
@@ -205,21 +200,12 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
               setLoginOpen((o) => !o)
               setMenuOpen(false)
               setSettingsOpen(false)
-              setDevOpen(false)
             }}
           >
             <Meh size={22} strokeWidth={1.5} />
           </button>
         )}
 
-        {/* Dev overlay button */}
-        <button
-          className="nav-btn nav-btn--right nav-dev"
-          aria-label={devOpen ? 'Close development' : 'Open development'}
-          onClick={() => { setDevOpen((o) => !o); setMenuOpen(false); setSettingsOpen(false); setLoginOpen(false) }}
-        >
-          <Code2 size={22} strokeWidth={1.5} />
-        </button>
       </nav>
 
       {/* ── Menu overlay ── */}
@@ -268,20 +254,17 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
                 style={{ borderRadius: 8 }}
               />
             </Link>
-            <button
-              aria-label="Open development overlay"
-              onClick={() => { closeAll(); setDevOpen(true) }}
-              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-            >
+            <Link href="/dev" aria-label="Development log" onClick={closeAll}>
               <Image
                 src="/images/site_images/claudecode-color.png"
-                alt="Claude Code development"
+                alt="Development log"
                 width={54}
                 height={54}
                 className="menu-footer-icon"
+                style={{ borderRadius: 8 }}
                 unoptimized
               />
-            </button>
+            </Link>
           </div>
         </div>
       </nav>
@@ -385,8 +368,6 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
         </div>
       </div>
 
-      {/* ── Dev overlay ── */}
-      <DevOverlay isOpen={devOpen} onClose={() => setDevOpen(false)} />
     </>
   )
 }

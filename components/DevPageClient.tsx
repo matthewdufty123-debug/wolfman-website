@@ -7,96 +7,15 @@ import { useSession } from 'next-auth/react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
+import {
+  GITHUB_REPO, GITHUB_API, ISSUES_URL, CACHE_TTL,
+  cachedFetch, isBetaFeedback, formatDate, daysBetween, isoWeekLabel,
+  labelBadges, milestoneOrder,
+  type GitHubIssue, type GitHubMilestone, type GitHubPR,
+} from '@/lib/github'
 
-const GITHUB_REPO = process.env.NEXT_PUBLIC_GITHUB_REPO ?? 'matthewdufty123-debug/wolfman-website'
-const GITHUB_API = `https://api.github.com/repos/${GITHUB_REPO}`
-const ISSUES_URL = `https://github.com/${GITHUB_REPO}/issues/`
-const CACHE_TTL = 5 * 60 * 1000
-
-interface GitHubLabel {
-  name: string
-  color: string
-}
-
-interface GitHubIssue {
-  number: number
-  title: string
-  body: string | null
-  labels: GitHubLabel[]
-  milestone: { title: string } | null
-  created_at: string
-  closed_at: string | null
-  html_url: string
-}
-
-// ── Helpers ────────────────────────────────────────────────────────────────
-
-function isBetaFeedback(issue: GitHubIssue) {
-  return issue.labels.some(l => l.name === 'beta-feedback')
-}
-
-function stageLabel(issue: GitHubIssue): string | null {
-  const label = issue.labels.find(l => /^P\dS\d/i.test(l.name))
-  return label ? label.name.toUpperCase() : null
-}
-
-function stageOrder(s: string): number {
-  const m = s.match(/P(\d)S(\d)/i)
-  if (!m) return 999
-  return parseInt(m[1]) * 10 + parseInt(m[2])
-}
-
-function isoWeekLabel(dateStr: string): string {
-  const d = new Date(dateStr)
-  const startOfYear = new Date(d.getFullYear(), 0, 1)
-  const week = Math.ceil(((d.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7)
-  return `w${week}`
-}
-
-function daysBetween(a: string, b: string): number {
-  return (new Date(b).getTime() - new Date(a).getTime()) / 86400000
-}
-
-function formatDate(iso: string) {
-  const d = new Date(iso)
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
-}
-
-const LABEL_CLASSES: Record<string, string> = {
-  'planned':     'dev-badge--planned',
-  'in-progress': 'dev-badge--in-progress',
-  'bug':         'dev-badge--bug',
-  'enhancement': 'dev-badge--enhancement',
-}
-
-function labelBadges(labels: GitHubLabel[]) {
-  const visible = labels.filter(l => !/^(P\dS\d|beta-feedback)$/i.test(l.name))
-  return visible.length
-    ? visible.map(l => (
-        <span key={l.name} className={`dev-badge ${LABEL_CLASSES[l.name] ?? 'dev-badge--default'}`}>
-          {l.name}
-        </span>
-      ))
-    : null
-}
-
-function cachedFetch<T>(url: string, cacheKey: string): Promise<T> {
-  try {
-    const raw = sessionStorage.getItem(cacheKey)
-    if (raw) {
-      const cached = JSON.parse(raw) as { ts: number; data: T }
-      if (Date.now() - cached.ts < CACHE_TTL) return Promise.resolve(cached.data)
-    }
-  } catch { /* ignore */ }
-
-  return fetch(url, { headers: { Accept: 'application/vnd.github.v3+json' } })
-    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<T> })
-    .then(data => {
-      try { sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data })) } catch { /* ignore */ }
-      return data
-    })
-}
+// re-export CACHE_TTL to silence unused-import lint if needed
+void CACHE_TTL
 
 // ── StatsRow ───────────────────────────────────────────────────────────────
 
@@ -170,19 +89,19 @@ function DevStats({ openIssues, closedIssues }: { openIssues: GitHubIssue[], clo
   }, [openIssues, now])
 
   const resolutionData = useMemo(() => {
-    const stages: Record<string, number[]> = {}
+    const milestones: Record<string, number[]> = {}
     closedIssues.filter(i => !isBetaFeedback(i) && i.closed_at).forEach(issue => {
-      const stage = stageLabel(issue)
-      if (!stage) return
+      const ms = issue.milestone?.title
+      if (!ms) return
       const days = daysBetween(issue.created_at, issue.closed_at!)
-      if (!stages[stage]) stages[stage] = []
-      stages[stage].push(days)
+      if (!milestones[ms]) milestones[ms] = []
+      milestones[ms].push(days)
     })
-    return Object.entries(stages)
+    return Object.entries(milestones)
       .filter(([, vals]) => vals.length >= 2)
-      .sort(([a], [b]) => stageOrder(a) - stageOrder(b))
-      .map(([stage, vals]) => ({
-        stage,
+      .sort(([a], [b]) => milestoneOrder(a) - milestoneOrder(b))
+      .map(([ms, vals]) => ({
+        milestone: ms.replace('Release ', 'v').replace(' — ', ' '),
         avg: Math.round(vals.reduce((s, v) => s + v, 0) / vals.length),
       }))
   }, [closedIssues])
@@ -224,10 +143,10 @@ function DevStats({ openIssues, closedIssues }: { openIssues: GitHubIssue[], clo
 
           {resolutionData.length >= 2 && (
             <div className="dev-chart-block">
-              <p className="dev-chart-title">Avg days to close by stage</p>
+              <p className="dev-chart-title">Avg days to close by release</p>
               <ResponsiveContainer width="100%" height={160}>
                 <BarChart data={resolutionData} barCategoryGap="35%">
-                  <XAxis dataKey="stage" tick={{ fontSize: 10, fill: '#909090' }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="milestone" tick={{ fontSize: 9, fill: '#909090' }} axisLine={false} tickLine={false} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: '#909090' }} axisLine={false} tickLine={false} width={28} />
                   <Tooltip contentStyle={{ fontSize: 12 }} />
                   <Bar dataKey="avg" fill="#4A7FA5" name="avg days" radius={[2,2,0,0]} />
@@ -241,6 +160,78 @@ function DevStats({ openIssues, closedIssues }: { openIssues: GitHubIssue[], clo
   )
 }
 
+// ── Milestones ──────────────────────────────────────────────────────────────
+
+function Milestones({ milestones }: { milestones: GitHubMilestone[] }) {
+  const sorted = [...milestones].sort((a, b) => milestoneOrder(a.title) - milestoneOrder(b.title))
+
+  if (!sorted.length) return <p className="dev-empty">No open milestones.</p>
+
+  return (
+    <div className="dev-milestones">
+      {sorted.map(ms => {
+        const total = ms.open_issues + ms.closed_issues
+        const pct = total > 0 ? Math.round((ms.closed_issues / total) * 100) : 0
+        const due = ms.due_on ? formatDate(ms.due_on) : null
+
+        return (
+          <div key={ms.number} className="dev-milestone-row">
+            <div className="dev-milestone-header">
+              <a href={ms.html_url} className="dev-milestone-title" target="_blank" rel="noopener noreferrer">
+                {ms.title}
+              </a>
+              <div className="dev-milestone-meta">
+                {due && <span className="dev-milestone-due">due {due}</span>}
+                <span className="dev-milestone-counts">{ms.closed_issues}/{total} closed</span>
+              </div>
+            </div>
+            <div className="dev-progress-bar">
+              <div className="dev-progress-fill" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── OpenPRs ────────────────────────────────────────────────────────────────
+
+function OpenPRs({ prs }: { prs: GitHubPR[] }) {
+  if (!prs.length) return <p className="dev-empty">No open pull requests.</p>
+  const now = new Date().toISOString()
+
+  return (
+    <table className="dev-table dev-table--pipeline">
+      <thead>
+        <tr>
+          <th className="dev-col-num">#</th>
+          <th className="dev-col-title">Branch / Title</th>
+          <th style={{ whiteSpace: 'nowrap' }}>Open for</th>
+        </tr>
+      </thead>
+      <tbody>
+        {prs.map(pr => (
+          <tr key={pr.number} className="dev-row-main">
+            <td className="dev-col-num dev-col-id">
+              <a href={pr.html_url} target="_blank" rel="noopener noreferrer" className="dev-commit-link">
+                #{pr.number}
+              </a>
+            </td>
+            <td className="dev-col-title">
+              <span className="dev-pr-branch">{pr.head.ref}</span>
+              <span className="dev-pr-title">{pr.title}</span>
+            </td>
+            <td style={{ color: '#8b949e', whiteSpace: 'nowrap', fontSize: '0.78rem' }}>
+              {Math.round(daysBetween(pr.created_at, now))}d
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
+
 // ── Pipeline ───────────────────────────────────────────────────────────────
 
 function Pipeline({ issues }: { issues: GitHubIssue[] }) {
@@ -250,11 +241,11 @@ function Pipeline({ issues }: { issues: GitHubIssue[] }) {
   const grouped = useMemo(() => {
     const map: Record<string, GitHubIssue[]> = {}
     filtered.forEach(issue => {
-      const key = stageLabel(issue) ?? 'Other'
+      const key = issue.milestone?.title ?? 'No milestone'
       if (!map[key]) map[key] = []
       map[key].push(issue)
     })
-    return Object.entries(map).sort(([a], [b]) => stageOrder(a) - stageOrder(b))
+    return Object.entries(map).sort(([a], [b]) => milestoneOrder(a) - milestoneOrder(b))
   }, [filtered])
 
   if (!grouped.length) return <p className="dev-empty">Pipeline is clear.</p>
@@ -357,6 +348,8 @@ function ClosedWork({ issues }: { issues: GitHubIssue[] }) {
 export default function DevPageClient() {
   const [openIssues, setOpenIssues] = useState<GitHubIssue[] | null>(null)
   const [closedIssues, setClosedIssues] = useState<GitHubIssue[] | null>(null)
+  const [milestones, setMilestones] = useState<GitHubMilestone[] | null>(null)
+  const [prs, setPRs] = useState<GitHubPR[] | null>(null)
   const [openError, setOpenError] = useState(false)
   const [closedError, setClosedError] = useState(false)
   const { data: session } = useSession()
@@ -367,6 +360,10 @@ export default function DevPageClient() {
       .then(setOpenIssues).catch(() => setOpenError(true))
     cachedFetch<GitHubIssue[]>(`${GITHUB_API}/issues?state=closed&per_page=100`, 'wm_gh_closed')
       .then(setClosedIssues).catch(() => setClosedError(true))
+    cachedFetch<GitHubMilestone[]>(`${GITHUB_API}/milestones?state=open&per_page=50`, 'wm_gh_milestones')
+      .then(setMilestones).catch(() => setMilestones([]))
+    cachedFetch<GitHubPR[]>(`${GITHUB_API}/pulls?state=open&per_page=30`, 'wm_gh_prs')
+      .then(setPRs).catch(() => setPRs([]))
   }, [])
 
   const ghLink = `https://github.com/${GITHUB_REPO}/issues`
@@ -376,11 +373,12 @@ export default function DevPageClient() {
 
       <section className="dev-section">
         <h1 className="dev-page-title">wolfman.blog / development</h1>
-        <p className="dev-subtitle">An open log of how this site is built and where it&apos;s going.</p>
+        <p className="dev-subtitle">The live technical log of how this site is built. Every feature tracked as a GitHub issue, every release a milestone.</p>
         <div className="dev-links">
-          <a href="https://github.com/matthewdufty123-debug" className="dev-link" target="_blank" rel="noopener noreferrer">
+          <a href={`https://github.com/${GITHUB_REPO}`} className="dev-link" target="_blank" rel="noopener noreferrer">
             See the code on GitHub →
           </a>
+          <Link href="/features" className="dev-link">Product roadmap →</Link>
           {isAdmin && (
             <Link href="/admin" className="dev-link">Admin panel →</Link>
           )}
@@ -406,11 +404,11 @@ export default function DevPageClient() {
             />
           </div>
           <p className="dev-collab-caption">
-            wolfman.blog is an open beta for a mindful morning journalling app, built in
-            collaboration with Claude Code. Every feature, fix, and improvement is tracked
-            as a GitHub Issue — this log is the live view.
+            wolfman.blog is built in the open, in collaboration with Claude Code.
+            Every feature starts as a GitHub Issue. Every release is a milestone.
+            What you see here is the live view of the build — no spin, just the actual pipeline.
           </p>
-          <Link href="/beta" className="dev-link dev-collab-jump">Learn about the beta →</Link>
+          <Link href="/beta" className="dev-link dev-collab-jump">About the beta →</Link>
         </div>
       </section>
 
@@ -421,6 +419,26 @@ export default function DevPageClient() {
           <DevStats openIssues={openIssues} closedIssues={closedIssues} />
         </section>
       )}
+
+      {/* Milestones */}
+      <section className="dev-section">
+        <h2 className="dev-section-title">// releases</h2>
+        {milestones === null ? (
+          <p className="dev-loading">Fetching milestones…</p>
+        ) : (
+          <Milestones milestones={milestones} />
+        )}
+      </section>
+
+      {/* Open PRs */}
+      <section className="dev-section">
+        <h2 className="dev-section-title">// open branches</h2>
+        {prs === null ? (
+          <p className="dev-loading">Fetching branches…</p>
+        ) : (
+          <OpenPRs prs={prs} />
+        )}
+      </section>
 
       {/* Pipeline */}
       <section className="dev-section" id="pipeline">
@@ -450,6 +468,45 @@ export default function DevPageClient() {
         ) : (
           <ClosedWork issues={closedIssues} />
         )}
+      </section>
+
+      {/* Workflow */}
+      <section className="dev-section">
+        <h2 className="dev-section-title">// how we build</h2>
+        <div className="dev-workflow">
+          <div className="dev-workflow-step">
+            <span className="dev-workflow-label">01 — Issues</span>
+            <p className="dev-workflow-desc">
+              Every feature, bug, and idea starts as a GitHub Issue. Issues are labelled,
+              milestoned, and prioritised before any code is written. The pipeline above is the live view.
+            </p>
+          </div>
+          <div className="dev-workflow-step">
+            <span className="dev-workflow-label">02 — Branches</span>
+            <p className="dev-workflow-desc">
+              Work happens on feature branches named <code>feature/description</code>.
+              Every branch pushed to GitHub gets an automatic Vercel preview URL —
+              a live, isolated version of the site for testing before anything reaches production.
+            </p>
+          </div>
+          <div className="dev-workflow-step">
+            <span className="dev-workflow-label">03 — Releases</span>
+            <p className="dev-workflow-desc">
+              Features ship in named releases (v0.1 Journaling through v0.9 Legal).
+              Merging to main triggers an automatic production deploy to wolfman.blog.
+              Closing an issue with <code>closes #N</code> in the commit auto-closes it in GitHub.
+            </p>
+          </div>
+          <div className="dev-workflow-step">
+            <span className="dev-workflow-label">04 — Feedback loop</span>
+            <p className="dev-workflow-desc">
+              Beta users submit feedback via the{' '}
+              <Link href="/feedback" className="dev-link">feedback form</Link>.
+              Each submission becomes a GitHub Issue automatically, labelled{' '}
+              <code>beta-feedback</code> and routed to the right milestone.
+            </p>
+          </div>
+        </div>
       </section>
 
     </main>
