@@ -235,6 +235,9 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
           </button>
         </div>
 
+        {/* WOLF|BOT ONLINE status strip — bottom of dome */}
+        <div className="wolf-panel-status-strip" aria-hidden="true">WOLF|BOT ONLINE</div>
+
         {/* WOLF|BOT face — centred inside dome, wakes up on open */}
         <button
           className={`wolf-panel-wolfbot-face wolf-panel-wolfbot-face--${wolfbotState}`}
@@ -242,7 +245,7 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
           onClick={() => setWolfPanelOpen(false)}
         >
           {/* Placeholder SVG — replace with real WOLF|BOT face assets via #161 */}
-          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <svg width="72" height="72" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             {/* Wolf ears */}
             <polygon points="9,22 16,4 23,22" fill="#4A7FA5"/>
             <polygon points="33,22 40,4 47,22" fill="#4A7FA5"/>
