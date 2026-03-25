@@ -66,6 +66,7 @@ authentic, personal, and real.
 
 **AI:** Anthropic API (Claude)
 - **Claude's Take** — auto-generates a day synthesis (scores + narrative). Generated at Review time via `/api/posts/[id]/review` (all users) or `/api/admin/claude-take` (admin). Updated again when evening reflection is saved. Scores stored as flexible JSONB.
+- **WOLF|BOT** — the AI journalling assistant. Personality modes, multi-review storage, and journal page UI (#133). All user-facing references use **WOLF|BOT** (not "Wolfbot").
 - **Review → Publish flow** — PostForm "Review" button saves draft, calls `/api/posts/[id]/review`, Claude generates: SEO excerpt (stored silently), refined title (pre-fills form), Claude's Take (scores + synthesis stored in `day_scores`). Button then flips to "Publish".
 - **SEO meta generation** (admin) — `/api/admin/seo` generates excerpt + suggestedTitle + review for Matthew's posts
 - Key stored as `ANTHROPIC_API_KEY` in Vercel env and `.env.local`
@@ -338,40 +339,28 @@ GitHub Issues is the single source of truth for all planned and in-progress work
 > `data/dev-log.json` and `data/future-dev.json` are **deprecated**. They are kept for
 > historical reference only and must not be used for planning or session tracking.
 
-### Three-Phase Roadmap
+### Roadmap
 
-All work is organised into three phases, each subdivided into stages. Issues carry a stage label
-(e.g. `P1S1`) and are assigned to the corresponding milestone.
+All work is organised by **milestone**, then **label**. No stage codes — milestones are the grouping unit.
 
-**Milestones:**
-- `Phase 1 — Public Alpha` (GitHub milestone #13) — closed alpha, Matthew + small test group
-- `Phase 2 — Public Beta` (GitHub milestone #12) — open registration, up to 51 users, closes 1 June 2026
-- `Phase 3 — Production Release` (GitHub milestone #14) — full public launch
+**Active milestones:**
 
-**Stage map:**
+| Milestone | GitHub # | Purpose | Due |
+|-----------|----------|---------|-----|
+| Closed Alpha Development | #15 | Must be complete before public beta opens | 30 April 2026 |
+| Phase 1 — Public Alpha | #13 | About page and SEO work (non-blocking) | — |
+| Phase 2 — Public Beta | #12 | All beta features + formerly Phase 3 scope | 30 June 2026 |
 
-| Stage | Name | Key issues | Status |
-|-------|------|------------|--------|
-| P1S1 | Cleanup & Housekeeping | #98 ✅, #99 ✅ | **Complete** |
-| P1S2 | Core UX & Navigation | #83 ✅, #64 ✅, #44 ✅, #115 ✅ | **Complete** |
-| P1S3 | Journal Creation for All Users | #80 ✅, #84 ✅, #85 ✅, #81 ✅ | **Complete** |
-| P1S4 | User Profile & Settings | #68 ✅, #86 ✅, #82 ✅, #113 ✅, #116 ✅, #117 ✅, #118 ✅ | **Complete** |
-| P1S5 | About & SEO | #47, #48, #49, #50, #45, #46 | Not started |
-| P2S1 | Beta Infrastructure | #88 ✅, #96 ✅, #97 ✅, #87 ✅, #114 ✅ | **Complete** |
-| P2S2 | Scoring System & Terminology | #100 (draft) | Not started |
-| P2S3 | Notifications | #91, #89, #90 | Not started |
-| P2S4 | Admin Panel | #92, #93, #94, #95 | Not started |
-| P2S5 | Rewards System | #101 (draft) | Not started |
-| P3S1 | Public Content & Sharing | #102 (draft — scope first) | Not started |
-| P3S2 | Talk Data | #103 (draft — scope first) | Not started |
-| P3S3 | Shop & Commerce | #104 (draft — scope first) | Not started |
-| P3S4 | Completion | #105 (draft — scope first) | Not started |
+**Beta timeline:**
+- **Now → 30 April 2026:** Closed Alpha — no new registrations. Closed Alpha Development issues must ship.
+- **1 May 2026:** Public Beta opens. Up to 51 users.
+- **30 June 2026:** Beta closes. Hard date.
 
-**Current phase: P1 complete — now in P2.**
-- P1S1 through P1S4 are all complete.
-- P1S5 (About & SEO) is not started — #47–#50, #45, #46.
-- P2S1 is complete: all six issues closed including #87 (user cap) and #114 (community feed/opt-in visibility).
-- Next up: P2S2–P2S5 and P1S5 remain open. #132 (Wolfbot) is a standalone P2 Beta issue being built now.
+**Current status (25 March 2026):**
+- Closed Alpha Development: 14 open issues (bugs + launch prep + branding). This is the active queue.
+- Phase 1: 4 open issues — About page (#47–#50). Not blocking beta.
+- Phase 2: 16 open issues — beta features, notifications, admin panel, WOLF|BOT, subscriptions, drafts.
+- Phase 3 milestone: closed — all scope folded into Phase 2.
 
 ### Session startup — do this every time before any work begins
 
@@ -379,7 +368,7 @@ All work is organised into three phases, each subdivided into stages. Issues car
 2. Fetch open issues via the GitHub API using the PAT in `.env.local` (`GITHUB_TOKEN`):
    `https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues?state=open&per_page=100`
 3. Check for any `in-progress` labelled issues — these were left mid-session and jump the queue.
-4. Identify the current stage (lowest P#S# with open issues). Propose the next issue to work on.
+4. Identify the active milestone. Priority order: **Closed Alpha Development** first, then Phase 1, then Phase 2.
 5. Summarise: recent commits, anything in-flight, suggested next issue. Let Matthew confirm before starting.
 
 ### Session workflow
@@ -387,7 +376,7 @@ All work is organised into three phases, each subdivided into stages. Issues car
 1. Once an issue is agreed, apply the `in-progress` label via the GitHub API.
 2. Use the issue's description as the brief — generate a plan and confirm with Matthew before implementing.
 3. On completion, reference the issue in the commit message: `closes #N` — this auto-closes the issue on push.
-4. If new work surfaces, create a new GitHub Issue with the appropriate milestone, stage label, and `planned` label.
+4. If new work surfaces, create a new GitHub Issue with the appropriate milestone and `planned` label.
 
 **Label conventions:**
 | Label | Colour | Meaning |
@@ -396,8 +385,12 @@ All work is organised into three phases, each subdivided into stages. Issues car
 | `in-progress` | Yellow `#C8B020` | Actively being worked on |
 | `bug` | Red `#d73a4a` | Something broken |
 | `enhancement` | Green `#a2eeef` | New feature or improvement |
-| `P1S1`–`P3S4` | Phase colour | Stage assignment (Blue=Alpha, Yellow=Beta, Grey=Production) |
 | `draft` | Lavender `#D4C5F9` | Needs scoping — do not implement until fully defined |
+| `beta-feedback` | — | Raised via the /feedback form by a beta user |
+| `subscriptions` | Purple `#8B5CF6` | Paid subscription tiers and feature gating |
+| `notifications` | — | Email and cron notification work |
+| `admin` | — | Admin panel and admin-only features |
+| `ux` | — | User experience and interface improvements |
 
 > **Draft issues must never be actioned.** If an issue carries the `draft` label, stop and prompt
 > Matthew to finish scoping it before any implementation begins. Draft issues are placeholders —
@@ -438,9 +431,10 @@ wolfman.blog is a public beta for a mindful morning journalling app. Registered 
 
 ### Beta parameters
 
-- **End date:** 1 June 2026 (hard close — countdown visible on feedback form)
+- **Closed Alpha:** Now until 30 April 2026 — no new registrations. Interest form for pre-registration.
+- **Public Beta opens:** 1 May 2026
+- **Public Beta closes:** 30 June 2026 (hard close — countdown visible on feedback form)
 - **User cap:** 51 users maximum including admin (registration auto-closes at cap)
-- **Registration:** Open or invite-only — TBD before launch
 - **Target users:** 20–50 concurrent beta testers
 
 ### What happens at close
@@ -458,14 +452,10 @@ wolfman.blog is a public beta for a mindful morning journalling app. Registered 
 - **Beta feedback** submitted to GitHub Issues API with label `beta-feedback`
 - **User cap enforcement** at 51 users — registration route returns closed state at cap
 
-### Deferred to post-beta v2
+### Subscriptions and paid tiers
 
-- Public sharing toggle on posts
-- Public feed browsable by anyone
-- Public stats page
-- Shop section in admin panel
-- Paid membership tiers
+The original Milestone 5 paid membership model (Stripe subscriptions, member portal) was abandoned and issues #27–#32 and #37 closed as superseded. That model is gone.
 
-### Paid membership — abandoned
+A new, lighter approach is being scoped (#149): a free vs premium feature comparison page that informs users and serves as a development reference for feature gating decisions. Premium tier scope is to be defined incrementally during the beta.
 
-The paid membership model (Stripe subscriptions, paywalled content, member portal) was fully scoped in Milestone 5 but has been abandoned for the beta. Issues #27–#32 and #37 have been closed as superseded. Do not reintroduce membership concepts without explicit instruction.
+Do not reintroduce the old Milestone 5 membership architecture without explicit instruction.
