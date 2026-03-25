@@ -343,24 +343,40 @@ GitHub Issues is the single source of truth for all planned and in-progress work
 
 All work is organised by **milestone**, then **label**. No stage codes — milestones are the grouping unit.
 
-**Active milestones:**
-
-| Milestone | GitHub # | Purpose | Due |
-|-----------|----------|---------|-----|
-| Closed Alpha Development | #15 | Must be complete before public beta opens | 30 April 2026 |
-| Phase 1 — Public Alpha | #13 | About page and SEO work (non-blocking) | — |
-| Phase 2 — Public Beta | #12 | All beta features + formerly Phase 3 scope | 30 June 2026 |
-
 **Beta timeline:**
-- **Now → 30 April 2026:** Closed Alpha — no new registrations. Closed Alpha Development issues must ship.
+- **Now → 30 April 2026:** Closed Alpha. No new registrations. All Closed Alpha Development issues must ship before 1 May.
 - **1 May 2026:** Public Beta opens. Up to 51 users.
-- **30 June 2026:** Beta closes. Hard date.
+- **31 August 2026:** Beta closes. Hard date.
+
+**Active milestones and release plan:**
+
+| Milestone | GitHub # | Due | Scope |
+|-----------|----------|-----|-------|
+| Closed Alpha Development | #15 | 30 Apr 2026 | Bugs, launch prep, branding, About page, donations |
+| Phase 1 — Public Alpha | #13 | — | About page work (non-blocking, overlaps Closed Alpha) |
+| Release 0.1 — Journaling | #16 | 31 May 2026 | Core journals, rituals, scales, profile stats, notifications, admin basics, data deletion |
+| Release 0.2 — WOLF\|BOT | #17 | 21 Jun 2026 | Personality modes, journal review, title toggle, admin prompt config |
+| Release 0.3 — Communities | #18 | 12 Jul 2026 | Community walls, public/private communities, nav, public sharing |
+| Release 0.4 — Rituals | #19 | 26 Jul 2026 | Standard rituals with logos/descriptions, custom rituals feature |
+| Release 0.5 — Statistics | #20 | 9 Aug 2026 | Profile stats finalised, site-wide stats, WOLF\|BOT data layer, achievements foundation |
+| Release 0.6 — Achievements | #21 | 23 Aug 2026 | Rewards, streaks, badges (built on 0.5 data layer) |
+| Release 0.7 — Shop | #22 | 31 Aug 2026 | Shop live, Printful fulfilment, Stripe payments |
+| Release 0.8 — Subscriptions | #23 | 31 Aug 2026 | Free vs premium tier, feature gating, paid tier live |
+
+**Version numbering:** Each release is a major version (v0.1, v0.2 etc). Patches within a release are v0.1.1, v0.1.2 etc. The current version number is displayed on the site.
 
 **Current status (25 March 2026):**
-- Closed Alpha Development: 14 open issues (bugs + launch prep + branding). This is the active queue.
-- Phase 1: 4 open issues — About page (#47–#50). Not blocking beta.
-- Phase 2: 16 open issues — beta features, notifications, admin panel, WOLF|BOT, subscriptions, drafts.
-- Phase 3 milestone: closed — all scope folded into Phase 2.
+- Closed Alpha Development (#15): active queue — bugs, launch prep, branding, About page. Must ship by 30 April.
+- Releases 0.1–0.8: planned, scoped, and milestoned. Beta runs 1 May – 31 August 2026.
+
+### Feature freeze
+
+The scope of each release is now locked for the beta period. **New feature requests are welcome but face strict scrutiny before being added to any beta release milestone.**
+
+- New features default to **post-live** unless there is a compelling, well-reasoned case
+- The bar for adding something to beta scope is high: it must be core to the beta's purpose, not additive
+- Bug fixes and critical UX issues are exempt from this rule — they can always be added
+- To request a scope change, raise a GitHub issue with a clear rationale. It will be reviewed before any implementation begins.
 
 ### Session startup — do this every time before any work begins
 
@@ -376,7 +392,7 @@ All work is organised by **milestone**, then **label**. No stage codes — miles
 1. Once an issue is agreed, apply the `in-progress` label via the GitHub API.
 2. Use the issue's description as the brief — generate a plan and confirm with Matthew before implementing.
 3. On completion, reference the issue in the commit message: `closes #N` — this auto-closes the issue on push.
-4. If new work surfaces, create a new GitHub Issue with the appropriate milestone and `planned` label.
+4. If new work surfaces, create a new GitHub Issue with the appropriate milestone and `planned` label. New feature requests go through the feature freeze process — see Roadmap section.
 
 **Label conventions:**
 | Label | Colour | Meaning |
@@ -433,7 +449,7 @@ wolfman.blog is a public beta for a mindful morning journalling app. Registered 
 
 - **Closed Alpha:** Now until 30 April 2026 — no new registrations. Interest form for pre-registration.
 - **Public Beta opens:** 1 May 2026
-- **Public Beta closes:** 30 June 2026 (hard close — countdown visible on feedback form)
+- **Public Beta closes:** 31 August 2026 (hard close — countdown visible on feedback form)
 - **User cap:** 51 users maximum including admin (registration auto-closes at cap)
 - **Target users:** 20–50 concurrent beta testers
 
