@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { SlidersHorizontal, Bot, Home, Layers, User, LayoutList } from 'lucide-react'
+import { SlidersHorizontal, Home, Layers, User, LayoutList } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import WolfLogo from './WolfLogo'
 import ThemeButtons from './ThemeButtons'
@@ -30,7 +30,7 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
   const [morePagesOpen, setMorePagesOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
-  const [wolfbotOpen, setWolfbotOpen] = useState(false)
+  const [wolfbotState, setWolfbotState] = useState<'greeting' | 'bored'>('greeting')
   const pathname = usePathname()
   const router = useRouter()
   const { data: session } = useSession()
@@ -81,12 +81,25 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
         setMorePagesOpen(false)
         setSettingsOpen(false)
         setLoginOpen(false)
-        setWolfbotOpen(false)
       }
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [])
+
+  // Auto-close dome: 5s → bored face, 10s → close
+  useEffect(() => {
+    if (!wolfPanelOpen) {
+      setWolfbotState('greeting')
+      return
+    }
+    const boredTimer = setTimeout(() => setWolfbotState('bored'), 5000)
+    const closeTimer = setTimeout(() => setWolfPanelOpen(false), 10000)
+    return () => {
+      clearTimeout(boredTimer)
+      clearTimeout(closeTimer)
+    }
+  }, [wolfPanelOpen])
 
   // Prevent body scroll when an overlay is open
   useEffect(() => {
@@ -99,7 +112,6 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
     setMorePagesOpen(false)
     setSettingsOpen(false)
     setLoginOpen(false)
-    setWolfbotOpen(false)
   }
 
   async function handleEmailLogin(e: React.FormEvent) {
@@ -145,30 +157,19 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
             setMorePagesOpen(false)
             setSettingsOpen(false)
             setLoginOpen(false)
-            setWolfbotOpen(false)
           }}
         >
           <WolfLogo size={64} priority />
         </button>
       </nav>
 
-      {/* ── Wolf panel ── */}
+      {/* ── Wolf panel (semicircular dome) ── */}
       <div
         className={`wolf-panel${wolfPanelOpen ? ' is-open' : ''}`}
         aria-hidden={!wolfPanelOpen}
       >
-        <svg
-          className="wolf-panel-bg"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="none"
-          viewBox="0 0 375 260"
-          aria-hidden="true"
-        >
-          <path d="M0,260 L0,190 C60,190 100,50 187.5,30 C275,50 315,190 375,190 L375,260 Z" />
-        </svg>
-
         <div className="wolf-panel-icons">
-          {/* 1 — Experience */}
+          {/* 1 — Experience (160°) */}
           <button
             className="wolf-panel-btn wpb-1"
             aria-label="Experience settings"
@@ -178,32 +179,22 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
             <span>experience</span>
           </button>
 
-          {/* 2 — Features */}
+          {/* 2 — Features (120°) */}
           <Link className="wolf-panel-btn wpb-2" href="/features" onClick={closeAll} aria-label="Features">
             <Layers size={24} strokeWidth={1.5} />
             <span>features</span>
           </Link>
 
-          {/* 3 — Home */}
-          <Link className="wolf-panel-btn wpb-3" href="/" onClick={closeAll} aria-label="Home">
+          {/* 3 — Journal / Home (90° — peak) */}
+          <Link className="wolf-panel-btn wpb-3" href="/" onClick={closeAll} aria-label="Journal">
             <Home size={24} strokeWidth={1.5} />
-            <span>home</span>
+            <span>journal</span>
           </Link>
 
-          {/* 4 — WOLF|BOT (centre peak) */}
-          <button
-            className="wolf-panel-btn wpb-4 wolf-panel-btn--wolfbot"
-            aria-label="WOLF|BOT"
-            onClick={() => setWolfbotOpen((o) => !o)}
-          >
-            <Bot size={28} strokeWidth={1.5} />
-            <span>wolf|bot</span>
-          </button>
-
-          {/* 5 — Account */}
+          {/* 4 — Account (60°) */}
           {session ? (
             <Link
-              className="wolf-panel-btn wpb-5"
+              className="wolf-panel-btn wpb-4"
               href="/account"
               onClick={closeAll}
               aria-label="Account"
@@ -224,7 +215,7 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
             </Link>
           ) : (
             <button
-              className="wolf-panel-btn wpb-5"
+              className="wolf-panel-btn wpb-4"
               aria-label="Sign in"
               onClick={() => { setLoginOpen(true); setWolfPanelOpen(false) }}
             >
@@ -233,9 +224,9 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
             </button>
           )}
 
-          {/* 6 — More pages */}
+          {/* 5 — More pages (20°) */}
           <button
-            className="wolf-panel-btn wpb-6"
+            className="wolf-panel-btn wpb-5"
             aria-label="More pages"
             onClick={() => { setMorePagesOpen(true); setWolfPanelOpen(false) }}
           >
@@ -244,10 +235,17 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
           </button>
         </div>
 
-        {/* WOLF|BOT offline notice */}
-        {wolfbotOpen && (
-          <p className="wolf-panel-wolfbot-msg">WOLF|BOT search is offline right now.</p>
-        )}
+        {/* WOLF|BOT face — centred at dome bottom, wakes up on open */}
+        <button
+          className={`wolf-panel-wolfbot-face wolf-panel-wolfbot-face--${wolfbotState}`}
+          aria-label={wolfPanelOpen ? 'Close navigation' : 'Open navigation'}
+          onClick={() => setWolfPanelOpen(false)}
+        >
+          <WolfLogo size={52} />
+          <span className="wolf-panel-wolfbot-text">
+            {wolfbotState === 'greeting' ? 'Hello. where would you like to go?' : '...'}
+          </span>
+        </button>
       </div>
 
       {/* ── More pages overlay ── */}
