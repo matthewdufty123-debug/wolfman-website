@@ -4,30 +4,35 @@ import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { SlidersHorizontal, ShoppingCart, Smile, Meh } from 'lucide-react'
+import { SlidersHorizontal, Bot, Home, Layers, User, LayoutList } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import WolfLogo from './WolfLogo'
 import ThemeButtons from './ThemeButtons'
 import FontSizeButtons from './FontSizeButtons'
 import FontFamilyButtons from './FontFamilyButtons'
-import { useCart } from '@/lib/cart'
 import { signInWithGoogle, signInWithGitHub } from '@/lib/actions/oauth'
 import { loginForModal } from '@/lib/actions/auth'
 
-const NAV_LINKS = [
-  { href: '/write',  label: 'set an intention',   pathKey: 'write' },
-  { href: '/shop',   label: 'buy something cool', pathKey: 'shop' },
-  { href: '/about',  label: 'discover Wolfman',   pathKey: 'about' },
-  { href: '/beta',   label: 'about the beta',     pathKey: 'beta' },
+const MORE_PAGES = [
+  { href: '/',         label: 'home' },
+  { href: '/write',    label: 'set an intention' },
+  { href: '/features', label: 'features' },
+  { href: '/shop',     label: 'buy something cool' },
+  { href: '/about',    label: 'discover wolfman' },
+  { href: '/beta',     label: 'about the beta' },
+  { href: '/dev',      label: 'development log' },
+  { href: '/feedback', label: 'give feedback' },
+  { href: '/terms',    label: 'terms' },
 ]
 
 export default function NavBar({ registrationOpen }: { registrationOpen: boolean }) {
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [wolfPanelOpen, setWolfPanelOpen] = useState(false)
+  const [morePagesOpen, setMorePagesOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
+  const [wolfbotOpen, setWolfbotOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
-  const { count: cartCount } = useCart()
   const { data: session } = useSession()
   const [navHidden, setNavHidden] = useState(false)
   const segments = pathname.split('/').filter(Boolean)
@@ -72,9 +77,11 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        setMenuOpen(false)
+        setWolfPanelOpen(false)
+        setMorePagesOpen(false)
         setSettingsOpen(false)
         setLoginOpen(false)
+        setWolfbotOpen(false)
       }
     }
     document.addEventListener('keydown', onKey)
@@ -83,14 +90,16 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
 
   // Prevent body scroll when an overlay is open
   useEffect(() => {
-    document.body.style.overflow = menuOpen || settingsOpen || loginOpen ? 'hidden' : ''
+    document.body.style.overflow = wolfPanelOpen || morePagesOpen || settingsOpen || loginOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
-  }, [menuOpen, settingsOpen, loginOpen])
+  }, [wolfPanelOpen, morePagesOpen, settingsOpen, loginOpen])
 
   function closeAll() {
-    setMenuOpen(false)
+    setWolfPanelOpen(false)
+    setMorePagesOpen(false)
     setSettingsOpen(false)
     setLoginOpen(false)
+    setWolfbotOpen(false)
   }
 
   async function handleEmailLogin(e: React.FormEvent) {
@@ -112,15 +121,10 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
     }
   }
 
-  // Active page is excluded from the menu list
-  const visibleLinks = NAV_LINKS.filter(
-    (l) => !pathname.startsWith('/' + l.pathKey)
-  )
-
   return (
     <>
-      {/* ── Nav bar ── */}
-      <nav className={`wolfman-nav${navHidden ? ' nav--hidden' : ''}`} id="wolfmanNav">
+      {/* ── Nav bar (wolf logo only) ── */}
+      <nav className={`wolfman-nav${navHidden ? ' nav--hidden' : ''}${wolfPanelOpen ? ' wolfman-nav--panel-open' : ''}`} id="wolfmanNav">
         <svg
           className="nav-bg"
           xmlns="http://www.w3.org/2000/svg"
@@ -131,141 +135,144 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
           <path d="M0,100 L0,46 L95,46 C125,46 158,0 187.5,0 C217,0 250,46 280,46 L375,46 L375,100 Z" />
         </svg>
 
-        {/* Experience button */}
+        {/* Wolf logo — toggles wolf panel */}
         <button
-          className="nav-btn nav-btn--left"
-          aria-label={settingsOpen ? 'Close experience' : 'Open experience'}
-          onClick={() => {
-            setSettingsOpen((o) => !o)
-            setMenuOpen(false)
-            setLoginOpen(false)
-          }}
-        >
-          <SlidersHorizontal size={22} strokeWidth={1.5} />
-        </button>
-
-        {/* Cart button */}
-        <Link
-          href={cartCount > 0 ? '/cart' : '/shop'}
-          className="nav-btn nav-btn--cart"
-          aria-label={cartCount > 0 ? `Cart — ${cartCount} item${cartCount !== 1 ? 's' : ''}` : 'Go to shop'}
-          onClick={closeAll}
-        >
-          <ShoppingCart size={22} strokeWidth={1.5} />
-          {cartCount > 0 && (
-            <span className="nav-cart-badge">{cartCount}</span>
-          )}
-        </Link>
-
-        {/* Wolf logo — opens menu */}
-        <button
-          className="nav-btn nav-btn--center wolf-btn"
+          className={`nav-btn nav-btn--center wolf-btn`}
           id="wolfBtn"
-          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-label={wolfPanelOpen ? 'Close navigation' : 'Open navigation'}
           onClick={() => {
-            setMenuOpen((o) => !o)
+            setWolfPanelOpen((o) => !o)
+            setMorePagesOpen(false)
             setSettingsOpen(false)
             setLoginOpen(false)
+            setWolfbotOpen(false)
           }}
         >
           <WolfLogo size={64} priority />
         </button>
-
-        {/* Face / auth button */}
-        {session ? (
-          <Link
-            href="/account"
-            className="nav-btn nav-btn--face"
-            aria-label={`Account — ${session.user?.name ?? 'signed in'}`}
-            onClick={closeAll}
-          >
-            {avatarUrl ? (
-              <Image
-                src={avatarUrl}
-                alt={session.user?.name ?? 'avatar'}
-                width={28}
-                height={28}
-                className="nav-avatar"
-                unoptimized
-              />
-            ) : (
-              <Smile size={22} strokeWidth={1.5} />
-            )}
-          </Link>
-        ) : (
-          <button
-            className="nav-btn nav-btn--face"
-            aria-label="Sign in"
-            onClick={() => {
-              setLoginOpen((o) => !o)
-              setMenuOpen(false)
-              setSettingsOpen(false)
-            }}
-          >
-            <Meh size={22} strokeWidth={1.5} />
-          </button>
-        )}
-
       </nav>
 
-      {/* ── Menu overlay ── */}
+      {/* ── Wolf panel ── */}
+      <div
+        className={`wolf-panel${wolfPanelOpen ? ' is-open' : ''}`}
+        aria-hidden={!wolfPanelOpen}
+      >
+        <svg
+          className="wolf-panel-bg"
+          xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="none"
+          viewBox="0 0 375 260"
+          aria-hidden="true"
+        >
+          <path d="M0,260 L0,190 C60,190 100,50 187.5,30 C275,50 315,190 375,190 L375,260 Z" />
+        </svg>
+
+        <div className="wolf-panel-icons">
+          {/* 1 — Experience */}
+          <button
+            className="wolf-panel-btn wpb-1"
+            aria-label="Experience settings"
+            onClick={() => { setSettingsOpen(true); setWolfPanelOpen(false) }}
+          >
+            <SlidersHorizontal size={24} strokeWidth={1.5} />
+            <span>experience</span>
+          </button>
+
+          {/* 2 — Features */}
+          <Link className="wolf-panel-btn wpb-2" href="/features" onClick={closeAll} aria-label="Features">
+            <Layers size={24} strokeWidth={1.5} />
+            <span>features</span>
+          </Link>
+
+          {/* 3 — Home */}
+          <Link className="wolf-panel-btn wpb-3" href="/" onClick={closeAll} aria-label="Home">
+            <Home size={24} strokeWidth={1.5} />
+            <span>home</span>
+          </Link>
+
+          {/* 4 — WOLF|BOT (centre peak) */}
+          <button
+            className="wolf-panel-btn wpb-4 wolf-panel-btn--wolfbot"
+            aria-label="WOLF|BOT"
+            onClick={() => setWolfbotOpen((o) => !o)}
+          >
+            <Bot size={28} strokeWidth={1.5} />
+            <span>wolf|bot</span>
+          </button>
+
+          {/* 5 — Account */}
+          {session ? (
+            <Link
+              className="wolf-panel-btn wpb-5"
+              href="/account"
+              onClick={closeAll}
+              aria-label="Account"
+            >
+              {avatarUrl ? (
+                <Image
+                  src={avatarUrl}
+                  alt={session.user?.name ?? 'avatar'}
+                  width={22}
+                  height={22}
+                  className="wolf-panel-avatar"
+                  unoptimized
+                />
+              ) : (
+                <User size={24} strokeWidth={1.5} />
+              )}
+              <span>{session.user?.name?.split(' ')[0]?.toLowerCase() ?? 'account'}</span>
+            </Link>
+          ) : (
+            <button
+              className="wolf-panel-btn wpb-5"
+              aria-label="Sign in"
+              onClick={() => { setLoginOpen(true); setWolfPanelOpen(false) }}
+            >
+              <User size={24} strokeWidth={1.5} />
+              <span>sign in</span>
+            </button>
+          )}
+
+          {/* 6 — More pages */}
+          <button
+            className="wolf-panel-btn wpb-6"
+            aria-label="More pages"
+            onClick={() => { setMorePagesOpen(true); setWolfPanelOpen(false) }}
+          >
+            <LayoutList size={24} strokeWidth={1.5} />
+            <span>more</span>
+          </button>
+        </div>
+
+        {/* WOLF|BOT offline notice */}
+        {wolfbotOpen && (
+          <p className="wolf-panel-wolfbot-msg">WOLF|BOT search is offline right now.</p>
+        )}
+      </div>
+
+      {/* ── More pages overlay ── */}
       <nav
-        className={`menu-overlay${menuOpen ? ' is-open' : ''}`}
-        aria-hidden={!menuOpen}
+        className={`menu-overlay${morePagesOpen ? ' is-open' : ''}`}
+        aria-hidden={!morePagesOpen}
       >
         <button
           className="menu-close"
           aria-label="Close menu"
-          onClick={() => setMenuOpen(false)}
+          onClick={() => setMorePagesOpen(false)}
         >
           &times;
         </button>
         <div className="menu-inner">
-          <p className="menu-prompt">What shall we do?</p>
+          <p className="menu-prompt">where to?</p>
           <ul className="menu-links">
-            {visibleLinks.map((link) => (
+            {MORE_PAGES.map((link) => (
               <li key={link.href}>
                 <Link href={link.href} onClick={closeAll}>
                   {link.label}
                 </Link>
               </li>
             ))}
-            <li className="menu-links-divider" aria-hidden="true" />
-            <li className="menu-links-auth">
-              {session ? (
-                <Link href="/account" onClick={closeAll}>
-                  {session.user?.name ?? 'my account'}
-                </Link>
-              ) : (
-                <button
-                  className="menu-links-signin-btn"
-                  onClick={() => { closeAll(); setLoginOpen(true) }}
-                >
-                  sign in
-                </button>
-              )}
-            </li>
           </ul>
-          <div className="menu-footer-icons">
-            <Link href="/" aria-label="Go home" onClick={closeAll}>
-              <WolfLogo
-                size={54}
-                className="menu-footer-icon"
-                style={{ borderRadius: 8 }}
-              />
-            </Link>
-            <Link href="/dev" aria-label="Development log" onClick={closeAll}>
-              <Image
-                src="/images/site_images/claudecode-color.png"
-                alt="Development log"
-                width={54}
-                height={54}
-                className="menu-footer-icon"
-                style={{ borderRadius: 8 }}
-                unoptimized
-              />
-            </Link>
-          </div>
         </div>
       </nav>
 

@@ -18,6 +18,7 @@ html[data-theme="dark"] {
   --admin-card-bg: rgba(255,255,255,0.18);
   --admin-border: rgba(51,63,80,0.2);
   --admin-muted: rgba(51,63,80,0.55);
+  --wolf-panel-fill: #214459;
 }
 
 html[data-theme="light"] {
@@ -39,6 +40,7 @@ html[data-theme="light"] {
   --admin-card-bg: rgba(0,0,0,0.18);
   --admin-border: rgba(229,203,187,0.2);
   --admin-muted: rgba(229,203,187,0.55);
+  --wolf-panel-fill: #4A7FA5;
 }
 
 *, *::before, *::after {
@@ -83,6 +85,7 @@ body {
   z-index: 50;
   overflow: visible;
   transition: opacity 0.6s ease, transform 0.6s ease;
+  pointer-events: none; /* container is decorative; children opt back in */
 }
 
 .wolfman-nav.nav--hidden {
@@ -130,60 +133,7 @@ body {
   height: 56px;
   width: 56px;
   z-index: 1;
-}
-
-.nav-btn--left {
-  left: 1rem;
-  color: var(--nav-btn-icon, rgba(255,255,255,0.55));
-}
-
-.nav-btn--right {
-  right: 1rem;
-  color: var(--nav-btn-icon, rgba(255,255,255,0.55));
-}
-
-.nav-btn--left:hover,
-.nav-btn--right:hover {
-  color: var(--heading);
-}
-
-.nav-btn--face {
-  right: calc(50% - 88px);
-  color: var(--nav-btn-icon, rgba(255,255,255,0.55));
-  text-decoration: none;
-}
-
-.nav-btn--face:hover {
-  color: var(--heading);
-}
-
-.nav-btn--cart {
-  left: calc(50% - 88px);
-  color: var(--nav-btn-icon, rgba(255,255,255,0.55));
-  text-decoration: none;
-}
-
-.nav-btn--cart:hover {
-  color: var(--heading);
-}
-
-.nav-cart-badge {
-  position: absolute;
-  top: 10px;
-  right: 8px;
-  background: #A0622A;
-  color: #fff;
-  font-size: 0.6rem;
-  font-weight: 700;
-  line-height: 1;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 4px;
-  pointer-events: none;
+  pointer-events: auto; /* re-enable on the wolf button */
 }
 
 .nav-btn--center {
@@ -212,6 +162,138 @@ body {
   32%  { transform: scale(1.18); }
   42%  { transform: scale(1); }
   100% { transform: scale(1); }
+}
+
+/* ── Wolf panel (curved navigation panel) ── */
+.wolf-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 260px;
+  z-index: 46;
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+  pointer-events: none;
+}
+
+.wolf-panel.is-open {
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.wolf-panel-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 -3px 14px rgba(0,0,0,0.28));
+}
+
+/* Match the nav fill — same colour as the persistent nav bell */
+.wolf-panel-bg path {
+  fill: var(--nav-fill, #193343);
+}
+
+/* Hide the nav bell-curve when the wolf panel is open */
+.wolfman-nav--panel-open .nav-bg {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.wolf-panel-icons {
+  position: absolute;
+  inset: 0;
+}
+
+.wolf-panel-btn {
+  position: absolute;
+  transform: translate(calc(-50% - 40px), -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.65rem;
+  font-weight: 500;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  text-transform: lowercase;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  padding: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+}
+
+/*
+ * Arc positions — calculated along the simple arch:
+ *   M0,260 L0,190 C60,190 100,50 187.5,30 C275,50 315,190 375,190 L375,260 Z
+ * Each icon is placed ~15–20px below the arch boundary at that x position.
+ * Coordinates verified to sit within the filled panel area.
+ */
+.wpb-1 { left:  9.1%; top: 73.2%; }  /* Experience  — x=34,  y=190 */
+.wpb-2 { left: 22.2%; top: 51.0%; }  /* Features    — x=83,  y=133 */
+.wpb-3 { left: 37.4%; top: 28.0%; }  /* Home        — x=140, y=73  */
+.wpb-4 { left: 50.0%; top: 17.7%; }  /* WOLF|BOT    — x=188, y=46  */
+.wpb-5 { left: 62.6%; top: 28.0%; }  /* Account     — x=235, y=73  */
+.wpb-6 { left: 77.8%; top: 51.0%; }  /* More        — x=292, y=133 */
+
+/* Open state: slide to final position and fade in */
+.wolf-panel.is-open .wolf-panel-btn {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+
+/* Staggered entrance delays — fan in left to right */
+.wolf-panel.is-open .wpb-1 { transition-delay: 0.44s; }
+.wolf-panel.is-open .wpb-2 { transition-delay: 0.50s; }
+.wolf-panel.is-open .wpb-3 { transition-delay: 0.56s; }
+.wolf-panel.is-open .wpb-4 { transition-delay: 0.62s; }
+.wolf-panel.is-open .wpb-5 { transition-delay: 0.68s; }
+.wolf-panel.is-open .wpb-6 { transition-delay: 0.74s; }
+
+.wolf-panel-btn:hover {
+  color: var(--heading, #E5CBBB);
+}
+
+/* WOLF|BOT — peak button, slightly brighter */
+.wolf-panel-btn--wolfbot {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.wolf-panel-btn--wolfbot span {
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/* Avatar inside wolf panel */
+.wolf-panel-avatar {
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  object-fit: cover;
+}
+
+/* WOLF|BOT offline message — appears below the wolfbot button */
+.wolf-panel-wolfbot-msg {
+  position: absolute;
+  left: 50%;
+  top: 33%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.65);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.72rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  padding: 0.35rem 0.9rem;
+  border-radius: 20px;
+  white-space: nowrap;
+  pointer-events: none;
+  margin: 0;
 }
 
 /* ── Top utility bar ── */
