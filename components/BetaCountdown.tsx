@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 
-const BETA_END = new Date('2026-06-01T00:00:00Z')
+const BETA_END = new Date('2026-08-31T23:59:59Z')
 
 function getDaysRemaining(): number {
   const now = new Date()

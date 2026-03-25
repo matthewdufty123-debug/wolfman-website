@@ -25,7 +25,7 @@ export default function BetaPage() {
 
         <div className="beta-countdown-block">
           <BetaCountdown className="beta-countdown" />
-          <p className="beta-end-date">Beta closes 1 June 2026</p>
+          <p className="beta-end-date">Beta closes 31 August 2026</p>
         </div>
 
         <div className="beta-section">
@@ -60,7 +60,9 @@ export default function BetaPage() {
           <p className="beta-section-body">
             Matthew is a real person and reads everything.{' '}
             <Link href="/feedback" className="beta-link">Leave a note via the feedback form</Link>
-            {' '}or find him on{' '}
+            {', '}read the{' '}
+            <Link href="/terms" className="beta-link">terms and conditions</Link>
+            {', '}or find him on{' '}
             <a
               href="https://www.linkedin.com/in/matthewwolfman"
               className="beta-link"
