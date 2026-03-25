@@ -175,23 +175,23 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
             aria-label="Experience settings"
             onClick={() => { setSettingsOpen(true); setWolfPanelOpen(false) }}
           >
-            <SlidersHorizontal size={24} strokeWidth={1.5} />
+            <SlidersHorizontal size={30} strokeWidth={1.5} />
             <span>experience</span>
           </button>
 
-          {/* 2 — Features (120°) */}
+          {/* 2 — Features (120°, r=48) */}
           <Link className="wolf-panel-btn wpb-2" href="/features" onClick={closeAll} aria-label="Features">
-            <Layers size={24} strokeWidth={1.5} />
+            <Layers size={30} strokeWidth={1.5} />
             <span>features</span>
           </Link>
 
           {/* 3 — Journal / Home (90° — peak) */}
           <Link className="wolf-panel-btn wpb-3" href="/" onClick={closeAll} aria-label="Journal">
-            <Home size={24} strokeWidth={1.5} />
+            <Home size={30} strokeWidth={1.5} />
             <span>journal</span>
           </Link>
 
-          {/* 4 — Account (60°) */}
+          {/* 4 — Account (60°, r=48) */}
           {session ? (
             <Link
               className="wolf-panel-btn wpb-4"
@@ -203,13 +203,13 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
                 <Image
                   src={avatarUrl}
                   alt={session.user?.name ?? 'avatar'}
-                  width={22}
-                  height={22}
+                  width={28}
+                  height={28}
                   className="wolf-panel-avatar"
                   unoptimized
                 />
               ) : (
-                <User size={24} strokeWidth={1.5} />
+                <User size={30} strokeWidth={1.5} />
               )}
               <span>{session.user?.name?.split(' ')[0]?.toLowerCase() ?? 'account'}</span>
             </Link>
@@ -219,7 +219,7 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
               aria-label="Sign in"
               onClick={() => { setLoginOpen(true); setWolfPanelOpen(false) }}
             >
-              <User size={24} strokeWidth={1.5} />
+              <User size={30} strokeWidth={1.5} />
               <span>sign in</span>
             </button>
           )}
@@ -230,20 +230,45 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
             aria-label="More pages"
             onClick={() => { setMorePagesOpen(true); setWolfPanelOpen(false) }}
           >
-            <LayoutList size={24} strokeWidth={1.5} />
+            <LayoutList size={30} strokeWidth={1.5} />
             <span>more</span>
           </button>
         </div>
 
-        {/* WOLF|BOT face — centred at dome bottom, wakes up on open */}
+        {/* WOLF|BOT ONLINE status strip — bottom of dome */}
+        <div className="wolf-panel-status-strip" aria-hidden="true">WOLF|BOT ONLINE</div>
+
+        {/* WOLF|BOT face — centred inside dome, wakes up on open */}
         <button
           className={`wolf-panel-wolfbot-face wolf-panel-wolfbot-face--${wolfbotState}`}
           aria-label={wolfPanelOpen ? 'Close navigation' : 'Open navigation'}
           onClick={() => setWolfPanelOpen(false)}
         >
-          <WolfLogo size={52} />
+          {/* Placeholder SVG — replace with real WOLF|BOT face assets via #161 */}
+          <svg width="72" height="72" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            {/* Wolf ears */}
+            <polygon points="9,22 16,4 23,22" fill="#4A7FA5"/>
+            <polygon points="33,22 40,4 47,22" fill="#4A7FA5"/>
+            <polygon points="12,22 16,10 20,22" fill="#214459"/>
+            <polygon points="36,22 40,10 44,22" fill="#214459"/>
+            {/* Head — robot rounded rect */}
+            <rect x="7" y="20" width="42" height="30" rx="6" fill="#214459" stroke="#4A7FA5" strokeWidth="1.5"/>
+            {/* Eye sockets */}
+            <rect x="12" y="26" width="13" height="10" rx="2" fill="#193343"/>
+            <rect x="31" y="26" width="13" height="10" rx="2" fill="#193343"/>
+            {/* Eyes — amber LED */}
+            <rect x="14" y="28" width="9" height="6" rx="1" fill="#C8B020"/>
+            <rect x="33" y="28" width="9" height="6" rx="1" fill="#C8B020"/>
+            {/* Mouth — digital segments */}
+            <rect x="16" y="40" width="5" height="3" rx="1" fill="rgba(255,255,255,0.35)"/>
+            <rect x="25" y="40" width="6" height="3" rx="1" fill="rgba(255,255,255,0.35)"/>
+            <rect x="35" y="40" width="5" height="3" rx="1" fill="rgba(255,255,255,0.35)"/>
+            {/* Antenna */}
+            <rect x="27" y="11" width="2" height="10" rx="1" fill="#4A7FA5"/>
+            <circle cx="28" cy="9" r="3" fill="#C8B020"/>
+          </svg>
           <span className="wolf-panel-wolfbot-text">
-            {wolfbotState === 'greeting' ? 'Hello. where would you like to go?' : '...'}
+            {wolfbotState === 'greeting' ? 'hello. where to?' : '...zzz'}
           </span>
         </button>
       </div>
