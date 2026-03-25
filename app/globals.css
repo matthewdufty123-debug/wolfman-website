@@ -164,42 +164,41 @@ body {
   100% { transform: scale(1); }
 }
 
-/* ── Wolf panel (curved navigation panel) ── */
+/* ── Wolf panel (semicircular dome) ── */
+/*
+ * The dome is a full circle (120vw × 120vw, border-radius: 50%).
+ * Its centre is anchored at the very bottom-centre of the viewport
+ * (bottom: -60vw positions it so the circle centre = viewport bottom edge).
+ * The circle is wider than the screen so it spills ~10vw off each side,
+ * creating the illusion of a smooth dome rising from the bottom.
+ * Visible dome height ≈ 60vw (~25% of screen height on a typical phone).
+ */
 .wolf-panel {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 260px;
+  bottom: -60vw;
+  left: 50%;
+  width: 120vw;
+  height: 120vw;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--nav-fill, #193343);
+  filter: drop-shadow(0 -4px 16px rgba(0,0,0,0.32));
   z-index: 46;
-  transform: translateY(100%);
-  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
   pointer-events: none;
+  transform: translateX(-50%) translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .wolf-panel.is-open {
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
   pointer-events: all;
 }
 
-.wolf-panel-bg {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  filter: drop-shadow(0 -3px 14px rgba(0,0,0,0.28));
-}
-
-/* Match the nav fill — same colour as the persistent nav bell */
-.wolf-panel-bg path {
-  fill: var(--nav-fill, #193343);
-}
-
-/* Hide the nav bell-curve when the wolf panel is open */
-.wolfman-nav--panel-open .nav-bg {
+/* Hide the nav bell-curve and wolf button when the dome is open */
+.wolfman-nav--panel-open .nav-bg,
+.wolfman-nav--panel-open .wolf-btn {
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.2s ease;
 }
 
@@ -210,7 +209,7 @@ body {
 
 .wolf-panel-btn {
   position: absolute;
-  transform: translate(calc(-50% - 40px), -50%);
+  transform: translate(-50%, -50%) scale(0.5);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -227,48 +226,35 @@ body {
   text-decoration: none;
   padding: 6px;
   opacity: 0;
-  transition: opacity 0.3s ease, transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+  transition: opacity 0.28s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
 }
 
 /*
- * Arc positions — calculated along the simple arch:
- *   M0,260 L0,190 C60,190 100,50 187.5,30 C275,50 315,190 375,190 L375,260 Z
- * Each icon is placed ~15–20px below the arch boundary at that x position.
- * Coordinates verified to sit within the filled panel area.
+ * Arc positions — 5 icons on a 120vw circle (r=42vw from element centre 50%,50%).
+ * Angles from horizontal: 160°, 120°, 90°, 60°, 20°
+ * Formula: left = (60 + 42·cos θ) / 120 · 100%,  top = (60 − 42·sin θ) / 120 · 100%
  */
-.wpb-1 { left:  9.1%; top: 73.2%; }  /* Experience  — x=34,  y=190 */
-.wpb-2 { left: 22.2%; top: 51.0%; }  /* Features    — x=83,  y=133 */
-.wpb-3 { left: 37.4%; top: 28.0%; }  /* Home        — x=140, y=73  */
-.wpb-4 { left: 50.0%; top: 17.7%; }  /* WOLF|BOT    — x=188, y=46  */
-.wpb-5 { left: 62.6%; top: 28.0%; }  /* Account     — x=235, y=73  */
-.wpb-6 { left: 77.8%; top: 51.0%; }  /* More        — x=292, y=133 */
+.wpb-1 { left: 17.1%; top: 38.0%; }  /* Experience — 160° */
+.wpb-2 { left: 32.5%; top: 19.7%; }  /* Features   — 120° */
+.wpb-3 { left: 50.0%; top: 15.0%; }  /* Journal    —  90° */
+.wpb-4 { left: 67.5%; top: 19.7%; }  /* Account    —  60° */
+.wpb-5 { left: 82.9%; top: 38.0%; }  /* More       —  20° */
 
-/* Open state: slide to final position and fade in */
+/* Open state: pop icons into final position */
 .wolf-panel.is-open .wolf-panel-btn {
   opacity: 1;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(1);
 }
 
-/* Staggered entrance delays — fan in left to right */
-.wolf-panel.is-open .wpb-1 { transition-delay: 0.44s; }
-.wolf-panel.is-open .wpb-2 { transition-delay: 0.50s; }
-.wolf-panel.is-open .wpb-3 { transition-delay: 0.56s; }
-.wolf-panel.is-open .wpb-4 { transition-delay: 0.62s; }
-.wolf-panel.is-open .wpb-5 { transition-delay: 0.68s; }
-.wolf-panel.is-open .wpb-6 { transition-delay: 0.74s; }
+/* Minimal outward-wave stagger from centre icon */
+.wolf-panel.is-open .wpb-1 { transition-delay: 0.04s; }
+.wolf-panel.is-open .wpb-2 { transition-delay: 0.02s; }
+.wolf-panel.is-open .wpb-3 { transition-delay: 0s; }
+.wolf-panel.is-open .wpb-4 { transition-delay: 0.02s; }
+.wolf-panel.is-open .wpb-5 { transition-delay: 0.04s; }
 
 .wolf-panel-btn:hover {
   color: var(--heading, #E5CBBB);
-}
-
-/* WOLF|BOT — peak button, slightly brighter */
-.wolf-panel-btn--wolfbot {
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.wolf-panel-btn--wolfbot span {
-  font-weight: 700;
-  letter-spacing: 0.1em;
 }
 
 /* Avatar inside wolf panel */
@@ -279,21 +265,50 @@ body {
   object-fit: cover;
 }
 
-/* WOLF|BOT offline message — appears below the wolfbot button */
-.wolf-panel-wolfbot-msg {
+/* ── WOLF|BOT face — centred at dome bottom (near viewport bottom) ── */
+.wolf-panel-wolfbot-face {
   position: absolute;
   left: 50%;
-  top: 33%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.65);
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 0.72rem;
+  top: 45%;
+  transform: translateX(-50%) translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.wolf-panel.is-open .wolf-panel-wolfbot-face {
+  opacity: 1;
+}
+
+.wolf-panel-wolfbot-face img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  animation: pulse 5s ease-in-out infinite;
+  transition: opacity 0.4s ease;
+}
+
+.wolf-panel-wolfbot-face--bored img {
+  animation: none;
+  opacity: 0.45;
+}
+
+.wolf-panel-wolfbot-text {
+  font-size: 0.6rem;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  padding: 0.35rem 0.9rem;
-  border-radius: 20px;
-  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+  letter-spacing: 0.04em;
+  max-width: 130px;
+  line-height: 1.35;
   pointer-events: none;
-  margin: 0;
 }
 
 /* ── Top utility bar ── */
