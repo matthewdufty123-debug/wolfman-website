@@ -144,8 +144,13 @@ inviting a click
 - `/login`, `/register` — public auth pages (register includes beta terms summary)
 - `/account` — user profile (username with live availability check, name, display name, bio, avatar, password)
 - `/settings` — user settings
-- `/beta` — beta information, terms, data policy, and countdown
+- `/beta` — beta information, beta-specific terms, data policy, and countdown. Links to `/terms`.
 - `/feedback` — beta feedback form (submits to GitHub Issues API)
+
+### Product & Development Pages
+- `/features` — non-technical release roadmap. Lists releases 0.1–0.9 with plain-English feature descriptions and status badges (Built / In Development / Coming Soon). Audience: users and community.
+- `/dev` — GitHub-integrated technical development hub. Shows milestones, open/closed issues, open branches and PRs, development workflow. Audience: developers and technical users.
+- `/terms` — general terms and conditions. Placeholder during beta; fully defined in Release 0.9. Linked from `/features` and `/beta`.
 
 ---
 
@@ -236,6 +241,15 @@ AI-generated
 - **Images:** never commit large images to git — upload to Vercel Blob via the admin upload tool, use the returned URL in code
 - **Schema changes:** run `npm run db:push` after editing `lib/db/schema.ts` to apply changes to Neon
 
+### Branching strategy
+
+- **main** — production. Every merge deploys automatically to wolfman.blog via Vercel.
+- **Feature branches** — named `feature/short-description` (e.g. `feature/wolf-bot-personality`). Branch from main, merge back to main via PR.
+- **Release branches** — named `release/0.x` when batching multiple features for a release.
+- **Vercel preview deployments** — every branch pushed to GitHub automatically gets a unique preview URL (e.g. `wolfman-blog-git-feature-xyz.vercel.app`). Use this for device testing and review before merging. No dedicated dev subdomain needed — Vercel previews are it.
+- **localhost** — for initial development and iteration. Push to branch when ready for real-device or mobile testing.
+- Branch and PR information is surfaced on the `/dev` page via the GitHub API — no manual documentation of active branches in CLAUDE.md required.
+
 ### Next.js App Router folder structure
 ```
 app/
@@ -248,8 +262,11 @@ app/
     beta/                   — Beta info, terms, data policy, countdown
     cart/                   — Shopping cart
     checkout/               — Stripe checkout + success
+    dev/                    — Technical GitHub-integrated development hub (milestones, issues, branches, PRs)
+    features/               — Non-technical release roadmap (releases 0.1–0.9, feature status badges)
     feedback/               — Beta feedback form (GitHub Issues integration)
     intentions/             — 301 redirect → /
+    terms/                  — General terms and conditions (placeholder; expanded in Release 0.9)
     login/                  — Login page
     morning-ritual/         — Ritual overview + [key] filter page
     morning-stats/          — Redirects logged-in users → /[username], else → /login
@@ -362,12 +379,13 @@ All work is organised by **milestone**, then **label**. No stage codes — miles
 | Release 0.6 — Achievements | #21 | 23 Aug 2026 | Rewards, streaks, badges (built on 0.5 data layer) |
 | Release 0.7 — Shop | #22 | 31 Aug 2026 | Shop live, Printful fulfilment, Stripe payments |
 | Release 0.8 — Subscriptions | #23 | 31 Aug 2026 | Free vs premium tier, feature gating, paid tier live |
+| Release 0.9 — Legal | #24 | Before go-live | Data protection, T&Cs, GDPR, cookie consent, EU/US legal, shop and subscription terms. Must be signed off before production launch. |
 
 **Version numbering:** Each release is a major version (v0.1, v0.2 etc). Patches within a release are v0.1.1, v0.1.2 etc. The current version number is displayed on the site.
 
 **Current status (25 March 2026):**
-- Closed Alpha Development (#15): active queue — bugs, launch prep, branding, About page. Must ship by 30 April.
-- Releases 0.1–0.8: planned, scoped, and milestoned. Beta runs 1 May – 31 August 2026.
+- Closed Alpha Development (#15): active queue — bugs, launch prep, branding, About page, IA consolidation. Must ship by 30 April.
+- Releases 0.1–0.9: planned, scoped, and milestoned. Beta runs 1 May – 31 August 2026. Release 0.9 (Legal) must complete before production go-live.
 
 ### Feature freeze
 
