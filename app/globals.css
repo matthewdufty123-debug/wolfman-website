@@ -658,9 +658,10 @@ body {
 
 /* Table column rules */
 .dev-table--completed { table-layout: fixed; width: 100%; }
-.dev-table--completed .dev-col-num    { width: 10%; }
-.dev-table--completed .dev-col-title  { width: 60%; word-break: break-word; white-space: normal; }
-.dev-table--completed .dev-col-labels { width: 30%; }
+.dev-table--completed .dev-col-num    { width: 6%; }
+.dev-table--completed .dev-col-title  { width: 50%; word-break: break-word; white-space: normal; }
+.dev-table--completed .dev-col-labels { width: 24%; }
+/* remaining 20% for the date column */
 
 .dev-table--pipeline { table-layout: fixed; width: 100%; }
 .dev-table--pipeline .dev-col-num   { width: 10%; }
@@ -2712,6 +2713,8 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
   margin: 3rem 0 0;
   padding: 1.5rem 0;
   border-top: 1px solid var(--nav-fade);
+  text-decoration: none;
+  color: inherit;
 }
 
 .post-author-photo {
