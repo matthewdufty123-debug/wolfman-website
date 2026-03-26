@@ -388,6 +388,8 @@ All work is organised by **milestone**, then **label**. No stage codes — miles
 - Closed Alpha Development (#15): active queue — bugs, launch prep, branding, About page, IA consolidation. Must ship by 30 April.
 - Navigation dome redesign shipped to production: issues #157, #158, #159, #160, #163 all closed. Circular dome nav with WOLF|BOT face placeholder is live on wolfman.blog. Issue #161 (real WOLF|BOT face assets) remains open.
 - Portrait-only mode shipped to production (#165): `LandscapeBlock` CSS-only overlay blocks landscape view on all touch devices (phones and tablets). Desktop unaffected. Issues #137 (floating dev window — already resolved) and #141 (landscape text bleed — superseded) also closed.
+- Session 26 March 2026 (afternoon): four bugs fixed and shipped to production — WOLF|BOT dome text bleed (wolfbot "where to?" leaking outside circular clip fixed with overflow:hidden), journal page author card now links to profile (#131 closed), /dev completed work table overflow fixed (#139 closed), GDPR consent + honeypot recovered from lost branch (#125, #138). Issue #140 (beta page scroll bleed) confirmed resolved, closed as not_planned. Stale branches cleaned up.
+- ACTION REQUIRED: run `npm run db:push` locally to create the `beta_interest` table (#166) — without this the beta interest registration form will 500.
 - Releases 0.1–0.9: planned, scoped, and milestoned. Beta runs 1 May – 31 August 2026. Release 0.9 (Legal) must complete before production go-live.
 
 ### Feature freeze
