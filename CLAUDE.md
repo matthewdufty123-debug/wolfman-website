@@ -325,6 +325,7 @@ components/                 — Shared React components
   ThemeButtons.tsx / ThemeProvider.tsx — Reader theme controls (DB-persisted)
   TopBar.tsx                — Fixed top utility bar: + new journal, BETA FEEDBACK, edit
   WolfLogo.tsx              — Animated wolf logo
+  LandscapeBlock.tsx        — CSS-only portrait lock: full-screen overlay shown on touch devices in landscape orientation
 
 lib/
   db/                       — Drizzle schema and database client
@@ -383,9 +384,10 @@ All work is organised by **milestone**, then **label**. No stage codes — miles
 
 **Version numbering:** Each release is a major version (v0.1, v0.2 etc). Patches within a release are v0.1.1, v0.1.2 etc. The current version number is displayed on the site.
 
-**Current status (25 March 2026):**
+**Current status (26 March 2026):**
 - Closed Alpha Development (#15): active queue — bugs, launch prep, branding, About page, IA consolidation. Must ship by 30 April.
 - Navigation dome redesign shipped to production: issues #157, #158, #159, #160, #163 all closed. Circular dome nav with WOLF|BOT face placeholder is live on wolfman.blog. Issue #161 (real WOLF|BOT face assets) remains open.
+- Portrait-only mode shipped to production (#165): `LandscapeBlock` CSS-only overlay blocks landscape view on all touch devices (phones and tablets). Desktop unaffected. Issues #137 (floating dev window — already resolved) and #141 (landscape text bleed — superseded) also closed.
 - Releases 0.1–0.9: planned, scoped, and milestoned. Beta runs 1 May – 31 August 2026. Release 0.9 (Legal) must complete before production go-live.
 
 ### Feature freeze
