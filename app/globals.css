@@ -180,9 +180,11 @@ body {
   width: 120vw;
   height: 120vw;
   border-radius: 50%;
+  overflow: hidden;
   background: var(--nav-fill, #193343);
-  /* box-shadow follows border-radius; avoids the filter+overflow:hidden
-     Chrome/Android rendering bug that leaked child text outside the dome */
+  /* box-shadow follows border-radius; no filter used here so overflow:hidden
+     is safe — the old Chrome/Android leak bug was caused by filter+overflow:hidden
+     together. Without filter, overflow:hidden clips child text correctly. */
   box-shadow: 0 -6px 24px rgba(0,0,0,0.38);
   z-index: 46;
   pointer-events: none;
