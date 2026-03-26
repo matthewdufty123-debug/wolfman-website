@@ -320,7 +320,7 @@ export default async function PostPage({
       </div>
 
       <div className="post-author-review-wrap">
-        <div className="post-author">
+        <a href={`/${username}`} className="post-author">
           {(author.avatar ?? author.image) ? (
             <img
               src={author.avatar ?? author.image ?? ''}
@@ -347,7 +347,7 @@ export default async function PostPage({
               <p className="post-author-bio">{author.bio}</p>
             )}
           </div>
-        </div>
+        </a>
       </div>
 
       {/* Merged morning + evening block */}

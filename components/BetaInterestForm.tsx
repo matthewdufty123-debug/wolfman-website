@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 type Source = 'beta-page' | 'login-page' | 'register-page'
 type Status = 'idle' | 'submitting' | 'success' | 'error'
@@ -8,6 +9,8 @@ type Status = 'idle' | 'submitting' | 'success' | 'error'
 export default function BetaInterestForm({ source }: { source: Source }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [consented, setConsented] = useState(false)
+  const [honeypot, setHoneypot] = useState('')
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const [isDuplicate, setIsDuplicate] = useState(false)
@@ -21,7 +24,7 @@ export default function BetaInterestForm({ source }: { source: Source }) {
       const res = await fetch('/api/beta-interest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), email: email.trim(), source }),
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), source, website: honeypot }),
       })
       const data = await res.json().catch(() => ({}))
 
@@ -56,6 +59,18 @@ export default function BetaInterestForm({ source }: { source: Source }) {
         <p className="interest-error" role="alert">{errorMsg}</p>
       )}
 
+      {/* Honeypot — hidden from humans, filled by bots */}
+      <div style={{ display: 'none' }} aria-hidden="true">
+        <input
+          type="text"
+          name="website"
+          value={honeypot}
+          onChange={e => setHoneypot(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+
       <div className="interest-field">
         <label htmlFor="interest-name" className="interest-label">Your name</label>
         <input
@@ -84,17 +99,30 @@ export default function BetaInterestForm({ source }: { source: Source }) {
         />
       </div>
 
+      <div className="interest-consent">
+        <label className="interest-consent-label">
+          <input
+            type="checkbox"
+            className="interest-consent-checkbox"
+            checked={consented}
+            onChange={e => setConsented(e.target.checked)}
+            required
+          />
+          <span>
+            I agree to be contacted once when the public beta opens.
+            My email won&apos;t be used for anything else.{' '}
+            <Link href="/terms" className="interest-consent-link">Terms</Link>
+          </span>
+        </label>
+      </div>
+
       <button
         type="submit"
         className="interest-submit"
-        disabled={status === 'submitting' || !name.trim() || !email.trim()}
+        disabled={status === 'submitting' || !name.trim() || !email.trim() || !consented}
       >
         {status === 'submitting' ? 'Please wait…' : 'Register my interest'}
       </button>
-
-      <p className="interest-privacy">
-        We&apos;ll use your email to let you know when the beta opens. Nothing else.
-      </p>
     </form>
   )
 }

@@ -180,9 +180,11 @@ body {
   width: 120vw;
   height: 120vw;
   border-radius: 50%;
+  overflow: hidden;
   background: var(--nav-fill, #193343);
-  /* box-shadow follows border-radius; avoids the filter+overflow:hidden
-     Chrome/Android rendering bug that leaked child text outside the dome */
+  /* box-shadow follows border-radius; no filter used here so overflow:hidden
+     is safe — the old Chrome/Android leak bug was caused by filter+overflow:hidden
+     together. Without filter, overflow:hidden clips child text correctly. */
   box-shadow: 0 -6px 24px rgba(0,0,0,0.38);
   z-index: 46;
   pointer-events: none;
@@ -656,9 +658,10 @@ body {
 
 /* Table column rules */
 .dev-table--completed { table-layout: fixed; width: 100%; }
-.dev-table--completed .dev-col-num    { width: 10%; }
-.dev-table--completed .dev-col-title  { width: 60%; word-break: break-word; white-space: normal; }
-.dev-table--completed .dev-col-labels { width: 30%; }
+.dev-table--completed .dev-col-num    { width: 6%; }
+.dev-table--completed .dev-col-title  { width: 50%; word-break: break-word; white-space: normal; }
+.dev-table--completed .dev-col-labels { width: 24%; }
+/* remaining 20% for the date column */
 
 .dev-table--pipeline { table-layout: fixed; width: 100%; }
 .dev-table--pipeline .dev-col-num   { width: 10%; }
@@ -2710,6 +2713,8 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
   margin: 3rem 0 0;
   padding: 1.5rem 0;
   border-top: 1px solid var(--nav-fade);
+  text-decoration: none;
+  color: inherit;
 }
 
 .post-author-photo {
@@ -5659,13 +5664,35 @@ html[data-theme="dark"] .stats-chart-card {
   margin: 0;
 }
 
-.interest-privacy {
+.interest-consent {
+  margin-top: 0.25rem;
+}
+
+.interest-consent-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  cursor: pointer;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   color: var(--body-text);
-  opacity: 0.45;
-  margin: 0;
+  opacity: 0.8;
   line-height: 1.5;
+}
+
+.interest-consent-checkbox {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  accent-color: #A0622A;
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+.interest-consent-link {
+  color: #A0622A;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .interest-success {

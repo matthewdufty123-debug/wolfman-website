@@ -202,33 +202,35 @@ function OpenPRs({ prs }: { prs: GitHubPR[] }) {
   const now = new Date().toISOString()
 
   return (
-    <table className="dev-table dev-table--pipeline">
-      <thead>
-        <tr>
-          <th className="dev-col-num">#</th>
-          <th className="dev-col-title">Branch / Title</th>
-          <th style={{ whiteSpace: 'nowrap' }}>Open for</th>
-        </tr>
-      </thead>
-      <tbody>
-        {prs.map(pr => (
-          <tr key={pr.number} className="dev-row-main">
-            <td className="dev-col-num dev-col-id">
-              <a href={pr.html_url} target="_blank" rel="noopener noreferrer" className="dev-commit-link">
-                #{pr.number}
-              </a>
-            </td>
-            <td className="dev-col-title">
-              <span className="dev-pr-branch">{pr.head.ref}</span>
-              <span className="dev-pr-title">{pr.title}</span>
-            </td>
-            <td style={{ color: '#8b949e', whiteSpace: 'nowrap', fontSize: '0.78rem' }}>
-              {Math.round(daysBetween(pr.created_at, now))}d
-            </td>
+    <div className="dev-table-wrap">
+      <table className="dev-table dev-table--pipeline">
+        <thead>
+          <tr>
+            <th className="dev-col-num">#</th>
+            <th className="dev-col-title">Branch / Title</th>
+            <th style={{ whiteSpace: 'nowrap' }}>Open for</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {prs.map(pr => (
+            <tr key={pr.number} className="dev-row-main">
+              <td className="dev-col-num dev-col-id">
+                <a href={pr.html_url} target="_blank" rel="noopener noreferrer" className="dev-commit-link">
+                  #{pr.number}
+                </a>
+              </td>
+              <td className="dev-col-title">
+                <span className="dev-pr-branch">{pr.head.ref}</span>
+                <span className="dev-pr-title">{pr.title}</span>
+              </td>
+              <td style={{ color: '#8b949e', whiteSpace: 'nowrap', fontSize: '0.78rem' }}>
+                {Math.round(daysBetween(pr.created_at, now))}d
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -306,32 +308,34 @@ function ClosedWork({ issues }: { issues: GitHubIssue[] }) {
 
   return (
     <>
-      <table className="dev-table dev-table--completed">
-        <thead>
-          <tr>
-            <th className="dev-col-num">#</th>
-            <th className="dev-col-title">Title</th>
-            <th className="dev-col-labels">Labels</th>
-            <th style={{ whiteSpace: 'nowrap' }}>Closed</th>
-          </tr>
-        </thead>
-        <tbody>
-          {visible.map(issue => (
-            <tr key={issue.number} className="dev-row-main">
-              <td className="dev-col-num dev-col-id">
-                <a href={`${ISSUES_URL}${issue.number}`} target="_blank" rel="noopener noreferrer" className="dev-commit-link">
-                  #{issue.number}
-                </a>
-              </td>
-              <td className="dev-col-title">{issue.title}</td>
-              <td className="dev-col-labels">{labelBadges(issue.labels)}</td>
-              <td style={{ color: '#8b949e', whiteSpace: 'nowrap', fontSize: '0.78rem' }}>
-                {issue.closed_at ? formatDate(issue.closed_at) : '—'}
-              </td>
+      <div className="dev-table-wrap">
+        <table className="dev-table dev-table--completed">
+          <thead>
+            <tr>
+              <th className="dev-col-num">#</th>
+              <th className="dev-col-title">Title</th>
+              <th className="dev-col-labels">Labels</th>
+              <th style={{ whiteSpace: 'nowrap' }}>Closed</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {visible.map(issue => (
+              <tr key={issue.number} className="dev-row-main">
+                <td className="dev-col-num dev-col-id">
+                  <a href={`${ISSUES_URL}${issue.number}`} target="_blank" rel="noopener noreferrer" className="dev-commit-link">
+                    #{issue.number}
+                  </a>
+                </td>
+                <td className="dev-col-title">{issue.title}</td>
+                <td className="dev-col-labels">{labelBadges(issue.labels)}</td>
+                <td style={{ color: '#8b949e', whiteSpace: 'nowrap', fontSize: '0.78rem' }}>
+                  {issue.closed_at ? formatDate(issue.closed_at) : '—'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       {hasMore && (
         <p className="dev-log-action">
           <a href="#" className="dev-link" onClick={e => { e.preventDefault(); setExpanded(x => !x) }}>

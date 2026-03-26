@@ -6,9 +6,15 @@ import { sendBetaInterestConfirmation, sendAdminBetaInterestAlert } from '@/lib/
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null)
 
-  const name  = typeof body?.name  === 'string' ? body.name.trim()               : ''
-  const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
-  const source = typeof body?.source === 'string' ? body.source : 'beta-page'
+  const name     = typeof body?.name    === 'string' ? body.name.trim()               : ''
+  const email    = typeof body?.email   === 'string' ? body.email.trim().toLowerCase() : ''
+  const source   = typeof body?.source  === 'string' ? body.source                    : 'beta-page'
+  const honeypot = typeof body?.website === 'string' ? body.website.trim()            : ''
+
+  // Honeypot — bots fill this field; humans never see it. Silently return success.
+  if (honeypot) {
+    return NextResponse.json({ ok: true, duplicate: false })
+  }
 
   if (!name || !email || !email.includes('@')) {
     return NextResponse.json(
