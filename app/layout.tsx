@@ -5,6 +5,7 @@ import ThemeProvider from '@/components/ThemeProvider'
 import AuthProvider from '@/components/AuthProvider'
 import { CartProvider } from '@/lib/cart'
 import { Analytics } from '@vercel/analytics/next'
+import LandscapeBlock from '@/components/LandscapeBlock'
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -52,6 +53,7 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
+        <LandscapeBlock />
         <AuthProvider>
           <ThemeProvider>
             <CartProvider>

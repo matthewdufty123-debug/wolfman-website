@@ -5553,3 +5553,59 @@ html[data-theme="dark"] .stats-chart-card {
   .features-item { padding: 0.75rem 1.25rem; flex-direction: column; gap: 0.5rem; }
   .features-status { align-self: flex-start; }
 }
+
+/* ── Portrait-only lock — landscape block overlay ──────────────────────── */
+/* Hidden by default — only shown to touch devices in landscape orientation  */
+
+.landscape-block {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #214459;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.landscape-block-icon {
+  opacity: 0.9;
+  animation: landscape-rotate-hint 2s ease-in-out infinite;
+}
+
+.landscape-block-title {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.landscape-block-subtitle {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+@keyframes landscape-rotate-hint {
+  0%, 100% { transform: rotate(0deg); }
+  40%       { transform: rotate(-15deg); }
+  60%       { transform: rotate(15deg); }
+}
+
+/* Show on touch devices in landscape only */
+@media (orientation: landscape) and (hover: none) and (pointer: coarse) {
+  .landscape-block {
+    display: flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landscape-block-icon {
+    animation: none;
+  }
+}
