@@ -5554,6 +5554,231 @@ html[data-theme="dark"] .stats-chart-card {
   .features-status { align-self: flex-start; }
 }
 
+/* ── Closed Alpha Banner ────────────────────────────────────────────────── */
+
+.closed-alpha-banner {
+  background: #C8B020;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  flex-shrink: 0;
+}
+
+.closed-alpha-banner-text {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #214459;
+  margin: 0;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.closed-alpha-banner-link {
+  color: #214459;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.15s ease;
+}
+
+.closed-alpha-banner-link:hover { opacity: 0.7; }
+
+/* ── Beta interest form ──────────────────────────────────────────────────── */
+
+.interest-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.interest-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.interest-label {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #A0622A;
+}
+
+.interest-input {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1rem;
+  color: var(--body-text, #ffffff);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(160, 98, 42, 0.4);
+  padding: 0.6rem 0;
+  outline: none;
+  transition: border-color 0.2s ease;
+  width: 100%;
+}
+
+.interest-input:focus { border-bottom-color: #A0622A; }
+.interest-input:disabled { opacity: 0.5; }
+
+.interest-input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset;
+  -webkit-text-fill-color: var(--body-text, #ffffff);
+  caret-color: var(--body-text, #ffffff);
+}
+
+.interest-submit {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #ffffff;
+  background: #214459;
+  border: none;
+  border-radius: 4px;
+  padding: 0.85rem 2rem;
+  cursor: pointer;
+  margin-top: 0.25rem;
+  transition: opacity 0.2s ease;
+  align-self: flex-start;
+}
+
+.interest-submit:hover:not(:disabled) { opacity: 0.85; }
+.interest-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.interest-error {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.875rem;
+  color: #A82020;
+  margin: 0;
+}
+
+.interest-privacy {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.75rem;
+  color: var(--body-text);
+  opacity: 0.45;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.interest-success {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.interest-success-tick {
+  font-size: 1.5rem;
+  color: #4A7FA5;
+}
+
+.interest-success-headline {
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--heading, #E5CBBB);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Beta page: interest block + timeline ────────────────────────────────── */
+
+.beta-interest-block {
+  padding: 0 0 2.5rem;
+  border-bottom: 1px solid rgba(160, 98, 42, 0.15);
+  margin-bottom: 2.5rem;
+}
+
+.beta-interest-heading {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 400;
+  color: var(--heading, #E5CBBB);
+  margin: 0 0 0.5rem;
+  line-height: 1.3;
+}
+
+.beta-interest-subtext {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--body-text);
+  opacity: 0.75;
+  margin: 0 0 1.75rem;
+}
+
+.beta-timeline {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 0.5rem;
+}
+
+.beta-timeline th {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #A0622A;
+  text-align: left;
+  padding: 0 0.5rem 0.6rem 0;
+  border-bottom: 1px solid rgba(160, 98, 42, 0.25);
+}
+
+.beta-timeline td {
+  font-size: 0.9rem;
+  color: var(--body-text);
+  padding: 0.75rem 0.5rem 0.75rem 0;
+  border-bottom: 1px solid rgba(160, 98, 42, 0.08);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.beta-timeline td:last-child { padding-right: 0; white-space: nowrap; }
+
+.beta-timeline-status {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.beta-timeline-status--active   { color: #4A7FA5; }
+.beta-timeline-status--upcoming { color: var(--body-text); opacity: 0.45; }
+.beta-timeline-status--tbd      { color: var(--body-text); opacity: 0.3; }
+
+/* ── Login: closed alpha notice ──────────────────────────────────────────── */
+
+.login-alpha-notice {
+  background: rgba(200, 176, 32, 0.07);
+  border: 1px solid rgba(200, 176, 32, 0.3);
+  border-radius: 4px;
+  padding: 0.85rem 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.login-alpha-notice-text {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--body-text);
+  margin: 0;
+}
+
+.login-alpha-notice-link {
+  color: #C8B020;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.15s ease;
+}
+
+.login-alpha-notice-link:hover { opacity: 0.8; }
+
 /* ── Portrait-only lock — landscape block overlay ──────────────────────── */
 /* Hidden by default — only shown to touch devices in landscape orientation  */
 

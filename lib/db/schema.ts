@@ -126,6 +126,19 @@ export const siteConfig = pgTable('site_config', {
   updatedBy: text('updated_by'),          // admin user ID who last changed it
 })
 
+// ── Beta interest registrations ───────────────────────────────────────────
+// Pre-registration interest list for the public beta (opens 1 May 2026).
+// NOT the same as a user account — no auth, no passwords.
+// source: 'beta-page' | 'login-page' | 'register-page'
+// Duplicate emails are silently ignored via onConflictDoNothing().
+export const betaInterest = pgTable('beta_interest', {
+  id:        uuid('id').primaryKey().defaultRandom(),
+  email:     text('email').notNull().unique(),
+  name:      text('name').notNull(),
+  source:    text('source').notNull().default('beta-page'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // ── Wolfbot configuration ─────────────────────────────────────────────────
 // Key-value config store for Wolfbot — the pixel art mascot.
 // All values are JSONB for maximum flexibility as the config schema evolves.
