@@ -230,6 +230,29 @@ export default async function ProfilePage(
   return (
     <main className="journal-page">
 
+      {/* Account button — owner only */}
+      {isOwner && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+          <a
+            href="/account"
+            style={{
+              display: 'inline-block',
+              padding: '0.45rem 1.1rem',
+              background: '#214459',
+              color: '#fff',
+              borderRadius: '6px',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+              letterSpacing: '0.04em',
+              textDecoration: 'none',
+            }}
+          >
+            Account
+          </a>
+        </div>
+      )}
+
       {/* Profile header */}
       <header style={{
         display: 'flex',

@@ -74,12 +74,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id
         // Fetch extended profile fields at sign-in time
         const [row] = await db
-          .select({ displayName: users.displayName, bio: users.bio, avatar: users.avatar, onboardingComplete: users.onboardingComplete })
+          .select({ displayName: users.displayName, bio: users.bio, avatar: users.avatar, username: users.username, onboardingComplete: users.onboardingComplete })
           .from(users)
           .where(eq(users.id, user.id!))
         token.displayName        = row?.displayName        ?? null
         token.bio                = row?.bio                ?? null
         token.avatar             = row?.avatar             ?? null
+        token.username           = row?.username           ?? null
         token.onboardingComplete = row?.onboardingComplete ?? false
       }
       return token
@@ -91,6 +92,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.displayName      = token.displayName      as string | null
         session.user.bio              = token.bio              as string | null
         session.user.avatar           = token.avatar           as string | null
+        session.user.username         = token.username         as string | null
         session.user.onboardingComplete = token.onboardingComplete as boolean
       }
       return session

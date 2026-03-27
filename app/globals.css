@@ -365,9 +365,17 @@ body {
   transition: color 0.15s ease;
 }
 .top-bar-btn:hover { color: var(--heading); }
-.top-bar-btn--left    { left: 0.5rem; }
-.top-bar-btn--right   { right: 0.5rem; }
-.top-bar-btn--journal { left: 3rem; }
+.top-bar-btn--left  { left: 0.5rem; }
+.top-bar-btn--right { right: 0.5rem; }
+
+.top-bar-avatar-btn { padding: 0; }
+.top-bar-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
 
 .top-bar-feedback {
   font-size: 0.65rem;
