@@ -403,12 +403,17 @@ The scope of each release is now locked for the beta period. **New feature reque
 
 ### Session startup — do this every time before any work begins
 
-1. Run `git log --oneline -10` to see the last 10 commits.
-2. Fetch open issues via the GitHub API using the PAT in `.env.local` (`GITHUB_TOKEN`):
+> **Why this matters:** Matthew works across desktop and phone. Phone sessions run in Claude worktrees
+> that push directly to GitHub. If the desktop local repo isn't pulled first, the two histories diverge
+> and a messy merge is required. Step 1 below prevents this entirely.
+
+1. **`git pull origin main`** — always do this first on desktop to sync any changes pushed from phone sessions or other worktrees. If there are local commits not yet on origin, this will produce a merge — resolve it before proceeding.
+2. Run `git log --oneline -10` to see the last 10 commits.
+3. Fetch open issues via the GitHub API using the PAT in `.env.local` (`GITHUB_TOKEN`):
    `https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues?state=open&per_page=100`
-3. Check for any `in-progress` labelled issues — these were left mid-session and jump the queue.
-4. Identify the active milestone. Priority order: **Closed Alpha Development** first, then Phase 1, then Phase 2.
-5. Summarise: recent commits, anything in-flight, suggested next issue. Let Matthew confirm before starting.
+4. Check for any `in-progress` labelled issues — these were left mid-session and jump the queue.
+5. Identify the active milestone. Priority order: **Closed Alpha Development** first, then Phase 1, then Phase 2.
+6. Summarise: recent commits, anything in-flight, suggested next issue. Let Matthew confirm before starting.
 
 ### Session workflow
 
