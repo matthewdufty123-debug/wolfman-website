@@ -6041,3 +6041,51 @@ html[data-theme="dark"] .stats-chart-card {
 html[data-theme="dark"] .tab-evening-edit-btn {
   border-color: rgba(255,255,255,0.15);
 }
+
+/* ── WOLF|BOT Review tab ──────────────────────────────────────────────────── */
+
+.wolfbot-review-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.wolfbot-review-face {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.wolfbot-review-label {
+  text-align: center;
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.4;
+  margin: 0 0 2.5rem;
+}
+
+.wolfbot-review-body {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: clamp(1rem, 2.5vw, 1.125rem);
+  line-height: 1.9;
+  color: var(--body-text, #4A4A4A);
+}
+
+.wolfbot-review-body p {
+  margin: 0 0 1.5em;
+}
+
+.wolfbot-review-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Font size follows user preference */
+html[data-fontsize="large"] .wolfbot-review-body {
+  font-size: clamp(1.5rem, 3.75vw, 1.6875rem);
+}
+
+html[data-fontsize="xlarge"] .wolfbot-review-body {
+  font-size: clamp(2rem, 5vw, 2.25rem);
+}

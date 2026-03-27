@@ -112,6 +112,29 @@ function MorningWalkPost({ post }: { post: ProcessedPost }) {
   )
 }
 
+// ── WOLF|BOT face SVG ─────────────────────────────────────────────────────────
+
+function WolfBotFaceSvg() {
+  return (
+    <svg width="80" height="80" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <polygon points="9,22 16,4 23,22" fill="#4A7FA5"/>
+      <polygon points="33,22 40,4 47,22" fill="#4A7FA5"/>
+      <polygon points="12,22 16,10 20,22" fill="#214459"/>
+      <polygon points="36,22 40,10 44,22" fill="#214459"/>
+      <rect x="7" y="20" width="42" height="30" rx="6" fill="#214459" stroke="#4A7FA5" strokeWidth="1.5"/>
+      <rect x="12" y="26" width="13" height="10" rx="2" fill="#193343"/>
+      <rect x="31" y="26" width="13" height="10" rx="2" fill="#193343"/>
+      <rect x="14" y="28" width="9" height="6" rx="1" fill="#C8B020"/>
+      <rect x="33" y="28" width="9" height="6" rx="1" fill="#C8B020"/>
+      <rect x="16" y="40" width="5" height="3" rx="1" fill="rgba(255,255,255,0.35)"/>
+      <rect x="25" y="40" width="6" height="3" rx="1" fill="rgba(255,255,255,0.35)"/>
+      <rect x="35" y="40" width="5" height="3" rx="1" fill="rgba(255,255,255,0.35)"/>
+      <rect x="27" y="11" width="2" height="10" rx="1" fill="#4A7FA5"/>
+      <circle cx="28" cy="9" r="3" fill="#C8B020"/>
+    </svg>
+  )
+}
+
 // ── Orb SVGs ──────────────────────────────────────────────────────────────────
 
 function WolfOrbSvg() {
@@ -208,48 +231,23 @@ function TabWolfbot({ ds, post }: {
   ds: JournalTabsProps['dayScores']
   post: ProcessedPost
 }) {
-  if (ds) {
-    const completenessLabel = COMPLETENESS_LABELS[ds.dataCompleteness] ?? ds.dataCompleteness
-    return (
-      <div className="post-day-block post-day-block--claudes-take">
-        <div className="post-day-claudes-take-header">
-          <p className="post-day-block-label" style={{ margin: 0 }}>✦ Claude&apos;s Take</p>
-          <span className="post-day-completeness">{completenessLabel}</span>
-        </div>
-        <div className="post-day-synthesis">
-          {ds.synthesis.split('\n\n').map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
-        </div>
-        <div className="post-day-scores">
-          {Object.entries(ds.scores).map(([dim, score]) => (
-            <div key={dim} className="post-day-score-card">
-              <span className="post-day-score-value">{score.toFixed(1)}</span>
-              <span className="post-day-score-dim">{dim.replace(/_/g, ' ')}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
+  const text = ds?.synthesis ?? post.review ?? null
 
-  if (post.review) {
-    return (
-      <div className="post-claude-review">
-        <div className="post-claude-review-header">
-          <img src="/images/site_images/claudecode-color.png" alt="Claude" className="post-claude-icon" />
-          <span className="post-claude-review-label">Claude&apos;s take</span>
-        </div>
-        <div className="post-claude-review-body">
-          {post.review.split('\n\n').map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
-        </div>
-      </div>
-    )
-  }
+  if (!text) return <div className="tab-empty-state">No synthesis yet.</div>
 
-  return <div className="tab-empty-state">No synthesis yet.</div>
+  return (
+    <div className="wolfbot-review-wrap">
+      <div className="wolfbot-review-face">
+        <WolfBotFaceSvg />
+      </div>
+      <p className="wolfbot-review-label">here is my review.</p>
+      <div className="wolfbot-review-body">
+        {text.split('\n\n').map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 function TabEvening({ er, postId, authorId, isOwner, eveningOpen, setEveningOpen }: {
