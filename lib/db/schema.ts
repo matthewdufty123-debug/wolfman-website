@@ -112,6 +112,16 @@ export const eveningReflection = pgTable('evening_reflection', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
+// ── Beta interest (pre-registration) ──────────────────────────────────────
+// Captures interest before registration opens. Source: 'beta-page' | 'login' | 'register'
+export const betaInterest = pgTable('beta_interest', {
+  id: serial('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  name: text('name'),
+  source: text('source').notNull().default('beta-page'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
 // ── Site configuration ─────────────────────────────────────────────────────
 // Singleton row (id always 1). Controls registration, messaging and UI mode.
 // status: closed_alpha | closed_beta | open_beta | live
