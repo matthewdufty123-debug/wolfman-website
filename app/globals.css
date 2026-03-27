@@ -5933,8 +5933,7 @@ html[data-theme="dark"] .stats-chart-card {
   align-items: center;
   justify-content: space-evenly;
   padding: 6px 1.5rem;
-  background: var(--page-bg, #fff);
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  background: transparent;
 }
 
 .tab-content {
@@ -6039,10 +6038,6 @@ html[data-theme="dark"] .stats-chart-card {
 
 .tab-meta-logo-wrap a { display: block; line-height: 0; }
 
-html[data-theme="dark"] .tab-orb-row {
-  background: var(--page-bg, #1a1a1a);
-  border-color: rgba(255,255,255,0.06);
-}
 html[data-theme="dark"] .tab-evening-edit-btn {
   border-color: rgba(255,255,255,0.15);
 }
