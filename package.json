@@ -33,7 +33,8 @@
     "remark": "^15.0.1",
     "remark-html": "^16.0.1",
     "resend": "^6.9.4",
-    "stripe": "^20.4.1"
+    "stripe": "^20.4.1",
+    "svix": "^1.89.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
