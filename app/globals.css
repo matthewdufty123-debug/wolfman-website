@@ -5912,3 +5912,134 @@ html[data-theme="dark"] .stats-chart-card {
     animation: none;
   }
 }
+
+/* ── Journal Tabs ─────────────────────────────────────────────────────────── */
+
+.tab-panel {
+  position: relative;
+}
+
+.tab-orb-row {
+  position: fixed;
+  top: 40px;
+  left: 0;
+  right: 0;
+  z-index: 48;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 0;
+  background: var(--page-bg, #fff);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.tab-content {
+  padding-top: 40px;
+  min-height: 60vh;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.tab-content--visible {
+  opacity: 1;
+}
+
+.tab-orb-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.28;
+  transition: opacity 0.2s ease;
+  color: var(--heading, #193343);
+}
+
+.tab-orb-btn--active,
+.tab-orb-btn:hover {
+  opacity: 0.85;
+}
+
+.tab-orb-btn--active {
+  opacity: 1;
+}
+
+.tab-orb-circle--solid,
+.tab-orb-circle--outline {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.tab-orb-circle--solid   { background: currentColor; }
+.tab-orb-circle--outline { border: 1.75px solid currentColor; background: transparent; }
+
+.tab-empty-state {
+  max-width: 640px;
+  margin: 4rem auto;
+  padding: 0 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--body-text);
+  opacity: 0.45;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.tab-empty-state--cta {
+  opacity: 1;
+}
+
+.tab-evening-cta-btn {
+  display: block;
+  margin: 0 auto;
+  padding: 0.85rem 1.75rem;
+  background: #214459;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  letter-spacing: 0.01em;
+  transition: opacity 0.15s ease;
+}
+
+.tab-evening-cta-btn:hover { opacity: 0.85; }
+
+.tab-evening-edit-btn {
+  display: block;
+  margin-top: 1.25rem;
+  padding: 0.45rem 0.9rem;
+  background: none;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  color: var(--body-text);
+  opacity: 0.55;
+  cursor: pointer;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  transition: opacity 0.15s ease;
+}
+
+.tab-evening-edit-btn:hover { opacity: 0.9; }
+
+.tab-meta-logo-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0 1.5rem;
+}
+
+.tab-meta-logo-wrap a { display: block; line-height: 0; }
+
+html[data-theme="dark"] .tab-orb-row {
+  background: var(--page-bg, #1a1a1a);
+  border-color: rgba(255,255,255,0.06);
+}
+html[data-theme="dark"] .tab-evening-edit-btn {
+  border-color: rgba(255,255,255,0.15);
+}

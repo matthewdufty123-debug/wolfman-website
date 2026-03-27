@@ -1,11 +1,9 @@
 import type { Metadata } from 'next'
-import { getAllSlugsWithUsernames, getAllPosts, getPostBySlug, ProcessedPost, ParsedSection } from '@/lib/posts'
+import { getAllSlugsWithUsernames, getPostBySlug } from '@/lib/posts'
 import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
-import PostFooter from '@/components/PostFooter'
 import { PostContextSetter } from '@/lib/post-context'
-import MorningRitualIconBar from '@/components/MorningRitualIconBar'
-import MorningScaleBar from '@/components/MorningScaleBar'
+import JournalTabs from '@/components/JournalTabs'
 import { db } from '@/lib/db'
 import { posts as postsTable, morningState, eveningReflection, dayScores, users as usersTable } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
@@ -45,203 +43,6 @@ export async function generateMetadata(
     },
     alternates: { canonical: url },
   }
-}
-
-function formatPostDate(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-').map(Number)
-  const months = ['January','February','March','April','May','June',
-                  'July','August','September','October','November','December']
-  const suffix = [1,21,31].includes(day) ? 'st' : [2,22].includes(day) ? 'nd'
-               : [3,23].includes(day) ? 'rd' : 'th'
-  return `${day}${suffix} ${months[month-1]} ${year}`
-}
-
-function MorningIntentionPost({ post }: { post: ProcessedPost }) {
-  const hasSections = post.sections && post.sections.length > 0
-  return (
-    <article className="post">
-      {hasSections
-        ? post.sections!.map((section: ParsedSection) => (
-            <div key={section.label} className="post-section">
-              <p className="post-section-label">{section.label}</p>
-              <div
-                className="post-body"
-                dangerouslySetInnerHTML={{ __html: section.html }}
-              />
-            </div>
-          ))
-        : (
-            <div
-              className="post-body"
-              dangerouslySetInnerHTML={{ __html: post.bodyHtml }}
-            />
-          )
-      }
-    </article>
-  )
-}
-
-function MorningWalkPost({ post }: { post: ProcessedPost }) {
-  return (
-    <article className="post post--walk">
-      {post.contextHtml && (
-        <div
-          className="post-body"
-          dangerouslySetInnerHTML={{ __html: post.contextHtml }}
-        />
-      )}
-      {post.videoId && (
-        <div className="post-video">
-          <iframe
-            src={`https://www.youtube.com/embed/${post.videoId}?rel=0`}
-            allowFullScreen
-            loading="lazy"
-            title={post.title}
-          />
-        </div>
-      )}
-    </article>
-  )
-}
-
-// ── Day data display components ────────────────────────────────────────────────
-
-const BRAIN_LABELS: [string,string,string,string,string,string] = ['Peaceful','Quiet','Active','Busy','Racing','Manic']
-const BODY_LABELS:  [string,string,string,string,string,string] = ['Lethargic','Slow','Steady','Energised','Strong','Buzzing']
-const HAPPY_LABELS: [string,string,string,string,string,string] = ['Far from happy','Low','Okay','Good','Happy','Joyful']
-
-type MorningStateRow = {
-  brainScale: number
-  bodyScale: number
-  happyScale?: number | null
-  routineChecklist: unknown
-}
-
-type EveningReflectionRow = {
-  reflection: string
-  wentToPlan: boolean
-  dayRating: number
-}
-
-type DayScoreRow = {
-  scores: unknown
-  synthesis: string
-  dataCompleteness: string
-}
-
-const COMPLETENESS_LABELS: Record<string, string> = {
-  post_only:             'from intention alone',
-  post_morning:          'from intention + morning state',
-  post_morning_evening:  'from full day data',
-}
-
-function ClaudesTakeBlock({ ds }: { ds: DayScoreRow }) {
-  const scores = ds.scores as Record<string, number>
-  const completenessLabel = COMPLETENESS_LABELS[ds.dataCompleteness] ?? ds.dataCompleteness
-  return (
-    <div className="post-day-block post-day-block--claudes-take">
-      <div className="post-day-claudes-take-header">
-        <p className="post-day-block-label" style={{ margin: 0 }}>✦ Claude&apos;s Take</p>
-        <span className="post-day-completeness">{completenessLabel}</span>
-      </div>
-
-      <div className="post-day-synthesis">
-        {ds.synthesis.split('\n\n').map((para, i) => (
-          <p key={i}>{para}</p>
-        ))}
-      </div>
-
-      <div className="post-day-scores">
-        {Object.entries(scores).map(([dim, score]) => (
-          <div key={dim} className="post-day-score-card">
-            <span className="post-day-score-value">{score.toFixed(1)}</span>
-            <span className="post-day-score-dim">{dim.replace(/_/g, ' ')}</span>
-          </div>
-        ))}
-      </div>
-
-    </div>
-  )
-}
-
-function DayBlock({ ms, er, username }: { ms: MorningStateRow | null; er: EveningReflectionRow | null; username: string }) {
-  if (!ms && !er) return null
-  return (
-    <div className="post-day-block">
-      {ms && (
-        <>
-          <p className="post-day-block-label">How the morning started</p>
-
-          <div className="post-day-routine-icons">
-            <span className="post-day-ritual-label">Morning Rituals</span>
-            <MorningRitualIconBar checklist={ms.routineChecklist as Record<string, boolean>} size={20} />
-          </div>
-
-          <div className="post-day-scales">
-            <div className="post-day-scale-col">
-              <span className="post-day-scale-name">Brain Activity</span>
-              <MorningScaleBar scaleName="Brain Activity" value={ms.brainScale} labels={BRAIN_LABELS} color="#4A7FA5" />
-            </div>
-            <div className="post-day-scale-col">
-              <span className="post-day-scale-name">Body Energy</span>
-              <MorningScaleBar scaleName="Body Energy" value={ms.bodyScale} labels={BODY_LABELS} color="#A0622A" />
-            </div>
-            {ms.happyScale != null && (
-              <div className="post-day-scale-col">
-                <span className="post-day-scale-name">Happy Scale</span>
-                <MorningScaleBar scaleName="Happy Scale" value={ms.happyScale} labels={HAPPY_LABELS} color="#3AB87A" />
-              </div>
-            )}
-          </div>
-
-          <a
-            href={`/${username}`}
-            style={{
-              display: 'block',
-              textAlign: 'center',
-              background: '#214459',
-              color: '#fff',
-              borderRadius: 10,
-              padding: '0.85rem 1.5rem',
-              fontSize: '0.95rem',
-              fontWeight: 600,
-              textDecoration: 'none',
-              marginTop: '1.5rem',
-              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-              letterSpacing: '0.01em',
-            }}
-          >
-            View morning stats →
-          </a>
-        </>
-      )}
-
-      {er && (
-        <>
-          {ms && <div className="post-day-section-divider" />}
-          <p className="post-day-block-label">How the day ended</p>
-
-          <div className="post-day-reflection-text">
-            {er.reflection.split('\n\n').map((para, i) => (
-              <p key={i}>{para}</p>
-            ))}
-          </div>
-
-          <div className="post-day-evening-meta">
-            <div className="post-day-went-to-plan" data-yes={er.wentToPlan}>
-              {er.wentToPlan ? '✓ Went to plan' : '~ Not quite to plan'}
-            </div>
-            <div className="post-day-rating">
-              {[1, 2, 3, 4, 5, 6].map(n => (
-                <div key={n} className="post-day-rating-pip" data-active={n <= er.dayRating} />
-              ))}
-              <span className="post-day-rating-label">{er.dayRating}/6</span>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  )
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -284,100 +85,46 @@ export default async function PostPage({
   // Non-admin users' posts are private — only the author can view them
   if (author.role !== 'admin' && session?.user?.id !== post.authorId) notFound()
 
-  // Fetch all posts for prev/next navigation (admin feed)
-  const allPosts = await getAllPosts()
-
-  // Fetch day data for DB-backed posts
-  const [ms, er, ds] = post.id
+  // Fetch day data + post timestamps for DB-backed posts
+  const [ms, er, ds, postRow] = post.id
     ? await Promise.all([
         db.select().from(morningState).where(eq(morningState.postId, post.id)).then(r => r[0] ?? null),
         db.select().from(eveningReflection).where(eq(eveningReflection.postId, post.id)).then(r => r[0] ?? null),
         db.select().from(dayScores).where(eq(dayScores.postId, post.id)).then(r => r[0] ?? null),
+        db.select({ createdAt: postsTable.createdAt, updatedAt: postsTable.updatedAt })
+           .from(postsTable).where(eq(postsTable.id, post.id)).then(r => r[0] ?? null),
       ])
-    : [null, null, null]
+    : [null, null, null, null]
 
-  // Posts sorted newest-first; prevPost = newer, nextPost = older
-  const currentIndex = allPosts.findIndex(p => p.slug === slug)
-  const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null
-  const nextPost = currentIndex !== -1 && currentIndex < allPosts.length - 1
-    ? allPosts[currentIndex + 1]
+  const postDates = postRow
+    ? { createdAt: postRow.createdAt.toISOString(), updatedAt: postRow.updatedAt.toISOString() }
     : null
-
-  const authorName = author.displayName ?? author.name ?? username
 
   return (
     <>
       <PostContextSetter postId={post.id ?? ''} authorId={post.authorId ?? null} />
-      {post.category === 'morning-walk'
-        ? <MorningWalkPost post={post} />
-        : <MorningIntentionPost post={post} />
-      }
-
-      <div className="post-reading-end">
-        <p className="post-reading-end-label">You have been reading</p>
-        <p className="post-reading-end-title">{post.title}</p>
-        <p className="post-reading-end-date">Posted {formatPostDate(post.date)}</p>
-      </div>
-
-      <div className="post-author-review-wrap">
-        <a href={`/${username}`} className="post-author">
-          {(author.avatar ?? author.image) ? (
-            <img
-              src={author.avatar ?? author.image ?? ''}
-              alt={authorName}
-              className="post-author-photo"
-            />
-          ) : (
-            <div
-              className="post-author-photo"
-              style={{
-                background: '#4A7FA5', color: '#fff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1.4rem', fontWeight: 700, borderRadius: '50%',
-                fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-              }}
-            >
-              {authorName.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)}
-            </div>
-          )}
-          <div>
-            <p className="post-author-byline">This post was written by</p>
-            <p className="post-author-name">{authorName}</p>
-            {author.bio && (
-              <p className="post-author-bio">{author.bio}</p>
-            )}
-          </div>
-        </a>
-      </div>
-
-      {/* Merged morning + evening block */}
-      {(ms || er) && <DayBlock ms={ms} er={er} username={username} />}
-
-      {/* Claude review block (legacy — only shown if no dayScores yet) */}
-      {post.review && !ds && (
-        <div className="post-claude-review">
-          <div className="post-claude-review-header">
-            <img src="/images/site_images/claudecode-color.png" alt="Claude" className="post-claude-icon" />
-            <span className="post-claude-review-label">Claude&apos;s take</span>
-          </div>
-          <div className="post-claude-review-body">
-            {post.review.split('\n\n').map((para, i) => (
-              <p key={i}>{para}</p>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {ds && <ClaudesTakeBlock ds={ds} />}
-
-      <PostFooter
-        prevPost={prevPost}
-        nextPost={nextPost}
-        slug={slug}
-        title={post.title}
-        postId={post.id ?? null}
+      <JournalTabs
+        post={post}
+        username={username}
+        author={author}
+        morningState={ms ? {
+          brainScale: ms.brainScale,
+          bodyScale: ms.bodyScale,
+          happyScale: ms.happyScale ?? null,
+          routineChecklist: ms.routineChecklist as Record<string, boolean>,
+        } : null}
+        eveningReflection={er ? {
+          reflection: er.reflection,
+          wentToPlan: er.wentToPlan,
+          dayRating: er.dayRating,
+        } : null}
+        dayScores={ds ? {
+          scores: ds.scores as Record<string, number>,
+          synthesis: ds.synthesis,
+          dataCompleteness: ds.dataCompleteness,
+        } : null}
+        postDates={postDates}
         authorId={post.authorId ?? null}
-        authorUsername={username}
       />
     </>
   )
