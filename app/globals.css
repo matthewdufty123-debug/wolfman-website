@@ -242,6 +242,8 @@ body {
 .wpb-3 { left: 50.0%; top: 12.5%; }  /* Journal    —  90°, r=45 */
 .wpb-4 { left: 72.9%; top: 17.2%; }  /* Account    —  55°, r=48 (midpoint 90°↔20°) */
 .wpb-5 { left: 82.9%; top: 38.0%; }  /* More       —  20°, r=42 */
+.wpb-prev { left: 22%; top: 62%; }
+.wpb-next { left: 78%; top: 62%; }
 
 /* Open state: pop icons into final position */
 .wolf-panel.is-open .wolf-panel-btn {
@@ -255,6 +257,8 @@ body {
 .wolf-panel.is-open .wpb-3 { transition-delay: 0s; }
 .wolf-panel.is-open .wpb-4 { transition-delay: 0.02s; }
 .wolf-panel.is-open .wpb-5 { transition-delay: 0.04s; }
+.wolf-panel.is-open .wpb-prev { transition-delay: 0.06s; }
+.wolf-panel.is-open .wpb-next { transition-delay: 0.06s; }
 
 .wolf-panel-btn:hover {
   color: var(--heading, #E5CBBB);
@@ -5927,9 +5931,8 @@ html[data-theme="dark"] .stats-chart-card {
   z-index: 48;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 6px 0;
+  justify-content: space-evenly;
+  padding: 6px 1.5rem;
   background: var(--page-bg, #fff);
   border-bottom: 1px solid rgba(0,0,0,0.06);
 }

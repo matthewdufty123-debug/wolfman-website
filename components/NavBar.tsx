@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { SlidersHorizontal, Home, Layers, User, LayoutList } from 'lucide-react'
+import {
+  SlidersHorizontal, Home, Layers, User, LayoutList,
+  Pencil, Download, Share2, ArrowLeft, ChevronLeft, ChevronRight,
+} from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import WolfLogo from './WolfLogo'
 import ThemeButtons from './ThemeButtons'
@@ -12,6 +15,7 @@ import FontSizeButtons from './FontSizeButtons'
 import FontFamilyButtons from './FontFamilyButtons'
 import { signInWithGoogle, signInWithGitHub } from '@/lib/actions/oauth'
 import { loginForModal } from '@/lib/actions/auth'
+import { usePostContext } from '@/lib/post-context'
 
 const MORE_PAGES = [
   { href: '/',         label: 'home' },
@@ -25,15 +29,41 @@ const MORE_PAGES = [
   { href: '/terms',    label: 'terms' },
 ]
 
+// Inline WOLF|BOT SVG for the trigger button on post pages
+function WolfBotTriggerSvg() {
+  return (
+    <svg width="52" height="52" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <polygon points="9,22 16,4 23,22" fill="#4A7FA5"/>
+      <polygon points="33,22 40,4 47,22" fill="#4A7FA5"/>
+      <polygon points="12,22 16,10 20,22" fill="#214459"/>
+      <polygon points="36,22 40,10 44,22" fill="#214459"/>
+      <rect x="7" y="20" width="42" height="30" rx="6" fill="#214459" stroke="#4A7FA5" strokeWidth="1.5"/>
+      <rect x="12" y="26" width="13" height="10" rx="2" fill="#193343"/>
+      <rect x="31" y="26" width="13" height="10" rx="2" fill="#193343"/>
+      <rect x="14" y="28" width="9" height="6" rx="1" fill="#C8B020"/>
+      <rect x="33" y="28" width="9" height="6" rx="1" fill="#C8B020"/>
+      <rect x="16" y="40" width="5" height="3" rx="1" fill="rgba(255,255,255,0.35)"/>
+      <rect x="25" y="40" width="6" height="3" rx="1" fill="rgba(255,255,255,0.35)"/>
+      <rect x="35" y="40" width="5" height="3" rx="1" fill="rgba(255,255,255,0.35)"/>
+      <rect x="27" y="11" width="2" height="10" rx="1" fill="#4A7FA5"/>
+      <circle cx="28" cy="9" r="3" fill="#C8B020"/>
+    </svg>
+  )
+}
+
+type AdjacentPost = { slug: string; authorUsername: string | null } | null
+
 export default function NavBar({ registrationOpen }: { registrationOpen: boolean }) {
   const [wolfPanelOpen, setWolfPanelOpen] = useState(false)
   const [morePagesOpen, setMorePagesOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
   const [wolfbotState, setWolfbotState] = useState<'greeting' | 'bored'>('greeting')
+  const [adjacent, setAdjacent] = useState<{ prev: AdjacentPost; next: AdjacentPost } | null>(null)
   const pathname = usePathname()
   const router = useRouter()
   const { data: session } = useSession()
+  const { post: postCtx } = usePostContext()
   const [navHidden, setNavHidden] = useState(false)
   const segments = pathname.split('/').filter(Boolean)
   const KNOWN_PREFIXES = new Set(['admin', 'edit', 'write', 'account', 'settings', 'shop', 'cart', 'checkout', 'login', 'register', 'about', 'morning-ritual', 'morning-stats', 'intentions', 'feedback', 'beta', 'dev', 'features', 'terms', 'discover', 'api'])
@@ -72,6 +102,15 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
       window.removeEventListener('touchstart', resetTimer)
     }
   }, [isPostPage])
+
+  // Fetch adjacent posts when on a post page
+  useEffect(() => {
+    if (!isPostPage || !postCtx?.postId) { setAdjacent(null); return }
+    fetch(`/api/posts/${postCtx.postId}/adjacent`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => setAdjacent(data))
+      .catch(() => {})
+  }, [isPostPage, postCtx?.postId])
 
   // Escape key closes all overlays
   useEffect(() => {
@@ -114,6 +153,31 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
     setLoginOpen(false)
   }
 
+  async function handleShare() {
+    const url = window.location.href
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: document.title, url })
+      } else {
+        await navigator.clipboard.writeText(url)
+      }
+    } catch {}
+    closeAll()
+  }
+
+  function handleExport() {
+    const postEl = document.querySelector('.post')
+    const text = postEl?.textContent ?? document.title
+    const blob = new Blob([text], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${segments[1] ?? 'journal'}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+    closeAll()
+  }
+
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoginError('')
@@ -147,9 +211,9 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
           <path d="M0,100 L0,46 L95,46 C125,46 158,0 187.5,0 C217,0 250,46 280,46 L375,46 L375,100 Z" />
         </svg>
 
-        {/* Wolf logo — toggles wolf panel */}
+        {/* Wolf logo — toggles wolf panel. On post pages shows WOLF|BOT face to signal journal context */}
         <button
-          className={`nav-btn nav-btn--center wolf-btn`}
+          className={`nav-btn nav-btn--center wolf-btn${isPostPage ? ' wolf-btn--journal' : ''}`}
           id="wolfBtn"
           aria-label={wolfPanelOpen ? 'Close navigation' : 'Open navigation'}
           onClick={() => {
@@ -159,80 +223,154 @@ export default function NavBar({ registrationOpen }: { registrationOpen: boolean
             setLoginOpen(false)
           }}
         >
-          <WolfLogo size={64} priority />
+          {isPostPage ? <WolfBotTriggerSvg /> : <WolfLogo size={64} priority />}
         </button>
       </nav>
 
       {/* ── Wolf panel (semicircular dome) ── */}
       <div
-        className={`wolf-panel${wolfPanelOpen ? ' is-open' : ''}`}
+        className={`wolf-panel${wolfPanelOpen ? ' is-open' : ''}${isPostPage ? ' wolf-panel--journal' : ''}`}
         aria-hidden={!wolfPanelOpen}
       >
         <div className="wolf-panel-icons">
-          {/* 1 — Experience (160°) */}
-          <button
-            className="wolf-panel-btn wpb-1"
-            aria-label="Experience settings"
-            onClick={() => { setSettingsOpen(true); setWolfPanelOpen(false) }}
-          >
-            <SlidersHorizontal size={30} strokeWidth={1.5} />
-            <span>experience</span>
-          </button>
+          {isPostPage ? (
+            <>
+              {/* Journal reading context — arc buttons */}
 
-          {/* 2 — Features (120°, r=48) */}
-          <Link className="wolf-panel-btn wpb-2" href="/features" onClick={closeAll} aria-label="Features">
-            <Layers size={30} strokeWidth={1.5} />
-            <span>features</span>
-          </Link>
+              {/* 1 — Edit (160°) */}
+              <Link
+                className="wolf-panel-btn wpb-1"
+                href={postCtx?.postId ? `/edit/${postCtx.postId}` : '#'}
+                onClick={closeAll}
+                aria-label="Edit post"
+              >
+                <Pencil size={28} strokeWidth={1.5} />
+                <span>edit</span>
+              </Link>
 
-          {/* 3 — Journal / Home (90° — peak) */}
-          <Link className="wolf-panel-btn wpb-3" href="/" onClick={closeAll} aria-label="Journal">
-            <Home size={30} strokeWidth={1.5} />
-            <span>journal</span>
-          </Link>
+              {/* 2 — Export (125°) */}
+              <button className="wolf-panel-btn wpb-2" aria-label="Export post" onClick={handleExport}>
+                <Download size={28} strokeWidth={1.5} />
+                <span>export</span>
+              </button>
 
-          {/* 4 — Account (60°, r=48) */}
-          {session ? (
-            <Link
-              className="wolf-panel-btn wpb-4"
-              href="/account"
-              onClick={closeAll}
-              aria-label="Account"
-            >
-              {avatarUrl ? (
-                <Image
-                  src={avatarUrl}
-                  alt={session.user?.name ?? 'avatar'}
-                  width={28}
-                  height={28}
-                  className="wolf-panel-avatar"
-                  unoptimized
-                />
-              ) : (
-                <User size={30} strokeWidth={1.5} />
+              {/* 3 — Share (90°, peak) */}
+              <button className="wolf-panel-btn wpb-3" aria-label="Share this post" onClick={handleShare}>
+                <Share2 size={28} strokeWidth={1.5} />
+                <span>share</span>
+              </button>
+
+              {/* 4 — Profile (55°) */}
+              <Link
+                className="wolf-panel-btn wpb-4"
+                href={`/${segments[0] ?? ''}`}
+                onClick={closeAll}
+                aria-label="Author profile"
+              >
+                <User size={28} strokeWidth={1.5} />
+                <span>profile</span>
+              </Link>
+
+              {/* 5 — Back to feed (20°) */}
+              <Link className="wolf-panel-btn wpb-5" href="/" onClick={closeAll} aria-label="Back to feed">
+                <ArrowLeft size={28} strokeWidth={1.5} />
+                <span>feed</span>
+              </Link>
+
+              {/* Discrete prev/next buttons at dome base */}
+              {adjacent?.prev && (
+                <Link
+                  className="wolf-panel-btn wpb-prev"
+                  href={`/${adjacent.prev.authorUsername ?? segments[0]}/${adjacent.prev.slug}`}
+                  onClick={closeAll}
+                  aria-label="Previous post"
+                >
+                  <ChevronLeft size={22} strokeWidth={1.5} />
+                  <span>prev</span>
+                </Link>
               )}
-              <span>{session.user?.name?.split(' ')[0]?.toLowerCase() ?? 'account'}</span>
-            </Link>
+              {adjacent?.next && (
+                <Link
+                  className="wolf-panel-btn wpb-next"
+                  href={`/${adjacent.next.authorUsername ?? segments[0]}/${adjacent.next.slug}`}
+                  onClick={closeAll}
+                  aria-label="Next post"
+                >
+                  <ChevronRight size={22} strokeWidth={1.5} />
+                  <span>next</span>
+                </Link>
+              )}
+            </>
           ) : (
-            <button
-              className="wolf-panel-btn wpb-4"
-              aria-label="Sign in"
-              onClick={() => { setLoginOpen(true); setWolfPanelOpen(false) }}
-            >
-              <User size={30} strokeWidth={1.5} />
-              <span>sign in</span>
-            </button>
-          )}
+            <>
+              {/* Default arc — site-wide navigation */}
 
-          {/* 5 — More pages (20°) */}
-          <button
-            className="wolf-panel-btn wpb-5"
-            aria-label="More pages"
-            onClick={() => { setMorePagesOpen(true); setWolfPanelOpen(false) }}
-          >
-            <LayoutList size={30} strokeWidth={1.5} />
-            <span>more</span>
-          </button>
+              {/* 1 — Experience (160°) */}
+              <button
+                className="wolf-panel-btn wpb-1"
+                aria-label="Experience settings"
+                onClick={() => { setSettingsOpen(true); setWolfPanelOpen(false) }}
+              >
+                <SlidersHorizontal size={30} strokeWidth={1.5} />
+                <span>experience</span>
+              </button>
+
+              {/* 2 — Features (125°) */}
+              <Link className="wolf-panel-btn wpb-2" href="/features" onClick={closeAll} aria-label="Features">
+                <Layers size={30} strokeWidth={1.5} />
+                <span>features</span>
+              </Link>
+
+              {/* 3 — Journal / Home (90° — peak) */}
+              <Link className="wolf-panel-btn wpb-3" href="/" onClick={closeAll} aria-label="Journal">
+                <Home size={30} strokeWidth={1.5} />
+                <span>journal</span>
+              </Link>
+
+              {/* 4 — Account (55°) */}
+              {session ? (
+                <Link
+                  className="wolf-panel-btn wpb-4"
+                  href="/account"
+                  onClick={closeAll}
+                  aria-label="Account"
+                >
+                  {avatarUrl ? (
+                    <Image
+                      src={avatarUrl}
+                      alt={session.user?.name ?? 'avatar'}
+                      width={28}
+                      height={28}
+                      className="wolf-panel-avatar"
+                      unoptimized
+                    />
+                  ) : (
+                    <User size={30} strokeWidth={1.5} />
+                  )}
+                  <span>{session.user?.name?.split(' ')[0]?.toLowerCase() ?? 'account'}</span>
+                </Link>
+              ) : (
+                <button
+                  className="wolf-panel-btn wpb-4"
+                  aria-label="Sign in"
+                  onClick={() => { setLoginOpen(true); setWolfPanelOpen(false) }}
+                >
+                  <User size={30} strokeWidth={1.5} />
+                  <span>sign in</span>
+                </button>
+              )}
+
+              {/* 5 — More pages (20°) */}
+              <button
+                className="wolf-panel-btn wpb-5"
+                aria-label="More pages"
+                onClick={() => { setMorePagesOpen(true); setWolfPanelOpen(false) }}
+              >
+                <LayoutList size={30} strokeWidth={1.5} />
+                <span>more</span>
+              </button>
+            </>
+          )}
         </div>
 
         {/* WOLF|BOT ONLINE status strip — bottom of dome */}
