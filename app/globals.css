@@ -6069,12 +6069,12 @@ html[data-theme="dark"] .tab-evening-edit-btn {
 .wolfbot-review-body {
   font-family: var(--font-jetbrains), monospace;
   font-size: clamp(1rem, 2.5vw, 1.125rem);
-  line-height: 1.9;
+  line-height: 1.5;
   color: var(--body-text, #4A4A4A);
 }
 
 .wolfbot-review-body p {
-  margin: 0 0 1.5em;
+  margin: 0 0 0.75em;
 }
 
 .wolfbot-review-body p:last-child {
