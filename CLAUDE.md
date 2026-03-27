@@ -405,15 +405,20 @@ The scope of each release is now locked for the beta period. **New feature reque
 
 > **Why this matters:** Matthew works across desktop and phone. Phone sessions run in Claude worktrees
 > that push directly to GitHub. If the desktop local repo isn't pulled first, the two histories diverge
-> and a messy merge is required. Step 1 below prevents this entirely.
+> and a messy merge is required. Steps 1–2 below prevent this entirely.
 
-1. **`git pull origin main`** — always do this first on desktop to sync any changes pushed from phone sessions or other worktrees. If there are local commits not yet on origin, this will produce a merge — resolve it before proceeding.
-2. Run `git log --oneline -10` to see the last 10 commits.
-3. Fetch open issues via the GitHub API using the PAT in `.env.local` (`GITHUB_TOKEN`):
+1. **Check for open `claude/*` branches on GitHub** — these are phone/worktree sessions. Fetch all branches via the API and list any named `claude/*`. If any exist, their work may not yet be in `main`. Review and merge or discard before proceeding.
+   ```
+   GET https://api.github.com/repos/matthewdufty123-debug/wolfman-website/branches?per_page=100
+   → flag any branch starting with claude/
+   ```
+2. **`git pull origin main`** — pull any merged phone work into the local repo before touching anything. If there are local commits not yet on origin, this will produce a merge — resolve it before proceeding.
+3. Run `git log --oneline -10` to see the last 10 commits.
+4. Fetch open issues via the GitHub API using the PAT in `.env.local` (`GITHUB_TOKEN`):
    `https://api.github.com/repos/matthewdufty123-debug/wolfman-website/issues?state=open&per_page=100`
-4. Check for any `in-progress` labelled issues — these were left mid-session and jump the queue.
-5. Identify the active milestone. Priority order: **Closed Alpha Development** first, then Phase 1, then Phase 2.
-6. Summarise: recent commits, anything in-flight, suggested next issue. Let Matthew confirm before starting.
+5. Check for any `in-progress` labelled issues — these were left mid-session and jump the queue.
+6. Identify the active milestone. Priority order: **Closed Alpha Development** first, then Phase 1, then Phase 2.
+7. Summarise: open `claude/*` branches (if any), recent commits, anything in-flight, suggested next issue. Let Matthew confirm before starting.
 
 ### Session workflow
 
