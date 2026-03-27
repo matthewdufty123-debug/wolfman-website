@@ -114,11 +114,14 @@ export const eveningReflection = pgTable('evening_reflection', {
 
 // ── Beta interest (pre-registration) ──────────────────────────────────────
 // Captures interest before registration opens. Source: 'beta-page' | 'login' | 'register'
+// emailStatus: 'pending' | 'delivered' | 'bounced' | 'complained' — updated via Resend webhook
 export const betaInterest = pgTable('beta_interest', {
   id: serial('id').primaryKey(),
   email: text('email').notNull().unique(),
   name: text('name'),
   source: text('source').notNull().default('beta-page'),
+  emailStatus: text('email_status').notNull().default('pending'),
+  emailStatusAt: timestamp('email_status_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
@@ -132,6 +135,7 @@ export const siteConfig = pgTable('site_config', {
   userCap: integer('user_cap'),           // null = no cap
   statusMessage: text('status_message'),  // optional custom closed/full message
   betaOpensAt: timestamp('beta_opens_at'), // drives countdowns when status = closed_beta
+  betaEmailsSent: jsonb('beta_emails_sent').notNull().default({}), // { week_notice: true, go_live: true }
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   updatedBy: text('updated_by'),          // admin user ID who last changed it
 })

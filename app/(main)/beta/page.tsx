@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import BetaCountdown from '@/components/BetaCountdown'
-
 import { siteMetadata } from '@/lib/metadata'
+import { getSiteConfig } from '@/lib/site-config'
+import { db } from '@/lib/db'
+import { betaInterest } from '@/lib/db/schema'
+import { count, notInArray } from 'drizzle-orm'
 
 export const metadata: Metadata = siteMetadata({
   title: 'Public Beta',
@@ -10,12 +13,32 @@ export const metadata: Metadata = siteMetadata({
   path: '/beta',
 })
 
-export default function BetaPage() {
+export default async function BetaPage() {
+  const [config, [{ total }]] = await Promise.all([
+    getSiteConfig(),
+    db.select({ total: count() }).from(betaInterest).where(
+      notInArray(betaInterest.emailStatus, ['bounced', 'complained'])
+    ),
+  ])
+
+  const subscriberCount = Number(total)
+  const cap = config.userCap ?? 51
+  const percentage = Math.round((subscriberCount / cap) * 100)
+
   return (
     <main className="beta-page">
       <div className="beta-card">
         <p className="beta-eyebrow">Public Beta</p>
         <h1 className="beta-title">You&apos;re part of something real.</h1>
+
+        <div className="beta-stats">
+          <p className="beta-stats-number">
+            <span className="beta-stats-count">{subscriberCount}</span>
+            <span className="beta-stats-of"> of {cap}</span>
+          </p>
+          <p className="beta-stats-label">subscribed for Public Beta Testing</p>
+          <p className="beta-stats-percent">{percentage}% subscribed</p>
+        </div>
 
         <p className="beta-intro">
           wolfman.blog is a public beta for a mindful morning journalling app. Real people, real
