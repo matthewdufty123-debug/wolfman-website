@@ -112,19 +112,6 @@ export const eveningReflection = pgTable('evening_reflection', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
 
-// ── Beta interest (pre-registration) ──────────────────────────────────────
-// Captures interest before registration opens. Source: 'beta-page' | 'login' | 'register'
-// emailStatus: 'pending' | 'delivered' | 'bounced' | 'complained' — updated via Resend webhook
-export const betaInterest = pgTable('beta_interest', {
-  id: serial('id').primaryKey(),
-  email: text('email').notNull().unique(),
-  name: text('name'),
-  source: text('source').notNull().default('beta-page'),
-  emailStatus: text('email_status').notNull().default('pending'),
-  emailStatusAt: timestamp('email_status_at'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-})
-
 // ── Site configuration ─────────────────────────────────────────────────────
 // Singleton row (id always 1). Controls registration, messaging and UI mode.
 // status: closed_alpha | closed_beta | open_beta | live
@@ -138,6 +125,22 @@ export const siteConfig = pgTable('site_config', {
   betaEmailsSent: jsonb('beta_emails_sent').notNull().default({}), // { week_notice: true, go_live: true }
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   updatedBy: text('updated_by'),          // admin user ID who last changed it
+})
+
+// ── Beta interest registrations ───────────────────────────────────────────
+// Pre-registration interest list for the public beta (opens 1 May 2026).
+// NOT the same as a user account — no auth, no passwords.
+// source: 'beta-page' | 'login-page' | 'register-page'
+// emailStatus: 'pending' | 'delivered' | 'bounced' | 'complained' — updated via Resend webhook
+// Duplicate emails are silently ignored via onConflictDoNothing().
+export const betaInterest = pgTable('beta_interest', {
+  id:            serial('id').primaryKey(),
+  email:         text('email').notNull().unique(),
+  name:          text('name'),
+  source:        text('source').notNull().default('beta-page'),
+  emailStatus:   text('email_status').notNull().default('pending'),
+  emailStatusAt: timestamp('email_status_at'),
+  createdAt:     timestamp('created_at').notNull().defaultNow(),
 })
 
 // ── Wolfbot configuration ─────────────────────────────────────────────────

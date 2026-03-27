@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { register } from '@/lib/actions/auth'
 import AuthForm from '@/components/AuthForm'
 import { getRegistrationState } from '@/lib/site-config'
+import BetaInterestForm from '@/components/BetaInterestForm'
 
 export default async function RegisterPage() {
   const { config, registrationOpen, capReached } = await getRegistrationState()
@@ -18,23 +19,13 @@ export default async function RegisterPage() {
         <div className="auth-card">
           <h1 className="auth-title">Registration is not open yet.</h1>
           <p className="beta-register-closed-body">{message}</p>
-          {config.betaOpensAt && (
-            <p className="beta-register-closed-body">
-              The beta opens on <strong>{new Date(config.betaOpensAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>.
-            </p>
-          )}
           <p className="beta-register-closed-body">
-            Keep an eye on{' '}
-            <a
-              href="https://www.linkedin.com/in/matthewwolfman"
-              className="beta-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Matthew&apos;s LinkedIn
-            </a>
-            {' '}for updates.
+            The public beta opens on <strong>1 May 2026</strong>. Register your interest below
+            and we&apos;ll let you know the moment it does.
           </p>
+          <div style={{ marginTop: '1.75rem' }}>
+            <BetaInterestForm source="register-page" />
+          </div>
           <p className="beta-register-closed-body" style={{ marginTop: '2rem' }}>
             <Link href="/beta" className="beta-link">Learn more about the beta →</Link>
           </p>
@@ -56,17 +47,8 @@ export default async function RegisterPage() {
           <h1 className="auth-title">Registration is closed.</h1>
           <p className="beta-register-closed-body">{message}</p>
           <p className="beta-register-closed-body">
-            The beta runs until <strong>1 June 2026</strong>. If it continues, registration
-            may reopen. Keep an eye on{' '}
-            <a
-              href="https://www.linkedin.com/in/matthewwolfman"
-              className="beta-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Matthew&apos;s LinkedIn
-            </a>
-            {' '}for updates.
+            The beta runs until <strong>31 August 2026</strong>.{' '}
+            <Link href="/beta" className="beta-link">Register your interest →</Link>
           </p>
           <p className="beta-register-closed-body" style={{ marginTop: '2rem' }}>
             <Link href="/beta" className="beta-link">Learn more about the beta →</Link>
@@ -85,7 +67,7 @@ export default async function RegisterPage() {
         <div className="beta-register-terms">
           <p className="beta-register-terms-headline">You&apos;re joining the public beta.</p>
           <ul className="beta-register-terms-list">
-            <li>Beta runs until <strong>1 June 2026</strong></li>
+            <li>Beta runs until <strong>31 August 2026</strong></li>
             <li>Your journal entries are private — only you can see them</li>
             <li>If the beta continues, your data carries over seamlessly</li>
             <li>If the beta ends, you get 30 days to download your data before deletion</li>

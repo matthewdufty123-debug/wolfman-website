@@ -164,42 +164,44 @@ body {
   100% { transform: scale(1); }
 }
 
-/* ── Wolf panel (curved navigation panel) ── */
+/* ── Wolf panel (semicircular dome) ── */
+/*
+ * The dome is a full circle (120vw × 120vw, border-radius: 50%).
+ * Its centre is anchored at the very bottom-centre of the viewport
+ * (bottom: -60vw positions it so the circle centre = viewport bottom edge).
+ * The circle is wider than the screen so it spills ~10vw off each side,
+ * creating the illusion of a smooth dome rising from the bottom.
+ * Visible dome height ≈ 60vw (~25% of screen height on a typical phone).
+ */
 .wolf-panel {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 260px;
+  bottom: -60vw;
+  left: 50%;
+  width: 120vw;
+  height: 120vw;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--nav-fill, #193343);
+  /* box-shadow follows border-radius; no filter used here so overflow:hidden
+     is safe — the old Chrome/Android leak bug was caused by filter+overflow:hidden
+     together. Without filter, overflow:hidden clips child text correctly. */
+  box-shadow: 0 -6px 24px rgba(0,0,0,0.38);
   z-index: 46;
-  transform: translateY(100%);
-  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
   pointer-events: none;
+  transform: translateX(-50%) translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .wolf-panel.is-open {
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
   pointer-events: all;
 }
 
-.wolf-panel-bg {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  filter: drop-shadow(0 -3px 14px rgba(0,0,0,0.28));
-}
-
-/* Match the nav fill — same colour as the persistent nav bell */
-.wolf-panel-bg path {
-  fill: var(--nav-fill, #193343);
-}
-
-/* Hide the nav bell-curve when the wolf panel is open */
-.wolfman-nav--panel-open .nav-bg {
+/* Hide the nav bell-curve and wolf button when the dome is open */
+.wolfman-nav--panel-open .nav-bg,
+.wolfman-nav--panel-open .wolf-btn {
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.2s ease;
 }
 
@@ -210,7 +212,7 @@ body {
 
 .wolf-panel-btn {
   position: absolute;
-  transform: translate(calc(-50% - 40px), -50%);
+  transform: translate(-50%, -50%) scale(0.5);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -219,7 +221,7 @@ body {
   border: none;
   cursor: pointer;
   color: rgba(255, 255, 255, 0.75);
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 500;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   text-transform: lowercase;
@@ -227,73 +229,111 @@ body {
   text-decoration: none;
   padding: 6px;
   opacity: 0;
-  transition: opacity 0.3s ease, transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+  transition: opacity 0.28s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
 }
 
 /*
- * Arc positions — calculated along the simple arch:
- *   M0,260 L0,190 C60,190 100,50 187.5,30 C275,50 315,190 375,190 L375,260 Z
- * Each icon is placed ~15–20px below the arch boundary at that x position.
- * Coordinates verified to sit within the filled panel area.
+ * Arc positions — 5 icons on a 120vw circle (r=42vw from element centre 50%,50%).
+ * Angles from horizontal: 160°, 120°, 90°, 60°, 20°
+ * Formula: left = (60 + 42·cos θ) / 120 · 100%,  top = (60 − 42·sin θ) / 120 · 100%
  */
-.wpb-1 { left:  9.1%; top: 73.2%; }  /* Experience  — x=34,  y=190 */
-.wpb-2 { left: 22.2%; top: 51.0%; }  /* Features    — x=83,  y=133 */
-.wpb-3 { left: 37.4%; top: 28.0%; }  /* Home        — x=140, y=73  */
-.wpb-4 { left: 50.0%; top: 17.7%; }  /* WOLF|BOT    — x=188, y=46  */
-.wpb-5 { left: 62.6%; top: 28.0%; }  /* Account     — x=235, y=73  */
-.wpb-6 { left: 77.8%; top: 51.0%; }  /* More        — x=292, y=133 */
+.wpb-1 { left: 17.1%; top: 38.0%; }  /* Experience — 160°, r=42 */
+.wpb-2 { left: 27.1%; top: 17.2%; }  /* Features   — 125°, r=48 (midpoint 160°↔90°) */
+.wpb-3 { left: 50.0%; top: 12.5%; }  /* Journal    —  90°, r=45 */
+.wpb-4 { left: 72.9%; top: 17.2%; }  /* Account    —  55°, r=48 (midpoint 90°↔20°) */
+.wpb-5 { left: 82.9%; top: 38.0%; }  /* More       —  20°, r=42 */
 
-/* Open state: slide to final position and fade in */
+/* Open state: pop icons into final position */
 .wolf-panel.is-open .wolf-panel-btn {
   opacity: 1;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(1);
 }
 
-/* Staggered entrance delays — fan in left to right */
-.wolf-panel.is-open .wpb-1 { transition-delay: 0.44s; }
-.wolf-panel.is-open .wpb-2 { transition-delay: 0.50s; }
-.wolf-panel.is-open .wpb-3 { transition-delay: 0.56s; }
-.wolf-panel.is-open .wpb-4 { transition-delay: 0.62s; }
-.wolf-panel.is-open .wpb-5 { transition-delay: 0.68s; }
-.wolf-panel.is-open .wpb-6 { transition-delay: 0.74s; }
+/* Minimal outward-wave stagger from centre icon */
+.wolf-panel.is-open .wpb-1 { transition-delay: 0.04s; }
+.wolf-panel.is-open .wpb-2 { transition-delay: 0.02s; }
+.wolf-panel.is-open .wpb-3 { transition-delay: 0s; }
+.wolf-panel.is-open .wpb-4 { transition-delay: 0.02s; }
+.wolf-panel.is-open .wpb-5 { transition-delay: 0.04s; }
 
 .wolf-panel-btn:hover {
   color: var(--heading, #E5CBBB);
 }
 
-/* WOLF|BOT — peak button, slightly brighter */
-.wolf-panel-btn--wolfbot {
-  color: rgba(255, 255, 255, 0.95);
-}
-
-.wolf-panel-btn--wolfbot span {
-  font-weight: 700;
-  letter-spacing: 0.1em;
-}
-
 /* Avatar inside wolf panel */
 .wolf-panel-avatar {
   border-radius: 50%;
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   object-fit: cover;
 }
 
-/* WOLF|BOT offline message — appears below the wolfbot button */
-.wolf-panel-wolfbot-msg {
+/* ── WOLF|BOT face — centred inside dome ── */
+.wolf-panel-wolfbot-face {
   position: absolute;
   left: 50%;
   top: 33%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.65);
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 0.72rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  padding: 0.35rem 0.9rem;
-  border-radius: 20px;
+  transform: translateX(-50%) translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.wolf-panel.is-open .wolf-panel-wolfbot-face {
+  opacity: 1;
+}
+
+.wolf-panel-wolfbot-face svg,
+.wolf-panel-wolfbot-face img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  animation: pulse 5s ease-in-out infinite;
+  transition: opacity 0.4s ease;
+}
+
+.wolf-panel-wolfbot-face--bored svg,
+.wolf-panel-wolfbot-face--bored img {
+  animation: none;
+  opacity: 0.4;
+}
+
+.wolf-panel-wolfbot-text {
+  font-size: 0.88rem;
+  font-family: 'Courier New', 'Courier', monospace;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  letter-spacing: 0.04em;
   white-space: nowrap;
   pointer-events: none;
-  margin: 0;
+}
+
+/* ── WOLF|BOT ONLINE status strip — bottom of visible dome ── */
+.wolf-panel-status-strip {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translateX(-50%);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.52rem;
+  font-weight: 300;
+  letter-spacing: 0.38em;
+  color: rgba(200, 176, 32, 0.0);
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: color 0.5s ease 0.25s;
+}
+
+.wolf-panel.is-open .wolf-panel-status-strip {
+  color: rgba(200, 176, 32, 0.72);
 }
 
 /* ── Top utility bar ── */
@@ -385,7 +425,7 @@ body {
 
 .menu-inner {
   text-align: left;
-  padding: 2rem 2rem 2rem 1.5rem;
+  padding: 2rem 2rem 8rem 1.5rem;
   display: flex;
   flex-direction: column;
   min-height: 72vh;
@@ -618,9 +658,10 @@ body {
 
 /* Table column rules */
 .dev-table--completed { table-layout: fixed; width: 100%; }
-.dev-table--completed .dev-col-num    { width: 10%; }
-.dev-table--completed .dev-col-title  { width: 60%; word-break: break-word; white-space: normal; }
-.dev-table--completed .dev-col-labels { width: 30%; }
+.dev-table--completed .dev-col-num    { width: 6%; }
+.dev-table--completed .dev-col-title  { width: 50%; word-break: break-word; white-space: normal; }
+.dev-table--completed .dev-col-labels { width: 24%; }
+/* remaining 20% for the date column */
 
 .dev-table--pipeline { table-layout: fixed; width: 100%; }
 .dev-table--pipeline .dev-col-num   { width: 10%; }
@@ -2672,6 +2713,8 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
   margin: 3rem 0 0;
   padding: 1.5rem 0;
   border-top: 1px solid var(--nav-fade);
+  text-decoration: none;
+  color: inherit;
 }
 
 .post-author-photo {
@@ -5556,4 +5599,307 @@ html[data-theme="dark"] .stats-chart-card {
   .features-release-header { padding: 1rem 1.25rem 0.85rem; }
   .features-item { padding: 0.75rem 1.25rem; flex-direction: column; gap: 0.5rem; }
   .features-status { align-self: flex-start; }
+}
+
+/* ── Closed Alpha Banner ────────────────────────────────────────────────── */
+
+.closed-alpha-banner {
+  background: #C8B020;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  flex-shrink: 0;
+}
+
+.closed-alpha-banner-text {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #214459;
+  margin: 0;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.closed-alpha-banner-link {
+  color: #214459;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.15s ease;
+}
+
+.closed-alpha-banner-link:hover { opacity: 0.7; }
+
+/* ── Beta interest form ──────────────────────────────────────────────────── */
+
+.interest-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.interest-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.interest-label {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #A0622A;
+}
+
+.interest-input {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1rem;
+  color: var(--body-text, #ffffff);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(160, 98, 42, 0.4);
+  padding: 0.6rem 0;
+  outline: none;
+  transition: border-color 0.2s ease;
+  width: 100%;
+}
+
+.interest-input:focus { border-bottom-color: #A0622A; }
+.interest-input:disabled { opacity: 0.5; }
+
+.interest-input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset;
+  -webkit-text-fill-color: var(--body-text, #ffffff);
+  caret-color: var(--body-text, #ffffff);
+}
+
+.interest-submit {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #ffffff;
+  background: #214459;
+  border: none;
+  border-radius: 4px;
+  padding: 0.85rem 2rem;
+  cursor: pointer;
+  margin-top: 0.25rem;
+  transition: opacity 0.2s ease;
+  align-self: flex-start;
+}
+
+.interest-submit:hover:not(:disabled) { opacity: 0.85; }
+.interest-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.interest-error {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.875rem;
+  color: #A82020;
+  margin: 0;
+}
+
+.interest-consent {
+  margin-top: 0.25rem;
+}
+
+.interest-consent-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  cursor: pointer;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  color: var(--body-text);
+  opacity: 0.8;
+  line-height: 1.5;
+}
+
+.interest-consent-checkbox {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  accent-color: #A0622A;
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+.interest-consent-link {
+  color: #A0622A;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.interest-success {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.interest-success-tick {
+  font-size: 1.5rem;
+  color: #4A7FA5;
+}
+
+.interest-success-headline {
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--heading, #E5CBBB);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Beta page: interest block + timeline ────────────────────────────────── */
+
+.beta-interest-block {
+  padding: 0 0 2.5rem;
+  border-bottom: 1px solid rgba(160, 98, 42, 0.15);
+  margin-bottom: 2.5rem;
+}
+
+.beta-interest-heading {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 400;
+  color: var(--heading, #E5CBBB);
+  margin: 0 0 0.5rem;
+  line-height: 1.3;
+}
+
+.beta-interest-subtext {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--body-text);
+  opacity: 0.75;
+  margin: 0 0 1.75rem;
+}
+
+.beta-timeline {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 0.5rem;
+}
+
+.beta-timeline th {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #A0622A;
+  text-align: left;
+  padding: 0 0.5rem 0.6rem 0;
+  border-bottom: 1px solid rgba(160, 98, 42, 0.25);
+}
+
+.beta-timeline td {
+  font-size: 0.9rem;
+  color: var(--body-text);
+  padding: 0.75rem 0.5rem 0.75rem 0;
+  border-bottom: 1px solid rgba(160, 98, 42, 0.08);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.beta-timeline td:last-child { padding-right: 0; white-space: nowrap; }
+
+.beta-timeline-status {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.beta-timeline-status--active   { color: #4A7FA5; }
+.beta-timeline-status--upcoming { color: var(--body-text); opacity: 0.45; }
+.beta-timeline-status--tbd      { color: var(--body-text); opacity: 0.3; }
+
+/* ── Login: closed alpha notice ──────────────────────────────────────────── */
+
+.login-alpha-notice {
+  background: rgba(200, 176, 32, 0.07);
+  border: 1px solid rgba(200, 176, 32, 0.3);
+  border-radius: 4px;
+  padding: 0.85rem 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.login-alpha-notice-text {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--body-text);
+  margin: 0;
+}
+
+.login-alpha-notice-link {
+  color: #C8B020;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.15s ease;
+}
+
+.login-alpha-notice-link:hover { opacity: 0.8; }
+
+/* ── Portrait-only lock — landscape block overlay ──────────────────────── */
+/* Hidden by default — only shown to touch devices in landscape orientation  */
+
+.landscape-block {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #214459;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.landscape-block-icon {
+  opacity: 0.9;
+  animation: landscape-rotate-hint 2s ease-in-out infinite;
+}
+
+.landscape-block-title {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.landscape-block-subtitle {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+@keyframes landscape-rotate-hint {
+  0%, 100% { transform: rotate(0deg); }
+  40%       { transform: rotate(-15deg); }
+  60%       { transform: rotate(15deg); }
+}
+
+/* Show on touch devices in landscape only */
+@media (orientation: landscape) and (hover: none) and (pointer: coarse) {
+  .landscape-block {
+    display: flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landscape-block-icon {
+    animation: none;
+  }
 }

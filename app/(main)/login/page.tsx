@@ -4,14 +4,29 @@ import { login } from '@/lib/actions/auth'
 import { signInWithGitHub, signInWithGoogle } from '@/lib/actions/oauth'
 import AuthForm from '@/components/AuthForm'
 import { noindexMetadata } from '@/lib/metadata'
+import { getSiteConfig, isRegistrationOpen } from '@/lib/site-config'
 
 export const metadata: Metadata = noindexMetadata('Sign in')
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const config = await getSiteConfig()
+  const registrationOpen = isRegistrationOpen(config.status)
+
   return (
     <main className="auth-main">
       <div className="auth-card">
         <h1 className="auth-title">Welcome back.</h1>
+
+        {!registrationOpen && (
+          <div className="login-alpha-notice" role="note">
+            <p className="login-alpha-notice-text">
+              Registrations are currently closed.{' '}
+              <Link href="/beta" className="login-alpha-notice-link">
+                Register your interest in the public beta &rarr;
+              </Link>
+            </p>
+          </div>
+        )}
 
         <div className="auth-social">
           <form action={signInWithGoogle}>

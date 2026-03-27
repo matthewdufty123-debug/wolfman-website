@@ -1,35 +1,43 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { betaInterest } from '@/lib/db/schema'
-import { sendBetaInterestConfirmation } from '@/lib/email'
+import { sendBetaInterestConfirmation, sendAdminBetaInterestAlert } from '@/lib/email'
 
-export async function POST(req: NextRequest) {
-  try {
-    const { email, name, source = 'beta-page' } = await req.json()
+export async function POST(req: Request) {
+  const body = await req.json().catch(() => null)
 
-    if (!email || typeof email !== 'string') {
-      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
-    }
+  const name     = typeof body?.name    === 'string' ? body.name.trim()                : ''
+  const email    = typeof body?.email   === 'string' ? body.email.trim().toLowerCase() : ''
+  const source   = typeof body?.source  === 'string' ? body.source                    : 'beta-page'
+  const honeypot = typeof body?.website === 'string' ? body.website.trim()            : ''
 
-    const [row] = await db
-      .insert(betaInterest)
-      .values({ email: email.toLowerCase().trim(), name: name ?? null, source })
-      .onConflictDoNothing()
-      .returning({ id: betaInterest.id })
-
-    // row is undefined if the email already existed — still return success to avoid enumeration
-    if (row) {
-      // Fire confirmation email — non-fatal if it fails
-      try {
-        await sendBetaInterestConfirmation({ to: email, name: name ?? null })
-      } catch (emailErr) {
-        console.error('[beta-interest] confirmation email failed:', emailErr)
-      }
-    }
-
-    return NextResponse.json({ ok: true })
-  } catch (err) {
-    console.error('[beta-interest] POST error:', err)
-    return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
+  // Honeypot — bots fill this field; humans never see it. Silently return success.
+  if (honeypot) {
+    return NextResponse.json({ ok: true, duplicate: false })
   }
+
+  if (!name || !email || !email.includes('@')) {
+    return NextResponse.json(
+      { error: 'Name and a valid email are required.' },
+      { status: 400 }
+    )
+  }
+
+  const result = await db
+    .insert(betaInterest)
+    .values({ email, name, source })
+    .onConflictDoNothing()
+    .returning({ id: betaInterest.id })
+
+  const isDuplicate = result.length === 0
+
+  if (!isDuplicate) {
+    // Fire-and-forget — email failures must never block the user's response
+    Promise.all([
+      sendBetaInterestConfirmation(email, name),
+      sendAdminBetaInterestAlert(email, name),
+    ]).catch(err => console.error('[beta-interest] email error:', err))
+  }
+
+  return NextResponse.json({ ok: true, duplicate: isDuplicate })
 }
