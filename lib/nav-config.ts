@@ -101,7 +101,7 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * morning-ritual, morning-stats, shop, cart, checkout, wolfbot, guide
    */
   standard: {
-    upper: [WRITE_PLUS, PROFILE_LINK, FEEDBACK_TEXT, BETA_LINK, SETTINGS],
+    upper: [WRITE_PLUS, EMPTY, FEEDBACK_TEXT, BETA_LINK, SETTINGS],
     //       NBUS1        NBUS2         NBUS3           NBUS4      NBUS5
     lower: [FEED, GUIDE, WOLFBOT, ACCOUNT, MORE_PAGES],
     //       NBLS1  NBLS2  NBLS3    NBLS4    NBLS5
