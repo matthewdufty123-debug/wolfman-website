@@ -46,7 +46,7 @@ type AdjacentPost = { slug: string; authorUsername: string | null } | null
 
 export default function UpperNavBar() {
   const pathname = usePathname()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const { post: postCtx } = usePostContext()
 
   const configKey = getNavConfigKey(pathname)
@@ -102,7 +102,7 @@ export default function UpperNavBar() {
         return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
 
       case 'write-plus':
-        if (!session) return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
+        if (status !== 'authenticated') return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
         return (
           <Link key={key} href="/write" className="nav-slot nav-slot--link" aria-label="Write a journal">
             <Plus size={16} strokeWidth={2} />
@@ -110,7 +110,7 @@ export default function UpperNavBar() {
         )
 
       case 'profile-link':
-        if (!session) return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
+        if (status !== 'authenticated') return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
         return (
           <Link key={key} href={profileHref} className="nav-slot nav-slot--link" aria-label="Your profile">
             {avatarUrl ? (
