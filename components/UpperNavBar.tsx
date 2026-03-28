@@ -110,6 +110,7 @@ export default function UpperNavBar() {
         )
 
       case 'profile-link':
+        if (!session) return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
         return (
           <Link key={key} href={profileHref} className="nav-slot nav-slot--link" aria-label="Your profile">
             {avatarUrl ? (

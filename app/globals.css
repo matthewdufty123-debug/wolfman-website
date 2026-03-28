@@ -112,7 +112,7 @@ body {
 
 /* ── Nav slots ── */
 .nav-slot {
-  flex: 1;
+  flex: 1;        /* default — equal distribution (lower nav) */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -195,6 +195,13 @@ body {
   margin: 0;
   letter-spacing: 0.02em;
 }
+
+/* ── Upper nav slot widths: 15 / 15 / 40 / 15 / 15 ── */
+.upper-nav .nav-slot:nth-child(1),
+.upper-nav .nav-slot:nth-child(2),
+.upper-nav .nav-slot:nth-child(4),
+.upper-nav .nav-slot:nth-child(5) { flex: 15; }
+.upper-nav .nav-slot:nth-child(3) { flex: 40; }
 
 /* ── Upper nav extras ── */
 .upper-nav-avatar {
