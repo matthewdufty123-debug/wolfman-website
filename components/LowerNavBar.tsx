@@ -5,11 +5,11 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
-  Home, Sunrise, Pencil, ShoppingBag, User, Settings,
+  Home, Sunrise, Pencil, ShoppingBag, User, UserCircle2, Settings,
   Share2, Download, ArrowLeft, ChevronLeft, ChevronRight,
-  LayoutDashboard, BadgeInfo, Bot,
+  LayoutDashboard, BadgeInfo, Bot, Plus, Building2, Rss, BookOpen, Menu, X,
 } from 'lucide-react'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { signInWithGoogle, signInWithGitHub } from '@/lib/actions/oauth'
 import { loginForModal } from '@/lib/actions/auth'
 import { getNavConfigKey, NAV_CONFIGS, type NavIcon, type SlotType } from '@/lib/nav-config'
@@ -20,25 +20,87 @@ import SettingsOverlay from './SettingsOverlay'
 // ─── Icon renderer ────────────────────────────────────────────────────────────
 
 function NavIconEl({ icon, size = 20 }: { icon: NavIcon; size?: number }) {
-  const props = { size, strokeWidth: 1.5 }
+  const p = { size, strokeWidth: 1.5 }
   switch (icon) {
-    case 'Home':           return <Home {...props} />
-    case 'Sunrise':        return <Sunrise {...props} />
-    case 'Pencil':         return <Pencil {...props} />
-    case 'ShoppingBag':    return <ShoppingBag {...props} />
-    case 'User':           return <User {...props} />
-    case 'Settings':       return <Settings {...props} />
-    case 'Share2':         return <Share2 {...props} />
-    case 'Download':       return <Download {...props} />
-    case 'ArrowLeft':      return <ArrowLeft {...props} />
-    case 'ChevronLeft':    return <ChevronLeft {...props} />
-    case 'ChevronRight':   return <ChevronRight {...props} />
-    case 'LayoutDashboard':return <LayoutDashboard {...props} />
-    case 'BadgeInfo':      return <BadgeInfo {...props} />
-    case 'Bot':            return <Bot {...props} />
-    default:               return null
+    case 'Home':            return <Home {...p} />
+    case 'Sunrise':         return <Sunrise {...p} />
+    case 'Pencil':          return <Pencil {...p} />
+    case 'ShoppingBag':     return <ShoppingBag {...p} />
+    case 'User':            return <User {...p} />
+    case 'UserCircle2':     return <UserCircle2 {...p} />
+    case 'Settings':        return <Settings {...p} />
+    case 'Share2':          return <Share2 {...p} />
+    case 'Download':        return <Download {...p} />
+    case 'ArrowLeft':       return <ArrowLeft {...p} />
+    case 'ChevronLeft':     return <ChevronLeft {...p} />
+    case 'ChevronRight':    return <ChevronRight {...p} />
+    case 'LayoutDashboard': return <LayoutDashboard {...p} />
+    case 'BadgeInfo':       return <BadgeInfo {...p} />
+    case 'Bot':             return <Bot {...p} />
+    case 'Plus':            return <Plus {...p} />
+    case 'Building2':       return <Building2 {...p} />
+    case 'Rss':             return <Rss {...p} />
+    case 'BookOpen':        return <BookOpen {...p} />
+    case 'Menu':            return <Menu {...p} />
+    case 'X':               return <X {...p} />
+    default:                return null
   }
 }
+
+// ─── More Pages panel content ─────────────────────────────────────────────────
+
+type PageLink = { href: string; label: string }
+type PageGroup = { title: string; links: PageLink[]; authOnly?: boolean }
+
+const PAGE_GROUPS: PageGroup[] = [
+  {
+    title: 'Your Space',
+    links: [
+      { href: '/',                label: 'Feed' },
+      { href: '/write',           label: 'Write a Journal' },
+      { href: '/guide',           label: 'The Guide' },
+      { href: '/wolfbot',         label: 'WOLF|BOT' },
+    ],
+  },
+  {
+    title: 'You',
+    authOnly: true,
+    links: [
+      { href: '/account',         label: 'Account' },
+      { href: '/settings',        label: 'Settings' },
+    ],
+  },
+  {
+    title: 'Discover',
+    links: [
+      { href: '/about',           label: 'About Wolfman' },
+      { href: '/features',        label: 'Features' },
+      { href: '/morning-ritual',  label: 'Morning Rituals' },
+      { href: '/morning-stats',   label: 'Stats' },
+    ],
+  },
+  {
+    title: 'Shop',
+    links: [
+      { href: '/shop',            label: 'Shop' },
+      { href: '/cart',            label: 'Cart' },
+    ],
+  },
+  {
+    title: 'The Beta',
+    links: [
+      { href: '/beta',            label: 'About the Beta' },
+      { href: '/feedback',        label: 'Give Feedback' },
+      { href: '/dev',             label: 'Dev Log' },
+    ],
+  },
+  {
+    title: 'Legal',
+    links: [
+      { href: '/terms',           label: 'Terms' },
+    ],
+  },
+]
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -58,8 +120,8 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
   const [faded, setFaded] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
+  const [morePagesOpen, setMorePagesOpen] = useState(false)
 
-  // Login form state
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState('')
@@ -68,15 +130,16 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
   const avatarUrl = session?.user?.avatar ?? session?.user?.image ?? null
   const segments = pathname.split('/').filter(Boolean)
 
-  // Hide bar entirely on auth pages
   if (config.hideBars) return null
 
-  // Fade on inactivity (journal reading only)
+  // Close More Pages when route changes
+  useEffect(() => { setMorePagesOpen(false) }, [pathname])
+
+  // Fade on inactivity — journal reading only
   useEffect(() => {
     if (!config.fadeOnInactivity) { setFaded(false); return }
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (prefersReduced) return
-
     let timer: ReturnType<typeof setTimeout>
     function resetTimer() {
       setFaded(false)
@@ -95,19 +158,25 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
     }
   }, [config.fadeOnInactivity])
 
-  // Lock body scroll when login modal is open
+  // Lock body scroll when any overlay is open
   useEffect(() => {
-    document.body.style.overflow = loginOpen ? 'hidden' : ''
+    document.body.style.overflow = (loginOpen || morePagesOpen) ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
-  }, [loginOpen])
+  }, [loginOpen, morePagesOpen])
+
+  // Escape closes overlays
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') { setLoginOpen(false); setMorePagesOpen(false) }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
 
   async function handleShare() {
     try {
-      if (navigator.share) {
-        await navigator.share({ title: document.title, url: window.location.href })
-      } else {
-        await navigator.clipboard.writeText(window.location.href)
-      }
+      if (navigator.share) await navigator.share({ title: document.title, url: window.location.href })
+      else await navigator.clipboard.writeText(window.location.href)
     } catch {}
   }
 
@@ -146,32 +215,42 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
     const key = idx
 
     switch (slot.kind) {
-
       case 'empty':
         return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
 
       case 'wolfbot':
         return (
           <Link key={key} href="/wolfbot" className="nav-slot nav-slot--wolfbot" aria-label="WOLF|BOT">
-            <WolfBotIcon size={28} />
+            <WolfBotIcon size={26} />
             <span className="nav-slot-label">wolf|bot</span>
           </Link>
         )
 
+      case 'more-pages':
+        return (
+          <button
+            key={key}
+            className={`nav-slot nav-slot--btn${morePagesOpen ? ' nav-slot--active' : ''}`}
+            aria-label={morePagesOpen ? 'Close navigation panel' : 'Open site navigation'}
+            onClick={() => setMorePagesOpen(o => !o)}
+          >
+            {morePagesOpen ? <X size={20} strokeWidth={1.5} /> : <Menu size={20} strokeWidth={1.5} />}
+            <span className="nav-slot-label">{morePagesOpen ? 'close' : 'more'}</span>
+          </button>
+        )
+
       case 'link': {
-        // journal-reading: profile slot href is dynamic
         let href = slot.href
         if (configKey === 'journal-reading' && slot.label === 'profile') {
           href = `/${segments[0] ?? ''}`
         }
-        // journal-reading: edit slot href is dynamic
         if (configKey === 'journal-reading' && slot.label === 'edit') {
           href = postCtx?.postId ? `/edit/${postCtx.postId}` : '#'
         }
         return (
           <Link key={key} href={href} className="nav-slot nav-slot--link" aria-label={slot.label}>
             <NavIconEl icon={slot.icon} />
-            <span className="nav-slot-label">{slot.label}</span>
+            {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
           </Link>
         )
       }
@@ -182,28 +261,28 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
             return (
               <button key={key} className="nav-slot nav-slot--btn" aria-label="Settings" onClick={() => setSettingsOpen(true)}>
                 <NavIconEl icon={slot.icon} />
-                <span className="nav-slot-label">{slot.label}</span>
+                {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
               </button>
             )
           case 'share':
             return (
               <button key={key} className="nav-slot nav-slot--btn" aria-label="Share" onClick={handleShare}>
                 <NavIconEl icon={slot.icon} />
-                <span className="nav-slot-label">{slot.label}</span>
+                {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
               </button>
             )
           case 'export-txt':
             return (
               <button key={key} className="nav-slot nav-slot--btn" aria-label="Export as text" onClick={handleExport}>
                 <NavIconEl icon={slot.icon} />
-                <span className="nav-slot-label">{slot.label}</span>
+                {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
               </button>
             )
           case 'go-back':
             return (
               <button key={key} className="nav-slot nav-slot--btn" aria-label="Go back" onClick={() => router.back()}>
                 <NavIconEl icon={slot.icon} />
-                <span className="nav-slot-label">{slot.label}</span>
+                {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
               </button>
             )
           default:
@@ -214,7 +293,7 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
         if (session) {
           const profileHref = session.user?.username ? `/${session.user.username}` : '/account'
           return (
-            <Link key={key} href={profileHref} className="nav-slot nav-slot--link" aria-label="Your account">
+            <Link key={key} href={profileHref} className="nav-slot nav-slot--link" aria-label="Account">
               {avatarUrl ? (
                 <Image
                   src={avatarUrl}
@@ -240,15 +319,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
           </button>
         )
 
-      case 'write':
-        if (!session) return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
-        return (
-          <Link key={key} href="/write" className="nav-slot nav-slot--link nav-slot--write" aria-label="Write a journal">
-            <Pencil size={20} strokeWidth={1.5} />
-            <span className="nav-slot-label">write</span>
-          </Link>
-        )
-
       default:
         return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
     }
@@ -260,10 +330,81 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
         {config.lower.map((slot, idx) => renderSlot(slot, idx))}
       </nav>
 
-      {/* Settings overlay */}
+      {/* ── More Pages panel ── */}
+      <div
+        className={`more-pages-panel${morePagesOpen ? ' is-open' : ''}`}
+        aria-hidden={!morePagesOpen}
+        role="dialog"
+        aria-label="Site Navigation"
+      >
+        {/* Close button top-right */}
+        <button
+          className="more-pages-close"
+          aria-label="Close navigation panel"
+          onClick={() => setMorePagesOpen(false)}
+        >
+          <X size={20} strokeWidth={1.5} />
+        </button>
+
+        <div className="more-pages-inner">
+          {/* Logo */}
+          <div className="more-pages-logo-wrap">
+            <Image
+              src="/images/site_images/Grey Bronze Full with LogoAsset 151000.png"
+              alt="Wolfman"
+              width={1000}
+              height={300}
+              className="more-pages-logo"
+              priority
+              unoptimized
+            />
+          </div>
+
+          <p className="more-pages-title">Site Navigation</p>
+
+          {/* Page groups */}
+          <nav className="more-pages-nav" aria-label="All pages">
+            {PAGE_GROUPS.map(group => {
+              if (group.authOnly && !session) return null
+              return (
+                <div key={group.title} className="more-pages-group">
+                  <p className="more-pages-group-title">{group.title}</p>
+                  <ul className="more-pages-list">
+                    {group.links.map(link => (
+                      <li key={link.href}>
+                        <Link
+                          href={link.href}
+                          className="more-pages-link"
+                          onClick={() => setMorePagesOpen(false)}
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })}
+          </nav>
+
+          {/* Sign out */}
+          {session && (
+            <div className="more-pages-signout-wrap">
+              <button
+                className="more-pages-signout"
+                onClick={() => signOut({ callbackUrl: '/' })}
+              >
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Settings overlay ── */}
       <SettingsOverlay open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
-      {/* Login modal */}
+      {/* ── Login modal ── */}
       <div
         className={`login-overlay${loginOpen ? ' is-open' : ''}`}
         aria-hidden={!loginOpen}
@@ -275,7 +416,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
         </button>
         <div className="login-inner">
           <p className="login-title">Good to see you.</p>
-
           <div className="login-oauth">
             <form action={signInWithGoogle}>
               <button type="submit" className="login-oauth-btn login-oauth-btn--google">
@@ -297,40 +437,18 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
               </button>
             </form>
           </div>
-
           <div className="login-divider"><span>or</span></div>
-
           <form className="login-form" onSubmit={handleEmailLogin}>
-            <input
-              type="email"
-              placeholder="Email"
-              value={loginEmail}
-              onChange={e => setLoginEmail(e.target.value)}
-              className="login-input"
-              required
-              autoComplete="email"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={loginPassword}
-              onChange={e => setLoginPassword(e.target.value)}
-              className="login-input"
-              required
-              autoComplete="current-password"
-            />
+            <input type="email" placeholder="Email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} className="login-input" required autoComplete="email" />
+            <input type="password" placeholder="Password" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} className="login-input" required autoComplete="current-password" />
             {loginError && <p className="login-error">{loginError}</p>}
             <button type="submit" className="login-submit" disabled={loginLoading}>
               {loginLoading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
-
           {registrationOpen && (
             <p className="login-register-prompt">
-              No account?{' '}
-              <Link href="/register" onClick={() => setLoginOpen(false)}>
-                Register here
-              </Link>
+              No account? <Link href="/register" onClick={() => setLoginOpen(false)}>Register here</Link>
             </p>
           )}
         </div>

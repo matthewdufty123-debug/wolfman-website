@@ -196,6 +196,292 @@ body {
   letter-spacing: 0.02em;
 }
 
+/* ── Upper nav extras ── */
+.upper-nav-avatar {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Text-only nav slot (e.g. SEND FEEDBACK) */
+.nav-slot--text-link {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: var(--nav-btn-icon, rgba(255, 255, 255, 0.55));
+  text-decoration: none;
+  transition: color 0.15s ease;
+  padding: 0 4px;
+  text-align: center;
+  line-height: 1.2;
+}
+.nav-slot--text-link:hover { color: var(--heading, #E5CBBB); }
+
+/* Active state — e.g. more-pages when open */
+.nav-slot--active {
+  color: var(--heading, #E5CBBB);
+}
+
+/* ── More Pages panel ── */
+.more-pages-panel {
+  position: fixed;
+  bottom: 64px;  /* sits above lower nav */
+  left: 0;
+  right: 0;
+  top: 44px;     /* sits below upper nav */
+  background: var(--nav-fill, #193343);
+  z-index: 49;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  pointer-events: none;
+}
+
+.more-pages-panel.is-open {
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.more-pages-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--nav-btn-icon, rgba(255, 255, 255, 0.55));
+  padding: 0.5rem;
+  line-height: 0;
+  transition: color 0.15s ease;
+  z-index: 1;
+}
+.more-pages-close:hover { color: var(--heading, #E5CBBB); }
+
+.more-pages-inner {
+  padding: 1.5rem 1.5rem 2rem;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* Logo */
+.more-pages-logo-wrap {
+  padding: 0 0 1.25rem;
+}
+.more-pages-logo {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+@media (min-width: 768px) {
+  .more-pages-logo {
+    width: 25%;
+  }
+}
+
+/* Title */
+.more-pages-title {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--nav-btn-icon, rgba(255, 255, 255, 0.45));
+  margin: 0 0 1.5rem;
+}
+
+/* Groups */
+.more-pages-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+.more-pages-group-title {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--nav-btn-icon, rgba(255, 255, 255, 0.35));
+  margin: 0 0 0.6rem;
+}
+.more-pages-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.more-pages-link {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: clamp(1rem, 3.5vw, 1.25rem);
+  font-weight: 400;
+  color: var(--body, rgba(255, 255, 255, 0.82));
+  text-decoration: none;
+  transition: color 0.15s ease;
+  display: block;
+  padding: 0.15rem 0;
+}
+.more-pages-link:hover { color: var(--heading, #E5CBBB); }
+
+/* Sign out */
+.more-pages-signout-wrap {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.more-pages-signout {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  padding: 0.55rem 1.25rem;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--nav-btn-icon, rgba(255, 255, 255, 0.55));
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.more-pages-signout:hover {
+  color: var(--heading, #E5CBBB);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── Guide page ── */
+.guide-page {
+  min-height: 100dvh;
+  padding: 5rem 1.5rem 6rem;
+}
+
+.guide-inner {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.guide-header {
+  margin-bottom: 2.5rem;
+}
+
+.guide-title {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 400;
+  color: var(--heading, #E5CBBB);
+  margin: 0 0 0.75rem;
+  line-height: 1.2;
+}
+
+.guide-subtitle {
+  font-size: 1rem;
+  color: var(--body, rgba(255, 255, 255, 0.7));
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Table of contents */
+.guide-toc {
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 3px solid var(--accent, #A0622A);
+  border-radius: 0 6px 6px 0;
+  padding: 1rem 1.25rem;
+  margin-bottom: 3rem;
+}
+
+.guide-toc-label {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--nav-btn-icon, rgba(255, 255, 255, 0.4));
+  margin: 0 0 0.6rem;
+}
+
+.guide-toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.guide-toc-link {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  color: var(--body, rgba(255, 255, 255, 0.7));
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.guide-toc-link:hover { color: var(--heading, #E5CBBB); }
+
+/* Sections */
+.guide-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.guide-section-title {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: clamp(1.2rem, 3.5vw, 1.5rem);
+  font-weight: 400;
+  color: var(--heading, #E5CBBB);
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.guide-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 0;
+}
+
+.guide-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.guide-item-q {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--heading, #E5CBBB);
+  margin: 0;
+}
+
+.guide-item-a {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--body, rgba(255, 255, 255, 0.72));
+  margin: 0;
+}
+
+.guide-footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.85rem;
+  color: var(--body, rgba(255, 255, 255, 0.5));
+}
+
+.guide-footer-link {
+  color: var(--accent, #A0622A);
+  text-decoration: none;
+}
+.guide-footer-link:hover { text-decoration: underline; }
+
 
 /* ── Settings overlay (slides up like the menu) ── */
 .settings-overlay {

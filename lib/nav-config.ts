@@ -5,7 +5,7 @@
  * The human-readable spec lives in docs/Navigation.md — keep them in sync.
  *
  * Slot numbering:
- *   Lower bar: NBLS1 = index 0 … NBLS6 = index 5
+ *   Lower bar: NBLS1 = index 0 … NBLS5 = index 4
  *   Upper bar: NBUS1 = index 0 … NBUS5 = index 4
  */
 
@@ -13,13 +13,16 @@
 
 export type SlotType =
   | { kind: 'empty' }
-  | { kind: 'link';    href: string; label: string; icon: NavIcon }
-  | { kind: 'action';  action: NavAction; label: string; icon: NavIcon }
-  | { kind: 'wolfbot' }           // always NBLS6 — renders WolfBotIcon, links to /wolfbot
+  | { kind: 'link';         href: string; label: string; icon: NavIcon; hideLabel?: boolean }
+  | { kind: 'action';       action: NavAction; label: string; icon: NavIcon; hideLabel?: boolean }
+  | { kind: 'text-link';    href: string; text: string }   // text only, no icon (e.g. SEND FEEDBACK)
+  | { kind: 'wolfbot' }           // renders WolfBotIcon, links to /wolfbot
   | { kind: 'prev-post' }         // journal-reading upper bar left
   | { kind: 'next-post' }         // journal-reading upper bar right
-  | { kind: 'account' }           // smart slot: account link (logged in) or sign-in modal (logged out)
-  | { kind: 'write' }             // smart slot: write link (logged in) or hidden (logged out)
+  | { kind: 'account' }           // smart: account link (logged in) or sign-in modal (logged out)
+  | { kind: 'write-plus' }        // + icon, no label, hidden when logged out
+  | { kind: 'profile-link' }      // UserCircle icon, no label, links to current user's profile
+  | { kind: 'more-pages' }        // opens More Pages panel; becomes close button when panel is open
 
 // Named icons — maps to Lucide icon names in the components
 export type NavIcon =
@@ -28,6 +31,7 @@ export type NavIcon =
   | 'Pencil'
   | 'ShoppingBag'
   | 'User'
+  | 'UserCircle2'
   | 'Settings'
   | 'Share2'
   | 'Download'
@@ -37,6 +41,12 @@ export type NavIcon =
   | 'LayoutDashboard'
   | 'BadgeInfo'
   | 'Bot'
+  | 'Plus'
+  | 'Building2'
+  | 'Rss'
+  | 'BookOpen'
+  | 'Menu'
+  | 'X'
 
 // Named actions handled by the nav components
 export type NavAction =
@@ -48,8 +58,8 @@ export type NavAction =
 // ─── Config shape ────────────────────────────────────────────────────────────
 
 export type NavBarConfig = {
-  /** Lower bar — 6 slots: index 0 = NBLS1 … index 5 = NBLS6 */
-  lower: [SlotType, SlotType, SlotType, SlotType, SlotType, SlotType]
+  /** Lower bar — 5 slots: index 0 = NBLS1 … index 4 = NBLS5 */
+  lower: [SlotType, SlotType, SlotType, SlotType, SlotType]
   /** Upper bar — 5 slots: index 0 = NBUS1 … index 4 = NBUS5 */
   upper: [SlotType, SlotType, SlotType, SlotType, SlotType]
   /** If true, both bars fade to 25% opacity after 3s inactivity */
@@ -62,21 +72,24 @@ export type NavConfigKey = 'standard' | 'journal-reading' | 'writing' | 'auth' |
 
 // ─── Shared slot shorthands ───────────────────────────────────────────────────
 
-const EMPTY: SlotType = { kind: 'empty' }
-const WOLFBOT: SlotType = { kind: 'wolfbot' }
-const FEED: SlotType = { kind: 'link', href: '/', label: 'feed', icon: 'Home' }
-const RITUALS: SlotType = { kind: 'link', href: '/morning-ritual', label: 'rituals', icon: 'Sunrise' }
-const SHOP: SlotType = { kind: 'link', href: '/shop', label: 'shop', icon: 'ShoppingBag' }
-const ACCOUNT: SlotType = { kind: 'account' }
-const WRITE: SlotType = { kind: 'write' }
-const SETTINGS: SlotType = { kind: 'action', action: 'open-settings', label: 'settings', icon: 'Settings' }
-const BETA: SlotType = { kind: 'link', href: '/beta', label: 'BETA', icon: 'BadgeInfo' }
-const SHARE: SlotType = { kind: 'action', action: 'share', label: 'share', icon: 'Share2' }
-const EXPORT: SlotType = { kind: 'action', action: 'export-txt', label: 'export', icon: 'Download' }
-const BACK: SlotType = { kind: 'action', action: 'go-back', label: 'back', icon: 'ArrowLeft' }
-const PREV_POST: SlotType = { kind: 'prev-post' }
-const NEXT_POST: SlotType = { kind: 'next-post' }
-const ADMIN: SlotType = { kind: 'link', href: '/admin', label: 'admin', icon: 'LayoutDashboard' }
+const EMPTY: SlotType         = { kind: 'empty' }
+const WOLFBOT: SlotType       = { kind: 'wolfbot' }
+const ACCOUNT: SlotType       = { kind: 'account' }
+const WRITE_PLUS: SlotType    = { kind: 'write-plus' }
+const PROFILE_LINK: SlotType  = { kind: 'profile-link' }
+const MORE_PAGES: SlotType    = { kind: 'more-pages' }
+const PREV_POST: SlotType     = { kind: 'prev-post' }
+const NEXT_POST: SlotType     = { kind: 'next-post' }
+
+const FEED: SlotType      = { kind: 'link', href: '/',               label: 'feed',    icon: 'Rss' }
+const GUIDE: SlotType     = { kind: 'link', href: '/guide',          label: 'guide',   icon: 'BookOpen' }
+const ADMIN: SlotType     = { kind: 'link', href: '/admin',          label: 'admin',   icon: 'LayoutDashboard' }
+const BETA_LINK: SlotType = { kind: 'link', href: '/beta',           label: 'beta',    icon: 'Building2',  hideLabel: true }
+const SETTINGS: SlotType  = { kind: 'action', action: 'open-settings', label: 'settings', icon: 'Settings', hideLabel: true }
+const FEEDBACK_TEXT: SlotType = { kind: 'text-link', href: '/feedback', text: 'SEND FEEDBACK' }
+const SHARE: SlotType     = { kind: 'action', action: 'share',      label: 'share',   icon: 'Share2' }
+const EXPORT: SlotType    = { kind: 'action', action: 'export-txt', label: 'export',  icon: 'Download' }
+const BACK: SlotType      = { kind: 'action', action: 'go-back',    label: 'back',    icon: 'ArrowLeft' }
 
 // ─── Named configurations ────────────────────────────────────────────────────
 
@@ -85,13 +98,13 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
   /**
    * standard
    * Home, profiles, about, features, beta, dev, feedback, terms,
-   * morning-ritual, morning-stats, shop, cart, checkout, wolfbot
+   * morning-ritual, morning-stats, shop, cart, checkout, wolfbot, guide
    */
   standard: {
-    lower: [FEED, RITUALS, WRITE, SHOP, ACCOUNT, WOLFBOT],
-    //       NBLS1  NBLS2   NBLS3  NBLS4  NBLS5    NBLS6
-    upper: [EMPTY, EMPTY, BETA, EMPTY, SETTINGS],
-    //       NBUS1  NBUS2  NBUS3  NBUS4  NBUS5
+    upper: [WRITE_PLUS, PROFILE_LINK, FEEDBACK_TEXT, BETA_LINK, SETTINGS],
+    //       NBUS1        NBUS2         NBUS3           NBUS4      NBUS5
+    lower: [FEED, GUIDE, WOLFBOT, ACCOUNT, MORE_PAGES],
+    //       NBLS1  NBLS2  NBLS3    NBLS4    NBLS5
   },
 
   /**
@@ -100,15 +113,14 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * Both bars fade to 25% opacity after 3s inactivity.
    */
   'journal-reading': {
-    lower: [
-      FEED,    // NBLS1 — back to home
-      { kind: 'link', href: '', label: 'profile', icon: 'User' }, // NBLS2 — author profile (href set dynamically)
-      SHARE,   // NBLS3
-      { kind: 'link', href: '', label: 'edit', icon: 'Pencil' },  // NBLS4 — edit (href set dynamically)
-      EXPORT,  // NBLS5
-      WOLFBOT, // NBLS6
-    ],
     upper: [PREV_POST, EMPTY, EMPTY, EMPTY, NEXT_POST],
+    lower: [
+      FEED,    // NBLS1 — back to home feed
+      { kind: 'link', href: '', label: 'profile', icon: 'User' },  // NBLS2 — dynamic href
+      SHARE,   // NBLS3
+      { kind: 'link', href: '', label: 'edit', icon: 'Pencil' },   // NBLS4 — dynamic href
+      EXPORT,  // NBLS5
+    ],
     fadeOnInactivity: true,
   },
 
@@ -117,9 +129,9 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * /write and /edit/[id]
    */
   writing: {
-    lower: [BACK, EMPTY, EMPTY, EMPTY, SETTINGS, WOLFBOT],
-    //       NBLS1  NBLS2  NBLS3  NBLS4  NBLS5     NBLS6
     upper: [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+    lower: [BACK, EMPTY, EMPTY, SETTINGS, MORE_PAGES],
+    //       NBLS1  NBLS2  NBLS3  NBLS4    NBLS5
   },
 
   /**
@@ -127,8 +139,8 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * /login and /register — both bars hidden entirely
    */
   auth: {
-    lower: [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
     upper: [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+    lower: [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
     hideBars: true,
   },
 
@@ -137,9 +149,9 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * /admin and /admin/*
    */
   admin: {
-    lower: [FEED, ADMIN, EMPTY, EMPTY, ACCOUNT, WOLFBOT],
-    //       NBLS1  NBLS2   NBLS3  NBLS4  NBLS5    NBLS6
     upper: [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+    lower: [FEED, ADMIN, EMPTY, ACCOUNT, MORE_PAGES],
+    //       NBLS1  NBLS2  NBLS3  NBLS4    NBLS5
   },
 }
 
@@ -157,14 +169,12 @@ export function getNavConfigKey(pathname: string): NavConfigKey {
   return 'standard'
 }
 
-// Known first-path-segments that are NOT journal slugs.
-// When a route is /[segment1]/[segment2] and segment1 is NOT in this set,
-// it is treated as /[username]/[slug] → journal-reading.
+// Known first-path-segments that are NOT [username]/[slug] journal routes.
 const KNOWN_PREFIXES = new Set([
   'admin', 'edit', 'write', 'account', 'settings', 'shop', 'cart',
   'checkout', 'login', 'register', 'about', 'morning-ritual',
   'morning-stats', 'intentions', 'feedback', 'beta', 'dev',
-  'features', 'terms', 'discover', 'api', 'posts', 'wolfbot',
+  'features', 'terms', 'discover', 'api', 'posts', 'wolfbot', 'guide',
 ])
 
 function isJournalReadingRoute(pathname: string): boolean {
