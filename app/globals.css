@@ -191,9 +191,11 @@ body {
   transition: box-shadow 0.15s ease;
 }
 
-.feed-logo-btn:hover,
-.feed-logo-btn:focus-visible {
+.feed-logo-btn:hover {
   box-shadow: 0 0 0 5px var(--nav-fill, #193343), 0 0 0 7px var(--heading, #E5CBBB);
+}
+
+.feed-logo-btn:focus {
   outline: none;
 }
 
