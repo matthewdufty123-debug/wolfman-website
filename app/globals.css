@@ -102,6 +102,7 @@ body {
   background: var(--nav-fill, #193343);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   transition: opacity 0.3s ease;
+  overflow: visible; /* allows feed-logo to float above the bar */
 }
 
 /* Fade state — journal reading inactivity */
@@ -165,6 +166,42 @@ body {
 
 .nav-slot--wolfbot:hover {
   color: var(--heading, #E5CBBB);
+}
+
+/* ── Feed logo slot (NBLS3 centre button) ── */
+.nav-slot--feed-logo {
+  position: relative;
+  overflow: visible;
+}
+
+/* The circular logo button — centre sits on the top edge of the nav bar */
+.feed-logo-btn {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: block;
+  /* Nav-coloured ring — gives "integrated border" illusion */
+  box-shadow: 0 0 0 5px var(--nav-fill, #193343);
+  transition: box-shadow 0.15s ease;
+}
+
+.feed-logo-btn:hover,
+.feed-logo-btn:focus-visible {
+  box-shadow: 0 0 0 5px var(--nav-fill, #193343), 0 0 0 7px var(--heading, #E5CBBB);
+  outline: none;
+}
+
+.feed-logo-img {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
 
 /* ── WOLF|BOT page ── */

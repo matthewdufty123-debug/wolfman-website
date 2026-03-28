@@ -15,6 +15,7 @@ import { loginForModal } from '@/lib/actions/auth'
 import { getNavConfigKey, NAV_CONFIGS, type NavIcon, type SlotType } from '@/lib/nav-config'
 import { usePostContext } from '@/lib/post-context'
 import WolfBotIcon from './WolfBotIcon'
+import WolfLogo from './WolfLogo'
 import SettingsOverlay from './SettingsOverlay'
 import ThemeLogo from './ThemeLogo'
 
@@ -225,6 +226,15 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
             <WolfBotIcon size={26} />
             <span className="nav-slot-label">wolf|bot</span>
           </Link>
+        )
+
+      case 'feed-logo':
+        return (
+          <div key={key} className="nav-slot nav-slot--feed-logo">
+            <Link href="/" className="feed-logo-btn" aria-label="Home feed">
+              <WolfLogo size={56} className="feed-logo-img" />
+            </Link>
+          </div>
         )
 
       case 'more-pages':
