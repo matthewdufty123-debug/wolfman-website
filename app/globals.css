@@ -25,8 +25,8 @@ html[data-theme="light"] {
   --bg: #F9F6F5;
   --heading: #193343;
   --body-text: #333F50;
-  --nav-fill: #E5CBBB;
-  --nav-btn-icon: rgba(25, 51, 67, 0.55);
+  --nav-fill: #4A7FA5;
+  --nav-btn-icon: rgba(255, 255, 255, 0.70);
   --nav-pill-bg: #EFE1D8;
   --nav-pill-icon: #193343;
   --logo-bg: #ffffff;
@@ -180,11 +180,12 @@ body {
   top: 0;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   overflow: hidden;
   display: block;
+  background: var(--nav-fill, #193343); /* fills transparent areas of the logo */
   /* Nav-coloured ring — gives "integrated border" illusion */
   box-shadow: 0 0 0 5px var(--nav-fill, #193343);
   transition: box-shadow 0.15s ease;
@@ -197,8 +198,8 @@ body {
 }
 
 .feed-logo-img {
-  width: 56px !important;
-  height: 56px !important;
+  width: 72px !important;
+  height: 72px !important;
   border-radius: 50%;
   object-fit: cover;
   display: block;
@@ -341,11 +342,11 @@ body {
   display: block;
 }
 /* Dark theme: show grey bronze, hide white */
-html[data-theme="dark"] .theme-logo--dark  { display: block; }
-html[data-theme="dark"] .theme-logo--light { display: none;  }
-/* Light theme: show white bronze, hide grey */
-html[data-theme="light"] .theme-logo--dark  { display: none;  }
-html[data-theme="light"] .theme-logo--light { display: block; }
+html[data-theme="dark"] .theme-logo--dark  { display: none;  }
+html[data-theme="dark"] .theme-logo--light { display: block; }
+/* Light theme: show grey bronze (dark logo reads on light bg), hide white */
+html[data-theme="light"] .theme-logo--dark  { display: block; }
+html[data-theme="light"] .theme-logo--light { display: none;  }
 
 /* Feed page logo */
 .feed-logo-wrap {
