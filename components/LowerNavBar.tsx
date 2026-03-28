@@ -1,0 +1,340 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import Image from 'next/image'
+import {
+  Home, Sunrise, Pencil, ShoppingBag, User, Settings,
+  Share2, Download, ArrowLeft, ChevronLeft, ChevronRight,
+  LayoutDashboard, BadgeInfo, Bot,
+} from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import { signInWithGoogle, signInWithGitHub } from '@/lib/actions/oauth'
+import { loginForModal } from '@/lib/actions/auth'
+import { getNavConfigKey, NAV_CONFIGS, type NavIcon, type SlotType } from '@/lib/nav-config'
+import { usePostContext } from '@/lib/post-context'
+import WolfBotIcon from './WolfBotIcon'
+import SettingsOverlay from './SettingsOverlay'
+
+// ─── Icon renderer ────────────────────────────────────────────────────────────
+
+function NavIconEl({ icon, size = 20 }: { icon: NavIcon; size?: number }) {
+  const props = { size, strokeWidth: 1.5 }
+  switch (icon) {
+    case 'Home':           return <Home {...props} />
+    case 'Sunrise':        return <Sunrise {...props} />
+    case 'Pencil':         return <Pencil {...props} />
+    case 'ShoppingBag':    return <ShoppingBag {...props} />
+    case 'User':           return <User {...props} />
+    case 'Settings':       return <Settings {...props} />
+    case 'Share2':         return <Share2 {...props} />
+    case 'Download':       return <Download {...props} />
+    case 'ArrowLeft':      return <ArrowLeft {...props} />
+    case 'ChevronLeft':    return <ChevronLeft {...props} />
+    case 'ChevronRight':   return <ChevronRight {...props} />
+    case 'LayoutDashboard':return <LayoutDashboard {...props} />
+    case 'BadgeInfo':      return <BadgeInfo {...props} />
+    case 'Bot':            return <Bot {...props} />
+    default:               return null
+  }
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+interface LowerNavBarProps {
+  registrationOpen: boolean
+}
+
+export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
+  const pathname = usePathname()
+  const router = useRouter()
+  const { data: session } = useSession()
+  const { post: postCtx } = usePostContext()
+
+  const configKey = getNavConfigKey(pathname)
+  const config = NAV_CONFIGS[configKey]
+
+  const [faded, setFaded] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [loginOpen, setLoginOpen] = useState(false)
+
+  // Login form state
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
+  const [loginLoading, setLoginLoading] = useState(false)
+
+  const avatarUrl = session?.user?.avatar ?? session?.user?.image ?? null
+  const segments = pathname.split('/').filter(Boolean)
+
+  // Hide bar entirely on auth pages
+  if (config.hideBars) return null
+
+  // Fade on inactivity (journal reading only)
+  useEffect(() => {
+    if (!config.fadeOnInactivity) { setFaded(false); return }
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReduced) return
+
+    let timer: ReturnType<typeof setTimeout>
+    function resetTimer() {
+      setFaded(false)
+      clearTimeout(timer)
+      timer = setTimeout(() => setFaded(true), 3000)
+    }
+    resetTimer()
+    window.addEventListener('scroll', resetTimer, { passive: true })
+    window.addEventListener('mousemove', resetTimer, { passive: true })
+    window.addEventListener('touchstart', resetTimer, { passive: true })
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('scroll', resetTimer)
+      window.removeEventListener('mousemove', resetTimer)
+      window.removeEventListener('touchstart', resetTimer)
+    }
+  }, [config.fadeOnInactivity])
+
+  // Lock body scroll when login modal is open
+  useEffect(() => {
+    document.body.style.overflow = loginOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [loginOpen])
+
+  async function handleShare() {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: document.title, url: window.location.href })
+      } else {
+        await navigator.clipboard.writeText(window.location.href)
+      }
+    } catch {}
+  }
+
+  function handleExport() {
+    const postEl = document.querySelector('.post')
+    const text = postEl?.textContent ?? document.title
+    const blob = new Blob([text], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${segments[1] ?? 'journal'}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  async function handleEmailLogin(e: React.FormEvent) {
+    e.preventDefault()
+    setLoginError('')
+    setLoginLoading(true)
+    try {
+      const result = await loginForModal(loginEmail, loginPassword)
+      if ('error' in result) {
+        setLoginError(result.error)
+      } else {
+        setLoginOpen(false)
+        setLoginEmail('')
+        setLoginPassword('')
+        router.refresh()
+      }
+    } finally {
+      setLoginLoading(false)
+    }
+  }
+
+  function renderSlot(slot: SlotType, idx: number) {
+    const key = idx
+
+    switch (slot.kind) {
+
+      case 'empty':
+        return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
+
+      case 'wolfbot':
+        return (
+          <Link key={key} href="/wolfbot" className="nav-slot nav-slot--wolfbot" aria-label="WOLF|BOT">
+            <WolfBotIcon size={28} />
+            <span className="nav-slot-label">wolf|bot</span>
+          </Link>
+        )
+
+      case 'link': {
+        // journal-reading: profile slot href is dynamic
+        let href = slot.href
+        if (configKey === 'journal-reading' && slot.label === 'profile') {
+          href = `/${segments[0] ?? ''}`
+        }
+        // journal-reading: edit slot href is dynamic
+        if (configKey === 'journal-reading' && slot.label === 'edit') {
+          href = postCtx?.postId ? `/edit/${postCtx.postId}` : '#'
+        }
+        return (
+          <Link key={key} href={href} className="nav-slot nav-slot--link" aria-label={slot.label}>
+            <NavIconEl icon={slot.icon} />
+            <span className="nav-slot-label">{slot.label}</span>
+          </Link>
+        )
+      }
+
+      case 'action':
+        switch (slot.action) {
+          case 'open-settings':
+            return (
+              <button key={key} className="nav-slot nav-slot--btn" aria-label="Settings" onClick={() => setSettingsOpen(true)}>
+                <NavIconEl icon={slot.icon} />
+                <span className="nav-slot-label">{slot.label}</span>
+              </button>
+            )
+          case 'share':
+            return (
+              <button key={key} className="nav-slot nav-slot--btn" aria-label="Share" onClick={handleShare}>
+                <NavIconEl icon={slot.icon} />
+                <span className="nav-slot-label">{slot.label}</span>
+              </button>
+            )
+          case 'export-txt':
+            return (
+              <button key={key} className="nav-slot nav-slot--btn" aria-label="Export as text" onClick={handleExport}>
+                <NavIconEl icon={slot.icon} />
+                <span className="nav-slot-label">{slot.label}</span>
+              </button>
+            )
+          case 'go-back':
+            return (
+              <button key={key} className="nav-slot nav-slot--btn" aria-label="Go back" onClick={() => router.back()}>
+                <NavIconEl icon={slot.icon} />
+                <span className="nav-slot-label">{slot.label}</span>
+              </button>
+            )
+          default:
+            return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
+        }
+
+      case 'account':
+        if (session) {
+          const profileHref = session.user?.username ? `/${session.user.username}` : '/account'
+          return (
+            <Link key={key} href={profileHref} className="nav-slot nav-slot--link" aria-label="Your account">
+              {avatarUrl ? (
+                <Image
+                  src={avatarUrl}
+                  alt={session.user?.name ?? 'avatar'}
+                  width={22}
+                  height={22}
+                  className="nav-slot-avatar"
+                  unoptimized
+                />
+              ) : (
+                <User size={20} strokeWidth={1.5} />
+              )}
+              <span className="nav-slot-label">
+                {session.user?.name?.split(' ')[0]?.toLowerCase() ?? 'account'}
+              </span>
+            </Link>
+          )
+        }
+        return (
+          <button key={key} className="nav-slot nav-slot--btn" aria-label="Sign in" onClick={() => setLoginOpen(true)}>
+            <User size={20} strokeWidth={1.5} />
+            <span className="nav-slot-label">sign in</span>
+          </button>
+        )
+
+      case 'write':
+        if (!session) return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
+        return (
+          <Link key={key} href="/write" className="nav-slot nav-slot--link nav-slot--write" aria-label="Write a journal">
+            <Pencil size={20} strokeWidth={1.5} />
+            <span className="nav-slot-label">write</span>
+          </Link>
+        )
+
+      default:
+        return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
+    }
+  }
+
+  return (
+    <>
+      <nav className={`lower-nav${faded ? ' nav--faded' : ''}`} aria-label="Lower navigation">
+        {config.lower.map((slot, idx) => renderSlot(slot, idx))}
+      </nav>
+
+      {/* Settings overlay */}
+      <SettingsOverlay open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
+      {/* Login modal */}
+      <div
+        className={`login-overlay${loginOpen ? ' is-open' : ''}`}
+        aria-hidden={!loginOpen}
+        role="dialog"
+        aria-label="Sign in"
+      >
+        <button className="login-close" aria-label="Close" onClick={() => setLoginOpen(false)}>
+          &times;
+        </button>
+        <div className="login-inner">
+          <p className="login-title">Good to see you.</p>
+
+          <div className="login-oauth">
+            <form action={signInWithGoogle}>
+              <button type="submit" className="login-oauth-btn login-oauth-btn--google">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Sign in with Google
+              </button>
+            </form>
+            <form action={signInWithGitHub}>
+              <button type="submit" className="login-oauth-btn login-oauth-btn--github">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+                Sign in with GitHub
+              </button>
+            </form>
+          </div>
+
+          <div className="login-divider"><span>or</span></div>
+
+          <form className="login-form" onSubmit={handleEmailLogin}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={loginEmail}
+              onChange={e => setLoginEmail(e.target.value)}
+              className="login-input"
+              required
+              autoComplete="email"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={loginPassword}
+              onChange={e => setLoginPassword(e.target.value)}
+              className="login-input"
+              required
+              autoComplete="current-password"
+            />
+            {loginError && <p className="login-error">{loginError}</p>}
+            <button type="submit" className="login-submit" disabled={loginLoading}>
+              {loginLoading ? 'Signing in…' : 'Sign in'}
+            </button>
+          </form>
+
+          {registrationOpen && (
+            <p className="login-register-prompt">
+              No account?{' '}
+              <Link href="/register" onClick={() => setLoginOpen(false)}>
+                Register here
+              </Link>
+            </p>
+          )}
+        </div>
+      </div>
+    </>
+  )
+}

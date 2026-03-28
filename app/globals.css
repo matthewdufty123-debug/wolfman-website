@@ -74,436 +74,128 @@ body {
   line-height: 1.3;
 }
 
-/* ── Bottom nav bar ── */
-.wolfman-nav {
+/* ── Upper navigation bar ── */
+.upper-nav {
   position: fixed;
-  bottom: 0;
+  top: 0;
   left: 0;
   right: 0;
-  height: 100px;
-  background: transparent;
+  height: 44px;
   z-index: 50;
-  overflow: visible;
-  transition: opacity 0.6s ease, transform 0.6s ease;
-  pointer-events: none; /* container is decorative; children opt back in */
-}
-
-.wolfman-nav.nav--hidden {
-  opacity: 0;
-  transform: translateY(12px);
-  pointer-events: none;
-}
-
-.wolfman-nav::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 160px;
-  background: linear-gradient(to top, var(--nav-fade, rgba(229, 203, 187, 0.12)), transparent);
-  pointer-events: none;
-}
-
-/* SVG draws the bell-curve shape — fill driven by theme */
-.nav-bg path {
-  fill: var(--nav-fill, #193343);
-}
-
-.nav-bg {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  filter: drop-shadow(0 -2px 8px rgba(0,0,0,0.18));
-}
-
-.nav-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  bottom: 0;
-  height: 56px;
-  width: 56px;
-  z-index: 1;
-  pointer-events: auto; /* re-enable on the wolf button */
-}
-
-.nav-btn--center {
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 26px;
-  height: auto;
-  width: auto;
-  z-index: 1;
-}
-
-.nav-btn--center img {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  display: block;
-  animation: pulse 5s ease-in-out infinite;
-  background: var(--logo-bg, transparent);
-}
-
-/* ── Heartbeat animation ── */
-@keyframes pulse {
-  0%   { transform: scale(1); }
-  10%  { transform: scale(1.18); }
-  20%  { transform: scale(1); }
-  32%  { transform: scale(1.18); }
-  42%  { transform: scale(1); }
-  100% { transform: scale(1); }
-}
-
-/* ── Wolf panel (semicircular dome) ── */
-/*
- * The dome is a full circle (120vw × 120vw, border-radius: 50%).
- * Its centre is anchored at the very bottom-centre of the viewport
- * (bottom: -60vw positions it so the circle centre = viewport bottom edge).
- * The circle is wider than the screen so it spills ~10vw off each side,
- * creating the illusion of a smooth dome rising from the bottom.
- * Visible dome height ≈ 60vw (~25% of screen height on a typical phone).
- */
-.wolf-panel {
-  position: fixed;
-  bottom: -60vw;
-  left: 50%;
-  width: 120vw;
-  height: 120vw;
-  border-radius: 50%;
-  overflow: hidden;
+  align-items: stretch;
   background: var(--nav-fill, #193343);
-  /* box-shadow follows border-radius; no filter used here so overflow:hidden
-     is safe — the old Chrome/Android leak bug was caused by filter+overflow:hidden
-     together. Without filter, overflow:hidden clips child text correctly. */
-  box-shadow: 0 -6px 24px rgba(0,0,0,0.38);
-  z-index: 46;
-  pointer-events: none;
-  transform: translateX(-50%) translateY(100%);
-  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
-}
-
-.wolf-panel.is-open {
-  transform: translateX(-50%) translateY(0);
-  pointer-events: all;
-}
-
-/* Hide the nav bell-curve and wolf button when the dome is open */
-.wolfman-nav--panel-open .nav-bg,
-.wolfman-nav--panel-open .wolf-btn {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.wolf-panel-icons {
-  position: absolute;
-  inset: 0;
-}
-
-.wolf-panel-btn {
-  position: absolute;
-  transform: translate(-50%, -50%) scale(0.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.72rem;
-  font-weight: 500;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  text-transform: lowercase;
-  letter-spacing: 0.06em;
-  text-decoration: none;
-  padding: 6px;
-  opacity: 0;
-  transition: opacity 0.28s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
-}
-
-/*
- * Arc positions — 5 icons on a 120vw circle (r=42vw from element centre 50%,50%).
- * Angles from horizontal: 160°, 120°, 90°, 60°, 20°
- * Formula: left = (60 + 42·cos θ) / 120 · 100%,  top = (60 − 42·sin θ) / 120 · 100%
- */
-.wpb-1 { left: 17.1%; top: 38.0%; }  /* Experience — 160°, r=42 */
-.wpb-2 { left: 27.1%; top: 17.2%; }  /* Features   — 125°, r=48 (midpoint 160°↔90°) */
-.wpb-3 { left: 50.0%; top: 12.5%; }  /* Journal    —  90°, r=45 */
-.wpb-4 { left: 72.9%; top: 17.2%; }  /* Account    —  55°, r=48 (midpoint 90°↔20°) */
-.wpb-5 { left: 82.9%; top: 38.0%; }  /* More       —  20°, r=42 */
-.wpb-prev { left: 22%; top: 62%; }
-.wpb-next { left: 78%; top: 62%; }
-
-/* Open state: pop icons into final position */
-.wolf-panel.is-open .wolf-panel-btn {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-/* Minimal outward-wave stagger from centre icon */
-.wolf-panel.is-open .wpb-1 { transition-delay: 0.04s; }
-.wolf-panel.is-open .wpb-2 { transition-delay: 0.02s; }
-.wolf-panel.is-open .wpb-3 { transition-delay: 0s; }
-.wolf-panel.is-open .wpb-4 { transition-delay: 0.02s; }
-.wolf-panel.is-open .wpb-5 { transition-delay: 0.04s; }
-.wolf-panel.is-open .wpb-prev { transition-delay: 0.06s; }
-.wolf-panel.is-open .wpb-next { transition-delay: 0.06s; }
-
-.wolf-panel-btn:hover {
-  color: var(--heading, #E5CBBB);
-}
-
-/* Avatar inside wolf panel */
-.wolf-panel-avatar {
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  object-fit: cover;
-}
-
-/* ── WOLF|BOT face — centred inside dome ── */
-.wolf-panel-wolfbot-face {
-  position: absolute;
-  left: 50%;
-  top: 33%;
-  transform: translateX(-50%) translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  opacity: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   transition: opacity 0.3s ease;
 }
 
-.wolf-panel.is-open .wolf-panel-wolfbot-face {
-  opacity: 1;
-}
-
-.wolf-panel-wolfbot-face svg,
-.wolf-panel-wolfbot-face img {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  animation: pulse 5s ease-in-out infinite;
-  transition: opacity 0.4s ease;
-}
-
-.wolf-panel-wolfbot-face--bored svg,
-.wolf-panel-wolfbot-face--bored img {
-  animation: none;
-  opacity: 0.4;
-}
-
-.wolf-panel-wolfbot-text {
-  font-size: 0.88rem;
-  font-family: 'Courier New', 'Courier', monospace;
-  color: rgba(255, 255, 255, 0.7);
-  text-align: center;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-/* ── WOLF|BOT ONLINE status strip — bottom of visible dome ── */
-.wolf-panel-status-strip {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  transform: translateX(-50%);
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.52rem;
-  font-weight: 300;
-  letter-spacing: 0.38em;
-  color: rgba(200, 176, 32, 0.0);
-  text-transform: uppercase;
-  white-space: nowrap;
-  pointer-events: none;
-  transition: color 0.5s ease 0.25s;
-}
-
-.wolf-panel.is-open .wolf-panel-status-strip {
-  color: rgba(200, 176, 32, 0.72);
-}
-
-/* ── Top utility bar ── */
-.top-bar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 40px;
-  z-index: 49;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--nav-fill, #193343);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.top-bar--hidden {
-  opacity: 0;
-  transform: translateY(-100%);
-  pointer-events: none;
-}
-
-.top-bar-btn {
-  position: absolute;
-  top: 0; height: 40px; width: 40px;
-  display: flex; align-items: center; justify-content: center;
-  background: none; border: none; cursor: pointer;
-  color: var(--nav-btn-icon, rgba(255,255,255,0.55));
-  transition: color 0.15s ease;
-}
-.top-bar-btn:hover { color: var(--heading); }
-.top-bar-btn--left  { left: 0.5rem; }
-.top-bar-btn--right { right: 0.5rem; }
-
-.top-bar-avatar-btn { padding: 0; }
-.top-bar-avatar {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-}
-
-.top-bar-feedback {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--nav-btn-icon, rgba(255,255,255,0.55));
-  text-decoration: none;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  transition: color 0.15s ease;
-}
-.top-bar-feedback:hover { color: var(--heading); }
-
-/* ── Bottom sheet menu ── */
-.menu-overlay {
+/* ── Lower navigation bar ── */
+.lower-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 75vh;
-  background: var(--menu-bg, #3D4E63);
-  border-radius: 0;
+  height: 64px;
+  z-index: 50;
   display: flex;
+  align-items: stretch;
+  background: var(--nav-fill, #193343);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  transition: opacity 0.3s ease;
+}
+
+/* Fade state — journal reading inactivity */
+.upper-nav.nav--faded,
+.lower-nav.nav--faded {
+  opacity: 0.25;
+}
+
+/* ── Nav slots ── */
+.nav-slot {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  transform: translateY(100%);
-  transition: transform 0.55s cubic-bezier(0.32, 0.72, 0, 1);
-  z-index: 100;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--nav-btn-icon, rgba(255, 255, 255, 0.55));
+  text-decoration: none;
+  font-size: 0;        /* hide label by default on small screens */
+  transition: color 0.15s ease;
+  padding: 0 2px;
+}
+
+.nav-slot:hover,
+.nav-slot:focus-visible {
+  color: var(--heading, #E5CBBB);
+  outline: none;
+}
+
+.nav-slot--empty {
+  cursor: default;
   pointer-events: none;
 }
 
-.menu-overlay.is-open {
-  transform: translateY(0);
-  pointer-events: all;
-}
-
-.menu-close {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  background: none;
-  border: none;
-  font-size: 2rem;
-  color: var(--menu-links, #D4C5BA);
-  cursor: pointer;
+.nav-slot-label {
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   line-height: 1;
-  padding: 0.5rem;
-  opacity: 0.5;
-  transition: opacity 0.2s ease;
-}
-
-.menu-close:hover {
-  opacity: 1;
-}
-
-.menu-inner {
-  text-align: left;
-  padding: 2rem 2rem 8rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  min-height: 72vh;
-  width: 100%;
-}
-
-.menu-prompt {
-  font-family: var(--font-playfair), Georgia, serif;
-  font-size: clamp(1.8rem, 6vw, 3rem);
-  font-weight: 400;
-  color: var(--menu-prompt, rgba(212, 197, 186, 0.45));
-  margin: 0 0 3rem 0;
-}
-
-.menu-links {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1.8rem;
-}
-
-.menu-links a {
-  font-family: var(--font-playfair), Georgia, serif;
-  font-size: clamp(1.8rem, 6vw, 3rem);
-  font-weight: 400;
-  color: var(--menu-links, #D4C5BA);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.menu-links a:hover {
-  color: var(--menu-hover, #C8B020);
-}
-
-.menu-links-divider {
-  height: 1px;
-  background: rgba(255,255,255,0.1);
-  margin: 0.5rem 0;
-}
-
-.menu-links-auth a {
-  font-size: clamp(1rem, 3.5vw, 1.4rem);
-  opacity: 0.6;
-}
-
-/* ── Menu footer icons ── */
-.menu-footer-icons {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 2rem;
-  margin-top: auto;
-}
-
-.menu-footer-icons a {
   display: block;
 }
 
-.menu-footer-icon {
-  width: 54px;
-  height: 54px;
-  border-radius: 8px;
+/* Avatar inside nav slot */
+.nav-slot-avatar {
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  object-fit: cover;
+  display: block;
 }
+
+/* WOLF|BOT slot — slightly distinct */
+.nav-slot--wolfbot {
+  color: var(--nav-btn-icon, rgba(255, 255, 255, 0.55));
+}
+
+.nav-slot--wolfbot:hover {
+  color: var(--heading, #E5CBBB);
+}
+
+/* ── WOLF|BOT page ── */
+.wolfbot-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+}
+
+.wolfbot-page-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.wolfbot-page-icon {
+  image-rendering: pixelated;
+}
+
+.wolfbot-page-caption {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1rem;
+  color: var(--muted, rgba(255, 255, 255, 0.45));
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
 
 /* ── Settings overlay (slides up like the menu) ── */
 .settings-overlay {
