@@ -16,6 +16,7 @@ import { getNavConfigKey, NAV_CONFIGS, type NavIcon, type SlotType } from '@/lib
 import { usePostContext } from '@/lib/post-context'
 import WolfBotIcon from './WolfBotIcon'
 import SettingsOverlay from './SettingsOverlay'
+import ThemeLogo from './ThemeLogo'
 
 // ─── Icon renderer ────────────────────────────────────────────────────────────
 
@@ -349,15 +350,7 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
         <div className="more-pages-inner">
           {/* Logo */}
           <div className="more-pages-logo-wrap">
-            <Image
-              src="/images/site_images/Grey Bronze Full with LogoAsset 151000.png"
-              alt="Wolfman"
-              width={1000}
-              height={300}
-              className="more-pages-logo"
-              priority
-              unoptimized
-            />
+            <ThemeLogo className="more-pages-logo" />
           </div>
 
           <p className="more-pages-title">Site Navigation</p>

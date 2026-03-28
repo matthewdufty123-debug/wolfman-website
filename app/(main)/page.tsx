@@ -16,6 +16,7 @@ import { db } from '@/lib/db'
 import { posts, morningState, users } from '@/lib/db/schema'
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import AnimatedRoutineIcons from '@/components/AnimatedRoutineIcons'
+import ThemeLogo from '@/components/ThemeLogo'
 
 function formatDate(iso: string) {
   const d = new Date(iso + 'T00:00:00')
@@ -194,6 +195,10 @@ export default async function FeedPage({
           </Link>
         </div>
       )}
+
+      <div className="feed-logo-wrap">
+        <ThemeLogo />
+      </div>
 
       <div className="feed-tabs">
         <Link href="/" className={`feed-tab${!isMine ? ' feed-tab--active' : ''}`}>

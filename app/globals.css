@@ -293,6 +293,34 @@ body {
   }
 }
 
+/* ── ThemeLogo — switches between grey (dark) and white (light) variants ── */
+.theme-logo-wrap {
+  display: block;
+  line-height: 0;
+}
+.theme-logo {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+/* Dark theme: show grey bronze, hide white */
+html[data-theme="dark"] .theme-logo--dark  { display: block; }
+html[data-theme="dark"] .theme-logo--light { display: none;  }
+/* Light theme: show white bronze, hide grey */
+html[data-theme="light"] .theme-logo--dark  { display: none;  }
+html[data-theme="light"] .theme-logo--light { display: block; }
+
+/* Feed page logo */
+.feed-logo-wrap {
+  padding: 2rem 1.5rem 0.5rem;
+  max-width: 280px;
+}
+@media (min-width: 768px) {
+  .feed-logo-wrap {
+    max-width: 320px;
+  }
+}
+
 /* Title */
 .more-pages-title {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
