@@ -286,12 +286,17 @@ body {
   z-index: 49;
   overflow-y: auto;
   transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  visibility: hidden;
+  /* visibility delays until after the slide-out finishes */
+  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), visibility 0s linear 0.4s;
   pointer-events: none;
 }
 
 .more-pages-panel.is-open {
   transform: translateY(0);
+  visibility: visible;
+  /* visibility becomes visible immediately on open */
+  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), visibility 0s linear 0s;
   pointer-events: all;
 }
 
