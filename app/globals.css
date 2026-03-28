@@ -205,7 +205,10 @@ body {
   border-radius: 50%;
   object-fit: cover;
   display: block;
-  filter: brightness(0) invert(1); /* white silhouette on any nav colour */
+}
+
+html[data-theme="light"] .feed-logo-img {
+  filter: brightness(0) invert(1);
 }
 
 /* ── WOLF|BOT page ── */
