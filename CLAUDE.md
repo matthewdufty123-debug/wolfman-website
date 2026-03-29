@@ -37,10 +37,10 @@ authentic, personal, and real.
   - `users` — id, email, passwordHash, name, displayName, bio, image, avatar, role, username
   - `accounts`, `sessions`, `verificationTokens` — Auth.js adapter tables
   - `orders`, `orderItems` — Stripe/Printful e-commerce
-  - `posts` — blog posts (DB-backed; the `posts/` markdown directory is empty and unused)
-  - `morning_state` — brain/body/happy scales (1–6) + routine checklist (JSONB)
-  - `evening_reflection` — end-of-day reflection text, wentToPlan flag, dayRating (1–6)
+  - `posts` — blog posts (DB-backed; the `posts/` markdown directory is empty and unused). Includes `evening_reflection` (text), `feel_about_today` (integer 1–6), `image` (Vercel Blob URL)
+  - `morning_state` — brain/body/happy/stress scales (all 1–6) + routine checklist (JSONB)
   - `day_scores` — Claude's Take synthesis: scores (JSONB), synthesis text, model, dataCompleteness
+  - ~~`evening_reflection`~~ — **dropped** (29 Mar 2026). Evening data now lives on `posts` table directly.
 
 **Image Storage:** Vercel Blob
 - All site images, blog post images, and product images stored here
@@ -113,8 +113,8 @@ inviting a click
 - This experience is sacred. Never compromise it.
 
 ### Morning Data & Stats
-- **Morning State** — captured at publish time via PostForm: brain activity scale, body energy scale, happy scale (all 1–6), plus routine checklist (10 rituals: sunlight, breathwork, cacao, meditation, cold shower, walk, animal love, caffeine, yoga, workout)
-- **Evening Reflection** — logged at end of day: reflection text, wentToPlan, dayRating (1–6). Available to any post owner via PostFooter.
+- **Morning State** — captured at publish time via PostForm ("After Waking" tab): brain activity, body energy, happy, and stress scales (all 1–6), plus routine checklist (10 rituals: sunlight, breathwork, cacao, meditation, cold shower, walk, animal love, caffeine, yoga, workout). Stored in `morning_state` table.
+- **Evening Reflection** — logged via PostForm "Before Bed" tab or inline on the journal reading page: free-text reflection + `feel_about_today` (1–6 sentiment: Want to Forget → Best Day Ever). Stored directly on `posts` table (not a separate table). `wentToPlan` and `dayRating` fields removed.
 - **Claude's Take** — generated at Review time (post content + morning state) and optionally regenerated when evening reflection is saved. Stored in `day_scores`.
 - **Stats & Profile page** (`/[username]`) — per-user charts, Morning Zone scatter, headline stats (total journals, current streak, longest streak, this month). Owner sees edit affordance; visitors see public view. `/morning-stats` and `/journal` redirect here for logged-in users, else to `/login`.
 - **Morning Ritual pages** (`/morning-ritual/[key]`) — filter journals by ritual. `/morning-ritual` root has no page; use `/rituals` for the overview.
@@ -406,12 +406,16 @@ All work is organised by **milestone**, then **label**. No stage codes — miles
 
 **Version numbering:** Each release is a major version (v0.1, v0.2 etc). Patches within a release are v0.1.1, v0.1.2 etc. The current version number is displayed on the site.
 
-**Current status (26 March 2026):**
-- Closed Alpha Development (#15): active queue — bugs, launch prep, branding, About page, IA consolidation. Must ship by 30 April.
-- Navigation dome redesign shipped to production: issues #157, #158, #159, #160, #163 all closed. Circular dome nav with WOLF|BOT face placeholder is live on wolfman.blog. Issue #161 (real WOLF|BOT face assets) remains open.
-- Portrait-only mode shipped to production (#165): `LandscapeBlock` CSS-only overlay blocks landscape view on all touch devices (phones and tablets). Desktop unaffected. Issues #137 (floating dev window — already resolved) and #141 (landscape text bleed — superseded) also closed.
-- Session 26 March 2026 (afternoon): four bugs fixed and shipped to production — WOLF|BOT dome text bleed (wolfbot "where to?" leaking outside circular clip fixed with overflow:hidden), journal page author card now links to profile (#131 closed), /dev completed work table overflow fixed (#139 closed), GDPR consent + honeypot recovered from lost branch (#125, #138). Issue #140 (beta page scroll bleed) confirmed resolved, closed as not_planned. Stale branches cleaned up.
-- ACTION REQUIRED: run `npm run db:push` locally to create the `beta_interest` table (#166) — without this the beta interest registration form will 500.
+**Current status (29 March 2026):**
+- Closed Alpha Development (#15): active queue — bugs, launch prep, branding, About page. Must ship by 30 April.
+- **Journal reading page fully redesigned** (shipped 29 Mar): Single vertically-scrolling page with 9 named sections replaces the 5-tab layout. Sections in order: Morning Rituals → How I Showed Up → The Journal → WOLF|BOT Review → Post Information → Evening Reflections → Journal Photo → About the Author → Audit Log. Orb navigation (9 fixed ambient orbs), swipe left/right for prev/next post (opacity fades 100%→25%). See `components/JournalPage.tsx` and `components/journal/`.
+- **Schema change** (29 Mar): `evening_reflection` table dropped. Evening data (`evening_reflection`, `feel_about_today`) now on `posts` table. `stress_scale` added to `morning_state`. Post image field added. Run `npm run db:push` already applied.
+- **PostForm redesigned** (29 Mar): Two-tab editing — "After Waking" (morning fields + stress scale + photo upload) and "Before Bed" (evening reflection + feel picker). Photo upload uses in-browser Canvas crop → Vercel Blob via `/api/posts/[id]/image`.
+- **Navigation** (29 Mar): Dual rectangular bar system (upper + lower). Standard lower bar NBLS2 = /about (BadgeInfo). Journal-reading bars: upper = prev/write+/feedback/edit/next; lower = share/export/feed-logo/profile/more. Export enriched with `✦ SECTION ✦` headings, Wolfman.blog footer. Guide added to Discover dropdown in More Pages.
+- **WOLF|BOT naming** (#147 closed 29 Mar): WOLF|BOT consistent across all user-facing UI.
+- **Dome nav** (#161 closed as not_planned 29 Mar): Dome replaced by rectangular bars. WOLF|BOT pixel face lives in the journal WOLF|BOT Review section.
+- **Export button** (#168 closed 29 Mar): Enriched .txt export with decorated headings and Wolfman.blog footer.
+- **Active bug**: #148 + #119 — favicon/site icon still needs fixing before public beta (30 Apr deadline).
 - Releases 0.1–0.9: planned, scoped, and milestoned. Beta runs 1 May – 31 August 2026. Release 0.9 (Legal) must complete before production go-live.
 
 ### Feature freeze

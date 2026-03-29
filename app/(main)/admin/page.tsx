@@ -125,7 +125,7 @@ export default async function AdminDashboard() {
         <section className="dash-section">
           <h2 className="dash-section-title">Quick links</h2>
           <div className="dash-links">
-            <Link href="/admin/wolfbot" className="dash-link">Wolfbot config →</Link>
+            <Link href="/admin/wolfbot" className="dash-link">WOLF|BOT config →</Link>
             <Link href="/write" className="dash-link">Write a journal</Link>
             <Link href="/intentions" className="dash-link">All intentions</Link>
             <Link href="https://vercel.com" className="dash-link" target="_blank">Vercel dashboard</Link>

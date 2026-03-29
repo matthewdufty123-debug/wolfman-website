@@ -177,9 +177,51 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
   }
 
   function handleExport() {
-    const postEl = document.querySelector('.post')
-    const text = postEl?.textContent ?? document.title
-    const blob = new Blob([text], { type: 'text/plain' })
+    const lines: string[] = []
+    const RULE_HEAVY = '═'.repeat(50)
+    const RULE_LIGHT = '─'.repeat(50)
+
+    // Header
+    lines.push(RULE_HEAVY)
+    lines.push('  WOLFMAN MORNING JOURNAL')
+    lines.push(RULE_HEAVY)
+    lines.push('')
+
+    // Title + date
+    const titleEl = document.querySelector('.post-reading-end-title')
+    const dateEl  = document.querySelector('.post-reading-end-date')
+    if (titleEl?.textContent) lines.push(titleEl.textContent.trim())
+    if (dateEl?.textContent)  lines.push(dateEl.textContent.trim())
+    lines.push('')
+
+    // Journal sections
+    const sections = document.querySelectorAll('.post-section')
+    if (sections.length > 0) {
+      sections.forEach(sec => {
+        const label = sec.querySelector('.post-section-label')?.textContent?.trim() ?? ''
+        const body  = sec.querySelector('.post-body')?.textContent?.trim() ?? ''
+        lines.push('')
+        lines.push(`✦ ${label} ✦`)
+        lines.push(RULE_LIGHT)
+        lines.push('')
+        lines.push(body)
+      })
+    } else {
+      // Fallback — plain article text
+      const postEl = document.querySelector('.post')
+      if (postEl?.textContent) lines.push(postEl.textContent.trim())
+    }
+
+    // Footer
+    lines.push('')
+    lines.push('')
+    lines.push(RULE_HEAVY)
+    lines.push('  Exported from Wolfman.blog')
+    lines.push(`  ${window.location.href}`)
+    lines.push(`  ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`)
+    lines.push(RULE_HEAVY)
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
