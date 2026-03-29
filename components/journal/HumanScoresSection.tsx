@@ -27,43 +27,63 @@ function getScaleColor(value: number, isStress = false): string {
   return `rgb(${rVal},${gVal},${bVal})`
 }
 
-// ── Segmented ring — 6 arc segments filled clockwise ─────────────────────────
+// ── Segmented ring — 6 arc segments, animated CCW on reveal ──────────────────
 
-function SegmentedRing({ value, color, size = 64 }: { value: number; color: string; size?: number }) {
+function SegmentedRing({ value, color, size = 64, revealed }: {
+  value: number
+  color: string
+  size?: number
+  revealed: boolean
+}) {
   const cx = size / 2
   const cy = size / 2
-  const r = size / 2 - 5
+  const r  = size / 2 - 5
   const SEGMENTS = 6
-  const GAP_DEG = 5
-  const ARC_DEG = 360 / SEGMENTS - GAP_DEG  // 55°
+  const GAP_DEG   = 5
+  const ARC_DEG   = 360 / SEGMENTS - GAP_DEG  // 55°
 
-  function toXY(clockDeg: number) {
-    const rad = (clockDeg - 90) * (Math.PI / 180)
+  // Arc length for dasharray (circumference fraction)
+  const arcLength = (ARC_DEG / 360) * 2 * Math.PI * r
+
+  function toXY(deg: number) {
+    const rad = (deg - 90) * (Math.PI / 180)
     return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
   }
 
   function arcPath(i: number) {
     const start = i * 60 + GAP_DEG / 2
-    const end = start + ARC_DEG
+    const end   = start + ARC_DEG
     const s = toXY(start)
     const e = toXY(end)
-    return `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${r} ${r} 0 0 1 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`
+    // Reversed path: start from the clockwise-end and sweep counter-clockwise back to start.
+    // sweep-flag 0 = CCW. This makes the stroke-dashoffset animation grow anti-clockwise.
+    return `M ${e.x.toFixed(2)} ${e.y.toFixed(2)} A ${r} ${r} 0 0 0 ${s.x.toFixed(2)} ${s.y.toFixed(2)}`
   }
 
   return (
     <div style={{ position: 'relative', width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0 }}>
-        {Array.from({ length: SEGMENTS }, (_, i) => (
-          <path
-            key={i}
-            d={arcPath(i)}
-            fill="none"
-            stroke={color}
-            strokeWidth={3.5}
-            strokeOpacity={i < value ? 1 : 0.15}
-            strokeLinecap="round"
-          />
-        ))}
+        {Array.from({ length: SEGMENTS }, (_, i) => {
+          const isFilled = i < value
+          return (
+            <path
+              key={i}
+              d={arcPath(i)}
+              fill="none"
+              stroke={color}
+              strokeWidth={3.5}
+              strokeOpacity={isFilled ? 1 : 0.15}
+              strokeLinecap="round"
+              strokeDasharray={isFilled ? arcLength : undefined}
+              strokeDashoffset={isFilled ? (revealed ? 0 : arcLength) : undefined}
+              style={isFilled ? {
+                transition: revealed
+                  ? 'stroke-dashoffset 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0s'
+                  : 'none',
+              } : undefined}
+            />
+          )
+        })}
       </svg>
       <span style={{
         fontFamily: 'var(--font-lora), Georgia, serif',
@@ -111,7 +131,7 @@ function ScaleCol({ title, value, labels, isStress = false, revealed }: ScaleCol
     >
       <span className="hss-col-title">{title}</span>
       <div className="hss-digit-wrap">
-        <SegmentedRing value={value} color={color} />
+        <SegmentedRing value={value} color={color} revealed={revealed} />
       </div>
       <span className="hss-col-word" style={{ color }}>{label}</span>
     </div>
