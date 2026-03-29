@@ -6066,7 +6066,8 @@ html[data-theme="dark"] .stats-chart-card {
   white-space: nowrap;
 }
 
-.wolfbot-review-btn:hover { opacity: 1; }
+.wolfbot-review-btn:hover:not(:disabled) { opacity: 1; }
+.wolfbot-review-btn:disabled { opacity: 0.4; cursor: default; }
 
 .journal-section-title {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -6131,6 +6132,12 @@ html[data-theme="dark"] .stats-chart-card {
 #the-journal.journal-section {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
+}
+
+/* Remove the large top padding from .post when nested inside the journal scroll page */
+#the-journal .post {
+  padding-top: 0.5rem;
+  padding-bottom: 0;
 }
 
 /* ── How I Showed Up — 4-column score grid ──────────────────────────────── */

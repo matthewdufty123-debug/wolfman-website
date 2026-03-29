@@ -29,18 +29,55 @@ function getScaleColor(value: number, isStress = false): string {
   return `rgb(${rVal},${gVal},${bVal})`
 }
 
-function ScaleNumber({ value, color }: { value: number; color: string }) {
+// ── Segmented ring — 6 arc segments filled clockwise ─────────────────────────
+
+function SegmentedRing({ value, color, size = 64 }: { value: number; color: string; size?: number }) {
+  const cx = size / 2
+  const cy = size / 2
+  const r = size / 2 - 5
+  const SEGMENTS = 6
+  const GAP_DEG = 5
+  const ARC_DEG = 360 / SEGMENTS - GAP_DEG  // 55°
+
+  function toXY(clockDeg: number) {
+    const rad = (clockDeg - 90) * (Math.PI / 180)
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
+  }
+
+  function arcPath(i: number) {
+    const start = i * 60 + GAP_DEG / 2
+    const end = start + ARC_DEG
+    const s = toXY(start)
+    const e = toXY(end)
+    return `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${r} ${r} 0 0 1 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`
+  }
+
   return (
-    <span style={{
-      fontFamily: 'var(--font-lora), Georgia, serif',
-      fontSize: '2.6rem',
-      fontWeight: 700,
-      color,
-      lineHeight: 1,
-      display: 'block',
-    }}>
-      {value}
-    </span>
+    <div style={{ position: 'relative', width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0 }}>
+        {Array.from({ length: SEGMENTS }, (_, i) => (
+          <path
+            key={i}
+            d={arcPath(i)}
+            fill="none"
+            stroke={color}
+            strokeWidth={3.5}
+            strokeOpacity={i < value ? 1 : 0.15}
+            strokeLinecap="round"
+          />
+        ))}
+      </svg>
+      <span style={{
+        fontFamily: 'var(--font-lora), Georgia, serif',
+        fontSize: '1.5rem',
+        fontWeight: 700,
+        color,
+        lineHeight: 1,
+        position: 'relative',
+      }}>
+        {value}
+      </span>
+    </div>
   )
 }
 
@@ -76,7 +113,7 @@ function ScaleCol({ title, value, labels, isStress = false, revealed }: ScaleCol
     >
       <span className="hss-col-title">{title}</span>
       <div className="hss-digit-wrap">
-        <ScaleNumber value={value} color={color} />
+        <SegmentedRing value={value} color={color} />
       </div>
       <span className="hss-col-word" style={{ color }}>{label}</span>
     </div>

@@ -107,60 +107,54 @@ export default function WolfBotSection({ synthesis }: Props) {
   const [quip, setQuip] = useState(() => WOLFBOT_QUIPS[Math.floor(Math.random() * WOLFBOT_QUIPS.length)])
   const [quipVisible, setQuipVisible] = useState(false)
   const [cursorVisible, setCursorVisible] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   function startReview() {
+    if (isPlaying) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setRevealed(true)
       setDisplayedText(synthesis ?? '')
       setQuipVisible(true)
       return
     }
-    // Pick a new random quip on replay
+    setIsPlaying(true)
     setQuip(WOLFBOT_QUIPS[Math.floor(Math.random() * WOLFBOT_QUIPS.length)])
     setDisplayedText('')
     setQuipVisible(false)
     setCursorVisible(false)
-    setRevealed(false)
     setTimeout(() => {
-      setRevealed(true)
-      setTimeout(() => setQuipVisible(true), 300)
-      setTimeout(() => setCursorVisible(true), 700)
-    }, 50)
+      setQuipVisible(true)
+      setTimeout(() => setCursorVisible(true), 400)
+    }, 100)
   }
 
+  // Face reveals on scroll — no typewriter auto-start
   useEffect(() => {
     const el = sectionRef.current
     if (!el) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setRevealed(true)
-      setDisplayedText(synthesis ?? '')
-      setQuipVisible(true)
       return
     }
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setRevealed(true)
-          observer.disconnect()
-          setTimeout(() => setQuipVisible(true), 300)
-          setTimeout(() => setCursorVisible(true), 700)
-        }
+        if (entry.isIntersecting) { setRevealed(true); observer.disconnect() }
       },
       { threshold: 0.2 }
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [synthesis])
+  }, [])
 
-  // Typewriter effect — fires once quip is visible and synthesis exists
+  // Typewriter — fires when quipVisible flips on, marks isPlaying=false when done
   useEffect(() => {
     if (!quipVisible || !synthesis) return
-    const chars = synthesis.split('')
     let i = 0
     const interval = setInterval(() => {
-      if (i >= chars.length) {
+      if (i >= synthesis.length) {
         clearInterval(interval)
         setCursorVisible(false)
+        setIsPlaying(false)
         return
       }
       setDisplayedText(synthesis.slice(0, i + 1))
@@ -182,8 +176,13 @@ export default function WolfBotSection({ synthesis }: Props) {
     <section ref={sectionRef} id="wolfbot-review" className="journal-section">
       <div className="journal-section-header">
         <h2 className="journal-section-title">WOLF|BOT Review</h2>
-        <button className="wolfbot-review-btn" onClick={startReview} aria-label="Replay WOLF|BOT review">
-          ▶ Review Journal
+        <button
+          className="wolfbot-review-btn"
+          onClick={startReview}
+          disabled={isPlaying}
+          aria-label="Start WOLF|BOT review"
+        >
+          {isPlaying ? '▌ Reviewing...' : '▶ Review Journal'}
         </button>
       </div>
 
