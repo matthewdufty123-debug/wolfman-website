@@ -1,0 +1,17 @@
+{
+  "name": "Wolfman",
+  "short_name": "Wolfman",
+  "description": "Mindful living. Morning intentions. Matthew Wolfman.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#4A4A4A",
+  "theme_color": "#4A7FA5",
+  "icons": [
+    {
+      "src": "/icon",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

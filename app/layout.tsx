@@ -29,8 +29,19 @@ const jetbrains = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Wolfman',
+  title: {
+    template: '%s | Wolfman',
+    default: 'Wolfman',
+  },
   description: 'Mindful living. Morning intentions. Matthew Wolfman.',
+  metadataBase: new URL('https://wolfman.blog'),
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Wolfman',
+  },
+  themeColor: '#4A7FA5',
 }
 
 export default function RootLayout({
