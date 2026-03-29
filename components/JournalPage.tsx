@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import type { ProcessedPost } from '@/lib/posts'
 import ThemeLogo from '@/components/ThemeLogo'
-import OrbNav from '@/components/journal/OrbNav'
 import MorningRitualsSection from '@/components/journal/MorningRitualsSection'
 import HumanScoresSection from '@/components/journal/HumanScoresSection'
 import JournalTextSection from '@/components/journal/JournalTextSection'
@@ -132,8 +131,6 @@ export default function JournalPage({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <OrbNav />
-
       <div
         className="journal-scroll-content"
         style={{
@@ -141,11 +138,13 @@ export default function JournalPage({
           transition: contentOpacity === 1 ? 'opacity 0.3s ease' : 'none',
         }}
       >
-        {/* Section running order: Rituals, Scores, Journal, WolfBot, PostInfo, Evening, Photo, Profile, Audit */}
+        {/* Post title — sits at top, below the fixed upper nav bar */}
+        <header className="journal-page-title-header">
+          <h1 className="journal-page-title">{post.title}</h1>
+          <p className="journal-page-date">{formatPostDate(post.date)}</p>
+        </header>
 
-        {morningState && (
-          <MorningRitualsSection checklist={morningState.routineChecklist} />
-        )}
+        {/* Section running order: Scores, Journal, Rituals, WolfBot, PostInfo, Evening, Photo, Profile, Audit */}
 
         {morningState && (
           <HumanScoresSection
@@ -157,6 +156,10 @@ export default function JournalPage({
         )}
 
         <JournalTextSection post={post} />
+
+        {morningState && (
+          <MorningRitualsSection checklist={morningState.routineChecklist} />
+        )}
 
         <WolfBotSection synthesis={synthesis} />
 

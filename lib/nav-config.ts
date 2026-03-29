@@ -130,7 +130,7 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
       SHARE,         // NBLS1
       EXPORT,        // NBLS2
       FEED_LOGO,     // NBLS3 — wolf logo, links to feed
-      PROFILE_LINK,  // NBLS4
+      SETTINGS,      // NBLS4 — user experience panel
       MORE_PAGES,    // NBLS5
     ],
     fadeOnInactivity: true,

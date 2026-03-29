@@ -253,10 +253,7 @@ export default function WolfBotSection({ synthesis }: Props) {
             }}
           >
             <div className="wolfbot-terminal-bar">
-              <span className="wolfbot-terminal-dot wbt-red" />
-              <span className="wolfbot-terminal-dot wbt-amber" />
-              <span className="wolfbot-terminal-dot wbt-green" />
-              <span className="wolfbot-terminal-label">WOLF|BOT v2.0</span>
+              <span className="wolfbot-terminal-label">WOLF|BOT Terminal</span>
             </div>
 
             <div className="wolfbot-bubble-inner">
