@@ -135,13 +135,20 @@ export default function UpperNavBar() {
           </Link>
         )
 
-      case 'link':
+      case 'link': {
+        let href = slot.href
+        // Dynamic edit link for journal-reading (post owner, upper bar)
+        if (configKey === 'journal-reading' && slot.label === 'edit') {
+          if (status !== 'authenticated') return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
+          href = postCtx?.postId ? `/edit/${postCtx.postId}` : '#'
+        }
         return (
-          <Link key={key} href={slot.href} className="nav-slot nav-slot--link" aria-label={slot.label}>
+          <Link key={key} href={href} className="nav-slot nav-slot--link" aria-label={slot.label}>
             <NavIconEl icon={slot.icon} />
             {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
           </Link>
         )
+      }
 
       case 'action':
         if (slot.action === 'open-settings') {

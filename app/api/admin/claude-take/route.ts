@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
-import { posts, morningState, eveningReflection, dayScores } from '@/lib/db/schema'
+import { posts, morningState, dayScores } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
 export const maxDuration = 60
@@ -47,9 +47,9 @@ export async function POST(request: Request) {
   if (!post) return NextResponse.json({ error: 'Post not found' }, { status: 404 })
 
   const [morning] = await db.select().from(morningState).where(eq(morningState.postId, postId))
-  const [evening] = await db.select().from(eveningReflection).where(eq(eveningReflection.postId, postId))
 
-  const dataCompleteness = morning && evening
+  const hasEvening = !!(post.eveningReflection)
+  const dataCompleteness = morning && hasEvening
     ? 'post_morning_evening'
     : morning
     ? 'post_morning'
@@ -77,11 +77,13 @@ export async function POST(request: Request) {
     contextParts.push(`Routine completed:\n${routineLines}`)
   }
 
-  if (evening) {
+  if (post.eveningReflection) {
     contextParts.push(`\nEVENING REFLECTION:`)
-    contextParts.push(`How the day went: ${evening.reflection}`)
-    contextParts.push(`Went to plan: ${evening.wentToPlan ? 'Yes' : 'Not quite'}`)
-    contextParts.push(`Day rating: ${evening.dayRating}/6`)
+    contextParts.push(`How the day went: ${post.eveningReflection}`)
+    if (post.feelAboutToday != null) {
+      const FEEL_LABELS = ['', 'Want to Forget', 'Regret my Actions', 'It Was Okay', 'Went as Expected', 'Happy with my Achievements', 'Best Day Ever']
+      contextParts.push(`How they felt about today: ${FEEL_LABELS[post.feelAboutToday] ?? post.feelAboutToday}/6`)
+    }
   } else {
     contextParts.push(`\nNote: No evening reflection yet — synthesise from morning data alone.`)
   }

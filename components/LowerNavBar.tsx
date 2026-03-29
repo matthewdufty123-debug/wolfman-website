@@ -242,15 +242,8 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
         )
 
       case 'link': {
-        let href = slot.href
-        if (configKey === 'journal-reading' && slot.label === 'profile') {
-          href = `/${segments[0] ?? ''}`
-        }
-        if (configKey === 'journal-reading' && slot.label === 'edit') {
-          href = postCtx?.postId ? `/edit/${postCtx.postId}` : '#'
-        }
         return (
-          <Link key={key} href={href} className="nav-slot nav-slot--link" aria-label={slot.label}>
+          <Link key={key} href={slot.href} className="nav-slot nav-slot--link" aria-label={slot.label}>
             <NavIconEl icon={slot.icon} />
           </Link>
         )

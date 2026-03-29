@@ -113,15 +113,24 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * journal-reading
    * /[username]/[slug] and /posts/[slug]
    * Both bars fade to 25% opacity after 3s inactivity.
+   *
+   * Upper: NBUS1=prev  NBUS2=write+  NBUS3=feedback  NBUS4=edit  NBUS5=next
+   * Lower: NBLS1=share NBLS2=export  NBLS3=feed-logo NBLS4=profile-link NBLS5=more-pages
    */
   'journal-reading': {
-    upper: [PREV_POST, EMPTY, EMPTY, EMPTY, NEXT_POST],
+    upper: [
+      PREV_POST,                                                           // NBUS1
+      WRITE_PLUS,                                                          // NBUS2
+      FEEDBACK_TEXT,                                                       // NBUS3
+      { kind: 'link', href: '', label: 'edit', icon: 'Pencil', hideLabel: true }, // NBUS4 — dynamic href
+      NEXT_POST,                                                           // NBUS5
+    ],
     lower: [
-      FEED,    // NBLS1 — back to home feed
-      { kind: 'link', href: '', label: 'profile', icon: 'User' },  // NBLS2 — dynamic href
-      SHARE,   // NBLS3
-      { kind: 'link', href: '', label: 'edit', icon: 'Pencil' },   // NBLS4 — dynamic href
-      EXPORT,  // NBLS5
+      SHARE,         // NBLS1
+      EXPORT,        // NBLS2
+      FEED_LOGO,     // NBLS3 — wolf logo, links to feed
+      PROFILE_LINK,  // NBLS4
+      MORE_PAGES,    // NBLS5
     ],
     fadeOnInactivity: true,
   },

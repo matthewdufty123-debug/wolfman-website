@@ -34,7 +34,7 @@ export async function PUT(
   if (error) return NextResponse.json({ error }, { status })
 
   const body = await request.json()
-  const { title, date, content, excerpt, status: reqStatus, morning, isPublic } = body
+  const { title, date, content, excerpt, status: reqStatus, morning, isPublic, image, eveningReflection, feelAboutToday } = body
 
   const updateData: Record<string, unknown> = { updatedAt: new Date() }
   if (title) updateData.title = title
@@ -42,6 +42,9 @@ export async function PUT(
   if (content) updateData.content = content
   if (excerpt !== undefined) updateData.excerpt = excerpt || null
   if (isPublic !== undefined) updateData.isPublic = Boolean(isPublic)
+  if (image !== undefined) updateData.image = image || null
+  if (eveningReflection !== undefined) updateData.eveningReflection = eveningReflection || null
+  if (feelAboutToday !== undefined) updateData.feelAboutToday = feelAboutToday ?? null
   if (reqStatus === 'published') {
     updateData.status = 'published'
     updateData.publishedAt = new Date()
@@ -55,10 +58,23 @@ export async function PUT(
     const [existing] = await db.select({ id: morningState.id }).from(morningState).where(eq(morningState.postId, id))
     if (existing) {
       await db.update(morningState)
-        .set({ brainScale: morning.brainScale, bodyScale: morning.bodyScale, happyScale: morning.happyScale ?? null, routineChecklist: morning.routineChecklist })
+        .set({
+          brainScale: morning.brainScale,
+          bodyScale: morning.bodyScale,
+          happyScale: morning.happyScale ?? null,
+          stressScale: morning.stressScale ?? null,
+          routineChecklist: morning.routineChecklist,
+        })
         .where(eq(morningState.postId, id))
     } else {
-      await db.insert(morningState).values({ postId: id, brainScale: morning.brainScale, bodyScale: morning.bodyScale, happyScale: morning.happyScale ?? null, routineChecklist: morning.routineChecklist })
+      await db.insert(morningState).values({
+        postId: id,
+        brainScale: morning.brainScale,
+        bodyScale: morning.bodyScale,
+        happyScale: morning.happyScale ?? null,
+        stressScale: morning.stressScale ?? null,
+        routineChecklist: morning.routineChecklist,
+      })
     }
   }
 

@@ -3,10 +3,10 @@ import { getAllSlugsWithUsernames, getPostBySlug } from '@/lib/posts'
 import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
 import { PostContextSetter } from '@/lib/post-context'
-import JournalTabs from '@/components/JournalTabs'
+import JournalPage from '@/components/JournalPage'
 import { db } from '@/lib/db'
-import { posts as postsTable, morningState, eveningReflection, dayScores, users as usersTable } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { posts as postsTable, morningState, dayScores, users as usersTable } from '@/lib/db/schema'
+import { eq, gt, lt, and, or, desc, asc } from 'drizzle-orm'
 
 // Allow slugs not in generateStaticParams to be dynamically rendered (posts published after a build)
 export const dynamicParams = true
@@ -85,25 +85,63 @@ export default async function PostPage({
   // Non-admin users' posts are private — only the author can view them
   if (author.role !== 'admin' && session?.user?.id !== post.authorId) notFound()
 
-  // Fetch day data + post timestamps for DB-backed posts
-  const [ms, er, ds, postRow] = post.id
+  const userId = session?.user?.id ?? null
+
+  // Fetch morning state, day scores, post timestamps, and adjacent posts
+  const [ms, ds, postRow] = post.id
     ? await Promise.all([
         db.select().from(morningState).where(eq(morningState.postId, post.id)).then(r => r[0] ?? null),
-        db.select().from(eveningReflection).where(eq(eveningReflection.postId, post.id)).then(r => r[0] ?? null),
         db.select().from(dayScores).where(eq(dayScores.postId, post.id)).then(r => r[0] ?? null),
-        db.select({ createdAt: postsTable.createdAt, updatedAt: postsTable.updatedAt })
-           .from(postsTable).where(eq(postsTable.id, post.id)).then(r => r[0] ?? null),
+        db.select({
+          createdAt: postsTable.createdAt,
+          updatedAt: postsTable.updatedAt,
+          eveningReflection: postsTable.eveningReflection,
+          feelAboutToday: postsTable.feelAboutToday,
+        })
+          .from(postsTable)
+          .where(eq(postsTable.id, post.id))
+          .then(r => r[0] ?? null),
       ])
-    : [null, null, null, null]
+    : [null, null, null]
 
   const postDates = postRow
     ? { createdAt: postRow.createdAt.toISOString(), updatedAt: postRow.updatedAt.toISOString() }
     : null
 
+  // Fetch adjacent posts for swipe navigation
+  const visibilityFilter = userId
+    ? or(
+        and(eq(postsTable.status, 'published'), eq(postsTable.isPublic, true)),
+        eq(postsTable.authorId, userId)
+      )
+    : and(eq(postsTable.status, 'published'), eq(postsTable.isPublic, true))
+
+  const currentCreatedAt = postRow?.createdAt ?? new Date()
+
+  const [prevRow, nextRow] = await Promise.all([
+    db.select({ slug: postsTable.slug, username: usersTable.username })
+      .from(postsTable)
+      .innerJoin(usersTable, eq(postsTable.authorId, usersTable.id))
+      .where(and(visibilityFilter, gt(postsTable.createdAt, currentCreatedAt)))
+      .orderBy(asc(postsTable.createdAt))
+      .limit(1)
+      .then(r => r[0] ?? null),
+    db.select({ slug: postsTable.slug, username: usersTable.username })
+      .from(postsTable)
+      .innerJoin(usersTable, eq(postsTable.authorId, usersTable.id))
+      .where(and(visibilityFilter, lt(postsTable.createdAt, currentCreatedAt)))
+      .orderBy(desc(postsTable.createdAt))
+      .limit(1)
+      .then(r => r[0] ?? null),
+  ])
+
+  const prevPost = prevRow?.username ? { slug: prevRow.slug, username: prevRow.username } : null
+  const nextPost = nextRow?.username ? { slug: nextRow.slug, username: nextRow.username } : null
+
   return (
     <>
       <PostContextSetter postId={post.id ?? ''} authorId={post.authorId ?? null} />
-      <JournalTabs
+      <JournalPage
         post={post}
         username={username}
         author={author}
@@ -111,13 +149,11 @@ export default async function PostPage({
           brainScale: ms.brainScale,
           bodyScale: ms.bodyScale,
           happyScale: ms.happyScale ?? null,
+          stressScale: ms.stressScale ?? null,
           routineChecklist: ms.routineChecklist as Record<string, boolean>,
         } : null}
-        eveningReflection={er ? {
-          reflection: er.reflection,
-          wentToPlan: er.wentToPlan,
-          dayRating: er.dayRating,
-        } : null}
+        eveningReflection={postRow?.eveningReflection ?? null}
+        feelAboutToday={postRow?.feelAboutToday ?? null}
         dayScores={ds ? {
           scores: ds.scores as Record<string, number>,
           synthesis: ds.synthesis,
@@ -125,6 +161,8 @@ export default async function PostPage({
         } : null}
         postDates={postDates}
         authorId={post.authorId ?? null}
+        prevPost={prevPost}
+        nextPost={nextPost}
       />
     </>
   )

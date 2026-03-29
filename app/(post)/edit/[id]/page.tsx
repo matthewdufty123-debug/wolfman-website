@@ -47,10 +47,14 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
     intention,
     grateful,
     greatAt,
+    image: post.image ?? null,
+    eveningReflection: post.eveningReflection ?? '',
+    feelAboutToday: post.feelAboutToday ?? 4,
     morning: ms ? {
       brainScale: ms.brainScale,
       bodyScale: ms.bodyScale,
       happyScale: ms.happyScale ?? 3,
+      stressScale: ms.stressScale ?? 3,
       routineChecklist: ms.routineChecklist as Record<string, boolean>,
     } : undefined,
   }

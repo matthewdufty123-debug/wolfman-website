@@ -84,12 +84,16 @@ export const posts = pgTable('posts', {
   publishedAt: timestamp('published_at').notNull().defaultNow(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  // Evening reflection — stored directly on post (no separate table)
+  eveningReflection: text('evening_reflection'),     // "How did the day go?" free text
+  feelAboutToday: integer('feel_about_today'),        // 1–6 sentiment scale
 })
 
 // Captured at publish time — how Matthew arrived at the day
 // Brain (My Thoughts): 1 (Peaceful) → 6 (Manic)
 // Body:  1 (Lethargic) → 6 (Buzzing)
 // Happy: 1 (Far from happy) → 6 (Joyful)
+// Stress: 1 (Calm) → 6 (Overwhelmed)
 // Routine: { sunlight, breathwork, cacao, meditation, coldShower, walk, animalLove } — true/false
 export const morningState = pgTable('morning_state', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -97,20 +101,14 @@ export const morningState = pgTable('morning_state', {
   brainScale: smallint('brain_scale').notNull(),   // 1–6
   bodyScale: smallint('body_scale').notNull(),     // 1–6
   happyScale: smallint('happy_scale'),             // 1–6, nullable (added later)
+  stressScale: smallint('stress_scale'),           // 1–6, nullable (added in redesign)
   routineChecklist: jsonb('routine_checklist').notNull().default({}),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
-// Logged at end of day — how it actually went
-export const eveningReflection = pgTable('evening_reflection', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  postId: uuid('post_id').notNull().unique().references(() => posts.id, { onDelete: 'cascade' }),
-  reflection: text('reflection').notNull(),
-  wentToPlan: boolean('went_to_plan').notNull(),
-  dayRating: smallint('day_rating').notNull(),   // 1–6
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-})
+// Evening reflection was previously a separate table (evening_reflection).
+// Consolidated into the posts table (eveningReflection, feelAboutToday columns) in the
+// journal page redesign (March 2026). Run `npm run db:push` to drop the old table.
 
 // ── Site configuration ─────────────────────────────────────────────────────
 // Singleton row (id always 1). Controls registration, messaging and UI mode.

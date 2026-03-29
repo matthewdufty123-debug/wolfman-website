@@ -3,17 +3,38 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { ROUTINE_ICON_MAP } from './RoutineIcons'
+import PhotoCropUpload from './PhotoCropUpload'
 
 const RITUAL_KEYS = Object.keys(ROUTINE_ICON_MAP)
 
-const BRAIN_LABELS = ['Peaceful', 'Quiet', 'Active', 'Busy', 'Racing', 'Manic']
-const BODY_LABELS  = ['Lethargic', 'Slow', 'Steady', 'Energised', 'Strong', 'Buzzing']
-const HAPPY_LABELS = ['Far from happy', 'Low', 'Okay', 'Good', 'Happy', 'Joyful']
+const BRAIN_LABELS  = ['Peaceful', 'Quiet', 'Active', 'Busy', 'Racing', 'Manic']
+const BODY_LABELS   = ['Lethargic', 'Slow', 'Steady', 'Energised', 'Strong', 'Buzzing']
+const HAPPY_LABELS  = ['Far from happy', 'Low', 'Okay', 'Good', 'Happy', 'Joyful']
+const STRESS_LABELS = ['Calm', 'Relaxed', 'Mild', 'Tense', 'Stressed', 'Overwhelmed']
+
+const FEEL_LABELS: Record<number, string> = {
+  1: 'Want to Forget',
+  2: 'Regret my Actions',
+  3: 'It Was Okay',
+  4: 'Went as Expected',
+  5: 'Happy with my Achievements',
+  6: 'Best Day Ever',
+}
+
+const FEEL_COLORS: Record<number, string> = {
+  1: '#A82020',
+  2: '#C87840',
+  3: '#909090',
+  4: '#4A7FA5',
+  5: '#3AB87A',
+  6: '#C8B020',
+}
 
 type MorningState = {
   brainScale: number
   bodyScale: number
   happyScale: number
+  stressScale: number
   routineChecklist: Record<string, boolean>
 }
 
@@ -24,6 +45,9 @@ type PostFormData = {
   grateful: string
   greatAt: string
   morning: MorningState
+  image: string | null
+  eveningReflection: string
+  feelAboutToday: number
 }
 
 interface PostFormProps {
@@ -71,8 +95,18 @@ function ScaleSelector({ label, value, onChange, color, labels }: {
   )
 }
 
-export default function PostForm({ mode, postId: initialPostId, initialData, onDelete, communityEnabled = false, defaultPublic = false, initialIsPublic, username }: PostFormProps) {
+export default function PostForm({
+  mode,
+  postId: initialPostId,
+  initialData,
+  onDelete,
+  communityEnabled = false,
+  defaultPublic = false,
+  initialIsPublic,
+  username,
+}: PostFormProps) {
   const router = useRouter()
+  const [activeTab, setActiveTab] = useState<'after-waking' | 'before-bed'>('after-waking')
   const [postId, setPostId] = useState<string | null>(initialPostId ?? null)
   const [title, setTitle] = useState(initialData?.title ?? '')
   const [date, setDate] = useState(initialData?.date ?? today())
@@ -80,12 +114,16 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
   const [grateful, setGrateful] = useState(initialData?.grateful ?? '')
   const [greatAt, setGreatAt] = useState(initialData?.greatAt ?? '')
   const [morning, setMorning] = useState<MorningState>({
-    brainScale: initialData?.morning?.brainScale ?? 3,
-    bodyScale: initialData?.morning?.bodyScale ?? 3,
-    happyScale: initialData?.morning?.happyScale ?? 3,
+    brainScale:  initialData?.morning?.brainScale  ?? 3,
+    bodyScale:   initialData?.morning?.bodyScale   ?? 3,
+    happyScale:  initialData?.morning?.happyScale  ?? 3,
+    stressScale: initialData?.morning?.stressScale ?? 3,
     routineChecklist: initialData?.morning?.routineChecklist ?? defaultChecklist(),
   })
-
+  const [image, setImage] = useState<string | null>(initialData?.image ?? null)
+  const [showCropUpload, setShowCropUpload] = useState(false)
+  const [eveningReflection, setEveningReflection] = useState(initialData?.eveningReflection ?? '')
+  const [feelAboutToday, setFeelAboutToday] = useState<number>(initialData?.feelAboutToday ?? 4)
   const [isPublic, setIsPublic] = useState<boolean>(initialIsPublic ?? defaultPublic)
 
   const [saving, setSaving] = useState(false)
@@ -104,8 +142,8 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
   function markDirtyAndUnreview() { markDirty(); setReviewed(false) }
 
   const currentData = useCallback((): PostFormData => ({
-    title, date, intention, grateful, greatAt, morning,
-  }), [title, date, intention, grateful, greatAt, morning])
+    title, date, intention, grateful, greatAt, morning, image, eveningReflection, feelAboutToday,
+  }), [title, date, intention, grateful, greatAt, morning, image, eveningReflection, feelAboutToday])
 
   // Auto-save every 30s
   useEffect(() => {
@@ -119,13 +157,23 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
 
   async function saveDraft(data: PostFormData, showFeedback = true) {
     const content = buildContent(data.intention, data.grateful, data.greatAt)
+    const payload = {
+      title: data.title || 'Untitled',
+      date: data.date,
+      content,
+      status: 'draft',
+      morning: data.morning,
+      image: data.image,
+      eveningReflection: data.eveningReflection || null,
+      feelAboutToday: data.feelAboutToday,
+    }
     try {
       let id = postId
       if (!id) {
         const res = await fetch('/api/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: data.title || 'Untitled', date: data.date, content, status: 'draft', morning: data.morning }),
+          body: JSON.stringify(payload),
         })
         if (!res.ok) throw new Error('Save failed')
         const result = await res.json()
@@ -135,7 +183,7 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
         const res = await fetch(`/api/posts/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: data.title || 'Untitled', date: data.date, content, status: 'draft', morning: data.morning }),
+          body: JSON.stringify(payload),
         })
         if (!res.ok) throw new Error('Save failed')
       }
@@ -160,14 +208,10 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
     const data = currentData()
     if (!data.title.trim()) { setError('Add a title first.'); return }
     if (!data.intention.trim()) { setError('Write your intention first.'); return }
-
     setReviewing(true)
     setError('')
-
-    // Ensure post is saved first
     const id = await saveDraft(data, false)
     if (!id) { setError('Could not save before review. Try again.'); setReviewing(false); return }
-
     const content = buildContent(data.intention, data.grateful, data.greatAt)
     try {
       const res = await fetch(`/api/posts/${id}/review`, {
@@ -191,17 +235,27 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
     const data = currentData()
     if (!data.title.trim()) { setError('Add a title first.'); return }
     if (!data.intention.trim()) { setError('Write your intention first.'); return }
-
     setPublishing(true)
     setError('')
     const content = buildContent(data.intention, data.grateful, data.greatAt)
+    const payload = {
+      title: data.title,
+      date: data.date,
+      content,
+      status: 'published',
+      morning: data.morning,
+      isPublic,
+      image: data.image,
+      eveningReflection: data.eveningReflection || null,
+      feelAboutToday: data.feelAboutToday,
+    }
     try {
       let slug: string
       if (!postId) {
         const res = await fetch('/api/posts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: data.title, date: data.date, content, status: 'published', morning: data.morning, isPublic }),
+          body: JSON.stringify(payload),
         })
         if (!res.ok) throw new Error('Publish failed')
         const result = await res.json()
@@ -210,7 +264,7 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
         const res = await fetch(`/api/posts/${postId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: data.title, date: data.date, content, status: 'published', morning: data.morning, isPublic }),
+          body: JSON.stringify(payload),
         })
         if (!res.ok) throw new Error('Publish failed')
         const result = await res.json()
@@ -241,9 +295,9 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
   }
 
   const sections = [
-    { key: 'intention' as const, label: "Today's Intention", placeholder: 'A story, observation or reflection that leads to a lesson or intention for the day…', value: intention, set: setIntention },
-    { key: 'grateful'  as const, label: "I'm Grateful For",  placeholder: 'Something specific, vivid and personal. Never generic.',                          value: grateful,  set: setGrateful  },
-    { key: 'greatAt'   as const, label: "Something I'm Great At", placeholder: 'A strength, owned with confidence and without apology.',                      value: greatAt,   set: setGreatAt   },
+    { key: 'intention' as const, label: "Today's Intention",    placeholder: 'A story, observation or reflection that leads to a lesson or intention for the day…', value: intention, set: setIntention },
+    { key: 'grateful'  as const, label: "I'm Grateful For",     placeholder: 'Something specific, vivid and personal. Never generic.',                          value: grateful,  set: setGrateful  },
+    { key: 'greatAt'   as const, label: "Something I'm Great At", placeholder: 'A strength, owned with confidence and without apology.',                        value: greatAt,   set: setGreatAt   },
   ]
 
   return (
@@ -254,112 +308,180 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
         <p className="pf-prompt">What&apos;s on your mind today?</p>
       </div>
 
-      {/* Date */}
-      <div className="pf-field">
-        <label className="pf-label">Date</label>
-        <input
-          type="date"
-          className="pf-input"
-          value={date}
-          onChange={e => { setDate(e.target.value); markDirty() }}
-        />
+      {/* Tab switcher */}
+      <div className="pf-tabs">
+        <button
+          type="button"
+          className={`pf-tab${activeTab === 'after-waking' ? ' pf-tab--active' : ''}`}
+          onClick={() => setActiveTab('after-waking')}
+        >
+          After Waking
+        </button>
+        <button
+          type="button"
+          className={`pf-tab${activeTab === 'before-bed' ? ' pf-tab--active' : ''}`}
+          onClick={() => setActiveTab('before-bed')}
+        >
+          Before Bed
+        </button>
       </div>
 
-      {/* Title */}
-      <div className="pf-field">
-        <label className="pf-label">Title</label>
-        <input
-          type="text"
-          className="pf-input pf-input--title"
-          placeholder="Give this day a title…"
-          value={title}
-          onChange={e => { setTitle(e.target.value); markDirtyAndUnreview() }}
-        />
-      </div>
-
-      {/* Content sections */}
-      {sections.map(({ key, label, placeholder, value, set }) => (
-        <div key={key} className="pf-field">
-          <label className="pf-label">{label}</label>
-          <div className="pf-textarea-wrap">
-            <textarea
-              className="pf-textarea"
-              placeholder={placeholder}
-              value={value}
-              rows={9}
-              onChange={e => { set(e.target.value); markDirtyAndUnreview() }}
+      {/* ── After Waking tab ───────────────────────────────────────────────── */}
+      {activeTab === 'after-waking' && (
+        <>
+          {/* Date */}
+          <div className="pf-field">
+            <label className="pf-label">Date</label>
+            <input
+              type="date"
+              className="pf-input"
+              value={date}
+              onChange={e => { setDate(e.target.value); markDirty() }}
             />
-            <button
-              type="button"
-              className="pf-expand-btn"
-              aria-label={`Expand ${label}`}
-              onClick={() => setFullscreenKey(key)}
-            >⤢</button>
           </div>
-        </div>
-      ))}
 
-      {/* Morning state */}
-      <div className="pf-section">
-        <p className="pf-section-title">Morning State</p>
+          {/* Title */}
+          <div className="pf-field">
+            <label className="pf-label">Title</label>
+            <input
+              type="text"
+              className="pf-input pf-input--title"
+              placeholder="Give this day a title…"
+              value={title}
+              onChange={e => { setTitle(e.target.value); markDirtyAndUnreview() }}
+            />
+          </div>
 
-        <ScaleSelector
-          label="Brain Activity"
-          value={morning.brainScale}
-          color="#4A7FA5"
-          labels={BRAIN_LABELS}
-          onChange={n => { setMorning(m => ({ ...m, brainScale: n })); markDirty() }}
-        />
-        <ScaleSelector
-          label="Body Energy"
-          value={morning.bodyScale}
-          color="#A0622A"
-          labels={BODY_LABELS}
-          onChange={n => { setMorning(m => ({ ...m, bodyScale: n })); markDirty() }}
-        />
-        <ScaleSelector
-          label="Happy Scale"
-          value={morning.happyScale}
-          color="#3AB87A"
-          labels={HAPPY_LABELS}
-          onChange={n => { setMorning(m => ({ ...m, happyScale: n })); markDirty() }}
-        />
+          {/* Content sections */}
+          {sections.map(({ key, label, placeholder, value, set }) => (
+            <div key={key} className="pf-field">
+              <label className="pf-label">{label}</label>
+              <div className="pf-textarea-wrap">
+                <textarea
+                  className="pf-textarea"
+                  placeholder={placeholder}
+                  value={value}
+                  rows={9}
+                  onChange={e => { set(e.target.value); markDirtyAndUnreview() }}
+                />
+                <button
+                  type="button"
+                  className="pf-expand-btn"
+                  aria-label={`Expand ${label}`}
+                  onClick={() => setFullscreenKey(key)}
+                >⤢</button>
+              </div>
+            </div>
+          ))}
 
-        {/* Rituals */}
-        <div className="pf-rituals">
-          {RITUAL_KEYS.map(key => {
-            const { label, Icon, color } = ROUTINE_ICON_MAP[key]
-            const done = morning.routineChecklist[key]
-            return (
+          {/* Morning state */}
+          <div className="pf-section">
+            <p className="pf-section-title">Morning State</p>
+            <ScaleSelector label="Brain Activity" value={morning.brainScale}  color="#4A7FA5" labels={BRAIN_LABELS}  onChange={n => { setMorning(m => ({ ...m, brainScale:  n })); markDirty() }} />
+            <ScaleSelector label="Body Energy"    value={morning.bodyScale}   color="#A0622A" labels={BODY_LABELS}   onChange={n => { setMorning(m => ({ ...m, bodyScale:   n })); markDirty() }} />
+            <ScaleSelector label="Happy Scale"    value={morning.happyScale}  color="#3AB87A" labels={HAPPY_LABELS}  onChange={n => { setMorning(m => ({ ...m, happyScale:  n })); markDirty() }} />
+            <ScaleSelector label="Stress Level"   value={morning.stressScale} color="#A82020" labels={STRESS_LABELS} onChange={n => { setMorning(m => ({ ...m, stressScale: n })); markDirty() }} />
+
+            {/* Rituals */}
+            <div className="pf-rituals">
+              {RITUAL_KEYS.map(key => {
+                const { label, Icon, color } = ROUTINE_ICON_MAP[key]
+                const done = morning.routineChecklist[key]
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`pf-ritual-btn${done ? ' pf-ritual-btn--done' : ''}`}
+                    style={done ? { borderColor: color, background: `${color}22` } : {}}
+                    onClick={() => toggleRitual(key)}
+                    title={label}
+                  >
+                    <Icon size={18} color={done ? color : undefined} />
+                    <span className="pf-ritual-label">{label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Journal photo */}
+          <div className="pf-section">
+            <p className="pf-section-title">Journal Photo</p>
+            {image ? (
+              <div className="pf-photo-preview">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={image} alt="Journal photo" className="pf-photo-img" />
+                <div className="pf-photo-actions">
+                  <button type="button" className="pf-photo-change" onClick={() => setShowCropUpload(true)}>Change photo</button>
+                  <button type="button" className="pf-photo-remove" onClick={() => { setImage(null); markDirty() }}>Remove</button>
+                </div>
+              </div>
+            ) : (
               <button
-                key={key}
                 type="button"
-                className={`pf-ritual-btn${done ? ' pf-ritual-btn--done' : ''}`}
-                style={done ? { borderColor: color, background: `${color}22` } : {}}
-                onClick={() => toggleRitual(key)}
-                title={label}
+                className="pf-photo-add"
+                onClick={() => {
+                  if (!postId) { setError('Save a draft first before adding a photo.'); return }
+                  setShowCropUpload(true)
+                }}
               >
-                <Icon size={18} color={done ? color : undefined} />
-                <span className="pf-ritual-label">{label}</span>
+                + Add a journal photo
               </button>
-            )
-          })}
-        </div>
-      </div>
+            )}
+          </div>
 
-      {/* Visibility toggle — only shown when community is enabled */}
-      {communityEnabled && (
-        <div className="pf-visibility">
-          <button
-            type="button"
-            className={`pf-visibility-btn${isPublic ? ' is-public' : ' is-private'}`}
-            onClick={() => setIsPublic(p => !p)}
-          >
-            {isPublic ? '🌍 Public' : '🔒 Private'}
-          </button>
-          <span className="pf-visibility-hint">
-            {isPublic ? 'This journal will appear in the community feed.' : 'Only you can see this journal.'}
-          </span>
+          {/* Visibility toggle */}
+          {communityEnabled && (
+            <div className="pf-visibility">
+              <button
+                type="button"
+                className={`pf-visibility-btn${isPublic ? ' is-public' : ' is-private'}`}
+                onClick={() => setIsPublic(p => !p)}
+              >
+                {isPublic ? '🌍 Public' : '🔒 Private'}
+              </button>
+              <span className="pf-visibility-hint">
+                {isPublic ? 'This journal will appear in the community feed.' : 'Only you can see this journal.'}
+              </span>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── Before Bed tab ─────────────────────────────────────────────────── */}
+      {activeTab === 'before-bed' && (
+        <div className="pf-section">
+          <p className="pf-section-title">Evening Reflection</p>
+
+          <div className="pf-field">
+            <label className="pf-label">How did the day go?</label>
+            <div className="pf-textarea-wrap">
+              <textarea
+                className="pf-textarea"
+                placeholder="Write freely about how it went…"
+                value={eveningReflection}
+                rows={7}
+                onChange={e => { setEveningReflection(e.target.value); markDirty() }}
+              />
+            </div>
+          </div>
+
+          <div className="pf-field">
+            <label className="pf-label">How do you feel about today?</label>
+            <div className="pf-feel-options">
+              {([1, 2, 3, 4, 5, 6] as const).map(n => (
+                <button
+                  key={n}
+                  type="button"
+                  className={`pf-feel-btn${feelAboutToday === n ? ' pf-feel-btn--active' : ''}`}
+                  style={feelAboutToday === n ? { borderColor: FEEL_COLORS[n], background: `${FEEL_COLORS[n]}18`, color: FEEL_COLORS[n] } : {}}
+                  onClick={() => { setFeelAboutToday(n); markDirty() }}
+                >
+                  {FEEL_LABELS[n]}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
@@ -424,11 +546,7 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
           <div className="pf-fullscreen">
             <div className="pf-fullscreen-header">
               <span className="pf-fullscreen-label">{label}</span>
-              <button
-                type="button"
-                className="pf-fullscreen-done"
-                onClick={() => setFullscreenKey(null)}
-              >Done</button>
+              <button type="button" className="pf-fullscreen-done" onClick={() => setFullscreenKey(null)}>Done</button>
             </div>
             <textarea
               className="pf-fullscreen-textarea"
@@ -439,6 +557,15 @@ export default function PostForm({ mode, postId: initialPostId, initialData, onD
           </div>
         )
       })()}
+
+      {/* Photo crop/upload modal */}
+      {showCropUpload && postId && (
+        <PhotoCropUpload
+          postId={postId}
+          onUploaded={url => { setImage(url); setShowCropUpload(false); markDirty() }}
+          onClose={() => setShowCropUpload(false)}
+        />
+      )}
     </div>
   )
 }

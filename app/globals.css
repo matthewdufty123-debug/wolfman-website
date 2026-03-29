@@ -6011,7 +6011,816 @@ html[data-theme="dark"] .stats-chart-card {
   }
 }
 
-/* ── Journal Tabs ─────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   JOURNAL SCROLL PAGE  — replaces the old tab layout
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Scroll page shell ──────────────────────────────────────────────────── */
+
+.journal-scroll-page {
+  position: relative;
+  min-height: 100vh;
+}
+
+.journal-scroll-content {
+  will-change: opacity;
+}
+
+/* ── Section base ───────────────────────────────────────────────────────── */
+
+.journal-section {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 1.5rem;
+}
+
+.journal-section--text {
+  padding-top: 1.5rem;  /* text section sits flush after journal-section-title */
+}
+
+.journal-section-title {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.38;
+  margin: 0 0 1.25rem;
+}
+
+.journal-section-empty {
+  font-size: 0.9rem;
+  color: var(--body-text);
+  opacity: 0.4;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* ── Orb nav — 9 ambient orbs ───────────────────────────────────────────── */
+
+.orb-nav {
+  position: fixed;
+  top: 40px;
+  left: 0;
+  right: 0;
+  z-index: 48;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 6px 1rem;
+  background: transparent;
+  pointer-events: none;  /* only the buttons are interactive */
+}
+
+.orb-nav-btn {
+  pointer-events: all;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--heading, #193343);
+  background: transparent;
+  opacity: 0.35;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.orb-nav-btn--active {
+  background: #4A7FA5;
+  border-color: #4A7FA5;
+  opacity: 1;
+}
+
+.orb-nav-btn:hover {
+  opacity: 0.7;
+}
+
+/* ── How I Showed Up — 4-column score grid ──────────────────────────────── */
+
+.hss-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  width: 100%;
+}
+
+.hss-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.25rem;
+}
+
+.hss-col-title {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.55;
+}
+
+.hss-digit-wrap {
+  line-height: 0;
+}
+
+.hss-col-word {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  color: var(--body-text);
+}
+
+.hss-col-empty {
+  font-size: 1.25rem;
+  color: var(--body-text);
+  opacity: 0.2;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* ── WOLF|BOT Review section ────────────────────────────────────────────── */
+
+.wolfbot-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.wolfbot-quip {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.wolfbot-quip-text {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.78rem;
+  color: #C8B020;
+  letter-spacing: 0.05em;
+}
+
+/* Blinking cursor after quip */
+.wolfbot-quip-cursor {
+  display: inline-block;
+  width: 6px;
+  height: 12px;
+  background: #C8B020;
+  animation: wolfbot-blink 1s step-end infinite;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+@keyframes wolfbot-blink {
+  0%, 100% { opacity: 1 }
+  50%       { opacity: 0 }
+}
+
+.wolfbot-face-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  position: relative;
+}
+
+.wolfbot-face-wrap {
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.wolfbot-bubble {
+  flex: 1;
+  margin-left: 0.75rem;
+  margin-top: 1.5rem;
+  border: 2px solid var(--heading, #193343);
+  border-radius: 0 8px 8px 8px;
+  padding: 1rem 1rem 1rem 1rem;
+  position: relative;
+  min-height: 80px;
+  /* Slightly pixelated/digital feel via box-shadow steps */
+  box-shadow:
+    2px 0 0 0 var(--heading, #193343),
+    0 2px 0 0 var(--heading, #193343);
+}
+
+/* Speech bubble tail */
+.wolfbot-bubble::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: -8px;
+  width: 8px;
+  height: 2px;
+  background: var(--heading, #193343);
+}
+
+.wolfbot-bubble-inner {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--body-text, #4A4A4A);
+}
+
+.wolfbot-bubble-text {
+  white-space: pre-wrap;
+}
+
+/* Typewriter cursor inside bubble */
+.wolfbot-type-cursor {
+  display: inline;
+  color: #4A7FA5;
+  animation: wolfbot-blink 0.7s step-end infinite;
+}
+
+html[data-theme="dark"] .wolfbot-bubble {
+  border-color: rgba(255,255,255,0.25);
+  box-shadow: 2px 0 0 0 rgba(255,255,255,0.25), 0 2px 0 0 rgba(255,255,255,0.25);
+}
+
+html[data-theme="dark"] .wolfbot-bubble::before {
+  background: rgba(255,255,255,0.25);
+}
+
+/* ── Post Information section ───────────────────────────────────────────── */
+
+.post-info-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.post-info-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.post-info-label {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--body-text);
+  opacity: 0.45;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.post-info-value {
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 0.9rem;
+  color: var(--body-text);
+}
+
+.post-info-badge {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.post-info-badge--published { background: #3AB87A22; color: #3AB87A; }
+.post-info-badge--draft     { background: #C8B02022; color: #C8B020; }
+
+html[data-theme="dark"] .post-info-row { border-color: rgba(255,255,255,0.06); }
+
+/* ── Evening Reflections section ────────────────────────────────────────── */
+
+.evening-feel-display {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.evening-feel-label {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--body-text);
+  opacity: 0.45;
+}
+
+.evening-feel-value {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.evening-reflection-text {
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: clamp(1rem, 2.5vw, 1.125rem);
+  line-height: 1.8;
+  color: var(--body-text);
+}
+
+.evening-reflection-text p { margin: 0 0 0.75em; }
+.evening-reflection-text p:last-child { margin-bottom: 0; }
+
+.evening-edit-btn,
+.evening-add-btn {
+  margin-top: 1.25rem;
+  padding: 0.5rem 1rem;
+  background: none;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: var(--body-text);
+  cursor: pointer;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  transition: opacity 0.15s ease;
+}
+
+.evening-add-btn {
+  background: #214459;
+  border-color: #214459;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.evening-edit-btn:hover,
+.evening-add-btn:hover { opacity: 0.8; }
+
+/* Evening edit overlay */
+.evening-edit-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+
+.evening-edit-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+}
+
+.evening-edit-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg, #fff);
+  border-radius: 16px 16px 0 0;
+  padding: 2rem 1.5rem 3rem;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.evening-edit-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--body-text);
+  opacity: 0.45;
+  padding: 0.25rem;
+}
+
+.evening-edit-heading {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin: 0 0 1.5rem;
+}
+
+.evening-edit-label {
+  display: block;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--body-text);
+  opacity: 0.55;
+  margin-bottom: 0.5rem;
+}
+
+.evening-edit-textarea {
+  width: 100%;
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--body-text);
+  background: var(--bg);
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.evening-feel-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.evening-feel-btn {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: none;
+  border: 1.5px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  text-align: left;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--body-text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.evening-feel-btn.is-selected {
+  font-weight: 700;
+}
+
+.evening-edit-error {
+  margin: 0.75rem 0 0;
+  font-size: 0.82rem;
+  color: #A82020;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.evening-edit-save {
+  display: block;
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.9rem;
+  background: #214459;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  transition: opacity 0.15s ease;
+}
+
+.evening-edit-save:disabled { opacity: 0.55; cursor: not-allowed; }
+
+html[data-theme="dark"] .evening-edit-textarea { border-color: rgba(255,255,255,0.12); }
+html[data-theme="dark"] .evening-feel-btn      { border-color: rgba(255,255,255,0.1); }
+html[data-theme="dark"] .evening-edit-btn      { border-color: rgba(255,255,255,0.15); }
+
+/* ── Audit Log section ──────────────────────────────────────────────────── */
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+}
+
+.audit-event {
+  color: var(--body-text);
+  opacity: 0.6;
+  padding: 0.45rem 0.75rem 0.45rem 0;
+  font-weight: 600;
+  width: 40%;
+}
+
+.audit-date {
+  color: var(--body-text);
+  padding: 0.45rem 0;
+}
+
+.audit-note {
+  margin-top: 1rem;
+  font-size: 0.72rem;
+  color: var(--body-text);
+  opacity: 0.35;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-style: italic;
+}
+
+/* ── Journal Photo section ──────────────────────────────────────────────── */
+
+.journal-photo-wrap {
+  width: 100%;
+}
+
+.journal-photo-img {
+  border-radius: 8px;
+  display: block;
+}
+
+/* ── PostForm tabs ──────────────────────────────────────────────────────── */
+
+.pf-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1.5px solid rgba(0,0,0,0.1);
+  margin: 0 0 1.5rem;
+}
+
+.pf-tab {
+  flex: 1;
+  padding: 0.65rem 0;
+  background: none;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -1.5px;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--body-text);
+  opacity: 0.45;
+  cursor: pointer;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.pf-tab--active {
+  opacity: 1;
+  border-bottom-color: #4A7FA5;
+  color: #4A7FA5;
+}
+
+html[data-theme="dark"] .pf-tabs { border-color: rgba(255,255,255,0.1); }
+
+/* ── PostForm evening feel options ──────────────────────────────────────── */
+
+.pf-feel-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.pf-feel-btn {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: none;
+  border: 1.5px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  text-align: left;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--body-text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pf-feel-btn--active { font-weight: 700; }
+
+html[data-theme="dark"] .pf-feel-btn { border-color: rgba(255,255,255,0.1); }
+
+/* ── PostForm photo upload ──────────────────────────────────────────────── */
+
+.pf-photo-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pf-photo-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.pf-photo-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.pf-photo-change,
+.pf-photo-remove {
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.pf-photo-change {
+  background: #214459;
+  color: #fff;
+  border: none;
+}
+
+.pf-photo-remove {
+  background: none;
+  border: 1px solid rgba(0,0,0,0.15);
+  color: var(--body-text);
+}
+
+.pf-photo-change:hover,
+.pf-photo-remove:hover { opacity: 0.75; }
+
+.pf-photo-add {
+  width: 100%;
+  padding: 1rem;
+  background: none;
+  border: 1.5px dashed rgba(0,0,0,0.2);
+  border-radius: 8px;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--body-text);
+  opacity: 0.55;
+  cursor: pointer;
+  text-align: center;
+  transition: opacity 0.15s ease;
+}
+
+.pf-photo-add:hover { opacity: 0.85; }
+
+html[data-theme="dark"] .pf-photo-remove { border-color: rgba(255,255,255,0.15); }
+html[data-theme="dark"] .pf-photo-add    { border-color: rgba(255,255,255,0.2); }
+
+/* ── PhotoCropUpload modal ──────────────────────────────────────────────── */
+
+.crop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+}
+
+.crop-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+}
+
+.crop-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg, #fff);
+  border-radius: 16px 16px 0 0;
+  padding: 2rem 1.5rem 3rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.crop-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--body-text);
+  opacity: 0.45;
+  padding: 0.25rem;
+}
+
+.crop-heading {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin: 0 0 0.25rem;
+}
+
+.crop-hint {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.8rem;
+  color: var(--body-text);
+  opacity: 0.5;
+  margin: 0 0 1.25rem;
+}
+
+.crop-file-label {
+  display: block;
+  padding: 1rem;
+  background: #214459;
+  color: #fff;
+  border-radius: 10px;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+
+.crop-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.crop-preview-wrap {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.crop-preview-img {
+  width: 100%;
+  display: block;
+  user-select: none;
+}
+
+.crop-shade {
+  position: absolute;
+  background: rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+
+.crop-shade--top    { top: 0; left: 0; right: 0; }
+.crop-shade--bottom { left: 0; right: 0; bottom: 0; }
+.crop-shade--left,
+.crop-shade--right  { position: absolute; }
+
+.crop-handle {
+  border: 2px solid #fff;
+  box-sizing: border-box;
+}
+
+.crop-change-btn {
+  display: block;
+  margin-top: 0.75rem;
+  background: none;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.78rem;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 600;
+  color: var(--body-text);
+  cursor: pointer;
+}
+
+.crop-error {
+  color: #A82020;
+  font-size: 0.82rem;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  margin: 0.5rem 0;
+}
+
+.crop-confirm-btn {
+  display: block;
+  width: 100%;
+  padding: 0.9rem;
+  background: #214459;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  transition: opacity 0.15s ease;
+  margin-top: 0.5rem;
+}
+
+.crop-confirm-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ── PostFooter reading-end ─────────────────────────────────────────────── */
+
+.post-reading-end {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+  text-align: center;
+}
+
+.post-reading-end-logo {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.post-reading-end-logo a { display: block; line-height: 0; }
+
+/* ── Old Journal Tabs ─────────────────────────────────────────────────────
+   Kept for reference during transition — can be removed once new layout
+   is fully in production.
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* ── Legacy tab styles (below) ── */
 
 .tab-panel {
   position: relative;
