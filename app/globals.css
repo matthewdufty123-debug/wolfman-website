@@ -6069,6 +6069,30 @@ html[data-theme="dark"] .stats-chart-card {
 .wolfbot-review-btn:hover:not(:disabled) { opacity: 1; }
 .wolfbot-review-btn:disabled { opacity: 0.4; cursor: default; }
 
+/* Full-width variant — sits above the face row */
+.wolfbot-review-btn--full {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-align: center;
+  border-radius: 3px;
+  margin-bottom: 1.25rem;
+  opacity: 1;
+  background: transparent;
+  border: 1px solid #4A7FA5;
+  color: #4A7FA5;
+}
+.wolfbot-review-btn--full:hover:not(:disabled) {
+  background: rgba(74,127,165,0.1);
+  opacity: 1;
+}
+.wolfbot-review-btn--full:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 .journal-section-title {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.65rem;
@@ -6193,31 +6217,7 @@ html[data-theme="dark"] .stats-chart-card {
 .wolfbot-layout {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-}
-
-.wolfbot-quip {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.wolfbot-quip-text {
-  font-family: var(--font-jetbrains), monospace;
-  font-size: 0.78rem;
-  color: #C8B020;
-  letter-spacing: 0.05em;
-}
-
-/* Blinking cursor after quip */
-.wolfbot-quip-cursor {
-  display: inline-block;
-  width: 6px;
-  height: 12px;
-  background: #C8B020;
-  animation: wolfbot-blink 1s step-end infinite;
-  vertical-align: middle;
-  margin-left: 2px;
+  gap: 0;
 }
 
 @keyframes wolfbot-blink {
@@ -6237,57 +6237,119 @@ html[data-theme="dark"] .stats-chart-card {
   z-index: 1;
 }
 
+/* ── Terminal bubble ────────────────────────────────────────────── */
+
 .wolfbot-bubble {
   flex: 1;
   margin-left: 0.75rem;
-  margin-top: 1.5rem;
-  border: 2px solid var(--heading, #193343);
-  border-radius: 0 8px 8px 8px;
-  padding: 1rem 1rem 1rem 1rem;
+  margin-top: 0.5rem;
   position: relative;
   min-height: 80px;
-  /* Slightly pixelated/digital feel via box-shadow steps */
-  box-shadow:
-    2px 0 0 0 var(--heading, #193343),
-    0 2px 0 0 var(--heading, #193343);
 }
 
-/* Speech bubble tail */
-.wolfbot-bubble::before {
+.wolfbot-bubble--terminal {
+  background: #0d1117;
+  border: 1px solid #1e3a50;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(74,127,165,0.15), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* Speech bubble connector */
+.wolfbot-bubble--terminal::before {
   content: '';
   position: absolute;
-  top: 8px;
-  left: -8px;
-  width: 8px;
+  top: 14px;
+  left: -6px;
+  width: 6px;
   height: 2px;
-  background: var(--heading, #193343);
+  background: #1e3a50;
 }
 
-.wolfbot-bubble-inner {
+/* Terminal top bar */
+.wolfbot-terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  background: #161b22;
+  border-bottom: 1px solid #1e3a50;
+}
+
+.wolfbot-terminal-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.wbt-red   { background: #ff5f56; opacity: 0.7; }
+.wbt-amber { background: #ffbd2e; opacity: 0.7; }
+.wbt-green { background: #27c93f; opacity: 0.7; }
+
+.wolfbot-terminal-label {
   font-family: var(--font-jetbrains), monospace;
-  font-size: 0.82rem;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  color: #4A7FA5;
+  margin-left: 4px;
+  opacity: 0.7;
+}
+
+/* Terminal body */
+.wolfbot-bubble-inner {
+  padding: 0.75rem 0.85rem;
+}
+
+.wolfbot-terminal-line {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.78rem;
   line-height: 1.65;
-  color: var(--body-text, #4A4A4A);
-}
-
-.wolfbot-bubble-text {
+  margin: 0 0 0.1rem;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 
-/* Typewriter cursor inside bubble */
+.wolfbot-terminal-review {
+  margin-top: 0.5rem;
+}
+
+/* Prompt > */
+.wbt-prompt {
+  color: #C8B020;
+  user-select: none;
+}
+
+/* Quip (idle state) */
+.wbt-quip {
+  color: #C8B020;
+}
+
+/* Boot lines */
+.wbt-boot {
+  color: #4A7FA5;
+  opacity: 0.85;
+}
+
+/* Review body text */
+.wbt-body {
+  color: #a8c4d8;
+}
+
+/* Typewriter cursor */
 .wolfbot-type-cursor {
   display: inline;
-  color: #4A7FA5;
+  color: #C8B020;
   animation: wolfbot-blink 0.7s step-end infinite;
 }
 
-html[data-theme="dark"] .wolfbot-bubble {
-  border-color: rgba(255,255,255,0.25);
-  box-shadow: 2px 0 0 0 rgba(255,255,255,0.25), 0 2px 0 0 rgba(255,255,255,0.25);
+/* Dark/cool themes — already dark so just lighten the border slightly */
+html[data-theme="dark"] .wolfbot-bubble--terminal,
+html[data-theme="cool"] .wolfbot-bubble--terminal {
+  border-color: #2a4a65;
 }
-
-html[data-theme="dark"] .wolfbot-bubble::before {
-  background: rgba(255,255,255,0.25);
+html[data-theme="dark"] .wolfbot-bubble--terminal::before,
+html[data-theme="cool"] .wolfbot-bubble--terminal::before {
+  background: #2a4a65;
 }
 
 /* ── Post Information section ───────────────────────────────────────────── */

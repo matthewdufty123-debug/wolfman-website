@@ -50,7 +50,6 @@ const PALETTE: Record<number, string> = {
 }
 
 function WolfBotFace({ size = 100 }: { size?: number }) {
-  const cellSize = size / 25
   return (
     <svg
       width={size}
@@ -79,20 +78,29 @@ function WolfBotFace({ size = 100 }: { size?: number }) {
   )
 }
 
-// ── Random quip list ──────────────────────────────────────────────────────────
+// ── Random quips — shown in bubble on scroll ───────────────────────────────
 
 const WOLFBOT_QUIPS = [
-  'Here we go',
-  "Let's review this thing",
-  "Alright, let's see what we've got",
+  'Time for my take',
   'Running analysis...',
+  "Let's see what we've got",
   'Processing your day...',
   'Loading my thoughts...',
-  'Let me take a look',
-  'Interesting choices today',
-  'Time for my take',
   'Stand by...',
+  'Interesting choices today',
+  'Let me take a look',
+  'Here we go',
+  "Alright. Let's do this",
 ]
+
+// ── Terminal boot lines — shown after button click ─────────────────────────
+
+const BOOT_LINES = [
+  'WOLF|BOT REVIEW INITIATED',
+  'PROCESSING JOURNAL ENTRY...',
+]
+
+type Phase = 'idle' | 'booting' | 'typing' | 'done'
 
 // ── Main section ─────────────────────────────────────────────────────────────
 
@@ -103,65 +111,98 @@ interface Props {
 export default function WolfBotSection({ synthesis }: Props) {
   const sectionRef = useRef<HTMLElement>(null)
   const [revealed, setRevealed] = useState(false)
-  const [displayedText, setDisplayedText] = useState('')
-  const [quip, setQuip] = useState(() => WOLFBOT_QUIPS[Math.floor(Math.random() * WOLFBOT_QUIPS.length)])
   const [quipVisible, setQuipVisible] = useState(false)
-  const [cursorVisible, setCursorVisible] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [phase, setPhase] = useState<Phase>('idle')
+  const [bootLine, setBootLine] = useState(0)       // which boot line we're on
+  const [displayedBoot, setDisplayedBoot] = useState('')
+  const [displayedReview, setDisplayedReview] = useState('')
+  const [cursorVisible, setCursorVisible] = useState(true)
+  const [quip] = useState(() => WOLFBOT_QUIPS[Math.floor(Math.random() * WOLFBOT_QUIPS.length)])
 
-  function startReview() {
-    if (isPlaying) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setRevealed(true)
-      setDisplayedText(synthesis ?? '')
-      setQuipVisible(true)
-      return
-    }
-    setIsPlaying(true)
-    setQuip(WOLFBOT_QUIPS[Math.floor(Math.random() * WOLFBOT_QUIPS.length)])
-    setDisplayedText('')
-    setQuipVisible(false)
-    setCursorVisible(false)
-    setTimeout(() => {
-      setQuipVisible(true)
-      setTimeout(() => setCursorVisible(true), 400)
-    }, 100)
-  }
-
-  // Face reveals on scroll — no typewriter auto-start
+  // Scroll reveal — face + quip appear
   useEffect(() => {
     const el = sectionRef.current
     if (!el) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setRevealed(true)
+      setQuipVisible(true)
       return
     }
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) { setRevealed(true); observer.disconnect() }
+        if (entry.isIntersecting) {
+          setRevealed(true)
+          setTimeout(() => setQuipVisible(true), 300)
+          observer.disconnect()
+        }
       },
-      { threshold: 0.2 }
+      { threshold: 0.15 }
     )
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
 
-  // Typewriter — fires when quipVisible flips on, marks isPlaying=false when done
+  function startReview() {
+    if (phase !== 'idle' || !synthesis) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setPhase('done')
+      setDisplayedReview(synthesis)
+      setCursorVisible(false)
+      return
+    }
+    setPhase('booting')
+    setCursorVisible(true)
+    setDisplayedBoot('')
+    setBootLine(0)
+  }
+
+  // Boot sequence — types out boot lines one by one
   useEffect(() => {
-    if (!quipVisible || !synthesis) return
+    if (phase !== 'booting') return
+    const line = BOOT_LINES[bootLine] ?? null
+    if (!line) {
+      // All boot lines done — move to review typing
+      setTimeout(() => {
+        setPhase('typing')
+      }, 300)
+      return
+    }
+    setDisplayedBoot('')
+    let i = 0
+    const interval = setInterval(() => {
+      if (i >= line.length) {
+        clearInterval(interval)
+        // Pause then move to next line
+        setTimeout(() => {
+          setBootLine(prev => prev + 1)
+          setDisplayedBoot('')
+        }, 250)
+        return
+      }
+      setDisplayedBoot(line.slice(0, i + 1))
+      i++
+    }, 22)
+    return () => clearInterval(interval)
+  }, [phase, bootLine])
+
+  // Review typewriter — fires when phase = 'typing'
+  useEffect(() => {
+    if (phase !== 'typing' || !synthesis) return
+    setDisplayedReview('')
+    setCursorVisible(true)
     let i = 0
     const interval = setInterval(() => {
       if (i >= synthesis.length) {
         clearInterval(interval)
         setCursorVisible(false)
-        setIsPlaying(false)
+        setPhase('done')
         return
       }
-      setDisplayedText(synthesis.slice(0, i + 1))
+      setDisplayedReview(synthesis.slice(0, i + 1))
       i++
     }, 12)
     return () => clearInterval(interval)
-  }, [quipVisible, synthesis])
+  }, [phase, synthesis])
 
   if (!synthesis) {
     return (
@@ -172,35 +213,24 @@ export default function WolfBotSection({ synthesis }: Props) {
     )
   }
 
+  const isActive = phase === 'booting' || phase === 'typing'
+  const isDone   = phase === 'done'
+
   return (
     <section ref={sectionRef} id="wolfbot-review" className="journal-section">
-      <div className="journal-section-header">
-        <h2 className="journal-section-title">WOLF|BOT Review</h2>
-        <button
-          className="wolfbot-review-btn"
-          onClick={startReview}
-          disabled={isPlaying}
-          aria-label="Start WOLF|BOT review"
-        >
-          {isPlaying ? '▌ Reviewing...' : '▶ Review Journal'}
-        </button>
-      </div>
+      <h2 className="journal-section-title">WOLF|BOT Review</h2>
+
+      {/* Full-width button — first thing seen on scroll */}
+      <button
+        className="wolfbot-review-btn wolfbot-review-btn--full"
+        onClick={startReview}
+        disabled={isActive || isDone}
+        aria-label="Start WOLF|BOT review"
+      >
+        {isActive ? '▌ REVIEWING...' : isDone ? '✦ REVIEW COMPLETE' : '▶ REVIEW JOURNAL'}
+      </button>
 
       <div className="wolfbot-layout">
-        {/* Quip line */}
-        <div
-          className="wolfbot-quip"
-          style={{
-            opacity: quipVisible ? 1 : 0,
-            transform: quipVisible ? 'translateX(0)' : 'translateX(-8px)',
-            transition: 'opacity 0.4s ease, transform 0.4s ease',
-          }}
-        >
-          <span className="wolfbot-quip-text">&gt; {quip}</span>
-          <span className="wolfbot-quip-cursor" aria-hidden="true" />
-        </div>
-
-        {/* Face + bubble row */}
         <div className="wolfbot-face-row">
           {/* Pixel face */}
           <div
@@ -214,19 +244,59 @@ export default function WolfBotSection({ synthesis }: Props) {
             <WolfBotFace size={100} />
           </div>
 
-          {/* Speech bubble */}
+          {/* Terminal speech bubble */}
           <div
-            className="wolfbot-bubble"
+            className="wolfbot-bubble wolfbot-bubble--terminal"
             style={{
               opacity: quipVisible ? 1 : 0,
-              transition: 'opacity 0.3s ease 0.2s',
+              transition: 'opacity 0.4s ease 0.2s',
             }}
           >
+            <div className="wolfbot-terminal-bar">
+              <span className="wolfbot-terminal-dot wbt-red" />
+              <span className="wolfbot-terminal-dot wbt-amber" />
+              <span className="wolfbot-terminal-dot wbt-green" />
+              <span className="wolfbot-terminal-label">WOLF|BOT v2.0</span>
+            </div>
+
             <div className="wolfbot-bubble-inner">
-              <span className="wolfbot-bubble-text">
-                {displayedText}
-                {cursorVisible && <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>}
-              </span>
+              {phase === 'idle' && (
+                <p className="wolfbot-terminal-line">
+                  <span className="wbt-prompt">&#62;&nbsp;</span>
+                  <span className="wbt-quip">{quip}</span>
+                  <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
+                </p>
+              )}
+
+              {(phase === 'booting' || phase === 'typing' || phase === 'done') && (
+                <>
+                  {/* Completed boot lines */}
+                  {BOOT_LINES.slice(0, bootLine).map((line, idx) => (
+                    <p key={idx} className="wolfbot-terminal-line">
+                      <span className="wbt-prompt">&#62;&nbsp;</span>
+                      <span className="wbt-boot">{line}</span>
+                    </p>
+                  ))}
+
+                  {/* Currently typing boot line */}
+                  {phase === 'booting' && (
+                    <p className="wolfbot-terminal-line">
+                      <span className="wbt-prompt">&#62;&nbsp;</span>
+                      <span className="wbt-boot">{displayedBoot}</span>
+                      <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
+                    </p>
+                  )}
+
+                  {/* Review text */}
+                  {(phase === 'typing' || phase === 'done') && (
+                    <p className="wolfbot-terminal-line wolfbot-terminal-review">
+                      <span className="wbt-prompt">&#62;&nbsp;</span>
+                      <span className="wbt-body">{displayedReview}</span>
+                      {cursorVisible && <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>}
+                    </p>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
