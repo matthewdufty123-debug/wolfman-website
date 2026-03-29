@@ -6024,6 +6024,7 @@ html[data-theme="dark"] .stats-chart-card {
 
 .journal-scroll-content {
   will-change: opacity;
+  padding-top: 110px;  /* clear the fixed orb nav */
 }
 
 /* ── Section base ───────────────────────────────────────────────────────── */
@@ -6031,12 +6032,41 @@ html[data-theme="dark"] .stats-chart-card {
 .journal-section {
   max-width: 640px;
   margin: 0 auto;
-  padding: 3rem 1.5rem 1.5rem;
+  padding: 1.5rem 1.5rem 0.75rem;
 }
 
 .journal-section--text {
   padding-top: 1.5rem;  /* text section sits flush after journal-section-title */
 }
+
+.journal-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 1.25rem;
+}
+
+.journal-section-header .journal-section-title {
+  margin: 0;
+}
+
+.wolfbot-review-btn {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #4A7FA5;
+  background: none;
+  border: 1px solid #4A7FA5;
+  border-radius: 3px;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  opacity: 0.75;
+  letter-spacing: 0.04em;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+.wolfbot-review-btn:hover { opacity: 1; }
 
 .journal-section-title {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;

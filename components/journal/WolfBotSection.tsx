@@ -104,9 +104,29 @@ export default function WolfBotSection({ synthesis }: Props) {
   const sectionRef = useRef<HTMLElement>(null)
   const [revealed, setRevealed] = useState(false)
   const [displayedText, setDisplayedText] = useState('')
-  const [quip] = useState(() => WOLFBOT_QUIPS[Math.floor(Math.random() * WOLFBOT_QUIPS.length)])
+  const [quip, setQuip] = useState(() => WOLFBOT_QUIPS[Math.floor(Math.random() * WOLFBOT_QUIPS.length)])
   const [quipVisible, setQuipVisible] = useState(false)
   const [cursorVisible, setCursorVisible] = useState(false)
+
+  function startReview() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setRevealed(true)
+      setDisplayedText(synthesis ?? '')
+      setQuipVisible(true)
+      return
+    }
+    // Pick a new random quip on replay
+    setQuip(WOLFBOT_QUIPS[Math.floor(Math.random() * WOLFBOT_QUIPS.length)])
+    setDisplayedText('')
+    setQuipVisible(false)
+    setCursorVisible(false)
+    setRevealed(false)
+    setTimeout(() => {
+      setRevealed(true)
+      setTimeout(() => setQuipVisible(true), 300)
+      setTimeout(() => setCursorVisible(true), 700)
+    }, 50)
+  }
 
   useEffect(() => {
     const el = sectionRef.current
@@ -122,9 +142,7 @@ export default function WolfBotSection({ synthesis }: Props) {
         if (entry.isIntersecting) {
           setRevealed(true)
           observer.disconnect()
-          // Quip appears first
           setTimeout(() => setQuipVisible(true), 300)
-          // Then cursor blinks, then text types in
           setTimeout(() => setCursorVisible(true), 700)
         }
       },
@@ -162,7 +180,12 @@ export default function WolfBotSection({ synthesis }: Props) {
 
   return (
     <section ref={sectionRef} id="wolfbot-review" className="journal-section">
-      <h2 className="journal-section-title">WOLF|BOT Review</h2>
+      <div className="journal-section-header">
+        <h2 className="journal-section-title">WOLF|BOT Review</h2>
+        <button className="wolfbot-review-btn" onClick={startReview} aria-label="Replay WOLF|BOT review">
+          ▶ Review Journal
+        </button>
+      </div>
 
       <div className="wolfbot-layout">
         {/* Quip line */}

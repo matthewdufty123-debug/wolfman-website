@@ -42,7 +42,7 @@ export default function MorningRitualsSection({ checklist }: Props) {
         <p className="journal-section-empty">No morning rituals recorded.</p>
       ) : (
         <>
-          <div ref={wrapRef} style={{ display: 'flex', flexWrap: 'wrap', gap: 12, width: '100%' }}>
+          <div ref={wrapRef} style={{ display: 'flex', flexWrap: 'wrap', gap: 16, width: '100%' }}>
             {items.map(([key, { label, Icon, color }], i) => (
               <button
                 key={key}
