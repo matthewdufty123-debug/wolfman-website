@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Playfair_Display, JetBrains_Mono } from 'next/font/google'
+import { Lora, Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import ThemeProvider from '@/components/ThemeProvider'
 import AuthProvider from '@/components/AuthProvider'
@@ -7,10 +7,17 @@ import { CartProvider } from '@/lib/cart'
 import { Analytics } from '@vercel/analytics/next'
 import LandscapeBlock from '@/components/LandscapeBlock'
 
-const playfair = Playfair_Display({
+const lora = Lora({
   subsets: ['latin'],
   weight: ['400', '700'],
-  variable: '--font-playfair',
+  variable: '--font-lora',
+  display: 'swap',
+})
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-inter',
   display: 'swap',
 })
 
@@ -34,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${jetbrains.variable}`}
+      className={`${lora.variable} ${inter.variable} ${jetbrains.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -44,10 +51,8 @@ export default function RootLayout({
             __html: `(function(){
               var t=localStorage.getItem('wolfman-theme')||'dark';
               var f=localStorage.getItem('wolfman-fontsize')||'normal';
-              var ff=localStorage.getItem('wolfman-fontfamily')||'serif';
               document.documentElement.setAttribute('data-theme',t);
               document.documentElement.setAttribute('data-fontsize',f);
-              document.documentElement.setAttribute('data-fontfamily',ff);
             })();`,
           }}
         />

@@ -7,6 +7,7 @@ import BetaInterestForm from '@/components/BetaInterestForm'
 import { db } from '@/lib/db'
 import { betaInterest } from '@/lib/db/schema'
 import { count, notInArray } from 'drizzle-orm'
+import SectionHeader from '@/components/SectionHeader'
 
 export const metadata: Metadata = siteMetadata({
   title: 'Public Beta',
@@ -30,6 +31,7 @@ export default async function BetaPage() {
 
   return (
     <main className="beta-page">
+      <SectionHeader section="beta" current="/beta" />
       <div className="beta-card">
 
         {/* ── Interest form — closed alpha, logged-out visitors only ── */}

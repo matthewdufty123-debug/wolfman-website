@@ -82,6 +82,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.avatar             = row?.avatar             ?? null
         token.username           = row?.username           ?? null
         token.onboardingComplete = row?.onboardingComplete ?? false
+      } else if (token.id && !token.username) {
+        // Username was null at sign-in (set later via account page) — re-fetch
+        const [row] = await db
+          .select({ username: users.username })
+          .from(users)
+          .where(eq(users.id, token.id as string))
+          .limit(1)
+        token.username = row?.username ?? null
       }
       return token
     },

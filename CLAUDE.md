@@ -117,7 +117,9 @@ inviting a click
 - **Evening Reflection** — logged at end of day: reflection text, wentToPlan, dayRating (1–6). Available to any post owner via PostFooter.
 - **Claude's Take** — generated at Review time (post content + morning state) and optionally regenerated when evening reflection is saved. Stored in `day_scores`.
 - **Stats & Profile page** (`/[username]`) — per-user charts, Morning Zone scatter, headline stats (total journals, current streak, longest streak, this month). Owner sees edit affordance; visitors see public view. `/morning-stats` and `/journal` redirect here for logged-in users, else to `/login`.
-- **Morning Ritual pages** (`/morning-ritual`, `/morning-ritual/[key]`) — filter journals by ritual
+- **Morning Ritual pages** (`/morning-ritual/[key]`) — filter journals by ritual. `/morning-ritual` root has no page; use `/rituals` for the overview.
+- **Rituals page** (`/rituals`) — placeholder overview page for rituals. Listed under Discover section in nav. Full build planned.
+- **Achievements page** (`/achievements`) — placeholder page for the achievements system (Release 0.6). Listed under Discover section. Terminology note: use **achievements** throughout — not "rewards". Achievements are earned milestones (10 journals logged, 30-day streak etc.), not prizes given.
 
 ### Home Page
 - Two-tab **Journal Feed** (built as of #115):
@@ -144,13 +146,21 @@ inviting a click
 - `/login`, `/register` — public auth pages (register includes beta terms summary)
 - `/account` — user profile (username with live availability check, name, display name, bio, avatar, password)
 - `/settings` — user settings
-- `/beta` — beta information, beta-specific terms, data policy, and countdown. Links to `/terms`.
-- `/feedback` — beta feedback form (submits to GitHub Issues API)
+- `/beta` — beta information (section label: **Beta Testing**), beta-specific terms, data policy, and countdown. Links to `/terms`.
+- `/feedback` — beta feedback form (submits to GitHub Issues API). Under Beta Testing section.
 
 ### Product & Development Pages
-- `/features` — non-technical release roadmap. Lists releases 0.1–0.9 with plain-English feature descriptions and status badges (Built / In Development / Coming Soon). Audience: users and community.
-- `/dev` — GitHub-integrated technical development hub. Shows milestones, open/closed issues, open branches and PRs, development workflow. Audience: developers and technical users.
+- `/features` — non-technical release roadmap. Lists releases 0.1–0.9 with plain-English feature descriptions and status badges (Built / In Development / Coming Soon). Audience: users and community. Under Discover section.
+- `/investment` — investment case and financial model. No SEO (noindex). Linked from About page only. Under Discover section.
+- `/dev` — GitHub-integrated technical development hub. Shows milestones, open/closed issues, open branches and PRs, development workflow. Audience: developers and technical users. Under Beta Testing section.
 - `/terms` — general terms and conditions. Placeholder during beta; fully defined in Release 0.9. Linked from `/features` and `/beta`.
+
+### Discover & Beta Testing navigation
+Pages are grouped under two section headers, each with a shared `SectionHeader` component (logo banner + dropdown nav):
+- **Discover:** `/about`, `/investment`, `/features`, `/rituals`, `/achievements`
+- **Beta Testing:** `/beta`, `/feedback`, `/dev`
+
+The `SectionHeader` component (`components/SectionHeader.tsx`) renders at the top of each page in these groups. It shows the grey wordmark logo (inverted white in dark/cool themes) and a native `<select>` dropdown to navigate within the section.
 
 ---
 
@@ -189,10 +199,20 @@ interaction
 - Never cluttered around. Give it space.
 
 ### Typography
-- **Headings / Hero:** Script or serif font — warm, human, personal
-- **Body / Blog text:** Clean, highly readable serif — like reading 
-a book. Generous line height. Comfortable margins.
-- **Navigation:** Minimal sans-serif — understated, never dominant
+The font system is **locked** — do not add a font selector or allow user font-family switching.
+
+| Role | Font | CSS variable | Examples |
+|------|------|-------------|---------|
+| Headings / titles | **Inter** | `--font-inter` | H1, H2, H3, section headings, page titles |
+| Body / reading | **Lora** | `--font-lora` | Paragraphs, journal text, placeholder body, table cells, form inputs, textareas |
+| UI / nav / labels | **Inter** | `--font-inter` | Buttons, nav labels, badges, form labels, chart axes |
+| Code / monospace | **JetBrains Mono** | `--font-jetbrains` | Version badges, eyebrow labels, dev page, code blocks |
+
+- `body { font-family: var(--font-lora) }` — Lora cascades to all reading text by default
+- Explicit Inter declarations on headings, buttons, and UI elements override the cascade
+- A targeted CSS section near the top of globals.css (`/* Font assignments — Lora for reading/input contexts */`) restores Lora on any elements that need it after the Inter override
+- Font size preference (`data-fontsize`: normal / large / xlarge) is still user-configurable via the experience overlay
+- Loaded via `next/font/google` in `app/layout.tsx`
 
 ### Design Principles
 - Minimalism above everything
@@ -268,7 +288,9 @@ app/
     intentions/             — 301 redirect → /
     terms/                  — General terms and conditions (placeholder; expanded in Release 0.9)
     login/                  — Login page
-    morning-ritual/         — Ritual overview + [key] filter page
+    morning-ritual/         — [key] filter page only (no root page — use /rituals for overview)
+    rituals/                — Rituals overview placeholder (Discover section)
+    achievements/           — Achievements overview placeholder (Discover section)
     morning-stats/          — Redirects logged-in users → /[username], else → /login
     journal/                — Redirects logged-in users → /[username], else → /login
     register/               — Register page (includes beta terms summary)
@@ -377,7 +399,7 @@ All work is organised by **milestone**, then **label**. No stage codes — miles
 | Release 0.3 — Communities | #18 | 12 Jul 2026 | Community walls, public/private communities, nav, public sharing |
 | Release 0.4 — Rituals | #19 | 26 Jul 2026 | Standard rituals with logos/descriptions, custom rituals feature |
 | Release 0.5 — Statistics | #20 | 9 Aug 2026 | Profile stats finalised, site-wide stats, WOLF\|BOT data layer, achievements foundation |
-| Release 0.6 — Achievements | #21 | 23 Aug 2026 | Rewards, streaks, badges (built on 0.5 data layer) |
+| Release 0.6 — Achievements | #21 | 23 Aug 2026 | Achievements, streaks, badges (built on 0.5 data layer) |
 | Release 0.7 — Shop | #22 | 31 Aug 2026 | Shop live, Printful fulfilment, Stripe payments |
 | Release 0.8 — Subscriptions | #23 | 31 Aug 2026 | Free vs premium tier, feature gating, paid tier live |
 | Release 0.9 — Legal | #24 | Before go-live | Data protection, T&Cs, GDPR, cookie consent, EU/US legal, shop and subscription terms. Must be signed off before production launch. |
@@ -443,7 +465,7 @@ The scope of each release is now locked for the beta period. **New feature reque
 
 > **Draft issues must never be actioned.** If an issue carries the `draft` label, stop and prompt
 > Matthew to finish scoping it before any implementation begins. Draft issues are placeholders —
-> the brief is incomplete. Examples: #100 (scoring system), #101 (rewards system).
+> the brief is incomplete. Examples: #100 (scoring system), #101 (achievements system).
 
 ---
 

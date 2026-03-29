@@ -230,35 +230,12 @@ export default async function ProfilePage(
   return (
     <main className="journal-page">
 
-      {/* Account button — owner only */}
-      {isOwner && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-          <a
-            href="/account"
-            style={{
-              display: 'inline-block',
-              padding: '0.45rem 1.1rem',
-              background: '#214459',
-              color: '#fff',
-              borderRadius: '6px',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-              letterSpacing: '0.04em',
-              textDecoration: 'none',
-            }}
-          >
-            Account
-          </a>
-        </div>
-      )}
-
       {/* Profile header */}
       <header style={{
         display: 'flex',
         alignItems: 'center',
         gap: '1.25rem',
-        marginBottom: '2rem',
+        marginBottom: isOwner ? '1rem' : '2rem',
       }}>
         <Avatar src={avatarSrc} name={displayName} size={72} />
         <div style={{ minWidth: 0 }}>
@@ -294,6 +271,13 @@ export default async function ProfilePage(
           )}
         </div>
       </header>
+
+      {/* Settings button — owner only, full-width below profile header */}
+      {isOwner && (
+        <a href="/account" className="profile-settings-btn">
+          Settings
+        </a>
+      )}
 
       {isEmpty ? (
         <div className="journal-empty">

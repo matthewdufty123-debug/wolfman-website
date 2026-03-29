@@ -176,7 +176,7 @@ const KNOWN_PREFIXES = new Set([
   'admin', 'edit', 'write', 'account', 'settings', 'shop', 'cart',
   'checkout', 'login', 'register', 'about', 'morning-ritual',
   'morning-stats', 'intentions', 'feedback', 'beta', 'dev',
-  'features', 'terms', 'discover', 'api', 'posts', 'wolfbot', 'guide',
+  'features', 'terms', 'discover', 'investment', 'rituals', 'achievements', 'api', 'posts', 'wolfbot', 'guide',
 ])
 
 function isJournalReadingRoute(pathname: string): boolean {

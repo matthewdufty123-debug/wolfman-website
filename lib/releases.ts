@@ -85,7 +85,7 @@ export const releases: Release[] = [
     features: [
       { name: 'Streak tracking', description: 'Current and longest streaks, tracked and celebrated.', status: 'coming-soon' },
       { name: 'Achievement badges', description: 'Earn badges for consistency, rituals completed, and milestones reached.', status: 'coming-soon' },
-      { name: 'Rewards history', description: 'A timeline of your achievements on your profile.', status: 'coming-soon' },
+      { name: 'Achievements history', description: 'A timeline of your achievements on your profile.', status: 'coming-soon' },
     ],
   },
   {

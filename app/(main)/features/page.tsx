@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { siteMetadata } from '@/lib/metadata'
 import { releases, type FeatureStatus, type ReleaseStatus } from '@/lib/releases'
+import SectionHeader from '@/components/SectionHeader'
 
 export const metadata: Metadata = siteMetadata({
   title: 'Features',
@@ -24,6 +25,7 @@ function featureStatusBadge(status: FeatureStatus) {
 export default function FeaturesPage() {
   return (
     <main className="features-page">
+      <SectionHeader section="discover" current="/features" />
       <div className="features-header">
         <p className="beta-eyebrow">Product Roadmap</p>
         <h1 className="features-title">What we&apos;re building.</h1>

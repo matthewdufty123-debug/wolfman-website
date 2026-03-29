@@ -2,7 +2,6 @@
 
 import ThemeButtons from './ThemeButtons'
 import FontSizeButtons from './FontSizeButtons'
-import FontFamilyButtons from './FontFamilyButtons'
 
 interface SettingsOverlayProps {
   open: boolean
@@ -26,7 +25,6 @@ export default function SettingsOverlay({ open, onClose }: SettingsOverlayProps)
         <p className="settings-overlay-title">experience</p>
         <ThemeButtons />
         <FontSizeButtons />
-        <FontFamilyButtons />
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { siteMetadata } from '@/lib/metadata'
 import DevPageClient from '@/components/DevPageClient'
+import SectionHeader from '@/components/SectionHeader'
 
 export const metadata: Metadata = siteMetadata({
   title: 'Development log',
@@ -9,5 +10,10 @@ export const metadata: Metadata = siteMetadata({
 })
 
 export default function DevPage() {
-  return <DevPageClient />
+  return (
+    <>
+      <SectionHeader section="beta" current="/dev" />
+      <DevPageClient />
+    </>
+  )
 }

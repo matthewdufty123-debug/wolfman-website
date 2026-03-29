@@ -65,20 +65,13 @@ const PAGE_GROUPS: PageGroup[] = [
     ],
   },
   {
-    title: 'You',
-    authOnly: true,
-    links: [
-      { href: '/account',         label: 'Account' },
-      { href: '/settings',        label: 'Settings' },
-    ],
-  },
-  {
     title: 'Discover',
     links: [
-      { href: '/about',           label: 'About Wolfman' },
-      { href: '/features',        label: 'Features' },
-      { href: '/morning-ritual',  label: 'Morning Rituals' },
-      { href: '/morning-stats',   label: 'Stats' },
+      { href: '/about',         label: 'About Wolfman' },
+      { href: '/investment',    label: 'Investment Case' },
+      { href: '/features',      label: 'Features' },
+      { href: '/rituals',       label: 'Rituals' },
+      { href: '/achievements',  label: 'Achievements' },
     ],
   },
   {
@@ -89,7 +82,7 @@ const PAGE_GROUPS: PageGroup[] = [
     ],
   },
   {
-    title: 'The Beta',
+    title: 'Beta Testing',
     links: [
       { href: '/beta',            label: 'About the Beta' },
       { href: '/feedback',        label: 'Give Feedback' },
@@ -224,7 +217,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
         return (
           <Link key={key} href="/wolfbot" className="nav-slot nav-slot--wolfbot" aria-label="WOLF|BOT">
             <WolfBotIcon size={26} />
-            <span className="nav-slot-label">wolf|bot</span>
           </Link>
         )
 
@@ -246,7 +238,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
             onClick={() => setMorePagesOpen(o => !o)}
           >
             {morePagesOpen ? <X size={20} strokeWidth={1.5} /> : <Menu size={20} strokeWidth={1.5} />}
-            <span className="nav-slot-label">{morePagesOpen ? 'close' : 'more'}</span>
           </button>
         )
 
@@ -261,7 +252,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
         return (
           <Link key={key} href={href} className="nav-slot nav-slot--link" aria-label={slot.label}>
             <NavIconEl icon={slot.icon} />
-            {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
           </Link>
         )
       }
@@ -272,28 +262,24 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
             return (
               <button key={key} className="nav-slot nav-slot--btn" aria-label="Settings" onClick={() => setSettingsOpen(true)}>
                 <NavIconEl icon={slot.icon} />
-                {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
               </button>
             )
           case 'share':
             return (
               <button key={key} className="nav-slot nav-slot--btn" aria-label="Share" onClick={handleShare}>
                 <NavIconEl icon={slot.icon} />
-                {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
               </button>
             )
           case 'export-txt':
             return (
               <button key={key} className="nav-slot nav-slot--btn" aria-label="Export as text" onClick={handleExport}>
                 <NavIconEl icon={slot.icon} />
-                {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
               </button>
             )
           case 'go-back':
             return (
               <button key={key} className="nav-slot nav-slot--btn" aria-label="Go back" onClick={() => router.back()}>
                 <NavIconEl icon={slot.icon} />
-                {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
               </button>
             )
           default:
@@ -317,16 +303,12 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
               ) : (
                 <User size={20} strokeWidth={1.5} />
               )}
-              <span className="nav-slot-label">
-                {session.user?.name?.split(' ')[0]?.toLowerCase() ?? 'account'}
-              </span>
             </Link>
           )
         }
         return (
           <button key={key} className="nav-slot nav-slot--btn" aria-label="Sign in" onClick={() => setLoginOpen(true)}>
             <User size={20} strokeWidth={1.5} />
-            <span className="nav-slot-label">sign in</span>
           </button>
         )
 
@@ -363,44 +345,73 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
             <ThemeLogo className="more-pages-logo" />
           </div>
 
-          <p className="more-pages-title">Site Navigation</p>
+          {/* Admin button — admin users only */}
+          {session?.user?.role === 'admin' && (
+            <Link
+              href="/admin"
+              className="more-pages-admin-btn"
+              onClick={() => setMorePagesOpen(false)}
+            >
+              ADMIN
+            </Link>
+          )}
 
-          {/* Page groups */}
-          <nav className="more-pages-nav" aria-label="All pages">
-            {PAGE_GROUPS.map(group => {
-              if (group.authOnly && !session) return null
-              return (
-                <div key={group.title} className="more-pages-group">
-                  <p className="more-pages-group-title">{group.title}</p>
-                  <ul className="more-pages-list">
-                    {group.links.map(link => (
-                      <li key={link.href}>
-                        <Link
-                          href={link.href}
-                          className="more-pages-link"
-                          onClick={() => setMorePagesOpen(false)}
-                        >
-                          {link.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )
-            })}
-          </nav>
-
-          {/* Sign out */}
+          {/* User row — profile link + sign out */}
           {session && (
-            <div className="more-pages-signout-wrap">
+            <div className="more-pages-user-row">
+              <Link
+                href={session.user?.username ? `/${session.user.username}` : '/account'}
+                className="more-pages-user-profile"
+                onClick={() => setMorePagesOpen(false)}
+              >
+                {avatarUrl ? (
+                  <Image
+                    src={avatarUrl}
+                    alt={session.user?.name ?? 'avatar'}
+                    width={32}
+                    height={32}
+                    className="more-pages-user-avatar"
+                    unoptimized
+                  />
+                ) : (
+                  <User size={20} strokeWidth={1.5} />
+                )}
+                <span className="more-pages-user-name">
+                  {session.user?.displayName ?? session.user?.name ?? 'Your Profile'}
+                </span>
+              </Link>
               <button
-                className="more-pages-signout"
+                className="more-pages-signout-btn"
                 onClick={() => signOut({ callbackUrl: '/' })}
               >
                 Sign out
               </button>
             </div>
           )}
+
+          <p className="more-pages-title">Site Navigation</p>
+
+          {/* Page groups */}
+          <nav className="more-pages-nav" aria-label="All pages">
+            {PAGE_GROUPS.map(group => (
+              <div key={group.title} className="more-pages-group">
+                <p className="more-pages-group-title">{group.title}</p>
+                <ul className="more-pages-list">
+                  {group.links.map(link => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="more-pages-link"
+                        onClick={() => setMorePagesOpen(false)}
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
         </div>
       </div>
 

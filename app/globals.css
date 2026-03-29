@@ -1,7 +1,7 @@
 /* ── Theme tokens ── */
 html[data-theme="dark"] {
   --bg: #333F50;
-  --heading: #E5CBBB;
+  --heading: #909090;
   --body-text: #ffffff;
   --nav-fill: #193343;
   --nav-btn-icon: rgba(255, 255, 255, 0.55);
@@ -52,8 +52,28 @@ body {
   padding-top: 40px; /* clearance for fixed top utility bar */
   padding-bottom: 120px; /* clearance for fixed bottom bell-curve nav */
   background: var(--bg, #333F50);
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-lora), Georgia, serif;
   min-height: 100vh;
+}
+
+/* ── Font assignments — Lora for reading/input contexts ──────────────────────
+   Inter is set globally on all explicit declarations above.
+   Override back to Lora for text the user reads or writes.
+   ─────────────────────────────────────────────────────────────────────────── */
+.post-body,
+.auth-input,
+.auth-social-btn,
+.product-select,
+.pf-input--title,
+.pf-fullscreen-textarea,
+.feedback-textarea,
+.interest-input,
+.journal-no-chart,
+.placeholder-body,
+.inv-body,
+.features-intro,
+.features-item-desc {
+  font-family: var(--font-lora), Georgia, serif;
 }
 
 /* ── Home greeting ── */
@@ -145,7 +165,7 @@ body {
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: lowercase;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   line-height: 1;
   display: block;
 }
@@ -266,7 +286,7 @@ html[data-theme="light"] .feed-logo-img {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: var(--nav-btn-icon, rgba(255, 255, 255, 0.55));
   text-decoration: none;
   transition: color 0.15s ease;
@@ -372,7 +392,7 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
 
 /* Title */
 .more-pages-title {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -388,7 +408,7 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
   gap: 1.75rem;
 }
 .more-pages-group-title {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.58rem;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -405,36 +425,96 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
   gap: 0.5rem;
 }
 .more-pages-link {
-  font-family: var(--font-playfair), Georgia, serif;
-  font-size: clamp(1rem, 3.5vw, 1.25rem);
-  font-weight: 400;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   color: var(--body, rgba(255, 255, 255, 0.82));
   text-decoration: none;
-  transition: color 0.15s ease;
   display: block;
-  padding: 0.15rem 0;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
-.more-pages-link:hover { color: var(--heading, #E5CBBB); }
+.more-pages-link:hover {
+  color: var(--heading, #E5CBBB);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+}
 
-/* Sign out */
-.more-pages-signout-wrap {
-  margin-top: 2.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+/* Admin button */
+.more-pages-admin-btn {
+  display: block;
+  margin-bottom: 1rem;
+  padding: 0.55rem 1.25rem;
+  background: #C8B020;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s ease;
 }
-.more-pages-signout {
+.more-pages-admin-btn:hover { background: #d9bf25; }
+
+/* User row */
+.more-pages-user-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.more-pages-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+  color: var(--body, rgba(255, 255, 255, 0.82));
+  transition: color 0.15s ease;
+}
+.more-pages-user-profile:hover { color: var(--heading, #E5CBBB); }
+.more-pages-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.more-pages-user-name {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.more-pages-signout-btn {
+  flex-shrink: 0;
   background: none;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 4px;
-  padding: 0.55rem 1.25rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 0.06em;
+  padding: 0.4rem 0.9rem;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
   color: var(--nav-btn-icon, rgba(255, 255, 255, 0.55));
   cursor: pointer;
   transition: color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
 }
-.more-pages-signout:hover {
+.more-pages-signout-btn:hover {
   color: var(--heading, #E5CBBB);
   border-color: rgba(255, 255, 255, 0.4);
 }
@@ -455,7 +535,7 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
 }
 
 .guide-title {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: clamp(2rem, 6vw, 3rem);
   font-weight: 400;
   color: var(--heading, #E5CBBB);
@@ -480,7 +560,7 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
 }
 
 .guide-toc-label {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -499,7 +579,7 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
 }
 
 .guide-toc-link {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.82rem;
   color: var(--body, rgba(255, 255, 255, 0.7));
   text-decoration: none;
@@ -515,7 +595,7 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
 }
 
 .guide-section-title {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: clamp(1.2rem, 3.5vw, 1.5rem);
   font-weight: 400;
   color: var(--heading, #E5CBBB);
@@ -538,7 +618,7 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
 }
 
 .guide-item-q {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--heading, #E5CBBB);
@@ -617,7 +697,7 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
 }
 
 .settings-overlay-title {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: clamp(1.8rem, 6vw, 3rem);
   font-weight: 400;
   color: var(--menu-prompt, rgba(212, 197, 186, 0.45));
@@ -1406,7 +1486,7 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
 
 .admin-link {
   display: inline-block;
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.85rem;
   font-weight: 400;
   text-decoration: none;
@@ -1606,7 +1686,7 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
   align-items: center;
   justify-content: center;
   gap: 0.3rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .post-nav-admin-btn:hover {
@@ -1679,7 +1759,7 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
 }
 
 .theme-btn {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1.1rem;
   font-weight: 400;
   color: var(--body-text, #ffffff);
@@ -1724,12 +1804,6 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
   }
 }
 
-/* ── Post font family variant ── */
-
-html[data-fontfamily="sans"] .post-body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
 /* ── Post font size variants (blog posts only) ── */
 
 html[data-fontsize="large"] .post-body {
@@ -1757,7 +1831,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 }
 
 .fontsize-btn {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: 400;
   color: var(--body-text, #ffffff);
   background: none;
@@ -1787,52 +1861,6 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
   .fontsize-toggle {
     flex-direction: column;
   }
-}
-
-/* ── Font family control ── */
-
-.fontfamily-toggle {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.fontfamily-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.75rem 1rem;
-  background: none;
-  border: 1px solid currentColor;
-  border-radius: 4px;
-  cursor: pointer;
-  color: var(--body-text, #ffffff);
-  opacity: 0.45;
-  transition: opacity 0.2s ease, color 0.2s ease;
-}
-
-.fontfamily-btn:hover {
-  opacity: 0.75;
-}
-
-.fontfamily-btn--active {
-  opacity: 1;
-  color: var(--heading, #E5CBBB);
-  border-color: var(--heading, #E5CBBB);
-}
-
-.fontfamily-btn-sample {
-  font-size: 1.4rem;
-  line-height: 1;
-  font-family: var(--font-playfair), Georgia, serif;
-}
-
-.fontfamily-btn-label {
-  font-size: 0.72rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 /* ── Auth pages (login / register) ── */
@@ -1879,7 +1907,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 }
 
 .auth-input {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1rem;
   color: var(--body-text, #ffffff);
   background: transparent;
@@ -1902,7 +1930,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 }
 
 .auth-submit {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-weight: 400;
   color: #ffffff;
@@ -1974,7 +2002,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.95rem;
   font-weight: 400;
   color: var(--body-text, #ffffff);
@@ -2120,7 +2148,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 }
 
 .account-signout {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.95rem;
   font-weight: 400;
   color: var(--body-text);
@@ -2414,7 +2442,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 }
 
 .shop-filter-btn {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.875rem;
   color: var(--body-text);
   text-decoration: none;
@@ -2565,7 +2593,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 }
 
 .product-select {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.95rem;
   color: var(--body-text);
   background: transparent;
@@ -2578,7 +2606,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 }
 
 .product-add-btn {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-weight: 400;
   color: #ffffff;
@@ -2756,7 +2784,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 }
 
 .cart-checkout-btn {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-weight: 400;
   color: #ffffff;
@@ -2845,7 +2873,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 }
 
 .post-reading-end-title {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: clamp(1.3rem, 4vw, 1.9rem);
   color: var(--heading);
   margin: 0 0 0.5rem;
@@ -3183,7 +3211,7 @@ html[data-theme="dark"] .post-day-score-card {
   font-weight: 700;
   color: var(--heading);
   margin: 0 0 0.75rem;
-  font-family: var(--font-heading, Georgia, serif);
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .ritual-header-description {
@@ -3242,7 +3270,7 @@ html[data-theme="dark"] .post-day-score-card {
   text-decoration: none;
   opacity: 0.55;
   margin-bottom: 1.5rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   transition: opacity 0.15s ease;
 }
 
@@ -3263,7 +3291,7 @@ html[data-theme="dark"] .post-day-score-card {
   color: var(--body-text);
   opacity: 0.55;
   margin: 0 0 2.5rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .stats-chart-card {
@@ -3282,7 +3310,7 @@ html[data-theme="dark"] .post-day-score-card {
   color: var(--body-text);
   opacity: 0.5;
   margin: 0 0 1rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 html[data-theme="dark"] .stats-chart-card {
@@ -3332,7 +3360,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .login-title {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1.4rem;
   color: var(--heading, #E5CBBB);
   text-align: center;
@@ -3363,7 +3391,7 @@ html[data-theme="dark"] .stats-chart-card {
   font-weight: 500;
   cursor: pointer;
   transition: opacity 0.15s ease;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
@@ -3389,7 +3417,7 @@ html[data-theme="dark"] .stats-chart-card {
   color: var(--body-text);
   opacity: 0.4;
   font-size: 0.8rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .login-divider::before,
@@ -3414,7 +3442,7 @@ html[data-theme="dark"] .stats-chart-card {
   background: rgba(255, 255, 255, 0.07);
   color: var(--body-text);
   font-size: 0.95rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   box-sizing: border-box;
 }
 
@@ -3425,7 +3453,7 @@ html[data-theme="dark"] .stats-chart-card {
   font-size: 0.82rem;
   color: #C87840;
   margin: 0;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .login-submit {
@@ -3438,7 +3466,7 @@ html[data-theme="dark"] .stats-chart-card {
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   transition: opacity 0.15s ease;
   margin-top: 0.25rem;
 }
@@ -3452,7 +3480,7 @@ html[data-theme="dark"] .stats-chart-card {
   color: var(--body-text);
   opacity: 0.5;
   margin-top: 1.25rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .login-register-prompt a {
@@ -3507,7 +3535,7 @@ html[data-theme="dark"] .stats-chart-card {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--heading, #E5CBBB);
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .avatar-overlay {
@@ -3521,7 +3549,7 @@ html[data-theme="dark"] .stats-chart-card {
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   opacity: 0;
   transition: opacity 0.2s ease;
   border-radius: 50%;
@@ -3536,7 +3564,7 @@ html[data-theme="dark"] .stats-chart-card {
   font-size: 0.8rem;
   color: #A82020;
   margin-top: 0.5rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 /* ── Nav avatar ── */
@@ -3556,7 +3584,7 @@ html[data-theme="dark"] .stats-chart-card {
   padding: 1.5rem 1.25rem 4rem;
   max-width: 680px;
   margin: 0 auto;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .pf-header {
@@ -3577,7 +3605,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .pf-prompt {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1.1rem;
   color: var(--heading, #E5CBBB);
   margin: 0;
@@ -3607,13 +3635,13 @@ html[data-theme="dark"] .stats-chart-card {
   background: rgba(255,255,255,0.07);
   color: var(--body-text);
   font-size: 0.95rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   box-sizing: border-box;
 }
 
 .pf-input--title {
   font-size: 1.15rem;
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .pf-input:focus,
@@ -3630,7 +3658,7 @@ html[data-theme="dark"] .stats-chart-card {
   background: rgba(255,255,255,0.07);
   color: var(--body-text);
   font-size: 0.9rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   resize: vertical;
   line-height: 1.6;
   box-sizing: border-box;
@@ -3684,7 +3712,7 @@ html[data-theme="dark"] .stats-chart-card {
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   transition: all 0.12s ease;
 }
 
@@ -3698,7 +3726,7 @@ html[data-theme="dark"] .stats-chart-card {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   min-height: 1.2em;
 }
 
@@ -3720,7 +3748,7 @@ html[data-theme="dark"] .stats-chart-card {
   color: var(--body-text);
   cursor: pointer;
   font-size: 0.75rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   transition: all 0.12s ease;
   opacity: 0.55;
 }
@@ -3758,7 +3786,7 @@ html[data-theme="dark"] .stats-chart-card {
   border: none;
   font-size: 0.95rem;
   font-weight: 600;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   cursor: pointer;
   transition: opacity 0.15s ease;
 }
@@ -3818,7 +3846,7 @@ html[data-theme="dark"] .stats-chart-card {
 .pf-fullscreen-label {
   font-size: 0.7rem; font-weight: 700;
   letter-spacing: 0.1em; text-transform: uppercase;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: var(--nav-btn-icon, rgba(255,255,255,0.5));
 }
 
@@ -3826,7 +3854,7 @@ html[data-theme="dark"] .stats-chart-card {
   background: var(--nav-fill, #193343); border: none;
   color: #fff; font-size: 0.85rem; font-weight: 600;
   padding: 6px 18px; border-radius: 6px; cursor: pointer;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .pf-fullscreen-textarea {
@@ -3835,7 +3863,7 @@ html[data-theme="dark"] .stats-chart-card {
   resize: none; border: none; outline: none;
   background: transparent;
   color: var(--body-text, #e8ddd0);
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1.05rem; line-height: 1.8;
   padding: 20px 24px;
   box-sizing: border-box;
@@ -3853,7 +3881,7 @@ html[data-theme="dark"] .stats-chart-card {
   opacity: 0.3;
   font-size: 0.8rem;
   cursor: pointer;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   text-decoration: underline;
 }
 
@@ -3875,7 +3903,7 @@ html[data-theme="dark"] .stats-chart-card {
   padding: 0.35rem 0.85rem;
   font-size: 0.82rem;
   cursor: pointer;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .pf-delete-no {
@@ -3884,7 +3912,7 @@ html[data-theme="dark"] .stats-chart-card {
   color: var(--body-text);
   font-size: 0.82rem;
   cursor: pointer;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   text-decoration: underline;
   opacity: 0.6;
 }
@@ -3894,7 +3922,7 @@ html[data-theme="dark"] .stats-chart-card {
   max-width: 680px;
   margin: 0 auto;
   padding: 0 1.25rem 4rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .write-drafts-title {
@@ -3986,7 +4014,7 @@ html[data-theme="dark"] .stats-chart-card {
   color: #4A7FA5;
   line-height: 1;
   margin: 0 0 0.3rem;
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .journal-stat-label {
@@ -3997,7 +4025,7 @@ html[data-theme="dark"] .stats-chart-card {
   color: var(--body-text);
   opacity: 0.5;
   margin: 0;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .journal-no-chart {
@@ -4006,7 +4034,7 @@ html[data-theme="dark"] .stats-chart-card {
   color: var(--body-text);
   opacity: 0.5;
   font-style: italic;
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .journal-empty {
@@ -4032,7 +4060,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .journal-empty-link {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -4094,7 +4122,7 @@ html[data-theme="dark"] .stats-chart-card {
   letter-spacing: 0.12em;
   color: #A0622A;
   margin: 0 0 0.75rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .beta-title {
@@ -4167,12 +4195,12 @@ html[data-theme="dark"] .stats-chart-card {
   font-size: 1.4rem;
   font-weight: 400;
   color: #4A7FA5;
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .beta-end-date {
   font-size: 0.78rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--body-text);
@@ -4191,7 +4219,7 @@ html[data-theme="dark"] .stats-chart-card {
   letter-spacing: 0.12em;
   color: #A0622A;
   margin: 0 0 0.6rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .beta-section-body {
@@ -4227,7 +4255,7 @@ html[data-theme="dark"] .stats-chart-card {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: #4A7FA5;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   margin: 0 0 0.75rem;
 }
 
@@ -4264,7 +4292,7 @@ html[data-theme="dark"] .stats-chart-card {
   font-size: 0.78rem;
   color: #4A7FA5;
   text-decoration: none;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   letter-spacing: 0.04em;
 }
 
@@ -4307,7 +4335,7 @@ html[data-theme="dark"] .stats-chart-card {
 
 .feedback-countdown {
   font-size: 0.8rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #4A7FA5;
@@ -4331,7 +4359,7 @@ html[data-theme="dark"] .stats-chart-card {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: #A0622A;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .feedback-categories {
@@ -4341,7 +4369,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .feedback-category-pill {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.82rem;
   font-weight: 500;
   padding: 0.4rem 1rem;
@@ -4365,7 +4393,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .feedback-textarea {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1rem;
   line-height: 1.65;
   color: var(--body-text, #ffffff);
@@ -4414,7 +4442,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .feedback-submit {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-weight: 400;
   color: #ffffff;
@@ -4462,7 +4490,7 @@ html[data-theme="dark"] .stats-chart-card {
 
 .feedback-screenshot-upload {
   display: inline-block;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.82rem;
   font-weight: 500;
   padding: 0.45rem 1.1rem;
@@ -4499,7 +4527,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .feedback-screenshot-clear {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -4519,7 +4547,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .feedback-topic-pill {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.76rem;
   font-weight: 500;
   padding: 0.3rem 0.75rem;
@@ -4553,7 +4581,7 @@ html[data-theme="dark"] .stats-chart-card {
   background: none;
   border: none;
   padding: 0;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.76rem;
   color: rgba(144, 144, 144, 0.8);
   cursor: pointer;
@@ -4574,7 +4602,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .feedback-advanced-note {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.78rem;
   line-height: 1.5;
   color: #909090;
@@ -4589,7 +4617,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .feedback-dev-anchor {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.8rem;
   color: #909090;
   text-decoration: none;
@@ -4601,7 +4629,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .feedback-again-btn {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -4633,7 +4661,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .feed-tab {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.82rem;
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -4680,7 +4708,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .feed-card-author-name {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.78rem;
   font-weight: 500;
   color: var(--body-text, #4A4A4A);
@@ -4702,7 +4730,7 @@ html[data-theme="dark"] .stats-chart-card {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.75rem;
   color: #909090;
   margin-bottom: 0.3rem;
@@ -4732,7 +4760,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .feed-card-excerpt {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.82rem;
   color: var(--body-text, #4A4A4A);
   opacity: 0.55;
@@ -4757,7 +4785,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .feed-empty-body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.9rem;
   color: var(--body-text, #4A4A4A);
   opacity: 0.6;
@@ -4772,7 +4800,7 @@ html[data-theme="dark"] .stats-chart-card {
   text-decoration: none;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.88rem;
   font-weight: 600;
 }
@@ -4783,7 +4811,7 @@ html[data-theme="dark"] .stats-chart-card {
   color: var(--body-text);
   opacity: 0.5;
   margin-top: 1.5rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   text-align: center;
 }
 
@@ -4803,7 +4831,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .onboarding-title {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--heading, #193343);
@@ -4812,7 +4840,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .onboarding-subtitle {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.95rem;
   color: var(--body-text);
   opacity: 0.7;
@@ -4837,7 +4865,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .onboarding-question-label {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-weight: 600;
   color: var(--heading, #193343);
@@ -4845,7 +4873,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .onboarding-question-hint {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.82rem;
   color: var(--body-text);
   opacity: 0.65;
@@ -4869,7 +4897,7 @@ html[data-theme="dark"] .stats-chart-card {
   cursor: pointer;
   text-align: left;
   transition: border-color 0.15s, background 0.15s;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .onboarding-option:hover {
@@ -4893,7 +4921,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .onboarding-error {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.85rem;
   color: #A82020;
   margin: 0;
@@ -4906,7 +4934,7 @@ html[data-theme="dark"] .stats-chart-card {
   border: none;
   border-radius: 8px;
   padding: 0.85rem 2rem;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -4932,14 +4960,14 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .onboarding-banner-text {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.88rem;
   color: var(--heading, #193343);
   margin: 0;
 }
 
 .onboarding-banner-link {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.82rem;
   font-weight: 600;
   color: #214459;
@@ -4972,7 +5000,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .community-toggle-label {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.9rem;
   color: var(--body-text);
 }
@@ -5014,14 +5042,14 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .community-saved {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.82rem;
   color: #3AB87A;
   margin: 0;
 }
 
 .community-error {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.82rem;
   color: #A82020;
   margin: 0;
@@ -5042,7 +5070,7 @@ html[data-theme="dark"] .stats-chart-card {
   padding: 0.35rem 0.9rem;
   border-radius: 20px;
   border: 2px solid transparent;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
@@ -5062,7 +5090,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .pf-visibility-hint {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.78rem;
   color: var(--body-text);
   opacity: 0.6;
@@ -5489,10 +5517,10 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .features-title {
-  font-family: var(--font-heading, Georgia, serif);
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: clamp(1.8rem, 4vw, 2.6rem);
   font-weight: 700;
-  color: var(--heading-text, #4A4A4A);
+  color: var(--heading, #193343);
   margin: 0.25rem 0 1rem;
   line-height: 1.2;
 }
@@ -5553,10 +5581,10 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .features-release-name {
-  font-family: var(--font-heading, Georgia, serif);
-  font-size: 1.2rem;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1.4rem;
   font-weight: 700;
-  color: var(--heading-text, #4A4A4A);
+  color: var(--heading, #193343);
   margin: 0;
 }
 
@@ -5623,7 +5651,7 @@ html[data-theme="dark"] .stats-chart-card {
 .features-item-name {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--heading-text, #4A4A4A);
+  color: var(--heading, #193343);
 }
 
 .features-item-desc {
@@ -5693,7 +5721,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .closed-alpha-banner-text {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -5730,7 +5758,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .interest-label {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -5739,7 +5767,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .interest-input {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1rem;
   color: var(--body-text, #ffffff);
   background: transparent;
@@ -5761,7 +5789,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .interest-submit {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1rem;
   font-weight: 400;
   color: #ffffff;
@@ -5779,7 +5807,7 @@ html[data-theme="dark"] .stats-chart-card {
 .interest-submit:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .interest-error {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.875rem;
   color: #A82020;
   margin: 0;
@@ -5794,7 +5822,7 @@ html[data-theme="dark"] .stats-chart-card {
   align-items: flex-start;
   gap: 0.6rem;
   cursor: pointer;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.82rem;
   color: var(--body-text);
   opacity: 0.8;
@@ -5866,7 +5894,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .beta-timeline th {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -5889,7 +5917,7 @@ html[data-theme="dark"] .stats-chart-card {
 .beta-timeline td:last-child { padding-right: 0; white-space: nowrap; }
 
 .beta-timeline-status {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -5911,7 +5939,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .login-alpha-notice-text {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 0.82rem;
   line-height: 1.6;
   color: var(--body-text);
@@ -5950,7 +5978,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .landscape-block-title {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 1.5rem;
   color: #ffffff;
   margin: 0;
@@ -6054,7 +6082,7 @@ html[data-theme="dark"] .stats-chart-card {
   font-size: 0.9rem;
   color: var(--body-text);
   opacity: 0.45;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .tab-empty-state--cta {
@@ -6072,7 +6100,7 @@ html[data-theme="dark"] .stats-chart-card {
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   letter-spacing: 0.01em;
   transition: opacity 0.15s ease;
 }
@@ -6090,7 +6118,7 @@ html[data-theme="dark"] .stats-chart-card {
   color: var(--body-text);
   opacity: 0.55;
   cursor: pointer;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   transition: opacity 0.15s ease;
 }
 
@@ -6154,4 +6182,628 @@ html[data-fontsize="large"] .wolfbot-review-body {
 
 html[data-fontsize="xlarge"] .wolfbot-review-body {
   font-size: clamp(2rem, 5vw, 2.25rem);
+}
+
+/* Site-wide paragraph text — follows font size preference */
+html[data-fontsize="large"] .placeholder-body,
+html[data-fontsize="large"] .inv-body,
+html[data-fontsize="large"] .features-intro,
+html[data-fontsize="large"] .features-item-desc,
+html[data-fontsize="large"] .beta-body,
+html[data-fontsize="large"] .dev-body {
+  font-size: 1.1rem;
+}
+
+html[data-fontsize="xlarge"] .placeholder-body,
+html[data-fontsize="xlarge"] .inv-body,
+html[data-fontsize="xlarge"] .features-intro,
+html[data-fontsize="xlarge"] .features-item-desc,
+html[data-fontsize="xlarge"] .beta-body,
+html[data-fontsize="xlarge"] .dev-body {
+  font-size: 1.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PLACEHOLDER PAGES  /rituals  /achievements  (and future stubs)
+   ═══════════════════════════════════════════════════════════ */
+
+.placeholder-page {
+  min-height: 100vh;
+  padding: 3rem 1.25rem 5rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.placeholder-content {
+  padding-top: 0.5rem;
+}
+
+.placeholder-eyebrow {
+  font-family: 'JetBrains Mono', 'Cascadia Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #A0622A;
+  margin-bottom: 0.5rem;
+}
+
+.placeholder-heading {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: clamp(2.2rem, 5.5vw, 3.2rem);
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin: 0 0 1.25rem;
+  line-height: 1.1;
+}
+
+.placeholder-body {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--body-text, #4A4A4A);
+  max-width: 580px;
+  margin-bottom: 0.9rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION HEADER  (Discover + Beta Testing shared component)
+   ═══════════════════════════════════════════════════════════ */
+
+.section-hdr {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--card-border, rgba(74,127,165,0.15));
+}
+
+/* Logo banner */
+.section-hdr-logo-wrap {
+  width: 100%;
+  margin-bottom: 1.25rem;
+  line-height: 0;
+}
+
+.section-hdr-logo {
+  width: 100%;
+  height: auto;
+  max-height: 80px;
+  object-fit: contain;
+  object-position: left center;
+  display: block;
+  /* Dark / cool themes: invert grey wordmark to white */
+}
+
+[data-theme="dark"] .section-hdr-logo,
+[data-theme="cool"] .section-hdr-logo {
+  filter: brightness(0) invert(1);
+}
+
+/* Section title */
+.section-hdr-title {
+  font-family: 'JetBrains Mono', 'Cascadia Mono', monospace;
+  font-size: clamp(0.62rem, 2.2vw, 0.82rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #A0622A;
+  margin: 0 0 0.6rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Dropdown wrapper */
+.section-hdr-select-wrap {
+  position: relative;
+  display: block;
+}
+
+.section-hdr-select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  padding: 0.7rem 2.5rem 0.7rem 1rem;
+  background: var(--bg, #fff);
+  border: 1px solid rgba(74,127,165,0.3);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 600;
+  color: var(--heading, #193343);
+  cursor: pointer;
+  line-height: 1.4;
+  transition: border-color 0.15s;
+}
+
+.section-hdr-select:hover,
+.section-hdr-select:focus {
+  border-color: rgba(74,127,165,0.6);
+  outline: none;
+}
+
+.section-hdr-chevron {
+  position: absolute;
+  right: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  color: #909090;
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PROFILE SETTINGS BUTTON  /[username]
+   ═══════════════════════════════════════════════════════════ */
+
+.profile-settings-btn {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-bottom: 2rem;
+  background: #214459;
+  color: #fff;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.profile-settings-btn:hover {
+  background: #1a3648;
+}
+
+@media (min-width: 480px) {
+  .profile-settings-btn {
+    width: auto;
+    display: inline-block;
+    padding: 0.55rem 1.5rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INVESTMENT PAGE  /investment
+   ═══════════════════════════════════════════════════════════ */
+
+.inv-page {
+  min-height: 100vh;
+  padding: 3rem 1.25rem 5rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Hero */
+.inv-hero {
+  margin-bottom: 3.5rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid var(--card-border, rgba(74,127,165,0.15));
+}
+
+.inv-eyebrow {
+  font-family: 'JetBrains Mono', 'Cascadia Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #A0622A;
+  margin-bottom: 0.6rem;
+}
+
+.inv-heading {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin: 0 0 1.25rem;
+  line-height: 1.15;
+}
+
+.inv-intro {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--body-text, #4A4A4A);
+  max-width: 600px;
+  margin-bottom: 0.9rem;
+}
+
+/* Sections */
+.inv-section {
+  margin-bottom: 3rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid var(--card-border, rgba(74,127,165,0.10));
+}
+.inv-section:last-of-type {
+  border-bottom: none;
+}
+
+.inv-section-heading {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: clamp(1.4rem, 3vw, 1.85rem);
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin: 0 0 1rem;
+}
+
+.inv-subsection-heading {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--body-text, #4A4A4A);
+  margin: 0 0 0.75rem;
+}
+
+.inv-body {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--body-text, #4A4A4A);
+  margin-bottom: 0.9rem;
+}
+
+.inv-list {
+  margin: 0 0 0.9rem 1.25rem;
+  padding: 0;
+}
+.inv-list li {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--body-text, #4A4A4A);
+  margin-bottom: 0.35rem;
+}
+
+.inv-link {
+  color: #4A7FA5;
+  text-decoration: none;
+}
+.inv-link:hover {
+  color: #A0622A;
+  text-decoration: underline;
+}
+
+.inv-spacer {
+  height: 2rem;
+}
+
+/* Price Cards */
+.inv-price-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.25rem 0 1.25rem;
+  max-width: 380px;
+}
+
+.inv-price-card {
+  border: 1px solid var(--card-border, rgba(74,127,165,0.2));
+  border-radius: 12px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+}
+
+.inv-price-card--featured {
+  background: rgba(74,127,165,0.06);
+  border-color: rgba(74,127,165,0.35);
+}
+
+.inv-price-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #909090;
+  margin-bottom: 0.4rem;
+}
+
+.inv-price-amount {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4A7FA5;
+  margin-bottom: 0.25rem;
+}
+
+.inv-price-note {
+  font-size: 0.78rem;
+  color: #909090;
+  line-height: 1.4;
+}
+
+/* Customer Types */
+.inv-customer-types {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.inv-customer-type {
+  border-left: 3px solid rgba(74,127,165,0.3);
+  padding: 0.75rem 0 0.75rem 1rem;
+}
+
+.inv-customer-type-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #4A7FA5;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.inv-customer-type-body {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--body-text, #4A4A4A);
+  margin: 0;
+}
+
+/* Tables */
+.inv-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+  border: 1px solid var(--card-border, rgba(74,127,165,0.15));
+}
+
+.inv-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 600px;
+  font-size: 0.82rem;
+}
+
+.inv-assumptions-table {
+  min-width: 500px;
+}
+
+.inv-th {
+  background: var(--card-bg, rgba(74,127,165,0.04));
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #909090;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--card-border, rgba(74,127,165,0.15));
+}
+.inv-th--sticky {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+.inv-th--right { text-align: right; }
+.inv-th--var   { width: 80px; }
+.inv-th--note  { min-width: 180px; color: #909090; }
+
+.inv-tr:nth-child(even) {
+  background: var(--card-bg, rgba(74,127,165,0.02));
+}
+
+.inv-td {
+  padding: 0.5rem 0.75rem;
+  color: var(--body-text, #4A4A4A);
+  border-bottom: 1px solid var(--card-border, rgba(74,127,165,0.08));
+  white-space: nowrap;
+}
+.inv-td--sticky {
+  position: sticky;
+  left: 0;
+  background: var(--bg, #fff);
+  font-weight: 500;
+  z-index: 1;
+}
+.inv-tr:nth-child(even) .inv-td--sticky {
+  background: var(--card-bg, rgba(74,127,165,0.02));
+}
+.inv-td--right   { text-align: right; font-variant-numeric: tabular-nums; }
+.inv-td--label   { font-size: 0.8rem; }
+.inv-td--value   { font-weight: 600; color: #4A7FA5; }
+.inv-td--var     { width: 80px; }
+.inv-td--note    { font-size: 0.8rem; color: #909090; min-width: 180px; white-space: normal; }
+.inv-td--churn   { color: #A82020; }
+.inv-td--premium { color: #4A7FA5; font-weight: 500; }
+.inv-td--revenue { color: #3AB87A; font-weight: 600; }
+
+.inv-var-code {
+  font-family: 'JetBrains Mono', 'Cascadia Mono', monospace;
+  font-size: 0.8rem;
+  background: rgba(74,127,165,0.08);
+  border-radius: 3px;
+  padding: 0.1rem 0.35rem;
+  color: #4A7FA5;
+}
+
+.inv-table-note {
+  font-size: 0.72rem;
+  color: #909090;
+  margin-top: 0.6rem;
+  font-family: 'JetBrains Mono', 'Cascadia Mono', monospace;
+  line-height: 1.6;
+}
+
+/* Targets */
+.inv-targets-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.inv-target-card {
+  border: 1px solid var(--card-border, rgba(74,127,165,0.2));
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.inv-target-year {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #909090;
+  margin-bottom: 0.25rem;
+}
+
+.inv-target-amount {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin-bottom: 0.1rem;
+}
+
+.inv-target-label {
+  font-size: 0.78rem;
+  color: #909090;
+  margin-bottom: 1rem;
+}
+
+.inv-target-scenarios {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border-top: 1px solid var(--card-border, rgba(74,127,165,0.12));
+  padding-top: 0.75rem;
+}
+
+.inv-scenario-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.inv-scenario-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.inv-scenario-name {
+  flex: 1;
+  color: var(--body-text, #4A4A4A);
+}
+
+.inv-scenario-val {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--body-text, #4A4A4A);
+}
+.inv-scenario-val--hit  { color: #3AB87A; }
+.inv-scenario-val--miss { color: #A82020; }
+
+/* Chart */
+.inv-chart-wrap {
+  margin: 0.5rem 0 0.5rem;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.inv-scenario-key {
+  font-size: 0.82rem;
+  color: #909090;
+  margin-bottom: 0.75rem;
+}
+
+/* Milestones */
+.inv-milestones {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 1rem;
+  border-left: 2px solid rgba(74,127,165,0.2);
+  padding-left: 1.25rem;
+}
+
+.inv-milestone {
+  padding-bottom: 1.5rem;
+  position: relative;
+}
+.inv-milestone::before {
+  content: '';
+  position: absolute;
+  left: -1.45rem;
+  top: 0.45rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #4A7FA5;
+  border: 2px solid var(--bg, #fff);
+  box-shadow: 0 0 0 2px rgba(74,127,165,0.3);
+}
+
+.inv-milestone--conditional::before {
+  background: #A0622A;
+  box-shadow: 0 0 0 2px rgba(160,98,42,0.3);
+}
+
+.inv-milestone-date {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #4A7FA5;
+  margin-bottom: 0.25rem;
+}
+.inv-milestone--conditional .inv-milestone-date {
+  color: #A0622A;
+}
+
+.inv-milestone-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin-bottom: 0.35rem;
+}
+
+.inv-milestone-desc {
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: var(--body-text, #4A4A4A);
+  margin: 0;
+}
+
+/* Tooltip */
+.inv-tooltip {
+  background: var(--bg, #fff);
+  border: 1px solid rgba(74,127,165,0.2);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
+}
+.inv-tooltip-label {
+  font-weight: 600;
+  color: var(--heading, #193343);
+  margin-bottom: 0.25rem;
+}
+.inv-tooltip-row {
+  margin: 0.1rem 0;
+}
+
+/* Footer note */
+.inv-footer-note {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--card-border, rgba(74,127,165,0.12));
+  font-size: 0.82rem;
+  color: #909090;
+  line-height: 1.7;
+}
+.inv-footer-note p { margin-bottom: 0.35rem; }
+
+@media (min-width: 640px) {
+  .inv-targets-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  .inv-customer-types {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+  .inv-customer-type {
+    flex: 1;
+  }
 }
