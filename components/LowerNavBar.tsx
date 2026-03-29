@@ -68,6 +68,7 @@ const PAGE_GROUPS: PageGroup[] = [
     title: 'Discover',
     links: [
       { href: '/about',         label: 'About Wolfman' },
+      { href: '/guide',         label: 'The Guide' },
       { href: '/investment',    label: 'Investment Case' },
       { href: '/features',      label: 'Features' },
       { href: '/rituals',       label: 'Rituals' },

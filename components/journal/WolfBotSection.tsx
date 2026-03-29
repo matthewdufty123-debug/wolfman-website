@@ -3,9 +3,11 @@
 import { useRef, useEffect, useState } from 'react'
 
 // ── Matthew's WOLF|BOT pixel face grid (25×25) ───────────────────────────────
-// Colour key:
-//   1 = transparent   2 = #2E2E2E (outline)   3 = #4A7FA5 (face fill)
-//   5 = #FFFFFF (eye highlight)               9 = #0D0D1A (eye/mouth)
+// WOLFBOT PALETTE:
+//   1 = transparent (background)   2 = #D9D9D9 (Main Fur)   3 = #2E2E2E (Core Facial)
+//   4 = #666666 (Alt Facial)       5 = #4A90C4 (Outer Eye)  6 = #C6DDEA (Inner Eye)
+//   7 = #BB9040 (Tongue/Bronze)    8 = #E8A0B0 (Heart/Blush)
+//   9 = #BF7E54 (Object/Copper)   10 = #A72525 (Angry)
 
 const WOLFBOT_GRID = [
   [1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,2,2,1,1,1,1,1],
@@ -36,10 +38,15 @@ const WOLFBOT_GRID = [
 ]
 
 const PALETTE: Record<number, string> = {
-  2: '#2E2E2E',
-  3: '#4A7FA5',
-  5: '#FFFFFF',
-  9: '#0D0D1A',
+  2:  '#D9D9D9',
+  3:  '#2E2E2E',
+  4:  '#666666',
+  5:  '#4A90C4',
+  6:  '#C6DDEA',
+  7:  '#BB9040',
+  8:  '#E8A0B0',
+  9:  '#BF7E54',
+  10: '#A72525',
 }
 
 function WolfBotFace({ size = 100 }: { size?: number }) {
@@ -140,7 +147,7 @@ export default function WolfBotSection({ synthesis }: Props) {
       }
       setDisplayedText(synthesis.slice(0, i + 1))
       i++
-    }, 18)
+    }, 12)
     return () => clearInterval(interval)
   }, [quipVisible, synthesis])
 

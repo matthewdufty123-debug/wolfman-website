@@ -31,7 +31,8 @@ export default function MorningRitualsSection({ checklist }: Props) {
   const items = Object.entries(ROUTINE_ICON_MAP).filter(([key]) => Boolean(checklist[key]))
   const active = activeKey ? ROUTINE_ICON_MAP[activeKey] : null
 
-  const SIZE = 48
+  const ICON_SIZE = 24
+  const CIRCLE = ICON_SIZE + 10
 
   return (
     <section id="morning-rituals" className="journal-section">
@@ -48,27 +49,44 @@ export default function MorningRitualsSection({ checklist }: Props) {
                 onClick={() => setActiveKey(key)}
                 aria-label={label}
                 style={{
-                  width: SIZE + 10,
-                  height: SIZE + 10,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 5,
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  flexShrink: 0,
+                  opacity: visible ? 1 : 0,
+                  transform: visible ? 'none' : 'translateX(40px)',
+                  transition: 'opacity 1.6s ease, transform 1.6s ease',
+                  transitionDelay: `${i * 55}ms`,
+                }}
+              >
+                <div style={{
+                  width: CIRCLE,
+                  height: CIRCLE,
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   background: `${color}22`,
                   border: `1.5px solid ${color}`,
-                  flexShrink: 0,
-                  cursor: 'pointer',
-                  padding: 0,
-                  opacity: visible ? 1 : 0,
-                  // Enter from right (positive translateX → 0)
-                  transform: visible ? 'none' : 'translateX(40px)',
-                  transition: 'opacity 1.6s ease, transform 1.6s ease',
-                  transitionDelay: `${i * 55}ms`,
-                }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = '0.75')}
-                onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-              >
-                <Icon size={SIZE} color={color} />
+                }}>
+                  <Icon size={ICON_SIZE} color={color} />
+                </div>
+                <span style={{
+                  fontFamily: 'var(--font-inter)',
+                  fontSize: '0.5rem',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color,
+                  lineHeight: 1.2,
+                  textAlign: 'center',
+                  maxWidth: CIRCLE + 8,
+                }}>{label}</span>
               </button>
             ))}
           </div>

@@ -29,94 +29,18 @@ function getScaleColor(value: number, isStress = false): string {
   return `rgb(${rVal},${gVal},${bVal})`
 }
 
-// ── SVG pixel digit 1–6 ───────────────────────────────────────────────────────
-// 5×7 pixel grid for each digit, rendered as SVG rects
-
-const DIGIT_PIXELS: Record<number, number[][]> = {
-  1: [
-    [0,0,1,0,0],
-    [0,1,1,0,0],
-    [0,0,1,0,0],
-    [0,0,1,0,0],
-    [0,0,1,0,0],
-    [0,0,1,0,0],
-    [0,1,1,1,0],
-  ],
-  2: [
-    [0,1,1,1,0],
-    [1,0,0,0,1],
-    [0,0,0,0,1],
-    [0,0,0,1,0],
-    [0,0,1,0,0],
-    [0,1,0,0,0],
-    [1,1,1,1,1],
-  ],
-  3: [
-    [0,1,1,1,0],
-    [1,0,0,0,1],
-    [0,0,0,0,1],
-    [0,0,1,1,0],
-    [0,0,0,0,1],
-    [1,0,0,0,1],
-    [0,1,1,1,0],
-  ],
-  4: [
-    [0,0,0,1,0],
-    [0,0,1,1,0],
-    [0,1,0,1,0],
-    [1,0,0,1,0],
-    [1,1,1,1,1],
-    [0,0,0,1,0],
-    [0,0,0,1,0],
-  ],
-  5: [
-    [1,1,1,1,1],
-    [1,0,0,0,0],
-    [1,1,1,1,0],
-    [0,0,0,0,1],
-    [0,0,0,0,1],
-    [1,0,0,0,1],
-    [0,1,1,1,0],
-  ],
-  6: [
-    [0,0,1,1,0],
-    [0,1,0,0,0],
-    [1,0,0,0,0],
-    [1,1,1,1,0],
-    [1,0,0,0,1],
-    [1,0,0,0,1],
-    [0,1,1,1,0],
-  ],
-}
-
-function PixelDigit({ value, color, size = 32 }: { value: number; color: string; size?: number }) {
-  const pixels = DIGIT_PIXELS[value] ?? DIGIT_PIXELS[1]
-  const cellSize = size / 5
-  const totalH = cellSize * 7
+function ScaleNumber({ value, color }: { value: number; color: string }) {
   return (
-    <svg
-      width={size}
-      height={totalH}
-      viewBox={`0 0 ${size} ${totalH}`}
-      aria-hidden="true"
-      style={{ display: 'block' }}
-    >
-      {pixels.map((row, ri) =>
-        row.map((cell, ci) =>
-          cell ? (
-            <rect
-              key={`${ri}-${ci}`}
-              x={ci * cellSize + 1}
-              y={ri * cellSize + 1}
-              width={cellSize - 2}
-              height={cellSize - 2}
-              rx={1}
-              fill={color}
-            />
-          ) : null
-        )
-      )}
-    </svg>
+    <span style={{
+      fontFamily: 'var(--font-lora), Georgia, serif',
+      fontSize: '2.6rem',
+      fontWeight: 700,
+      color,
+      lineHeight: 1,
+      display: 'block',
+    }}>
+      {value}
+    </span>
   )
 }
 
@@ -151,8 +75,8 @@ function ScaleCol({ title, value, labels, isStress = false, revealed }: ScaleCol
       }}
     >
       <span className="hss-col-title">{title}</span>
-      <div className="hss-digit-wrap" style={{ color }}>
-        <PixelDigit value={value} color={color} size={36} />
+      <div className="hss-digit-wrap">
+        <ScaleNumber value={value} color={color} />
       </div>
       <span className="hss-col-word" style={{ color }}>{label}</span>
     </div>

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import type { ProcessedPost } from '@/lib/posts'
-import WolfLogo from '@/components/WolfLogo'
+import ThemeLogo from '@/components/ThemeLogo'
 import OrbNav from '@/components/journal/OrbNav'
 import MorningRitualsSection from '@/components/journal/MorningRitualsSection'
 import HumanScoresSection from '@/components/journal/HumanScoresSection'
@@ -177,14 +177,14 @@ export default function JournalPage({
 
         <AuditLogSection postDates={postDates} />
 
-        {/* PostFooter — "You have been reading..." + wolf logo */}
+        {/* PostFooter — "You have been reading..." + wordmark */}
         <footer className="post-reading-end">
           <p className="post-reading-end-label">You have been reading</p>
           <p className="post-reading-end-title">{post.title}</p>
           <p className="post-reading-end-date">Posted {formatPostDate(post.date)}</p>
           <div className="post-reading-end-logo">
-            <a href="/" aria-label="Return to Wolfman home">
-              <WolfLogo size={56} />
+            <a href="/about" aria-label="About Wolfman">
+              <ThemeLogo className="post-reading-end-wordmark" />
             </a>
           </div>
         </footer>

@@ -85,6 +85,7 @@ const NEXT_POST: SlotType     = { kind: 'next-post' }
 const FEED: SlotType      = { kind: 'link', href: '/',               label: 'feed',    icon: 'Rss' }
 const FEED_LOGO: SlotType = { kind: 'feed-logo' }
 const GUIDE: SlotType     = { kind: 'link', href: '/guide',          label: 'guide',   icon: 'BookOpen' }
+const ABOUT: SlotType     = { kind: 'link', href: '/about',          label: 'about',   icon: 'BadgeInfo', hideLabel: true }
 const ADMIN: SlotType     = { kind: 'link', href: '/admin',          label: 'admin',   icon: 'LayoutDashboard' }
 const BETA_LINK: SlotType = { kind: 'link', href: '/beta',           label: 'beta',    icon: 'Building2',  hideLabel: true }
 const SETTINGS: SlotType  = { kind: 'action', action: 'open-settings', label: 'settings', icon: 'Settings', hideLabel: true }
@@ -105,7 +106,7 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
   standard: {
     upper: [WRITE_PLUS, EMPTY, FEEDBACK_TEXT, BETA_LINK, SETTINGS],
     //       NBUS1        NBUS2         NBUS3           NBUS4      NBUS5
-    lower: [WOLFBOT, GUIDE, FEED_LOGO, ACCOUNT, MORE_PAGES],
+    lower: [WOLFBOT, ABOUT, FEED_LOGO, ACCOUNT, MORE_PAGES],
     //       NBLS1    NBLS2  NBLS3      NBLS4    NBLS5
   },
 

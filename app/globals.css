@@ -6060,22 +6060,22 @@ html[data-theme="dark"] .stats-chart-card {
 
 .orb-nav {
   position: fixed;
-  top: 40px;
+  top: 60px;
   left: 0;
   right: 0;
   z-index: 48;
   display: flex;
   align-items: center;
   justify-content: space-evenly;
-  padding: 6px 1rem;
+  padding: 10px 1rem;
   background: transparent;
   pointer-events: none;  /* only the buttons are interactive */
 }
 
 .orb-nav-btn {
   pointer-events: all;
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   border: 1.5px solid var(--heading, #193343);
   background: transparent;
@@ -6093,6 +6093,14 @@ html[data-theme="dark"] .stats-chart-card {
 
 .orb-nav-btn:hover {
   opacity: 0.7;
+}
+
+/* ── Reduced horizontal padding for score + journal sections ─────────────── */
+
+#how-i-showed-up.journal-section,
+#the-journal.journal-section {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 /* ── How I Showed Up — 4-column score grid ──────────────────────────────── */
@@ -6814,6 +6822,9 @@ html[data-theme="dark"] .pf-photo-add    { border-color: rgba(255,255,255,0.2); 
 }
 
 .post-reading-end-logo a { display: block; line-height: 0; }
+
+.post-reading-end-wordmark { max-width: 200px; opacity: 0.85; transition: opacity 0.2s ease; }
+.post-reading-end-logo a:hover .post-reading-end-wordmark { opacity: 1; }
 
 /* ── Old Journal Tabs ─────────────────────────────────────────────────────
    Kept for reference during transition — can be removed once new layout
