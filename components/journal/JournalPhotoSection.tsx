@@ -10,7 +10,7 @@ export default function JournalPhotoSection({ imageUrl, title }: Props) {
 
   return (
     <section id="journal-photo" className="journal-section">
-      <h2 className="journal-section-title">If I Could Put My Journal Into Words It Would Be...</h2>
+      <h2 className="journal-section-title">Journal Photo</h2>
       <div className="journal-photo-wrap">
         <Image
           src={imageUrl}

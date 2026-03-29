@@ -6032,17 +6032,18 @@ html[data-theme="dark"] .stats-chart-card {
 .journal-page-title-header {
   max-width: 640px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 1.5rem;
+  padding: 1.75rem 0.75rem 1.5rem;
   text-align: center;
 }
 
 .journal-page-title {
   font-family: var(--font-lora), Georgia, serif;
-  font-size: 1.45rem;
+  font-size: clamp(2rem, 8.5vw, 3rem);
   font-weight: 700;
-  line-height: 1.35;
+  line-height: 1.2;
   color: var(--body-text, #4A4A4A);
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.5rem;
+  text-wrap: balance;
 }
 
 .journal-page-date {
@@ -6060,7 +6061,7 @@ html[data-theme="dark"] .stats-chart-card {
 .journal-section {
   max-width: 640px;
   margin: 0 auto;
-  padding: 1.5rem 1.5rem 0.75rem;
+  padding: 1.5rem 1rem 0.75rem;
 }
 
 .journal-section--text {
@@ -7122,6 +7123,15 @@ html[data-fontsize="large"] .wolfbot-review-body {
 
 html[data-fontsize="xlarge"] .wolfbot-review-body {
   font-size: clamp(2rem, 5vw, 2.25rem);
+}
+
+/* WOLF|BOT terminal text scales with font size preference */
+html[data-fontsize="large"] .wolfbot-terminal-line {
+  font-size: 0.9rem;
+}
+
+html[data-fontsize="xlarge"] .wolfbot-terminal-line {
+  font-size: 1.05rem;
 }
 
 /* Site-wide paragraph text — follows font size preference */
