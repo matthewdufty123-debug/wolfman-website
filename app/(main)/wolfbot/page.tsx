@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import WolfBotIcon from '@/components/WolfBotIcon'
 
-export const metadata = undefined // suppressed — client component
 
 const PAGE_BOOT_SETS = [
   [
