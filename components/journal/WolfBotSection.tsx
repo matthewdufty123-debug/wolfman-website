@@ -203,7 +203,7 @@ export default function WolfBotSection({ synthesis }: Props) {
           <WolfBotFace size={72} />
           <div className="wolfbot-integrated-title">
             <span className="wolfbot-integrated-name">WOLF|BOT</span>
-            <span className="wolfbot-integrated-sub">JOURNAL REVIEW</span>
+            <span className="wolfbot-integrated-sub">REVIEW MODE</span>
           </div>
         </div>
 

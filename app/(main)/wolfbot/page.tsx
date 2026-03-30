@@ -85,6 +85,13 @@ export default function WolfBotPage() {
           </div>
         </div>
 
+        {/* Dev log button — directly under header */}
+        <div style={{ padding: '0.75rem 1.25rem 0' }}>
+          <Link href="/dev" className="wolfbot-yellow-btn" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>
+            VIEW DEV LOG →
+          </Link>
+        </div>
+
         {/* Terminal content */}
         <div className="wolfbot-bubble-inner wolfbot-page-content">
 
@@ -152,13 +159,6 @@ export default function WolfBotPage() {
               </div>
             </>
           )}
-
-          {/* Dev Log link — pinned to bottom */}
-          <div className="wolfbot-page-footer">
-            <Link href="/dev" className="wolfbot-dev-log-link">
-              View Dev Log →
-            </Link>
-          </div>
 
         </div>
       </div>
