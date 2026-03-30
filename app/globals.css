@@ -237,27 +237,62 @@ html[data-theme="light"] .feed-logo-img {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5rem 2rem;
-}
-
-.wolfbot-page-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2rem;
+  padding: 5rem 2rem 8rem;
 }
 
 .wolfbot-page-icon {
   image-rendering: pixelated;
 }
 
-.wolfbot-page-caption {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 1rem;
-  color: var(--muted, rgba(255, 255, 255, 0.45));
-  text-align: center;
-  margin: 0;
-  letter-spacing: 0.02em;
+/* ── WOLF|BOT coming-soon page ──────────────────────────────────────────── */
+.wolfbot-coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 520px;
+  padding: 0 1.25rem;
+}
+
+.wolfbot-coming-icon-wrap {
+  animation: wolfbot-page-pulse 3s ease-in-out infinite;
+}
+
+@keyframes wolfbot-page-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.04); }
+}
+
+.wolfbot-coming-terminal {
+  width: 100%;
+  background: #0d1117;
+  border: 1px solid #1e3a50;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(74, 127, 165, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.wolfbot-coming-dev-link {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: #4A7FA5;
+  text-decoration: none;
+  border: 1px solid rgba(74, 127, 165, 0.4);
+  border-radius: 4px;
+  padding: 0.55rem 1.25rem;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.wolfbot-coming-dev-link:hover {
+  background: rgba(74, 127, 165, 0.1);
+  color: #7AAFC8;
+  border-color: rgba(74, 127, 165, 0.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wolfbot-coming-icon-wrap { animation: none; }
 }
 
 /* ── Upper nav slot widths: 15 / 15 / 40 / 15 / 15 ── */
@@ -401,11 +436,17 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
   margin: 0 0 1.5rem;
 }
 
-/* Groups */
+/* ── Coloured page groups ──────────────────────────────────────────────────── */
 .more-pages-nav {
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
+  gap: 1rem;
+}
+.more-pages-group {
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--group-color) 35%, transparent);
+  background: color-mix(in srgb, var(--group-color) 5%, transparent);
+  overflow: hidden;
 }
 .more-pages-group-title {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -413,35 +454,50 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--nav-btn-icon, rgba(255, 255, 255, 0.35));
-  margin: 0 0 0.6rem;
+  color: var(--group-color);
+  margin: 0;
+  padding: 0.55rem 1rem;
+  border-left: 3px solid var(--group-color);
+  background: color-mix(in srgb, var(--group-color) 12%, transparent);
 }
 .more-pages-list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0.35rem 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0;
 }
 .more-pages-link {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 500;
-  letter-spacing: 0.04em;
-  color: var(--body, rgba(255, 255, 255, 0.82));
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
   padding: 0.55rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 .more-pages-link:hover {
-  color: var(--heading, #E5CBBB);
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: color-mix(in srgb, var(--group-color) 15%, transparent);
+  color: #ffffff;
+}
+.more-pages-link-icon {
+  color: var(--group-color);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  line-height: 0;
+  opacity: 0.9;
+}
+html[data-theme="light"] .more-pages-link {
+  color: rgba(25, 51, 67, 0.88);
+}
+html[data-theme="light"] .more-pages-link:hover {
+  color: #193343;
 }
 
 /* Admin button */
@@ -517,6 +573,92 @@ html[data-theme="light"] .theme-logo--light { display: none;  }
 .more-pages-signout-btn:hover {
   color: var(--heading, #E5CBBB);
   border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MORE PAGES — WOLF|BOT SECTION
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.more-pages-wolfbot {
+  margin-top: 1.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 1.5rem;
+}
+
+.more-pages-wolfbot-face-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.more-pages-wolfbot-banner {
+  flex: 1;
+  background: #0d1117;
+  border: 1px solid #1e3a50;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  gap: 0.3rem;
+  min-height: 80px;
+}
+
+.more-pages-wolfbot-banner-title {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #C8B020;
+  line-height: 1.1;
+}
+
+.more-pages-wolfbot-banner-sub {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  color: rgba(200, 176, 32, 0.55);
+  text-transform: uppercase;
+}
+
+.more-pages-wolfbot-terminal {
+  background: #0d1117;
+  border: 1px solid #1e3a50;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(74, 127, 165, 0.12);
+}
+
+.more-pages-wolfbot-prompt-label {
+  color: rgba(200, 176, 32, 0.6);
+  margin-top: 0.4rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.72rem;
+}
+
+.more-pages-wolfbot-input-row {
+  display: flex;
+  align-items: center;
+  padding-bottom: 0.25rem;
+}
+
+.more-pages-wolfbot-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: #C8B020;
+  caret-color: #C8B020;
+  line-height: 1.65;
+  padding: 0;
+  width: 100%;
+}
+
+.more-pages-wolfbot-input::placeholder {
+  color: rgba(200, 176, 32, 0.3);
 }
 
 /* ── Guide page ── */

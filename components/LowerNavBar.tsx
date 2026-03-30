@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -8,6 +8,7 @@ import {
   Home, Sunrise, Pencil, ShoppingBag, User, UserCircle2, Settings,
   Share2, Download, ArrowLeft, ChevronLeft, ChevronRight,
   LayoutDashboard, BadgeInfo, Bot, Plus, Building2, Rss, BookOpen, Menu, X,
+  TrendingUp, Trophy, Sparkles, ShoppingCart, MessageSquare, Code2, FileText,
 } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 import { signInWithGoogle, signInWithGitHub } from '@/lib/actions/oauth'
@@ -51,52 +52,136 @@ function NavIconEl({ icon, size = 20 }: { icon: NavIcon; size?: number }) {
 
 // ─── More Pages panel content ─────────────────────────────────────────────────
 
-type PageLink = { href: string; label: string }
-type PageGroup = { title: string; links: PageLink[]; authOnly?: boolean }
+type PageLink = { href: string; label: string; icon: React.ReactNode }
+type PageGroup = { title: string; links: PageLink[]; color: string; authOnly?: boolean }
 
 const PAGE_GROUPS: PageGroup[] = [
   {
     title: 'Your Space',
+    color: '#4A7FA5',
     links: [
-      { href: '/',                label: 'Feed' },
-      { href: '/write',           label: 'Write a Journal' },
-      { href: '/guide',           label: 'The Guide' },
-      { href: '/wolfbot',         label: 'WOLF|BOT' },
+      { href: '/',        label: 'Feed',            icon: <Home         size={16} strokeWidth={1.5} /> },
+      { href: '/write',   label: 'Write a Journal', icon: <Pencil       size={16} strokeWidth={1.5} /> },
+      { href: '/guide',   label: 'The Guide',       icon: <BookOpen     size={16} strokeWidth={1.5} /> },
+      { href: '/wolfbot', label: 'WOLF|BOT',        icon: <Bot          size={16} strokeWidth={1.5} /> },
     ],
   },
   {
     title: 'Discover',
+    color: '#3AB87A',
     links: [
-      { href: '/about',         label: 'About Wolfman' },
-      { href: '/guide',         label: 'The Guide' },
-      { href: '/investment',    label: 'Investment Case' },
-      { href: '/features',      label: 'Features' },
-      { href: '/rituals',       label: 'Rituals' },
-      { href: '/achievements',  label: 'Achievements' },
+      { href: '/about',        label: 'About Wolfman',   icon: <User        size={16} strokeWidth={1.5} /> },
+      { href: '/investment',   label: 'Investment Case', icon: <TrendingUp  size={16} strokeWidth={1.5} /> },
+      { href: '/features',     label: 'Features',        icon: <Sparkles    size={16} strokeWidth={1.5} /> },
+      { href: '/rituals',      label: 'Rituals',         icon: <Sunrise     size={16} strokeWidth={1.5} /> },
+      { href: '/achievements', label: 'Achievements',    icon: <Trophy      size={16} strokeWidth={1.5} /> },
     ],
   },
   {
     title: 'Shop',
+    color: '#A0622A',
     links: [
-      { href: '/shop',            label: 'Shop' },
-      { href: '/cart',            label: 'Cart' },
+      { href: '/shop', label: 'Shop', icon: <ShoppingBag  size={16} strokeWidth={1.5} /> },
+      { href: '/cart', label: 'Cart', icon: <ShoppingCart size={16} strokeWidth={1.5} /> },
     ],
   },
   {
     title: 'Beta Testing',
+    color: '#C8B020',
     links: [
-      { href: '/beta',            label: 'About the Beta' },
-      { href: '/feedback',        label: 'Give Feedback' },
-      { href: '/dev',             label: 'Dev Log' },
+      { href: '/beta',     label: 'About the Beta', icon: <BadgeInfo     size={16} strokeWidth={1.5} /> },
+      { href: '/feedback', label: 'Give Feedback',  icon: <MessageSquare size={16} strokeWidth={1.5} /> },
+      { href: '/dev',      label: 'Dev Log',        icon: <Code2         size={16} strokeWidth={1.5} /> },
     ],
   },
   {
     title: 'Legal',
+    color: '#909090',
     links: [
-      { href: '/terms',           label: 'Terms' },
+      { href: '/terms', label: 'Terms', icon: <FileText size={16} strokeWidth={1.5} /> },
     ],
   },
 ]
+
+// ─── WOLF|BOT menu terminal ────────────────────────────────────────────────────
+
+const MENU_BOOT_SETS = [
+  [
+    'WOLF|BOT CPU WARMING... WARMING! READY!',
+    'NEURAL PATHWAYS CALIBRATED',
+    'SNIFFING NETWORK... OK',
+  ],
+  [
+    'INITIATING HOWL PROTOCOLS...',
+    'LOADING MOON PHASE DATA... DONE',
+    'TAIL CALIBRATION: NOMINAL',
+  ],
+  [
+    'BOOTING WOLF BRAIN v4.2.0...',
+    'CHECKING TREAT RESERVES... EMPTY',
+    'PROCEEDING ANYWAY. BRAVE.',
+  ],
+]
+
+const MENU_WOLFBOT_GRID = [
+  [1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,2,2,1,1,1,1,1],
+  [1,1,1,2,2,2,2,1,1,1,1,1,1,1,1,1,1,2,2,2,2,1,1,1,1],
+  [1,1,1,2,3,3,2,2,1,1,1,1,1,1,1,1,2,2,3,3,2,2,1,1,1],
+  [1,1,1,2,3,3,3,2,1,1,1,1,1,1,1,1,2,2,3,3,3,2,1,1,1],
+  [1,1,2,2,3,3,3,2,2,1,1,1,1,1,1,1,2,2,3,3,3,2,2,1,1],
+  [1,2,2,3,3,3,3,3,2,2,1,1,1,1,1,2,2,3,3,3,3,3,2,1,1],
+  [1,2,3,3,3,3,3,3,3,2,2,2,2,2,2,2,3,3,3,3,3,3,2,1,1],
+  [2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,1],
+  [2,2,3,3,9,9,9,9,9,9,9,3,3,3,9,9,9,9,9,9,9,3,3,2,1],
+  [2,2,3,3,9,9,9,9,9,9,9,3,3,3,9,9,9,9,9,9,9,3,3,2,1],
+  [2,2,3,3,3,3,3,5,5,5,3,3,3,3,3,3,3,3,5,5,5,3,2,2,1],
+  [1,2,2,3,3,3,3,5,5,5,3,3,3,3,3,3,3,3,5,5,5,3,2,2,1],
+  [1,1,2,3,3,3,3,3,3,3,3,2,2,2,3,3,3,3,3,3,3,2,2,1,1],
+  [1,1,2,3,3,3,3,3,3,2,2,2,2,2,2,2,3,3,3,3,3,2,2,1,1],
+  [1,1,2,2,3,3,3,3,2,3,3,3,3,3,3,3,2,3,3,3,2,2,1,1,1],
+  [1,1,2,2,3,3,3,2,2,2,3,3,3,3,3,2,2,2,3,3,2,2,1,1,1],
+  [1,1,1,2,3,3,2,2,3,2,2,2,2,2,2,2,3,2,2,2,2,1,1,1,1],
+  [1,1,1,2,2,2,2,3,3,3,2,2,2,2,2,3,3,3,2,2,2,1,1,1,1],
+  [1,1,1,1,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,2,1,1,1,1,1],
+  [1,1,1,1,2,2,3,3,3,9,9,9,9,9,9,9,3,3,3,2,1,1,1,1,1],
+  [1,1,1,1,1,2,2,3,3,9,9,9,9,9,9,9,3,3,2,1,1,1,1,1,1],
+  [1,1,1,1,1,2,2,3,3,3,3,3,3,3,3,3,3,3,2,1,1,1,1,1,1],
+  [1,1,1,1,1,1,2,3,3,3,3,3,3,3,3,3,3,3,2,1,1,1,1,1,1],
+  [1,1,1,1,1,1,2,2,3,3,3,3,3,3,3,3,3,2,1,1,1,1,1,1,1],
+  [1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1],
+]
+
+const MENU_WOLFBOT_PALETTE: Record<number, string> = {
+  2:  '#D9D9D9',
+  3:  '#2E2E2E',
+  4:  '#666666',
+  5:  '#4A90C4',
+  6:  '#C6DDEA',
+  7:  '#BB9040',
+  8:  '#E8A0B0',
+  9:  '#BF7E54',
+  10: '#A72525',
+}
+
+function MenuWolfBotFace({ size = 80 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 25 25"
+      aria-hidden="true"
+      style={{ display: 'block', imageRendering: 'pixelated', flexShrink: 0 }}
+    >
+      {MENU_WOLFBOT_GRID.map((row, ri) =>
+        row.map((cell, ci) => {
+          const fill = MENU_WOLFBOT_PALETTE[cell]
+          if (!fill) return null
+          return <rect key={`${ri}-${ci}`} x={ci} y={ri} width={1} height={1} fill={fill} />
+        })
+      )}
+    </svg>
+  )
+}
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -122,6 +207,16 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
+
+  // WOLF|BOT terminal boot sequence
+  type BootPhase = 'idle' | 'booting' | 'done'
+  const [bootPhase, setBootPhase]               = useState<BootPhase>('idle')
+  const [bootSetIdx]                            = useState(() => Math.floor(Math.random() * MENU_BOOT_SETS.length))
+  const [bootLineIdx, setBootLineIdx]           = useState(0)
+  const [displayedBoot, setDisplayedBoot]       = useState('')
+  const [bootDone, setBootDone]                 = useState(false)
+  const [menuSearchInput, setMenuSearchInput]   = useState('')
+  const menuInputRef = useRef<HTMLInputElement>(null)
 
   const avatarUrl = session?.user?.avatar ?? session?.user?.image ?? null
   const segments = pathname.split('/').filter(Boolean)
@@ -168,6 +263,48 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [])
+
+  // WOLF|BOT terminal — reset on close, start on open
+  useEffect(() => {
+    if (!morePagesOpen) {
+      setBootPhase('idle')
+      setBootLineIdx(0)
+      setDisplayedBoot('')
+      setBootDone(false)
+      setMenuSearchInput('')
+      return
+    }
+    const t = setTimeout(() => setBootPhase('booting'), 400)
+    return () => clearTimeout(t)
+  }, [morePagesOpen])
+
+  // WOLF|BOT terminal — type each boot line
+  useEffect(() => {
+    if (bootPhase !== 'booting') return
+    const lines = MENU_BOOT_SETS[bootSetIdx]
+    const line = lines[bootLineIdx] ?? null
+    if (!line) {
+      setBootPhase('done')
+      setBootDone(true)
+      setTimeout(() => menuInputRef.current?.focus(), 150)
+      return
+    }
+    setDisplayedBoot('')
+    let i = 0
+    const interval = setInterval(() => {
+      if (i >= line.length) {
+        clearInterval(interval)
+        setTimeout(() => {
+          setBootLineIdx(prev => prev + 1)
+          setDisplayedBoot('')
+        }, 280)
+        return
+      }
+      setDisplayedBoot(line.slice(0, i + 1))
+      i++
+    }, 20)
+    return () => clearInterval(interval)
+  }, [bootPhase, bootLineIdx, bootSetIdx])
 
   async function handleShare() {
     try {
@@ -430,7 +567,11 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
           {/* Page groups */}
           <nav className="more-pages-nav" aria-label="All pages">
             {PAGE_GROUPS.map(group => (
-              <div key={group.title} className="more-pages-group">
+              <div
+                key={group.title}
+                className="more-pages-group"
+                style={{ '--group-color': group.color } as React.CSSProperties}
+              >
                 <p className="more-pages-group-title">{group.title}</p>
                 <ul className="more-pages-list">
                   {group.links.map(link => (
@@ -440,7 +581,8 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
                         className="more-pages-link"
                         onClick={() => setMorePagesOpen(false)}
                       >
-                        {link.label}
+                        <span className="more-pages-link-icon">{link.icon}</span>
+                        <span>{link.label}</span>
                       </Link>
                     </li>
                   ))}
@@ -448,6 +590,88 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
               </div>
             ))}
           </nav>
+
+          {/* ── WOLF|BOT terminal section ── */}
+          <div className="more-pages-wolfbot">
+            {/* Face + banner */}
+            <div className="more-pages-wolfbot-face-row">
+              <MenuWolfBotFace size={80} />
+              <div className="more-pages-wolfbot-banner">
+                <span className="more-pages-wolfbot-banner-title">WOLF|BOT</span>
+                <span className="more-pages-wolfbot-banner-sub">SEARCH &amp; ASSIST</span>
+              </div>
+            </div>
+
+            {/* Terminal */}
+            <div className="more-pages-wolfbot-terminal">
+              <div className="wolfbot-terminal-bar">
+                <span className="wolfbot-terminal-dot wbt-red" />
+                <span className="wolfbot-terminal-dot wbt-amber" />
+                <span className="wolfbot-terminal-dot wbt-green" />
+                <span className="wolfbot-terminal-label">WOLF|BOT Terminal</span>
+              </div>
+              <div className="wolfbot-bubble-inner">
+
+                {/* Completed boot lines */}
+                {(bootPhase === 'booting' || bootDone) &&
+                  MENU_BOOT_SETS[bootSetIdx].slice(0, bootLineIdx).map((line, idx) => (
+                    <p key={idx} className="wolfbot-terminal-line">
+                      <span className="wbt-prompt">&gt;&nbsp;</span>
+                      <span className="wbt-boot">{line}</span>
+                    </p>
+                  ))
+                }
+
+                {/* Currently typing line */}
+                {bootPhase === 'booting' && (
+                  <p className="wolfbot-terminal-line">
+                    <span className="wbt-prompt">&gt;&nbsp;</span>
+                    <span className="wbt-boot">{displayedBoot}</span>
+                    <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
+                  </p>
+                )}
+
+                {/* Search prompt — shown when boot done */}
+                {bootDone && (
+                  <>
+                    <p className="wolfbot-terminal-line more-pages-wolfbot-prompt-label">
+                      What would you like to search for?
+                    </p>
+                    <div className="more-pages-wolfbot-input-row">
+                      <span className="wbt-prompt">&gt;&nbsp;</span>
+                      <input
+                        ref={menuInputRef}
+                        type="text"
+                        className="more-pages-wolfbot-input"
+                        value={menuSearchInput}
+                        onChange={e => setMenuSearchInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' && menuSearchInput.trim()) {
+                            setMorePagesOpen(false)
+                            router.push('/wolfbot')
+                          }
+                        }}
+                        placeholder="type and press Enter..."
+                        aria-label="Search WOLF|BOT"
+                        autoComplete="off"
+                        spellCheck={false}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Idle — blinking cursor only */}
+                {bootPhase === 'idle' && (
+                  <p className="wolfbot-terminal-line">
+                    <span className="wbt-prompt">&gt;&nbsp;</span>
+                    <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
+                  </p>
+                )}
+
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
