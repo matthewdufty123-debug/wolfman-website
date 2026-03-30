@@ -758,8 +758,12 @@ html[data-theme="light"] .more-pages-link:hover {
 
 /* ── WOLF|BOT page — full-page terminal ──────────────────────────────────── */
 .wolfbot-page--full {
-  align-items: stretch;
+  position: fixed;
+  inset: 44px 0 64px 0;
+  min-height: unset;
   padding: 0;
+  align-items: stretch;
+  overflow: hidden;
 }
 
 .wolfbot-page-terminal {
@@ -770,13 +774,16 @@ html[data-theme="light"] .more-pages-link:hover {
   border-top: none;
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 44px - 64px);
+  min-height: unset;
+  height: 100%;
 }
 
 .wolfbot-page-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  min-height: 0; /* required for flex overflow-y to work */
 }
 
 .wolfbot-page-footer {
