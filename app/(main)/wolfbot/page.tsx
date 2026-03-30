@@ -82,6 +82,7 @@ export default function WolfBotPage() {
           <div className="wolfbot-integrated-title">
             <span className="wolfbot-integrated-name">WOLF|BOT</span>
             <span className="wolfbot-integrated-sub">SEARCH &amp; ASSIST</span>
+            <span className="wolfbot-integrated-mode">Current Mode: Standard</span>
           </div>
         </div>
 

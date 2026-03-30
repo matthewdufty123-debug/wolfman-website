@@ -657,7 +657,7 @@ html[data-theme="light"] .more-pages-link:hover {
 
 .wolfbot-integrated-name {
   font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   color: #C8B020;
@@ -666,10 +666,19 @@ html[data-theme="light"] .more-pages-link:hover {
 
 .wolfbot-integrated-sub {
   font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   letter-spacing: 0.22em;
   color: rgba(200, 176, 32, 0.55);
   text-transform: uppercase;
+}
+
+.wolfbot-integrated-mode {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  color: rgba(200, 176, 32, 0.4);
+  text-transform: uppercase;
+  margin-top: 0.15rem;
 }
 
 /* Yellow action button — used in journal review + wolfbot page */
