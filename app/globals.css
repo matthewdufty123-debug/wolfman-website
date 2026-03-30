@@ -660,9 +660,130 @@ html[data-theme="light"] .more-pages-link:hover {
   color: rgba(200, 176, 32, 0.3);
 }
 
-/* Override bubble-inner padding for the menu terminal — more room in full-width */
+/* Override bubble-inner padding for the menu terminal — lift content off nav bar */
 .more-pages-wolfbot-terminal .wolfbot-bubble-inner {
-  padding: 0.75rem 1.25rem 1rem;
+  padding: 0.75rem 1.25rem 5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WOLF|BOT — INTEGRATED TERMINAL  (journal page + wolfbot page)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Shared terminal shell */
+.wolfbot-integrated {
+  background: #0d1117;
+  border: 1px solid #1e3a50;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(74, 127, 165, 0.12);
+}
+
+/* Header row: face + title */
+.wolfbot-integrated-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.wolfbot-integrated-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.wolfbot-integrated-name {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #C8B020;
+  line-height: 1.1;
+}
+
+.wolfbot-integrated-sub {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  color: rgba(200, 176, 32, 0.55);
+  text-transform: uppercase;
+}
+
+/* Yellow action button — used in journal review + wolfbot page */
+.wolfbot-yellow-btn {
+  display: block;
+  width: 100%;
+  background: #C8B020;
+  color: #0d1117;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+.wolfbot-yellow-btn:hover:not(:disabled) { background: #d9bf25; }
+.wolfbot-yellow-btn:disabled { opacity: 0.55; cursor: default; }
+
+/* Error line text */
+.wbt-error {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: #A82020;
+  letter-spacing: 0.02em;
+}
+
+/* Dev log link — yellow terminal style */
+.wolfbot-dev-log-link {
+  display: inline-block;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: #C8B020;
+  text-decoration: none;
+  border: 1px solid rgba(200, 176, 32, 0.45);
+  border-radius: 4px;
+  padding: 0.5rem 1.25rem;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.wolfbot-dev-log-link:hover {
+  background: rgba(200, 176, 32, 0.1);
+  border-color: rgba(200, 176, 32, 0.8);
+}
+
+/* ── WOLF|BOT page — full-page terminal ──────────────────────────────────── */
+.wolfbot-page--full {
+  align-items: stretch;
+  padding: 0;
+}
+
+.wolfbot-page-terminal {
+  flex: 1;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 44px - 64px);
+}
+
+.wolfbot-page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.wolfbot-page-footer {
+  margin-top: auto;
+  padding-top: 2rem;
+  padding-bottom: 1.5rem;
 }
 
 /* ── Guide page ── */
