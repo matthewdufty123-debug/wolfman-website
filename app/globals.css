@@ -587,22 +587,21 @@ html[data-theme="light"] .more-pages-link:hover {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.more-pages-wolfbot-terminal {
-  background: #0d1117;
-  border-top: 1px solid #1e3a50;
-  border-left: none;
-  border-right: none;
-  border-bottom: none;
-  overflow: hidden;
-}
-
-/* Integrated header: face + title block inside the terminal */
-.more-pages-wolfbot-header {
+/* Clickable card — links to /wolfbot */
+.more-pages-wolfbot-card {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 1.25rem 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 1rem 1.25rem;
+  background: #0d1117;
+  border-top: 1px solid #1e3a50;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.more-pages-wolfbot-card:hover,
+.more-pages-wolfbot-card:active {
+  background: #111b24;
 }
 
 .more-pages-wolfbot-title-block {
@@ -626,42 +625,6 @@ html[data-theme="light"] .more-pages-link:hover {
   letter-spacing: 0.22em;
   color: rgba(200, 176, 32, 0.55);
   text-transform: uppercase;
-}
-
-.more-pages-wolfbot-prompt-label {
-  color: rgba(200, 176, 32, 0.6);
-  margin-top: 0.4rem;
-  margin-bottom: 0.35rem;
-  font-size: 0.72rem;
-}
-
-.more-pages-wolfbot-input-row {
-  display: flex;
-  align-items: center;
-  padding-bottom: 0.5rem;
-}
-
-.more-pages-wolfbot-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
-  font-size: 0.78rem;
-  color: #C8B020;
-  caret-color: #C8B020;
-  line-height: 1.65;
-  padding: 0;
-  width: 100%;
-}
-
-.more-pages-wolfbot-input::placeholder {
-  color: rgba(200, 176, 32, 0.3);
-}
-
-/* Override bubble-inner padding for the menu terminal */
-.more-pages-wolfbot-terminal .wolfbot-bubble-inner {
-  padding: 0.75rem 1.25rem 2rem;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -103,25 +103,7 @@ const PAGE_GROUPS: PageGroup[] = [
   },
 ]
 
-// ─── WOLF|BOT menu terminal ────────────────────────────────────────────────────
-
-const MENU_BOOT_SETS = [
-  [
-    'WOLF|BOT CPU WARMING... WARMING! READY!',
-    'NEURAL PATHWAYS CALIBRATED',
-    'SNIFFING NETWORK... OK',
-  ],
-  [
-    'INITIATING HOWL PROTOCOLS...',
-    'LOADING MOON PHASE DATA... DONE',
-    'TAIL CALIBRATION: NOMINAL',
-  ],
-  [
-    'BOOTING WOLF BRAIN v4.2.0...',
-    'CHECKING TREAT RESERVES... EMPTY',
-    'PROCEEDING ANYWAY. BRAVE.',
-  ],
-]
+// ─── WOLF|BOT menu face ────────────────────────────────────────────────────────
 
 const MENU_WOLFBOT_GRID = [
   [1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,2,2,1,1,1,1,1],
@@ -208,16 +190,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
   const [loginError, setLoginError] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
 
-  // WOLF|BOT terminal boot sequence
-  type BootPhase = 'idle' | 'booting' | 'done'
-  const [bootPhase, setBootPhase]               = useState<BootPhase>('idle')
-  const [bootSetIdx]                            = useState(() => Math.floor(Math.random() * MENU_BOOT_SETS.length))
-  const [bootLineIdx, setBootLineIdx]           = useState(0)
-  const [displayedBoot, setDisplayedBoot]       = useState('')
-  const [bootDone, setBootDone]                 = useState(false)
-  const [menuSearchInput, setMenuSearchInput]   = useState('')
-  const menuInputRef = useRef<HTMLInputElement>(null)
-
   const avatarUrl = session?.user?.avatar ?? session?.user?.image ?? null
   const segments = pathname.split('/').filter(Boolean)
 
@@ -263,48 +235,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [])
-
-  // WOLF|BOT terminal — reset on close, start on open
-  useEffect(() => {
-    if (!morePagesOpen) {
-      setBootPhase('idle')
-      setBootLineIdx(0)
-      setDisplayedBoot('')
-      setBootDone(false)
-      setMenuSearchInput('')
-      return
-    }
-    const t = setTimeout(() => setBootPhase('booting'), 400)
-    return () => clearTimeout(t)
-  }, [morePagesOpen])
-
-  // WOLF|BOT terminal — type each boot line
-  useEffect(() => {
-    if (bootPhase !== 'booting') return
-    const lines = MENU_BOOT_SETS[bootSetIdx]
-    const line = lines[bootLineIdx] ?? null
-    if (!line) {
-      setBootPhase('done')
-      setBootDone(true)
-      setTimeout(() => menuInputRef.current?.focus(), 150)
-      return
-    }
-    setDisplayedBoot('')
-    let i = 0
-    const interval = setInterval(() => {
-      if (i >= line.length) {
-        clearInterval(interval)
-        setTimeout(() => {
-          setBootLineIdx(prev => prev + 1)
-          setDisplayedBoot('')
-        }, 280)
-        return
-      }
-      setDisplayedBoot(line.slice(0, i + 1))
-      i++
-    }, 20)
-    return () => clearInterval(interval)
-  }, [bootPhase, bootLineIdx, bootSetIdx])
 
   async function handleShare() {
     try {
@@ -591,77 +521,19 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
             ))}
           </nav>
 
-          {/* ── WOLF|BOT terminal section ── */}
+          {/* ── WOLF|BOT link card ── */}
           <div className="more-pages-wolfbot">
-            <div className="more-pages-wolfbot-terminal">
-              {/* Integrated header: face + title inside the terminal */}
-              <div className="more-pages-wolfbot-header">
-                <MenuWolfBotFace size={72} />
-                <div className="more-pages-wolfbot-title-block">
-                  <span className="more-pages-wolfbot-banner-title">WOLF|BOT</span>
-                  <span className="more-pages-wolfbot-banner-sub">SEARCH &amp; ASSIST</span>
-                </div>
+            <Link
+              href="/wolfbot"
+              className="more-pages-wolfbot-card"
+              onClick={() => setMorePagesOpen(false)}
+            >
+              <MenuWolfBotFace size={72} />
+              <div className="more-pages-wolfbot-title-block">
+                <span className="more-pages-wolfbot-banner-title">WOLF|BOT</span>
+                <span className="more-pages-wolfbot-banner-sub">SEARCH &amp; ASSIST</span>
               </div>
-              <div className="wolfbot-bubble-inner">
-
-                {/* Completed boot lines */}
-                {(bootPhase === 'booting' || bootDone) &&
-                  MENU_BOOT_SETS[bootSetIdx].slice(0, bootLineIdx).map((line, idx) => (
-                    <p key={idx} className="wolfbot-terminal-line">
-                      <span className="wbt-prompt">&gt;&nbsp;</span>
-                      <span className="wbt-boot">{line}</span>
-                    </p>
-                  ))
-                }
-
-                {/* Currently typing line */}
-                {bootPhase === 'booting' && (
-                  <p className="wolfbot-terminal-line">
-                    <span className="wbt-prompt">&gt;&nbsp;</span>
-                    <span className="wbt-boot">{displayedBoot}</span>
-                    <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
-                  </p>
-                )}
-
-                {/* Search prompt — shown when boot done */}
-                {bootDone && (
-                  <>
-                    <p className="wolfbot-terminal-line more-pages-wolfbot-prompt-label">
-                      What would you like to search for?
-                    </p>
-                    <div className="more-pages-wolfbot-input-row">
-                      <span className="wbt-prompt">&gt;&nbsp;</span>
-                      <input
-                        ref={menuInputRef}
-                        type="text"
-                        className="more-pages-wolfbot-input"
-                        value={menuSearchInput}
-                        onChange={e => setMenuSearchInput(e.target.value)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter' && menuSearchInput.trim()) {
-                            setMorePagesOpen(false)
-                            router.push('/wolfbot')
-                          }
-                        }}
-                        placeholder="type and press Enter..."
-                        aria-label="Search WOLF|BOT"
-                        autoComplete="off"
-                        spellCheck={false}
-                      />
-                    </div>
-                  </>
-                )}
-
-                {/* Idle — blinking cursor only */}
-                {bootPhase === 'idle' && (
-                  <p className="wolfbot-terminal-line">
-                    <span className="wbt-prompt">&gt;&nbsp;</span>
-                    <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
-                  </p>
-                )}
-
-              </div>
-            </div>
+            </Link>
           </div>
 
         </div>
