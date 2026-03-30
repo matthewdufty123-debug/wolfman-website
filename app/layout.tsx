@@ -60,7 +60,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){
-              var t=localStorage.getItem('wolfman-theme')||'dark';
+              var t=localStorage.getItem('wolfman-theme')||'light';
               var f=localStorage.getItem('wolfman-fontsize')||'normal';
               document.documentElement.setAttribute('data-theme',t);
               document.documentElement.setAttribute('data-fontsize',f);

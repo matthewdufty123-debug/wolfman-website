@@ -43,13 +43,13 @@ function saveToDb(prefs: { theme?: string; fontSize?: string }) {
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initialise with server-safe defaults so SSR and client HTML match.
   // useEffect then syncs to whatever the flash-prevention script already painted.
-  const [theme, setThemeState] = useState<Theme>('dark')
+  const [theme, setThemeState] = useState<Theme>('light')
   const [fontSize, setFontSizeState] = useState<FontSize>('normal')
   const { data: session, status } = useSession()
 
   // On mount: read from DOM (set by flash-prevention script from localStorage)
   useEffect(() => {
-    const t = (document.documentElement.getAttribute('data-theme') as Theme) || 'dark'
+    const t = (document.documentElement.getAttribute('data-theme') as Theme) || 'light'
     const f = (document.documentElement.getAttribute('data-fontsize') as FontSize) || 'normal'
     setThemeState(t)
     setFontSizeState(f)
