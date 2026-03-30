@@ -593,22 +593,14 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
 
           {/* ── WOLF|BOT terminal section ── */}
           <div className="more-pages-wolfbot">
-            {/* Face + banner */}
-            <div className="more-pages-wolfbot-face-row">
-              <MenuWolfBotFace size={80} />
-              <div className="more-pages-wolfbot-banner">
-                <span className="more-pages-wolfbot-banner-title">WOLF|BOT</span>
-                <span className="more-pages-wolfbot-banner-sub">SEARCH &amp; ASSIST</span>
-              </div>
-            </div>
-
-            {/* Terminal */}
             <div className="more-pages-wolfbot-terminal">
-              <div className="wolfbot-terminal-bar">
-                <span className="wolfbot-terminal-dot wbt-red" />
-                <span className="wolfbot-terminal-dot wbt-amber" />
-                <span className="wolfbot-terminal-dot wbt-green" />
-                <span className="wolfbot-terminal-label">WOLF|BOT Terminal</span>
+              {/* Integrated header: face + title inside the terminal */}
+              <div className="more-pages-wolfbot-header">
+                <MenuWolfBotFace size={72} />
+                <div className="more-pages-wolfbot-title-block">
+                  <span className="more-pages-wolfbot-banner-title">WOLF|BOT</span>
+                  <span className="more-pages-wolfbot-banner-sub">SEARCH &amp; ASSIST</span>
+                </div>
               </div>
               <div className="wolfbot-bubble-inner">
 
