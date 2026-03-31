@@ -101,9 +101,12 @@ export default function JournalPage({
     const delta = e.touches[0].clientX - touchStartX.current
     const abs = Math.abs(delta)
     if (abs > 10) {
-      // Fade content as swipe progresses — from 1 down to 0.25
-      const opacity = Math.max(0.25, 1 - (abs / MAX_SWIPE_DISTANCE) * 0.75)
-      setContentOpacity(opacity)
+      // Only fade if there is a post to navigate to in this direction
+      const href = delta < 0 ? nextHref : prevHref
+      if (href) {
+        const opacity = Math.max(0.25, 1 - (abs / MAX_SWIPE_DISTANCE) * 0.75)
+        setContentOpacity(opacity)
+      }
     }
   }
 

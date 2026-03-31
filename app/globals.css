@@ -426,12 +426,19 @@ html[data-theme="light"] .feed-logo-img {
   height: auto;
   display: block;
 }
-/* Dark theme: show grey bronze, hide white */
-html[data-theme="dark"] .theme-logo--dark  { display: none;  }
-html[data-theme="dark"] .theme-logo--light { display: block; }
-/* Light theme: show grey bronze (dark logo reads on light bg), hide white */
-html[data-theme="light"] .theme-logo--dark  { display: block; }
-html[data-theme="light"] .theme-logo--light { display: none;  }
+/* Default (fallback / unknown theme): show grey bronze, hide white */
+.theme-logo--dark  { display: block; }
+.theme-logo--light { display: none;  }
+/* Dark + Cool themes: show white logo (reads on dark backgrounds), hide grey */
+html[data-theme="dark"] .theme-logo--dark,
+html[data-theme="cool"] .theme-logo--dark  { display: none;  }
+html[data-theme="dark"] .theme-logo--light,
+html[data-theme="cool"] .theme-logo--light { display: block; }
+/* Light + Warm themes: show grey bronze (reads on light backgrounds), hide white */
+html[data-theme="light"] .theme-logo--dark,
+html[data-theme="warm"]  .theme-logo--dark  { display: block; }
+html[data-theme="light"] .theme-logo--light,
+html[data-theme="warm"]  .theme-logo--light { display: none;  }
 
 /* Feed page logo */
 .feed-logo-wrap {

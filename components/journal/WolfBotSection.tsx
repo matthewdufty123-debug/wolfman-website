@@ -114,7 +114,8 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: 
       i++
     }, 22)
     return () => clearInterval(interval)
-  }, [revealed, bootLine])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealed, bootLine, userTriggered])
 
   // Typewriter for active tab (runs once per tab)
   useEffect(() => {
