@@ -44,8 +44,13 @@ export async function POST(req: Request) {
     }
     const ext = screenshot.name.split('.').pop() ?? 'png'
     const filename = `feedback/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-    const blob = await put(filename, screenshot, { access: 'public', contentType: screenshot.type })
-    screenshotUrl = blob.url
+    try {
+      const blob = await put(filename, screenshot, { access: 'public', contentType: screenshot.type })
+      screenshotUrl = blob.url
+    } catch (err) {
+      console.error('[feedback] Screenshot upload failed:', err)
+      return NextResponse.json({ error: 'Screenshot upload failed. Try removing the image and submitting again.' }, { status: 502 })
+    }
   }
 
   const shortMessage = message.trim().slice(0, 60)

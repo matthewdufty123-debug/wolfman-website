@@ -270,7 +270,7 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
       case 'wolfbot':
         return (
           <Link key={key} href="/wolfbot" className="nav-slot nav-slot--wolfbot" aria-label="WOLF|BOT">
-            <WolfBotIcon size={26} />
+            <WolfBotIcon size={20} />
           </Link>
         )
 

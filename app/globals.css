@@ -6401,13 +6401,13 @@ html[data-theme="dark"] .stats-chart-card {
 .journal-page-title-header {
   max-width: 640px;
   margin: 0 auto;
-  padding: 1.75rem 0.75rem 1.5rem;
+  padding: 1.75rem 1rem 1.5rem;
   text-align: center;
 }
 
 .journal-page-title {
   font-family: var(--font-lora), Georgia, serif;
-  font-size: clamp(1.5rem, 6vw, 2.2rem);
+  font-size: clamp(1.4rem, 5.5vw, 2rem);
   font-weight: 700;
   line-height: 1.2;
   color: var(--body-text, #4A4A4A);
@@ -7724,7 +7724,7 @@ html[data-fontsize="xlarge"] .dev-body {
 
 .section-hdr {
   margin-bottom: 1rem;
-  padding-bottom: 1.5rem;
+  padding: 1rem 1.5rem 1.5rem;
   border-bottom: 1px solid var(--card-border, rgba(74,127,165,0.15));
 }
 
