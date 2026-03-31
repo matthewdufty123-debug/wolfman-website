@@ -339,3 +339,90 @@ export async function sendAdminBetaInterestAlert(email: string, name: string) {
     html,
   })
 }
+
+// ── Admin instant alerts ─────────────────────────────────────────────────────
+// Clean functional template — not brand tone. Fast, scannable, server-only.
+
+function adminHtml(heading: string, rows: Array<[string, string]>): string {
+  const tableRows = rows
+    .map(([label, value]) =>
+      `<tr>
+        <td style="padding:5px 20px 5px 0;color:#888;font-size:13px;white-space:nowrap;vertical-align:top;">${label}</td>
+        <td style="padding:5px 0;font-size:13px;color:#222;">${value}</td>
+      </tr>`
+    )
+    .join('')
+  return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:24px;background:#fff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#333;">
+  <p style="margin:0 0 16px;font-size:15px;font-weight:bold;color:#193343;">${heading}</p>
+  <table cellpadding="0" cellspacing="0" style="border-collapse:collapse;">${tableRows}</table>
+  <p style="margin:20px 0 0;font-size:11px;color:#bbb;">wolfman.blog &mdash; ${new Date().toUTCString()}</p>
+</body></html>`
+}
+
+function adminSend(subject: string, html: string): Promise<void> {
+  const to = process.env.ADMIN_NOTIFY_EMAIL ?? 'matthew@wolfman.blog'
+  return getResend().emails.send({
+    from: 'Wolfman Admin <orders@wolfman.blog>',
+    to,
+    subject,
+    html,
+  }).then(() => undefined)
+}
+
+export function notifyAdminNewRegistration(params: {
+  username: string
+  email: string
+  userCount: number
+  userCap: number
+}): void {
+  const html = adminHtml('New user registered', [
+    ['Username', params.username],
+    ['Email', params.email],
+    ['User count', `${params.userCount} / ${params.userCap}`],
+  ])
+  adminSend(`New registration: ${params.username}`, html).catch(() => {})
+}
+
+export function notifyAdminFeedbackSubmitted(params: {
+  category: string
+  messagePreview: string
+  anonymous: boolean
+  pageUrl?: string | null
+}): void {
+  const rows: Array<[string, string]> = [
+    ['Category', params.category],
+    ['Message', params.messagePreview],
+    ['Anonymous', params.anonymous ? 'Yes' : 'No'],
+  ]
+  if (!params.anonymous && params.pageUrl) rows.push(['Page', params.pageUrl])
+  const html = adminHtml(`Beta feedback: ${params.category}`, rows)
+  adminSend(`Feedback [${params.category}]: ${params.messagePreview.slice(0, 55)}`, html).catch(() => {})
+}
+
+export function notifyAdminFirstPost(params: {
+  username: string
+  postTitle: string
+  postUrl: string
+}): void {
+  const html = adminHtml('User published their first journal', [
+    ['Username', params.username],
+    ['Title', params.postTitle],
+    ['URL', params.postUrl],
+  ])
+  adminSend(`First post: ${params.username} — "${params.postTitle.slice(0, 50)}"`, html).catch(() => {})
+}
+
+export function notifyAdminClaudesTakeFailed(params: {
+  userId: string
+  postId: string
+  errorMessage: string
+}): void {
+  const html = adminHtml("Claude's Take generation failed", [
+    ['Post ID', params.postId],
+    ['User ID', params.userId],
+    ['Error', params.errorMessage],
+  ])
+  adminSend(`Claude's Take failed — post ${params.postId.slice(0, 8)}`, html).catch(() => {})
+}

@@ -4,6 +4,7 @@ import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { posts, morningState, dayScores } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
+import { notifyAdminClaudesTakeFailed } from '@/lib/email'
 
 export const maxDuration = 60
 
@@ -94,7 +95,9 @@ Return ONLY valid JSON. No markdown fences. No explanation outside the JSON.`,
       messages: [{ role: 'user', content: fullContext }],
     })
   } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err)
     console.error('[review] Anthropic API call failed:', err)
+    notifyAdminClaudesTakeFailed({ userId: session.user.id, postId: id, errorMessage })
     return NextResponse.json({ error: 'Claude is unavailable right now. Please try again.' }, { status: 502 })
   }
 

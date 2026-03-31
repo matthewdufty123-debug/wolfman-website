@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { put } from '@vercel/blob'
+import { notifyAdminFeedbackSubmitted } from '@/lib/email'
 
 const REPO = 'matthewdufty123-debug/wolfman-website'
 const BETA_MILESTONE = 12
@@ -94,6 +95,13 @@ export async function POST(req: Request) {
     console.error('[feedback] GitHub API error:', res.status, text)
     return NextResponse.json({ error: 'Failed to submit feedback.' }, { status: 502 })
   }
+
+  notifyAdminFeedbackSubmitted({
+    category,
+    messagePreview: message.trim().slice(0, 120),
+    anonymous,
+    pageUrl,
+  })
 
   return NextResponse.json({ ok: true })
 }

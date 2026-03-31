@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { posts, morningState } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and, count } from 'drizzle-orm'
+import { notifyAdminFirstPost } from '@/lib/email'
 
 async function requireOwner(postId: string) {
   const session = await auth()
@@ -30,7 +31,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const { error, status } = await requireOwner(id)
+  const { error, status, session, post: existingPost } = await requireOwner(id)
   if (error) return NextResponse.json({ error }, { status })
 
   const body = await request.json()
@@ -46,6 +47,8 @@ export async function PUT(
   if (videoId !== undefined) updateData.videoId = videoId || null
   if (eveningReflection !== undefined) updateData.eveningReflection = eveningReflection || null
   if (feelAboutToday !== undefined) updateData.feelAboutToday = feelAboutToday ?? null
+  const isFirstPublish = reqStatus === 'published' && existingPost?.status !== 'published'
+
   if (reqStatus === 'published') {
     updateData.status = 'published'
     updateData.publishedAt = new Date()
@@ -54,6 +57,22 @@ export async function PUT(
   }
 
   const [updated] = await db.update(posts).set(updateData).where(eq(posts.id, id)).returning({ id: posts.id, slug: posts.slug })
+
+  // Fire first-post notification if this is a brand-new publish
+  if (isFirstPublish && session?.user?.id && updated?.slug) {
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(posts)
+      .where(and(eq(posts.authorId, session.user.id), eq(posts.status, 'published')))
+    if (Number(total) === 1) {
+      const username = session.user.username ?? session.user.id
+      notifyAdminFirstPost({
+        username,
+        postTitle: String(updateData.title ?? existingPost?.title ?? ''),
+        postUrl: `https://wolfman.blog/${username}/${updated.slug}`,
+      })
+    }
+  }
 
   if (morning) {
     const [existing] = await db.select({ id: morningState.id }).from(morningState).where(eq(morningState.postId, id))

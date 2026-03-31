@@ -9,6 +9,7 @@ import { redirect } from 'next/navigation'
 import { AuthError } from 'next-auth'
 import { generateUniqueUsername } from '@/lib/username'
 import { getSiteConfig, isRegistrationOpen, isCapReached } from '@/lib/site-config'
+import { notifyAdminNewRegistration } from '@/lib/email'
 
 type ActionState = { error: string } | undefined
 
@@ -71,6 +72,13 @@ export async function register(_prev: ActionState, formData: FormData): Promise<
   const passwordHash = await bcrypt.hash(password, 12)
   const username = await generateUniqueUsername(name)
   await db.insert(users).values({ name, email, passwordHash, role: 'customer', username })
+
+  notifyAdminNewRegistration({
+    username,
+    email,
+    userCount: Number(total) + 1,
+    userCap: config.userCap,
+  })
 
   // Auto sign-in and redirect to onboarding
   await signIn('credentials', { email, password, redirectTo: '/onboarding' })
