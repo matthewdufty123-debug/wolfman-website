@@ -6609,6 +6609,102 @@ html[data-theme="dark"] .stats-chart-card {
   animation: wolfbot-blink 0.7s step-end infinite;
 }
 
+/* ── WOLF|BOT loading overlay ────────────────────────────────────────────── */
+@keyframes wb-eye-scan {
+  0%, 100% { transform: translateX(-0.5px); }
+  50%       { transform: translateX(0.5px); }
+}
+.wb-eye { animation: wb-eye-scan 1.8s ease-in-out infinite; }
+
+.wb-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(13, 17, 23, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.wb-overlay-text {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: #C8B020;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+/* ── WOLF|BOT personality tab switcher ───────────────────────────────────── */
+.wb-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.wb-tab {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  padding: 0.3rem 0.65rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  /* inactive */
+  background: transparent;
+  color: #C8B020;
+  border: 1px solid rgba(200, 176, 32, 0.4);
+}
+
+.wb-tab--active {
+  background: #C8B020;
+  color: #0d1117;
+  border-color: #C8B020;
+}
+
+/* WOLF|BOT PostForm section */
+.pf-wolfbot-section {
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(200, 176, 32, 0.3);
+  border-radius: 6px;
+  background: rgba(200, 176, 32, 0.04);
+}
+
+.pf-wolfbot-trigger,
+.pf-wolfbot-retrigger {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  background: transparent;
+  color: #C8B020;
+  border: 1px solid rgba(200, 176, 32, 0.5);
+  border-radius: 4px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pf-wolfbot-trigger:hover,
+.pf-wolfbot-retrigger:hover {
+  background: rgba(200, 176, 32, 0.12);
+}
+
+.pf-wolfbot-retrigger {
+  margin-top: 0.5rem;
+  font-size: 0.62rem;
+  opacity: 0.7;
+}
+
+.pf-wolfbot-done {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: #C8B020;
+  letter-spacing: 0.04em;
+}
+
 /* Dark/cool themes — already dark so just lighten the border slightly */
 html[data-theme="dark"] .wolfbot-bubble--terminal,
 html[data-theme="cool"] .wolfbot-bubble--terminal {

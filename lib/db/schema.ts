@@ -16,6 +16,8 @@ export const users = pgTable('users', {
   communityEnabled: boolean('community_enabled').notNull().default(false),   // opted in to community posting
   defaultPublic: boolean('default_public').notNull().default(false),         // new posts public by default
   onboardingComplete: boolean('onboarding_complete').notNull().default(false), // completed onboarding flow
+  profession:    text('profession'),          // user's profession — personalises WOLF|BOT prompts
+  humourSource:  text('humour_source'),       // where user finds humour — calibrates WOLF|BOT wit
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
@@ -154,6 +156,20 @@ export const wolfbotConfig = pgTable('wolfbot_config', {
   value:       jsonb('value').notNull(),
   description: text('description'),
   updatedAt:   timestamp('updated_at', { withTimezone: true }).defaultNow(),
+})
+
+// ── WOLF|BOT personality reviews ──────────────────────────────────────────
+// One row per post — four personality reviews generated together in a single
+// user-triggered action. Admin can re-trigger to regenerate. Unique on postId.
+export const wolfbotReviews = pgTable('wolfbot_reviews', {
+  id:                 uuid('id').primaryKey().defaultRandom(),
+  postId:             uuid('post_id').notNull().unique().references(() => posts.id, { onDelete: 'cascade' }),
+  reviewHelpful:      text('review_helpful'),
+  reviewIntellectual: text('review_intellectual'),
+  reviewLovely:       text('review_lovely'),
+  reviewSassy:        text('review_sassy'),
+  generatedAt:        timestamp('generated_at').notNull().defaultNow(),
+  triggeredBy:        uuid('triggered_by').references(() => users.id),
 })
 
 // ── Claude-generated synthesis ────────────────────────────────────────────

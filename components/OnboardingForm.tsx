@@ -11,6 +11,8 @@ export default function OnboardingForm({ username }: Props) {
   const router = useRouter()
   const [communityEnabled, setCommunityEnabled] = useState(false)
   const [defaultPublic, setDefaultPublic] = useState(false)
+  const [profession, setProfession] = useState('')
+  const [humourSource, setHumourSource] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -23,7 +25,7 @@ export default function OnboardingForm({ username }: Props) {
       const res = await fetch('/api/user/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ communityEnabled, defaultPublic }),
+        body: JSON.stringify({ communityEnabled, defaultPublic, profession, humourSource }),
       })
 
       if (!res.ok) {
@@ -103,6 +105,42 @@ export default function OnboardingForm({ username }: Props) {
           </div>
         </div>
       )}
+
+      {/* Q3 — Profession */}
+      <div className="onboarding-question">
+        <p className="onboarding-question-label">
+          What is your profession?
+        </p>
+        <p className="onboarding-question-hint">
+          Optional. Helps WOLF|BOT tailor its journal reviews to your world.
+        </p>
+        <input
+          type="text"
+          className="onboarding-text-input"
+          value={profession}
+          onChange={e => setProfession(e.target.value)}
+          placeholder="e.g. software engineer, teacher, nurse…"
+          maxLength={120}
+        />
+      </div>
+
+      {/* Q4 — Humour source */}
+      <div className="onboarding-question">
+        <p className="onboarding-question-label">
+          Where do you find humour?
+        </p>
+        <p className="onboarding-question-hint">
+          Optional. Gives WOLF|BOT its wit calibration.
+        </p>
+        <input
+          type="text"
+          className="onboarding-text-input"
+          value={humourSource}
+          onChange={e => setHumourSource(e.target.value)}
+          placeholder="e.g. dry sarcasm, absurdist comedy, dad jokes…"
+          maxLength={120}
+        />
+      </div>
 
       {error && <p className="onboarding-error">{error}</p>}
 

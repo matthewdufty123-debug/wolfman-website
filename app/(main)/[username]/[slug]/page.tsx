@@ -5,7 +5,7 @@ import { auth } from '@/auth'
 import { PostContextSetter } from '@/lib/post-context'
 import JournalPage from '@/components/JournalPage'
 import { db } from '@/lib/db'
-import { posts as postsTable, morningState, dayScores, users as usersTable } from '@/lib/db/schema'
+import { posts as postsTable, morningState, dayScores, users as usersTable, wolfbotReviews as wolfbotReviewsTable } from '@/lib/db/schema'
 import { eq, gt, lt, and, or, desc, asc } from 'drizzle-orm'
 
 // Allow slugs not in generateStaticParams to be dynamically rendered (posts published after a build)
@@ -88,7 +88,7 @@ export default async function PostPage({
   const userId = session?.user?.id ?? null
 
   // Fetch morning state, day scores, post timestamps, and adjacent posts
-  const [ms, ds, postRow] = post.id
+  const [ms, ds, postRow, wbr] = post.id
     ? await Promise.all([
         db.select().from(morningState).where(eq(morningState.postId, post.id)).then(r => r[0] ?? null),
         db.select().from(dayScores).where(eq(dayScores.postId, post.id)).then(r => r[0] ?? null),
@@ -101,8 +101,17 @@ export default async function PostPage({
           .from(postsTable)
           .where(eq(postsTable.id, post.id))
           .then(r => r[0] ?? null),
+        db.select({
+          reviewHelpful:      wolfbotReviewsTable.reviewHelpful,
+          reviewIntellectual: wolfbotReviewsTable.reviewIntellectual,
+          reviewLovely:       wolfbotReviewsTable.reviewLovely,
+          reviewSassy:        wolfbotReviewsTable.reviewSassy,
+        })
+          .from(wolfbotReviewsTable)
+          .where(eq(wolfbotReviewsTable.postId, post.id))
+          .then(r => r[0] ?? null),
       ])
-    : [null, null, null]
+    : [null, null, null, null]
 
   const postDates = postRow
     ? { createdAt: postRow.createdAt.toISOString(), updatedAt: postRow.updatedAt.toISOString() }
@@ -163,6 +172,7 @@ export default async function PostPage({
         authorId={post.authorId ?? null}
         prevPost={prevPost}
         nextPost={nextPost}
+        wolfbotReviews={wbr}
       />
     </>
   )

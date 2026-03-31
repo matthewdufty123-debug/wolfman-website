@@ -8,7 +8,7 @@ import ThemeLogo from '@/components/ThemeLogo'
 import MorningRitualsSection from '@/components/journal/MorningRitualsSection'
 import HumanScoresSection from '@/components/journal/HumanScoresSection'
 import JournalTextSection from '@/components/journal/JournalTextSection'
-import WolfBotSection from '@/components/journal/WolfBotSection'
+import WolfBotSection, { type WolfBotReviews } from '@/components/journal/WolfBotSection'
 import PostInfoSection from '@/components/journal/PostInfoSection'
 import EveningSection from '@/components/journal/EveningSection'
 import JournalPhotoSection from '@/components/journal/JournalPhotoSection'
@@ -48,6 +48,7 @@ export interface JournalPageProps {
   authorId: string | null
   prevPost: { slug: string; username: string } | null
   nextPost: { slug: string; username: string } | null
+  wolfbotReviews: WolfBotReviews | null
 }
 
 // ── Date helper ───────────────────────────────────────────────────────────────
@@ -77,6 +78,7 @@ export default function JournalPage({
   authorId,
   prevPost,
   nextPost,
+  wolfbotReviews,
 }: JournalPageProps) {
   const router = useRouter()
   const { data: session } = useSession()
@@ -161,7 +163,12 @@ export default function JournalPage({
           <MorningRitualsSection checklist={morningState.routineChecklist} />
         )}
 
-        <WolfBotSection synthesis={synthesis} />
+        <WolfBotSection
+          synthesis={synthesis}
+          wolfbotReviews={wolfbotReviews}
+          isOwnPost={isOwner}
+          postId={post.id ?? ''}
+        />
 
         <PostInfoSection post={post} postDates={postDates} />
 

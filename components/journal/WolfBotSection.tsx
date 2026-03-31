@@ -1,69 +1,34 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import WolfBotIcon from '@/components/WolfBotIcon'
+import WolfBotLoadingOverlay from '@/components/WolfBotLoadingOverlay'
 
-// ── Matthew's WOLF|BOT pixel face grid (25×25) ───────────────────────────────
-const WOLFBOT_GRID = [
-  [1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,2,2,1,1,1,1,1],
-  [1,1,1,2,2,2,2,1,1,1,1,1,1,1,1,1,1,2,2,2,2,1,1,1,1],
-  [1,1,1,2,3,3,2,2,1,1,1,1,1,1,1,1,2,2,3,3,2,2,1,1,1],
-  [1,1,1,2,3,3,3,2,1,1,1,1,1,1,1,1,2,2,3,3,3,2,1,1,1],
-  [1,1,2,2,3,3,3,2,2,1,1,1,1,1,1,1,2,2,3,3,3,2,2,1,1],
-  [1,2,2,3,3,3,3,3,2,2,1,1,1,1,1,2,2,3,3,3,3,3,2,1,1],
-  [1,2,3,3,3,3,3,3,3,2,2,2,2,2,2,2,3,3,3,3,3,3,2,1,1],
-  [2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,1],
-  [2,2,3,3,9,9,9,9,9,9,9,3,3,3,9,9,9,9,9,9,9,3,3,2,1],
-  [2,2,3,3,9,9,9,9,9,9,9,3,3,3,9,9,9,9,9,9,9,3,3,2,1],
-  [2,2,3,3,3,3,3,5,5,5,3,3,3,3,3,3,3,3,5,5,5,3,2,2,1],
-  [1,2,2,3,3,3,3,5,5,5,3,3,3,3,3,3,3,3,5,5,5,3,2,2,1],
-  [1,1,2,3,3,3,3,3,3,3,3,2,2,2,3,3,3,3,3,3,3,2,2,1,1],
-  [1,1,2,3,3,3,3,3,3,2,2,2,2,2,2,2,3,3,3,3,3,2,2,1,1],
-  [1,1,2,2,3,3,3,3,2,3,3,3,3,3,3,3,2,3,3,3,2,2,1,1,1],
-  [1,1,2,2,3,3,3,2,2,2,3,3,3,3,3,2,2,2,3,3,2,2,1,1,1],
-  [1,1,1,2,3,3,2,2,3,2,2,2,2,2,2,2,3,2,2,2,2,1,1,1,1],
-  [1,1,1,2,2,2,2,3,3,3,2,2,2,2,2,3,3,3,2,2,2,1,1,1,1],
-  [1,1,1,1,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,2,1,1,1,1,1],
-  [1,1,1,1,2,2,3,3,3,9,9,9,9,9,9,9,3,3,3,2,1,1,1,1,1],
-  [1,1,1,1,1,2,2,3,3,9,9,9,9,9,9,9,3,3,2,1,1,1,1,1,1],
-  [1,1,1,1,1,2,2,3,3,3,3,3,3,3,3,3,3,3,2,1,1,1,1,1,1],
-  [1,1,1,1,1,1,2,3,3,3,3,3,3,3,3,3,3,3,2,1,1,1,1,1,1],
-  [1,1,1,1,1,1,2,2,3,3,3,3,3,3,3,3,3,2,1,1,1,1,1,1,1],
-  [1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1],
+// ── Types ────────────────────────────────────────────────────────────────────
+
+type Tab = 'HELPFUL' | 'INTELLECTUAL' | 'LOVELY' | 'SASSY'
+
+export type WolfBotReviews = {
+  reviewHelpful:      string | null
+  reviewIntellectual: string | null
+  reviewLovely:       string | null
+  reviewSassy:        string | null
+}
+
+interface Props {
+  synthesis:       string | null
+  wolfbotReviews:  WolfBotReviews | null
+  isOwnPost:       boolean
+  postId:          string
+}
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const BOOT_LINES = [
+  'WOLF|BOT REVIEW INITIATED',
+  'PROCESSING JOURNAL ENTRY...',
 ]
-
-const PALETTE: Record<number, string> = {
-  2:  '#D9D9D9',
-  3:  '#2E2E2E',
-  4:  '#666666',
-  5:  '#4A90C4',
-  6:  '#C6DDEA',
-  7:  '#BB9040',
-  8:  '#E8A0B0',
-  9:  '#BF7E54',
-  10: '#A72525',
-}
-
-function WolfBotFace({ size = 72 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 25 25"
-      aria-hidden="true"
-      style={{ display: 'block', imageRendering: 'pixelated', flexShrink: 0 }}
-    >
-      {WOLFBOT_GRID.map((row, ri) =>
-        row.map((cell, ci) => {
-          const fill = PALETTE[cell]
-          if (!fill) return null
-          return <rect key={`${ri}-${ci}`} x={ci} y={ri} width={1} height={1} fill={fill} />
-        })
-      )}
-    </svg>
-  )
-}
-
-// ── Random quips — shown idle in terminal ──────────────────────────────────
 
 const WOLFBOT_QUIPS = [
   'Time for my take',
@@ -78,30 +43,32 @@ const WOLFBOT_QUIPS = [
   "Alright. Let's do this",
 ]
 
-// ── Terminal boot lines ────────────────────────────────────────────────────
+const TAB_ORDER: Tab[] = ['HELPFUL', 'INTELLECTUAL', 'LOVELY', 'SASSY']
 
-const BOOT_LINES = [
-  'WOLF|BOT REVIEW INITIATED',
-  'PROCESSING JOURNAL ENTRY...',
-]
+// ── Sub-components ────────────────────────────────────────────────────────────
 
-type Phase = 'idle' | 'booting' | 'typing' | 'done'
+/** State A — reviews exist: boot then tab switcher */
+function NewReviewTerminal({ wolfbotReviews }: { wolfbotReviews: WolfBotReviews }) {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const [revealed,     setRevealed]     = useState(false)
+  const [bootLine,     setBootLine]     = useState(0)
+  const [displayedBoot,setDisplayedBoot]= useState('')
+  const [bootDone,     setBootDone]     = useState(false)
+  const [activeTab,    setActiveTab]    = useState<Tab>('HELPFUL')
+  const [displayedText,setDisplayedText]= useState('')
+  const [typedTabs,    setTypedTabs]    = useState<Set<Tab>>(new Set())
+  const [cursorVisible,setCursorVisible]= useState(true)
 
-interface Props {
-  synthesis: string | null
-}
+  function getReviewText(tab: Tab): string | null {
+    switch (tab) {
+      case 'HELPFUL':      return wolfbotReviews.reviewHelpful
+      case 'INTELLECTUAL': return wolfbotReviews.reviewIntellectual
+      case 'LOVELY':       return wolfbotReviews.reviewLovely
+      case 'SASSY':        return wolfbotReviews.reviewSassy
+    }
+  }
 
-export default function WolfBotSection({ synthesis }: Props) {
-  const sectionRef = useRef<HTMLElement>(null)
-  const [revealed, setRevealed]               = useState(false)
-  const [phase, setPhase]                     = useState<Phase>('idle')
-  const [bootLine, setBootLine]               = useState(0)
-  const [displayedBoot, setDisplayedBoot]     = useState('')
-  const [displayedReview, setDisplayedReview] = useState('')
-  const [cursorVisible, setCursorVisible]     = useState(true)
-  const [quip]                                = useState(() => WOLFBOT_QUIPS[Math.floor(Math.random() * WOLFBOT_QUIPS.length)])
-
-  // Scroll reveal — whole terminal fades in
+  // Scroll reveal
   useEffect(() => {
     const el = sectionRef.current
     if (!el) return
@@ -110,35 +77,22 @@ export default function WolfBotSection({ synthesis }: Props) {
       return
     }
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) { setRevealed(true); observer.disconnect() }
-      },
+      ([entry]) => { if (entry.isIntersecting) { setRevealed(true); observer.disconnect() } },
       { threshold: 0.1 }
     )
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
 
-  function startReview() {
-    if (phase !== 'idle' || !synthesis) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setPhase('done')
-      setDisplayedReview(synthesis)
-      setCursorVisible(false)
-      return
-    }
-    setPhase('booting')
-    setCursorVisible(true)
-    setDisplayedBoot('')
-    setBootLine(0)
-  }
-
   // Boot sequence
   useEffect(() => {
-    if (phase !== 'booting') return
+    if (!revealed) return
     const line = BOOT_LINES[bootLine] ?? null
     if (!line) {
-      setTimeout(() => setPhase('typing'), 300)
+      setTimeout(() => {
+        setBootDone(true)
+        setCursorVisible(true)
+      }, 300)
       return
     }
     setDisplayedBoot('')
@@ -153,110 +107,300 @@ export default function WolfBotSection({ synthesis }: Props) {
       i++
     }, 22)
     return () => clearInterval(interval)
-  }, [phase, bootLine])
+  }, [revealed, bootLine])
 
-  // Review typewriter
+  // Typewriter for active tab (runs once per tab)
   useEffect(() => {
-    if (phase !== 'typing' || !synthesis) return
-    setDisplayedReview('')
+    if (!bootDone) return
+    const text = getReviewText(activeTab)
+    if (!text) { setDisplayedText('(No review available for this personality.)'); return }
+
+    if (typedTabs.has(activeTab)) {
+      // Already typed — show instantly
+      setDisplayedText(text)
+      setCursorVisible(false)
+      return
+    }
+
+    // First time — type it
+    setDisplayedText('')
     setCursorVisible(true)
     let i = 0
     const interval = setInterval(() => {
-      if (i >= synthesis.length) {
+      if (i >= text.length) {
         clearInterval(interval)
         setCursorVisible(false)
-        setPhase('done')
+        setTypedTabs(prev => new Set(prev).add(activeTab))
         return
       }
-      setDisplayedReview(synthesis.slice(0, i + 1))
+      setDisplayedText(text.slice(0, i + 1))
       i++
     }, 12)
     return () => clearInterval(interval)
-  }, [phase, synthesis])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bootDone, activeTab])
 
-  if (!synthesis) {
-    return (
-      <section id="wolfbot-review" className="journal-section">
-        <h2 className="journal-section-title">WOLF|BOT Review</h2>
-        <p className="journal-section-empty">No WOLF|BOT review yet.</p>
-      </section>
-    )
+  function handleTabClick(tab: Tab) {
+    if (tab === activeTab) return
+    setActiveTab(tab)
   }
 
-  const isActive = phase === 'booting' || phase === 'typing'
-  const isDone   = phase === 'done'
+  return (
+    <div
+      ref={sectionRef}
+      className="wolfbot-integrated"
+      style={{
+        opacity: revealed ? 1 : 0,
+        transform: revealed ? 'translateY(0)' : 'translateY(10px)',
+        transition: 'opacity 0.5s ease, transform 0.5s ease',
+      }}
+    >
+      <div className="wolfbot-integrated-header">
+        <WolfBotIcon size={72} />
+        <div className="wolfbot-integrated-title">
+          <span className="wolfbot-integrated-name">WOLF|BOT</span>
+          <span className="wolfbot-integrated-sub">REVIEW MODE</span>
+        </div>
+      </div>
+
+      <div className="wolfbot-bubble-inner">
+        {/* Boot lines */}
+        {BOOT_LINES.slice(0, bootLine).map((line, idx) => (
+          <p key={idx} className="wolfbot-terminal-line">
+            <span className="wbt-prompt">&#62;&nbsp;</span>
+            <span className="wbt-boot">{line}</span>
+          </p>
+        ))}
+        {!bootDone && (
+          <p className="wolfbot-terminal-line">
+            <span className="wbt-prompt">&#62;&nbsp;</span>
+            <span className="wbt-boot">{displayedBoot}</span>
+            <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
+          </p>
+        )}
+
+        {/* Tab switcher + review — shown after boot */}
+        {bootDone && (
+          <>
+            <div className="wb-tabs">
+              {TAB_ORDER.map(tab => (
+                <button
+                  key={tab}
+                  type="button"
+                  className={`wb-tab${activeTab === tab ? ' wb-tab--active' : ''}`}
+                  onClick={() => handleTabClick(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            <p className="wolfbot-terminal-line wolfbot-terminal-review">
+              <span className="wbt-prompt">&#62;&nbsp;</span>
+              <span className="wbt-body">{displayedText}</span>
+              {cursorVisible && <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>}
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/** State B — no reviews, own post: trigger button */
+function TriggerTerminal({ postId }: { postId: string }) {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState(false)
+
+  async function handleTrigger() {
+    setLoading(true)
+    setError(false)
+    try {
+      const res = await fetch(`/api/posts/${postId}/wolfbot-reviews`, { method: 'POST' })
+      if (res.ok || res.status === 409) {
+        router.refresh()
+      } else {
+        setLoading(false)
+        setError(true)
+      }
+    } catch {
+      setLoading(false)
+      setError(true)
+    }
+  }
 
   return (
-    <section ref={sectionRef} id="wolfbot-review" className="journal-section">
-      <h2 className="journal-section-title">WOLF|BOT Review</h2>
-
-      <div
-        className="wolfbot-integrated"
-        style={{
-          opacity: revealed ? 1 : 0,
-          transform: revealed ? 'translateY(0)' : 'translateY(10px)',
-          transition: 'opacity 0.5s ease, transform 0.5s ease',
-        }}
-      >
-        {/* Integrated header: face + title */}
+    <>
+      <WolfBotLoadingOverlay open={loading} />
+      <div className="wolfbot-integrated">
         <div className="wolfbot-integrated-header">
-          <WolfBotFace size={72} />
+          <WolfBotIcon size={72} />
           <div className="wolfbot-integrated-title">
             <span className="wolfbot-integrated-name">WOLF|BOT</span>
             <span className="wolfbot-integrated-sub">REVIEW MODE</span>
           </div>
         </div>
-
-        {/* Terminal content */}
         <div className="wolfbot-bubble-inner">
-          {/* Yellow review button */}
           <button
             className="wolfbot-yellow-btn"
-            onClick={startReview}
-            disabled={isActive || isDone}
-            aria-label="Start WOLF|BOT review"
+            onClick={handleTrigger}
+            disabled={loading}
           >
-            {isActive ? '▌ REVIEWING...' : isDone ? '✦ REVIEW COMPLETE' : '▶ REVIEW JOURNAL'}
+            {error ? '▶ RETRY WOLF|BOT REVIEW' : '▶ GENERATE WOLF|BOT REVIEW'}
           </button>
-
-          {/* Idle quip */}
-          {phase === 'idle' && (
+          {error && (
             <p className="wolfbot-terminal-line">
               <span className="wbt-prompt">&#62;&nbsp;</span>
-              <span className="wbt-quip">{quip}</span>
-              <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
+              <span className="wbt-error">Generation failed. Try again.</span>
             </p>
-          )}
-
-          {/* Boot + review output */}
-          {(phase === 'booting' || phase === 'typing' || phase === 'done') && (
-            <>
-              {BOOT_LINES.slice(0, bootLine).map((line, idx) => (
-                <p key={idx} className="wolfbot-terminal-line">
-                  <span className="wbt-prompt">&#62;&nbsp;</span>
-                  <span className="wbt-boot">{line}</span>
-                </p>
-              ))}
-
-              {phase === 'booting' && (
-                <p className="wolfbot-terminal-line">
-                  <span className="wbt-prompt">&#62;&nbsp;</span>
-                  <span className="wbt-boot">{displayedBoot}</span>
-                  <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
-                </p>
-              )}
-
-              {(phase === 'typing' || phase === 'done') && (
-                <p className="wolfbot-terminal-line wolfbot-terminal-review">
-                  <span className="wbt-prompt">&#62;&nbsp;</span>
-                  <span className="wbt-body">{displayedReview}</span>
-                  {cursorVisible && <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>}
-                </p>
-              )}
-            </>
           )}
         </div>
       </div>
+    </>
+  )
+}
+
+/** Legacy fallback — synthesis only, no personality reviews */
+function LegacyTerminal({ synthesis }: { synthesis: string }) {
+  const sectionRef                              = useRef<HTMLDivElement>(null)
+  const [revealed,     setRevealed]             = useState(false)
+  const [phase,        setPhase]                = useState<'idle' | 'booting' | 'typing' | 'done'>('idle')
+  const [bootLine,     setBootLine]             = useState(0)
+  const [displayedBoot,setDisplayedBoot]        = useState('')
+  const [displayedReview, setDisplayedReview]   = useState('')
+  const [cursorVisible, setCursorVisible]       = useState(true)
+  const [quip]                                  = useState(() => WOLFBOT_QUIPS[Math.floor(Math.random() * WOLFBOT_QUIPS.length)])
+
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setRevealed(true); return }
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setRevealed(true); observer.disconnect() } },
+      { threshold: 0.1 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  function startReview() {
+    if (phase !== 'idle') return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setPhase('done'); setDisplayedReview(synthesis); setCursorVisible(false); return
+    }
+    setPhase('booting'); setCursorVisible(true); setDisplayedBoot(''); setBootLine(0)
+  }
+
+  useEffect(() => {
+    if (phase !== 'booting') return
+    const line = BOOT_LINES[bootLine] ?? null
+    if (!line) { setTimeout(() => setPhase('typing'), 300); return }
+    setDisplayedBoot(''); let i = 0
+    const interval = setInterval(() => {
+      if (i >= line.length) { clearInterval(interval); setTimeout(() => { setBootLine(p => p + 1); setDisplayedBoot('') }, 250); return }
+      setDisplayedBoot(line.slice(0, i + 1)); i++
+    }, 22)
+    return () => clearInterval(interval)
+  }, [phase, bootLine])
+
+  useEffect(() => {
+    if (phase !== 'typing') return
+    setDisplayedReview(''); setCursorVisible(true); let i = 0
+    const interval = setInterval(() => {
+      if (i >= synthesis.length) { clearInterval(interval); setCursorVisible(false); setPhase('done'); return }
+      setDisplayedReview(synthesis.slice(0, i + 1)); i++
+    }, 12)
+    return () => clearInterval(interval)
+  }, [phase, synthesis])
+
+  const isActive = phase === 'booting' || phase === 'typing'
+  const isDone   = phase === 'done'
+
+  return (
+    <div
+      ref={sectionRef}
+      className="wolfbot-integrated"
+      style={{
+        opacity: revealed ? 1 : 0,
+        transform: revealed ? 'translateY(0)' : 'translateY(10px)',
+        transition: 'opacity 0.5s ease, transform 0.5s ease',
+      }}
+    >
+      <div className="wolfbot-integrated-header">
+        <WolfBotIcon size={72} />
+        <div className="wolfbot-integrated-title">
+          <span className="wolfbot-integrated-name">WOLF|BOT</span>
+          <span className="wolfbot-integrated-sub">REVIEW MODE</span>
+        </div>
+      </div>
+      <div className="wolfbot-bubble-inner">
+        <button
+          className="wolfbot-yellow-btn"
+          onClick={startReview}
+          disabled={isActive || isDone}
+        >
+          {isActive ? '▌ REVIEWING...' : isDone ? '✦ REVIEW COMPLETE' : '▶ REVIEW JOURNAL'}
+        </button>
+        {phase === 'idle' && (
+          <p className="wolfbot-terminal-line">
+            <span className="wbt-prompt">&#62;&nbsp;</span>
+            <span className="wbt-quip">{quip}</span>
+            <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
+          </p>
+        )}
+        {(isActive || isDone) && (
+          <>
+            {BOOT_LINES.slice(0, bootLine).map((line, idx) => (
+              <p key={idx} className="wolfbot-terminal-line">
+                <span className="wbt-prompt">&#62;&nbsp;</span>
+                <span className="wbt-boot">{line}</span>
+              </p>
+            ))}
+            {phase === 'booting' && (
+              <p className="wolfbot-terminal-line">
+                <span className="wbt-prompt">&#62;&nbsp;</span>
+                <span className="wbt-boot">{displayedBoot}</span>
+                <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
+              </p>
+            )}
+            {(phase === 'typing' || isDone) && (
+              <p className="wolfbot-terminal-line wolfbot-terminal-review">
+                <span className="wbt-prompt">&#62;&nbsp;</span>
+                <span className="wbt-body">{displayedReview}</span>
+                {cursorVisible && <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>}
+              </p>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Main export ───────────────────────────────────────────────────────────────
+
+export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, postId }: Props) {
+  const hasNewReviews = wolfbotReviews && (
+    wolfbotReviews.reviewHelpful ||
+    wolfbotReviews.reviewIntellectual ||
+    wolfbotReviews.reviewLovely ||
+    wolfbotReviews.reviewSassy
+  )
+
+  // State C — nothing to show
+  if (!hasNewReviews && !synthesis && !isOwnPost) return null
+
+  return (
+    <section id="wolfbot-review" className="journal-section">
+      <h2 className="journal-section-title">WOLF|BOT Review</h2>
+      {hasNewReviews ? (
+        <NewReviewTerminal wolfbotReviews={wolfbotReviews!} />
+      ) : synthesis ? (
+        <LegacyTerminal synthesis={synthesis} />
+      ) : (
+        <TriggerTerminal postId={postId} />
+      )}
     </section>
   )
 }

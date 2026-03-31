@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { ROUTINE_ICON_MAP } from './RoutineIcons'
 import PhotoCropUpload from './PhotoCropUpload'
+import WolfBotLoadingOverlay from './WolfBotLoadingOverlay'
 
 const RITUAL_KEYS = Object.keys(ROUTINE_ICON_MAP)
 
@@ -59,6 +61,7 @@ interface PostFormProps {
   defaultPublic?: boolean
   initialIsPublic?: boolean
   username?: string | null
+  wolfbotReviewExists?: boolean
 }
 
 function defaultChecklist(): Record<string, boolean> {
@@ -104,8 +107,10 @@ export default function PostForm({
   defaultPublic = false,
   initialIsPublic,
   username,
+  wolfbotReviewExists = false,
 }: PostFormProps) {
   const router = useRouter()
+  const { data: session } = useSession()
   const [activeTab, setActiveTab] = useState<'after-waking' | 'before-bed'>('after-waking')
   const [postId, setPostId] = useState<string | null>(initialPostId ?? null)
   const [title, setTitle] = useState(initialData?.title ?? '')
@@ -135,6 +140,9 @@ export default function PostForm({
   const [isDirty, setIsDirty] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
   const [fullscreenKey, setFullscreenKey] = useState<'intention' | 'grateful' | 'greatAt' | null>(null)
+  const [reviewStatus, setReviewStatus] = useState<'none' | 'loading' | 'done' | 'error'>(
+    wolfbotReviewExists ? 'done' : 'none'
+  )
 
   const lastSavedRef = useRef<PostFormData | null>(null)
 
@@ -228,6 +236,21 @@ export default function PostForm({
       setError('Review failed. Try again.')
     } finally {
       setReviewing(false)
+    }
+  }
+
+  async function handleWolfBotTrigger() {
+    if (!postId) return
+    setReviewStatus('loading')
+    try {
+      const res = await fetch(`/api/posts/${postId}/wolfbot-reviews`, { method: 'POST' })
+      if (res.ok || res.status === 409) {
+        setReviewStatus('done')
+      } else {
+        setReviewStatus('error')
+      }
+    } catch {
+      setReviewStatus('error')
     }
   }
 
@@ -516,6 +539,38 @@ export default function PostForm({
           </button>
         )}
       </div>
+
+      {/* WOLF|BOT review trigger */}
+      {postId && (
+        <div className="pf-wolfbot-section">
+          {(reviewStatus === 'none' || reviewStatus === 'error') && (
+            <button
+              type="button"
+              className="pf-wolfbot-trigger"
+              onClick={handleWolfBotTrigger}
+            >
+              {reviewStatus === 'error' ? 'WOLF|BOT Review Failed — Retry' : 'Generate WOLF|BOT Review'}
+            </button>
+          )}
+          {reviewStatus === 'done' && (
+            <p className="pf-wolfbot-done">
+              <span className="wbt-prompt">&gt;&nbsp;</span>
+              WOLF|BOT REVIEW COMPLETE
+            </p>
+          )}
+          {reviewStatus === 'done' && session?.user?.role === 'admin' && (
+            <button
+              type="button"
+              className="pf-wolfbot-retrigger"
+              onClick={handleWolfBotTrigger}
+            >
+              Re-generate (admin)
+            </button>
+          )}
+        </div>
+      )}
+
+      <WolfBotLoadingOverlay open={reviewStatus === 'loading'} />
 
       {/* Delete (edit mode only) */}
       {mode === 'edit' && postId && (

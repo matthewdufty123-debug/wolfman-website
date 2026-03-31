@@ -10,9 +10,10 @@ interface Props {
   defaultPublic: boolean
   initialIsPublic: boolean
   username: string | null
+  wolfbotReviewExists: boolean
 }
 
-export default function EditPageClient({ postId, initialData, communityEnabled, defaultPublic, initialIsPublic, username }: Props) {
+export default function EditPageClient({ postId, initialData, communityEnabled, defaultPublic, initialIsPublic, username, wolfbotReviewExists }: Props) {
   const router = useRouter()
   return (
     <PostForm
@@ -24,6 +25,7 @@ export default function EditPageClient({ postId, initialData, communityEnabled, 
       defaultPublic={defaultPublic}
       initialIsPublic={initialIsPublic}
       username={username}
+      wolfbotReviewExists={wolfbotReviewExists}
     />
   )
 }
