@@ -2,14 +2,42 @@
 
 import { useState } from 'react'
 
+const PROFESSIONS = [
+  'Data & Analytics',
+  'Software Engineering',
+  'Product & Design',
+  'Marketing & Communications',
+  'Healthcare & Medicine',
+  'Education & Teaching',
+  'Entrepreneur / Founder',
+  'Finance & Accounting',
+  'Legal & Compliance',
+  'Creative (Writing, Art, Music)',
+  'Operations & Management',
+  'Sales & Business Development',
+  'Engineering (Civil, Mechanical, Electrical)',
+  'Trades & Skilled Work',
+  'Retired / Between roles',
+  'Other',
+]
+
+const HUMOUR_STYLES = [
+  'Dry & deadpan',
+  'Self-deprecating',
+  'Absurdist & surreal',
+  'Sarcastic & witty',
+  'Warm & wholesome',
+  'Other',
+]
+
 interface Props {
   profession: string
   humourSource: string
 }
 
 export default function AccountWolfBotProfileForm({ profession: initial, humourSource: initialHumour }: Props) {
-  const [profession, setProfession] = useState(initial)
-  const [humourSource, setHumourSource] = useState(initialHumour)
+  const [profession, setProfession] = useState(PROFESSIONS.includes(initial) ? initial : '')
+  const [humourSource, setHumourSource] = useState(HUMOUR_STYLES.includes(initialHumour) ? initialHumour : '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -19,14 +47,12 @@ export default function AccountWolfBotProfileForm({ profession: initial, humourS
     setSaving(true)
     setSaved(false)
     setError('')
-
     try {
       const res = await fetch('/api/user/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ profession, humourSource }),
       })
-
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
         setError(data.error ?? 'Something went wrong.')
@@ -42,34 +68,34 @@ export default function AccountWolfBotProfileForm({ profession: initial, humourS
   }
 
   return (
-    <form className="account-wolfbot-form" onSubmit={handleSubmit}>
-      <div className="account-field">
-        <label className="account-field-label" htmlFor="wb-profession">Profession</label>
-        <input
+    <form className="account-form" onSubmit={handleSubmit}>
+      <div className="auth-field">
+        <label className="auth-label" htmlFor="wb-profession">Profession</label>
+        <select
           id="wb-profession"
-          type="text"
-          className="account-field-input"
+          className="auth-input auth-select"
           value={profession}
           onChange={e => setProfession(e.target.value)}
-          placeholder="e.g. software engineer, teacher, nurse…"
-          maxLength={120}
-        />
+        >
+          <option value="">Select your profession</option>
+          {PROFESSIONS.map(p => <option key={p} value={p}>{p}</option>)}
+        </select>
       </div>
-      <div className="account-field">
-        <label className="account-field-label" htmlFor="wb-humour">Where you find humour</label>
-        <input
+      <div className="auth-field">
+        <label className="auth-label" htmlFor="wb-humour">Where you find humour</label>
+        <select
           id="wb-humour"
-          type="text"
-          className="account-field-input"
+          className="auth-input auth-select"
           value={humourSource}
           onChange={e => setHumourSource(e.target.value)}
-          placeholder="e.g. dry sarcasm, absurdist comedy, dad jokes…"
-          maxLength={120}
-        />
+        >
+          <option value="">Select your humour style</option>
+          {HUMOUR_STYLES.map(h => <option key={h} value={h}>{h}</option>)}
+        </select>
       </div>
-      {saved && <p className="community-saved">Saved.</p>}
-      {error && <p className="community-error">{error}</p>}
-      <button type="submit" className="account-save-btn" disabled={saving}>
+      {saved && <p className="auth-success">Saved.</p>}
+      {error && <p className="auth-error">{error}</p>}
+      <button type="submit" className="auth-submit" disabled={saving}>
         {saving ? 'Saving…' : 'Save'}
       </button>
     </form>
