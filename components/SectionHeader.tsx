@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 // ─── Section definitions ──────────────────────────────────────────────────────
 
 const DISCOVER_PAGES = [
+  { href: '/discover',      label: 'Discover — Overview' },
   { href: '/about',         label: 'About Wolfman' },
   { href: '/investment',    label: 'Investment Case' },
   { href: '/features',      label: 'Features & Roadmap' },

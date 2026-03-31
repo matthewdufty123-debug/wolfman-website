@@ -7969,6 +7969,10 @@ html[data-fontsize="xlarge"] .dev-body {
    ═══════════════════════════════════════════════════════════ */
 
 .section-hdr {
+  position: sticky;
+  top: 44px;
+  z-index: 10;
+  background: var(--bg, #ffffff);
   margin-bottom: 1rem;
   padding: 1rem 1.5rem 1.5rem;
   border-bottom: 1px solid var(--card-border, rgba(74,127,165,0.15));
@@ -8048,6 +8052,64 @@ html[data-fontsize="xlarge"] .dev-body {
   color: #909090;
   pointer-events: none;
   line-height: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DISCOVER HUB  /discover
+   ═══════════════════════════════════════════════════════════ */
+
+.discover-hub {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+.discover-hub-intro {
+  font-family: var(--font-lora);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--body-text);
+  opacity: 0.7;
+  margin: 0 0 2rem;
+}
+
+.discover-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.discover-card {
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--card-border, rgba(74,127,165,0.12));
+}
+
+.discover-card-title {
+  font-family: var(--font-inter);
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--heading, #193343);
+  margin: 0 0 0.4rem;
+}
+
+.discover-card-body {
+  font-family: var(--font-lora);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--body-text);
+  margin: 0 0 0.6rem;
+  opacity: 0.75;
+}
+
+.discover-card-link {
+  font-family: var(--font-inter);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #A0622A;
+  text-decoration: none;
+  letter-spacing: 0.04em;
 }
 
 /* ═══════════════════════════════════════════════════════════

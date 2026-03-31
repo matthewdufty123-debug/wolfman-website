@@ -162,10 +162,12 @@ inviting a click
 
 ### Discover & Beta Testing navigation
 Pages are grouped under two section headers, each with a shared `SectionHeader` component (logo banner + dropdown nav):
-- **Discover:** `/about`, `/investment`, `/features`, `/rituals`, `/achievements`
+- **Discover:** `/discover` (hub), `/about`, `/investment`, `/features`, `/journaling`, `/scores`, `/rituals`, `/achievements`
 - **Beta Testing:** `/beta`, `/feedback`, `/dev`
 
-The `SectionHeader` component (`components/SectionHeader.tsx`) renders at the top of each page in these groups. It shows the grey wordmark logo (inverted white in dark/cool themes) and a native `<select>` dropdown to navigate within the section.
+NBLS2 (lower nav bar slot 2) links to `/discover` — a hub page listing all Discover pages as cards with descriptions and direct links.
+
+The `SectionHeader` component (`components/SectionHeader.tsx`) renders at the top of each page in these groups. It shows the grey wordmark logo (inverted white in dark/cool themes) and a native `<select>` dropdown to navigate within the section. The header is `position: sticky` at `top: 44px` (below the fixed upper nav bar) so the dropdown stays accessible while scrolling.
 
 ---
 
@@ -288,9 +290,12 @@ app/
     cart/                   — Shopping cart
     checkout/               — Stripe checkout + success
     dev/                    — Technical GitHub-integrated development hub (milestones, issues, branches, PRs)
+    discover/               — Discover hub page (NBLS2 destination): cards linking to all Discover pages
     features/               — Non-technical release roadmap (releases 0.1–0.9, feature status badges)
     feedback/               — Beta feedback form (GitHub Issues integration)
     intentions/             — 301 redirect → /
+    journaling/             — The Journalling Practice (Discover section, placeholder)
+    scores/                 — Morning Scores explainer (Discover section, placeholder)
     terms/                  — General terms and conditions (placeholder; expanded in Release 0.9)
     login/                  — Login page
     morning-ritual/         — [key] filter page only (no root page — use /rituals for overview)
@@ -424,7 +429,7 @@ All work is organised by **milestone**, then **label**. No stage codes — miles
 - **Schema change** (29 Mar): `evening_reflection` table dropped. Evening data (`evening_reflection`, `feel_about_today`) now on `posts` table. `stress_scale` added to `morning_state`. Post image field added.
 - **Schema change** (31 Mar, #91): 4 new columns on `users` — `morningReminderEnabled`, `morningReminderTime`, `morningReminderTimezone`, `lastReminderSentAt`.
 - **PostForm redesigned** (29 Mar): Two-tab editing — "After Waking" (morning fields + stress scale + photo upload) and "Before Bed" (evening reflection + feel picker).
-- **Navigation** (29 Mar): Dual rectangular bar system (upper + lower). Standard lower bar NBLS2 = /about (BadgeInfo). Journal-reading bars: upper = prev/write+/feedback/edit/next; lower = share/export/feed-logo/profile/more.
+- **Navigation** (29 Mar): Dual rectangular bar system (upper + lower). Standard lower bar NBLS2 = /discover (BadgeInfo, hub page). Journal-reading bars: upper = prev/write+/feedback/edit/next; lower = share/export/feed-logo/profile/more.
 - **WOLF|BOT personality system shipped** (31 Mar, #184–#189, #133 closed): Four AI personalities (Helpful, Intellectual, Lovely, Sassy) via Claude Haiku. Trigger button in PostForm and journal reading page. Tab switcher with typewriter per tab. `wolfbot_reviews` table. `WolfBotLoadingOverlay` with eye-scan animation. Onboarding gains profession + humour source profiling fields.
 - **WOLF|BOT prompt versioning** (31 Mar): `prompt_version` auto-increments in `wolfbot_config` on any prompt or token cap change. `wolfbot_version_log` audit table. WOLF BRAIN vN shown in terminal boot. Admin panel `/admin/wolfbot` has live-editable prompts + token cap + version history table.
 - **Site version badge** (31 Mar): version displayed in upper nav bar (bottom-right, disappears on journal reading pages). Controlled via `NEXT_PUBLIC_APP_VERSION` env var set from `package.json` at build time.
