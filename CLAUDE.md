@@ -34,13 +34,16 @@ authentic, personal, and real.
 - Schema managed via `drizzle-kit` — deploy changes with `npm run db:push`
 - Auth adapter: `@auth/drizzle-adapter` with explicit table references
 - Tables:
-  - `users` — id, email, passwordHash, name, displayName, bio, image, avatar, role, username
+  - `users` — id, email, passwordHash, name, displayName, bio, image, avatar, role, username, profession, humourSource
   - `accounts`, `sessions`, `verificationTokens` — Auth.js adapter tables
   - `orders`, `orderItems` — Stripe/Printful e-commerce
   - `posts` — blog posts (DB-backed; the `posts/` markdown directory is empty and unused). Includes `evening_reflection` (text), `feel_about_today` (integer 1–6), `image` (Vercel Blob URL)
   - `morning_state` — brain/body/happy/stress scales (all 1–6) + routine checklist (JSONB)
   - `day_scores` — Claude's Take synthesis: scores (JSONB), synthesis text, model, dataCompleteness
   - ~~`evening_reflection`~~ — **dropped** (29 Mar 2026). Evening data now lives on `posts` table directly.
+  - `wolfbot_reviews` — per-post four-personality WOLF|BOT reviews (reviewHelpful, reviewIntellectual, reviewLovely, reviewSassy); unique FK on postId with cascade delete
+  - `wolfbot_config` — key/value config store for WOLF|BOT: prompts (prompt_core, prompt_helpful, prompt_intellectual, prompt_lovely, prompt_sassy), max_tokens, prompt_version, page_appearances
+  - `wolfbot_version_log` — append-only audit log; a row is inserted on every prompt or token cap save; tracks version number, key changed, old/new value, timestamp
 
 **Image Storage:** Vercel Blob
 - All site images, blog post images, and product images stored here
@@ -66,7 +69,7 @@ authentic, personal, and real.
 
 **AI:** Anthropic API (Claude)
 - **Claude's Take** — auto-generates a day synthesis (scores + narrative). Generated at Review time via `/api/posts/[id]/review` (all users) or `/api/admin/claude-take` (admin). Updated again when evening reflection is saved. Scores stored as flexible JSONB.
-- **WOLF|BOT** — the AI journalling assistant. Personality modes, multi-review storage, and journal page UI (#133). All user-facing references use **WOLF|BOT** (not "Wolfbot").
+- **WOLF|BOT** — the AI journalling assistant. Four personality modes (Helpful, Intellectual, Lovely, Sassy) generated in parallel via Claude Haiku (`claude-haiku-4-5-20251001`), stored in `wolfbot_reviews` per post. Users trigger once (POST `/api/posts/[id]/wolfbot-reviews`); admins can re-trigger. Journal terminal shows boot sequence → 4-tab switcher with per-tab typewriter. Prompts are live-editable from `/admin/wolfbot`; every save auto-increments `prompt_version` in `wolfbot_config` and logs to `wolfbot_version_log`. WOLF BRAIN version shown in terminal boot. All user-facing references use **WOLF|BOT** (not "Wolfbot"). `isPremium()` stub in API route — all users treated as premium until Release 0.8.
 - **Review → Publish flow** — PostForm "Review" button saves draft, calls `/api/posts/[id]/review`, Claude generates: SEO excerpt (stored silently), refined title (pre-fills form), Claude's Take (scores + synthesis stored in `day_scores`). Button then flips to "Publish".
 - **SEO meta generation** (admin) — `/api/admin/seo` generates excerpt + suggestedTitle + review for Matthew's posts
 - Key stored as `ANTHROPIC_API_KEY` in Vercel env and `.env.local`
@@ -406,15 +409,16 @@ All work is organised by **milestone**, then **label**. No stage codes — miles
 
 **Version numbering:** Each release is a major version (v0.1, v0.2 etc). Patches within a release are v0.1.1, v0.1.2 etc. The current version number is displayed on the site.
 
-**Current status (29 March 2026):**
+**Current status (31 March 2026):**
 - Closed Alpha Development (#15): active queue — bugs, launch prep, branding, About page. Must ship by 30 April.
-- **Journal reading page fully redesigned** (shipped 29 Mar): Single vertically-scrolling page with 9 named sections replaces the 5-tab layout. Sections in order: Morning Rituals → How I Showed Up → The Journal → WOLF|BOT Review → Post Information → Evening Reflections → Journal Photo → About the Author → Audit Log. Orb navigation (9 fixed ambient orbs), swipe left/right for prev/next post (opacity fades 100%→25%). See `components/JournalPage.tsx` and `components/journal/`.
-- **Schema change** (29 Mar): `evening_reflection` table dropped. Evening data (`evening_reflection`, `feel_about_today`) now on `posts` table. `stress_scale` added to `morning_state`. Post image field added. Run `npm run db:push` already applied.
-- **PostForm redesigned** (29 Mar): Two-tab editing — "After Waking" (morning fields + stress scale + photo upload) and "Before Bed" (evening reflection + feel picker). Photo upload uses in-browser Canvas crop → Vercel Blob via `/api/posts/[id]/image`.
-- **Navigation** (29 Mar): Dual rectangular bar system (upper + lower). Standard lower bar NBLS2 = /about (BadgeInfo). Journal-reading bars: upper = prev/write+/feedback/edit/next; lower = share/export/feed-logo/profile/more. Export enriched with `✦ SECTION ✦` headings, Wolfman.blog footer. Guide added to Discover dropdown in More Pages.
-- **WOLF|BOT naming** (#147 closed 29 Mar): WOLF|BOT consistent across all user-facing UI.
-- **Dome nav** (#161 closed as not_planned 29 Mar): Dome replaced by rectangular bars. WOLF|BOT pixel face lives in the journal WOLF|BOT Review section.
-- **Export button** (#168 closed 29 Mar): Enriched .txt export with decorated headings and Wolfman.blog footer.
+- **Journal reading page fully redesigned** (shipped 29 Mar): Single vertically-scrolling page with 9 named sections replaces the 5-tab layout. Sections in order: Morning Rituals → How I Showed Up → The Journal → WOLF|BOT Review → Post Information → Evening Reflections → Journal Photo → About the Author → Audit Log. Swipe left/right for prev/next post (opacity fades 100%→25%). See `components/JournalPage.tsx` and `components/journal/`.
+- **Schema change** (29 Mar): `evening_reflection` table dropped. Evening data (`evening_reflection`, `feel_about_today`) now on `posts` table. `stress_scale` added to `morning_state`. Post image field added.
+- **PostForm redesigned** (29 Mar): Two-tab editing — "After Waking" (morning fields + stress scale + photo upload) and "Before Bed" (evening reflection + feel picker).
+- **Navigation** (29 Mar): Dual rectangular bar system (upper + lower). Standard lower bar NBLS2 = /about (BadgeInfo). Journal-reading bars: upper = prev/write+/feedback/edit/next; lower = share/export/feed-logo/profile/more.
+- **WOLF|BOT personality system shipped** (31 Mar, #184–#189, #133 closed): Four AI personalities (Helpful, Intellectual, Lovely, Sassy) via Claude Haiku. Trigger button in PostForm and journal reading page. Tab switcher with typewriter per tab. `wolfbot_reviews` table. `WolfBotLoadingOverlay` with eye-scan animation. Onboarding gains profession + humour source profiling fields.
+- **WOLF|BOT prompt versioning** (31 Mar): `prompt_version` auto-increments in `wolfbot_config` on any prompt or token cap change. `wolfbot_version_log` audit table. WOLF BRAIN vN shown in terminal boot. Admin panel `/admin/wolfbot` has live-editable prompts + token cap + version history table.
+- **Site version badge** (31 Mar): `v0.2.0` displayed in upper nav bar (bottom-right, disappears on journal reading pages). Controlled via `NEXT_PUBLIC_APP_VERSION` env var set from `package.json` at build time.
+- **Shared pixel data** (31 Mar): `lib/wolfbot-pixel-data.ts` is single source of truth for WOLF|BOT sprite — `WOLFBOT_GRID`, `WOLFBOT_PALETTE`, `LEFT_EYE_CELLS`, `RIGHT_EYE_CELLS`. `WolfBotIcon.tsx` imports from here.
 - **Active bug**: #148 + #119 — favicon/site icon still needs fixing before public beta (30 Apr deadline).
 - Releases 0.1–0.9: planned, scoped, and milestoned. Beta runs 1 May – 31 August 2026. Release 0.9 (Legal) must complete before production go-live.
 
