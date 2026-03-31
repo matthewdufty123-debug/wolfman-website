@@ -6621,14 +6621,189 @@ html[data-theme="dark"] .stats-chart-card {
 
 .journal-section-title {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.75rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--body-text, #4A4A4A);
-  opacity: 0.55;
+  color: var(--heading, #193343);
   margin: 0 0 1.25rem;
+  text-align: left;
+}
+
+/* ── Section info header (with ? popup) ── */
+.sih-wrap {
+  margin-bottom: 1.25rem;
+}
+
+.sih-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.sih-title {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--heading, #193343);
+  margin: 0;
+  text-align: left;
+  line-height: 1.1;
+}
+
+.sih-q-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--body-text, #4A4A4A);
+  background: none;
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+  line-height: 1;
+}
+
+.sih-q-btn:hover { opacity: 0.85; }
+
+.sih-desc {
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 0.85rem;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.6;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.sih-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.sih-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 61;
+  background: var(--bg, #ffffff);
+  border-radius: 16px;
+  padding: 2rem 1.5rem 1.5rem;
+  width: min(340px, calc(100vw - 2rem));
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.22);
+}
+
+.sih-popup-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.45;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.sih-popup-title {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--heading, #193343);
+  margin: 0 0 0.875rem;
+}
+
+.sih-popup-body {
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: var(--body-text, #4A4A4A);
+  margin: 0 0 1.25rem;
+}
+
+.sih-popup-link {
+  display: block;
   text-align: center;
+  background: #214459;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* ── Morning rituals 6-col grid ── */
+.morning-rituals-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  row-gap: 0.75rem;
+  width: 100%;
+}
+
+/* ── WOLF|BOT 2×2 personality selector ── */
+.wb-personality-select {
+  margin-bottom: 0.5rem;
+}
+
+.wb-personality-prompt {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: rgba(200, 176, 32, 0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.6rem;
+  line-height: 1.4;
+}
+
+.wb-personality-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.wb-personality-btn {
+  background: rgba(200, 176, 32, 0.08);
+  border: 1.5px solid rgba(200, 176, 32, 0.35);
+  border-radius: 5px;
+  color: #C8B020;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0.65rem 0.5rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.15s, border-color 0.15s;
+  text-align: center;
+}
+
+.wb-personality-btn:hover:not(:disabled) {
+  background: rgba(200, 176, 32, 0.18);
+  border-color: rgba(200, 176, 32, 0.65);
+}
+
+.wb-personality-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .journal-section-empty {

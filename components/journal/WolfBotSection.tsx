@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import WolfBotIcon from '@/components/WolfBotIcon'
 import WolfBotLoadingOverlay from '@/components/WolfBotLoadingOverlay'
+import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -63,6 +64,17 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: 
   const [displayedText,setDisplayedText]= useState('')
   const [typedTabs,    setTypedTabs]    = useState<Set<Tab>>(new Set())
   const [cursorVisible,setCursorVisible]= useState(true)
+
+  // Auto-start if TriggerTerminal saved a personality choice before generating
+  useEffect(() => {
+    const saved = sessionStorage.getItem('wb-personality-select')
+    if (saved && (TAB_ORDER as string[]).includes(saved)) {
+      sessionStorage.removeItem('wb-personality-select')
+      setActiveTab(saved as Tab)
+      setUserTriggered(true)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function getReviewText(tab: Tab): string | null {
     switch (tab) {
@@ -172,14 +184,23 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: 
       </div>
 
       <div className="wolfbot-bubble-inner">
-        {/* Generate button — shown until user triggers */}
+        {/* Personality selector — shown until user triggers */}
         {!userTriggered && (
-          <button
-            className="wolfbot-yellow-btn"
-            onClick={() => setUserTriggered(true)}
-          >
-            ▶ GENERATE WOLF|BOT REVIEW
-          </button>
+          <div className="wb-personality-select">
+            <p className="wb-personality-prompt">Choose a personality to read the review:</p>
+            <div className="wb-personality-grid">
+              {TAB_ORDER.map(tab => (
+                <button
+                  key={tab}
+                  type="button"
+                  className="wb-personality-btn"
+                  onClick={() => { setActiveTab(tab); setUserTriggered(true) }}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* Boot lines */}
@@ -260,19 +281,27 @@ function TriggerTerminal({ postId }: { postId: string }) {
           </div>
         </div>
         <div className="wolfbot-bubble-inner">
-          <button
-            className="wolfbot-yellow-btn"
-            onClick={handleTrigger}
-            disabled={loading}
-          >
-            {error ? '▶ RETRY WOLF|BOT REVIEW' : '▶ GENERATE WOLF|BOT REVIEW'}
-          </button>
-          {error && (
-            <p className="wolfbot-terminal-line">
-              <span className="wbt-prompt">&#62;&nbsp;</span>
-              <span className="wbt-error">Generation failed. Try again.</span>
+          <div className="wb-personality-select">
+            <p className="wb-personality-prompt">
+              {error ? 'Generation failed — choose a personality to retry:' : 'Choose a personality to generate your review:'}
             </p>
-          )}
+            <div className="wb-personality-grid">
+              {TAB_ORDER.map(tab => (
+                <button
+                  key={tab}
+                  type="button"
+                  className="wb-personality-btn"
+                  disabled={loading}
+                  onClick={() => {
+                    sessionStorage.setItem('wb-personality-select', tab)
+                    handleTrigger()
+                  }}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </>
@@ -413,7 +442,11 @@ export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, p
 
   return (
     <section id="wolfbot-review" className="journal-section">
-      <h2 className="journal-section-title">WOLF|BOT Review</h2>
+      <SectionInfoHeader
+        title="WOLF|BOT Review"
+        description="An AI companion's perspective on this entry, offered in four distinct personalities."
+        popupBody="WOLF|BOT is powered by Claude AI. It reads the journal through four lenses: Helpful is practical and grounded; Intellectual goes deep on themes and meaning; Lovely is warm and encouraging; Sassy is witty and doesn't pull punches. Each review is generated fresh from the journal content."
+      />
       {hasNewReviews ? (
         <NewReviewTerminal wolfbotReviews={wolfbotReviews!} promptVersion={promptVersion} />
       ) : synthesis ? (

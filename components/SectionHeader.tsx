@@ -9,6 +9,8 @@ const DISCOVER_PAGES = [
   { href: '/about',         label: 'About Wolfman' },
   { href: '/investment',    label: 'Investment Case' },
   { href: '/features',      label: 'Features & Roadmap' },
+  { href: '/journaling',    label: 'The Journalling Practice' },
+  { href: '/scores',        label: 'Morning Scores' },
   { href: '/rituals',       label: 'Rituals' },
   { href: '/achievements',  label: 'Achievements' },
 ]

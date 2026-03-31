@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { ROUTINE_ICON_MAP } from '@/components/RoutineIcons'
+import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
 
 interface Props {
   checklist: Record<string, boolean>
@@ -36,13 +37,18 @@ export default function MorningRitualsSection({ checklist }: Props) {
 
   return (
     <section id="morning-rituals" className="journal-section">
-      <h2 className="journal-section-title">Morning Rituals</h2>
+      <SectionInfoHeader
+        title="Morning Rituals"
+        description="The daily rituals Matthew completed this morning before sitting down to write."
+        popupBody="Morning rituals are small, consistent practices — breathwork, sunlight, movement, stillness — that set the conditions for a good day. Each ritual Matthew completes is logged here. Tap any icon to learn more about it and see other journals where it featured."
+        popupLink={{ href: '/rituals', label: 'Explore all rituals' }}
+      />
 
       {items.length === 0 ? (
         <p className="journal-section-empty">No morning rituals recorded.</p>
       ) : (
         <>
-          <div ref={wrapRef} style={{ display: 'flex', flexWrap: 'wrap', gap: 16, width: '100%' }}>
+          <div ref={wrapRef} className="morning-rituals-grid">
             {items.map(([key, { label, Icon, color }], i) => (
               <button
                 key={key}
@@ -57,7 +63,6 @@ export default function MorningRitualsSection({ checklist }: Props) {
                   border: 'none',
                   cursor: 'pointer',
                   padding: 0,
-                  flexShrink: 0,
                   opacity: visible ? 1 : 0,
                   transform: visible ? 'none' : 'translateX(40px)',
                   transition: 'opacity 1.6s ease, transform 1.6s ease',

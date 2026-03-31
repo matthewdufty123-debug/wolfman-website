@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useEffect, useState } from 'react'
+import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
 
 // ── Labels for each scale ───────────────────────────────────────────────────
 
@@ -168,7 +169,12 @@ export default function HumanScoresSection({ brainScale, bodyScale, happyScale, 
 
   return (
     <section ref={sectionRef} id="how-i-showed-up" className="journal-section">
-      <h2 className="journal-section-title">How I Showed Up</h2>
+      <SectionInfoHeader
+        title="How I Showed Up"
+        description="Four scales recorded each morning — how sharp the mind was, how alive the body felt, how happy and how stressed."
+        popupBody="Before writing, Matthew rates himself on Brain Activity (Peaceful → Manic), Body Energy (Lethargic → Buzzing), Happiness (Far from happy → Joyful), and Stress (Calm → Overwhelmed). These honest snapshots build into a data picture of how his inner state shapes his intentions over time."
+        popupLink={{ href: '/scores', label: 'About the morning scores' }}
+      />
       <div className="hss-grid">
         <ScaleCol title="Brain"  value={brainScale}  labels={BRAIN_LABELS}  revealed={revealed} />
         <ScaleCol title="Body"   value={bodyScale}   labels={BODY_LABELS}   revealed={revealed} />

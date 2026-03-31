@@ -8,7 +8,6 @@ import HumanScoresSection from '@/components/journal/HumanScoresSection'
 import JournalTextSection from '@/components/journal/JournalTextSection'
 import WolfBotSection, { type WolfBotReviews } from '@/components/journal/WolfBotSection'
 import PostInfoSection from '@/components/journal/PostInfoSection'
-import EveningSection from '@/components/journal/EveningSection'
 import JournalPhotoSection from '@/components/journal/JournalPhotoSection'
 import JournalVideoSection from '@/components/journal/JournalVideoSection'
 
@@ -106,7 +105,7 @@ export default function JournalPage({
           </a>
         </header>
 
-        {/* Section running order: Scores, Journal, Rituals, WolfBot, Evening, Photo, PostInfo, NextPost, Footer */}
+        {/* Section running order: Scores, Journal, WolfBot, Rituals, Photo, Video, PostInfo, NextPost, Footer */}
 
         {morningState && (
           <HumanScoresSection
@@ -119,26 +118,17 @@ export default function JournalPage({
 
         <JournalTextSection post={post} />
 
+        <WolfBotSection
+          synthesis={synthesis}
+          wolfbotReviews={wolfbotReviews}
+          isOwnPost={isOwner}
+          postId={post.id ?? ''}
+          promptVersion={promptVersion}
+        />
+
         {morningState && (
           <MorningRitualsSection checklist={morningState.routineChecklist} />
         )}
-
-        {(wolfbotReviews !== null || synthesis !== null) && (
-          <WolfBotSection
-            synthesis={synthesis}
-            wolfbotReviews={wolfbotReviews}
-            isOwnPost={isOwner}
-            postId={post.id ?? ''}
-            promptVersion={promptVersion}
-          />
-        )}
-
-        <EveningSection
-          postId={post.id ?? ''}
-          isOwner={isOwner}
-          reflection={eveningReflection}
-          feelAboutToday={feelAboutToday}
-        />
 
         {post.image && (
           <JournalPhotoSection imageUrl={post.image} title={post.title} />
