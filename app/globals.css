@@ -6353,7 +6353,7 @@ html[data-theme="dark"] .stats-chart-card {
 
 .journal-page-title {
   font-family: var(--font-lora), Georgia, serif;
-  font-size: clamp(2rem, 8.5vw, 3rem);
+  font-size: clamp(1.5rem, 6vw, 2.2rem);
   font-weight: 700;
   line-height: 1.2;
   color: var(--body-text, #4A4A4A);
@@ -6370,6 +6370,63 @@ html[data-theme="dark"] .stats-chart-card {
   margin: 0;
   text-transform: uppercase;
 }
+
+/* ── Author byline — discreet avatar + name below title ─────────────────── */
+
+.journal-author-byline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+  text-decoration: none;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.journal-author-byline:hover { opacity: 0.8; }
+
+.journal-author-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.journal-author-name {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.72rem;
+  color: var(--body-text);
+  letter-spacing: 0.02em;
+}
+
+/* ── Next Journal button — full-width at bottom of page ─────────────────── */
+
+.journal-next-post-wrap {
+  max-width: 640px;
+  margin: 2rem auto 0;
+  padding: 0 1.5rem;
+}
+
+.journal-next-post-btn {
+  display: block;
+  width: 100%;
+  background: #214459;
+  color: #ffffff;
+  text-align: center;
+  text-decoration: none;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 1rem 1.5rem;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.journal-next-post-btn:hover { background: #193343; }
 
 /* ── Section base ───────────────────────────────────────────────────────── */
 
@@ -6439,13 +6496,14 @@ html[data-theme="dark"] .stats-chart-card {
 
 .journal-section-title {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--body-text, #4A4A4A);
-  opacity: 0.38;
+  opacity: 0.55;
   margin: 0 0 1.25rem;
+  text-align: center;
 }
 
 .journal-section-empty {

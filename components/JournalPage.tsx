@@ -12,8 +12,6 @@ import WolfBotSection, { type WolfBotReviews } from '@/components/journal/WolfBo
 import PostInfoSection from '@/components/journal/PostInfoSection'
 import EveningSection from '@/components/journal/EveningSection'
 import JournalPhotoSection from '@/components/journal/JournalPhotoSection'
-import ProfileSection from '@/components/journal/ProfileSection'
-import AuditLogSection from '@/components/journal/AuditLogSection'
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -146,9 +144,21 @@ export default function JournalPage({
         <header className="journal-page-title-header">
           <h1 className="journal-page-title">{post.title}</h1>
           <p className="journal-page-date">{formatPostDate(post.date)}</p>
+          <a href={`/${username}`} className="journal-author-byline">
+            {(author.avatar ?? author.image) && (
+              <img
+                src={author.avatar ?? author.image ?? ''}
+                alt={author.displayName ?? author.name ?? username}
+                className="journal-author-avatar"
+              />
+            )}
+            <span className="journal-author-name">
+              {author.displayName ?? author.name ?? username}
+            </span>
+          </a>
         </header>
 
-        {/* Section running order: Scores, Journal, Rituals, WolfBot, PostInfo, Evening, Photo, Profile, Audit */}
+        {/* Section running order: Scores, Journal, Rituals, WolfBot, Evening, Photo, PostInfo, NextPost, Footer */}
 
         {morningState && (
           <HumanScoresSection
@@ -173,8 +183,6 @@ export default function JournalPage({
           promptVersion={promptVersion}
         />
 
-        <PostInfoSection post={post} postDates={postDates} />
-
         <EveningSection
           postId={post.id ?? ''}
           isOwner={isOwner}
@@ -186,11 +194,18 @@ export default function JournalPage({
           <JournalPhotoSection imageUrl={post.image} title={post.title} />
         )}
 
-        <ProfileSection author={author} username={username} />
+        <PostInfoSection post={post} postDates={postDates} />
 
-        <AuditLogSection postDates={postDates} />
+        {/* Next Journal button — full width, only shown when a next post exists */}
+        {nextHref && (
+          <div className="journal-next-post-wrap">
+            <a href={nextHref} className="journal-next-post-btn">
+              NEXT JOURNAL →
+            </a>
+          </div>
+        )}
 
-        {/* PostFooter — "You have been reading..." + wordmark */}
+        {/* Footer — wordmark */}
         <footer className="post-reading-end">
           <p className="post-reading-end-label">You have been reading</p>
           <p className="post-reading-end-title">{post.title}</p>
