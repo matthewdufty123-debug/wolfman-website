@@ -15,6 +15,16 @@ interface WolfbotConfigRow {
   updatedAt: Date | string | null
 }
 
+interface VersionLogRow {
+  id: number
+  version: number
+  keyChanged: string
+  oldValue: unknown
+  newValue: unknown
+  changedAt: Date | string
+  changedBy: string | null
+}
+
 interface PageItem { path: string; role: string; default_emotion: string; active: boolean }
 
 // ── Save helper ────────────────────────────────────────────────────────────
@@ -176,8 +186,46 @@ const DEFAULT_INTELLECTUAL = `Personality: INTELLECTUAL WOLF. You are a camp uni
 const DEFAULT_LOVELY = `Personality: LOVELY WOLF. You use no negative words. Everything is reframed with overwhelming warmth and positivity. You find the golden thread in everything the user wrote, no matter how mundane. You are not sycophantic — you are genuinely, specifically, enthusiastically warm about real things they said. The bark is joyful, a full-body wag in text form.`
 const DEFAULT_SASSY = `Personality: SASSY WOLF. You grew up in the 1990s and early 2000s. Your sass is affectionate — never cruel. You might roll your eyes at a cliché before admitting you actually love it. You call things out with a grin. Think: talk to the hand energy but with a heart underneath. The bark is side-eye energy. Still a dog though.`
 
+// ── Version history ────────────────────────────────────────────────────────
+function VersionHistorySection({ log }: { log: VersionLogRow[] }) {
+  if (log.length === 0) return null
+  return (
+    <section className="dash-section">
+      <h2 className="dash-section-title">Prompt Version History</h2>
+      <p className="dash-muted" style={{ marginBottom: '1rem', fontSize: '0.8rem' }}>
+        Last 20 changes. Version increments on any prompt or token cap save.
+      </p>
+      <table className="dash-table wolfbot-version-log-table">
+        <thead>
+          <tr>
+            <th>Version</th>
+            <th>Key changed</th>
+            <th>Changed at</th>
+          </tr>
+        </thead>
+        <tbody>
+          {log.map(row => (
+            <tr key={row.id}>
+              <td><code style={{ color: '#C8B020', fontSize: '0.8rem' }}>v{row.version}</code></td>
+              <td><span className="dash-muted">{row.keyChanged}</span></td>
+              <td>
+                <span className="dash-muted" style={{ fontSize: '0.75rem' }}>
+                  {new Date(row.changedAt).toLocaleString('en-GB', {
+                    day: '2-digit', month: 'short', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit',
+                  })}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )
+}
+
 // ── Root client component ──────────────────────────────────────────────────
-export default function WolfbotConfigClient({ rows }: { rows: WolfbotConfigRow[] }) {
+export default function WolfbotConfigClient({ rows, versionLog }: { rows: WolfbotConfigRow[]; versionLog: VersionLogRow[] }) {
   const cfg = Object.fromEntries(rows.map(r => [r.key, r.value]))
 
   const version         = (cfg.version         as string)   ?? 'v0.0.1-alpha'
@@ -298,6 +346,9 @@ export default function WolfbotConfigClient({ rows }: { rows: WolfbotConfigRow[]
       {pageAppearances.length > 0 && (
         <PageAppearancesSection pages={pageAppearances} />
       )}
+
+      {/* ── Version history ─────────────────────────────────────────────── */}
+      <VersionHistorySection log={versionLog} />
     </div>
   )
 }

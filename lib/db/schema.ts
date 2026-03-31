@@ -158,6 +158,19 @@ export const wolfbotConfig = pgTable('wolfbot_config', {
   updatedAt:   timestamp('updated_at', { withTimezone: true }).defaultNow(),
 })
 
+// ── WOLF|BOT prompt version log ───────────────────────────────────────────
+// Append-only audit log. One row per admin prompt/token-cap save.
+// version mirrors the prompt_version counter in wolfbot_config at time of change.
+export const wolfbotVersionLog = pgTable('wolfbot_version_log', {
+  id:         serial('id').primaryKey(),
+  version:    integer('version').notNull(),
+  keyChanged: text('key_changed').notNull(),
+  oldValue:   jsonb('old_value'),
+  newValue:   jsonb('new_value').notNull(),
+  changedAt:  timestamp('changed_at').notNull().defaultNow(),
+  changedBy:  uuid('changed_by').references(() => users.id),
+})
+
 // ── WOLF|BOT personality reviews ──────────────────────────────────────────
 // One row per post — four personality reviews generated together in a single
 // user-triggered action. Admin can re-trigger to regenerate. Unique on postId.

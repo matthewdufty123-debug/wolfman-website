@@ -192,6 +192,11 @@ export default function UpperNavBar() {
     <>
       <nav className={`upper-nav${faded ? ' nav--faded' : ''}`} aria-label="Upper navigation">
         {config.upper.map((slot, idx) => renderSlot(slot, idx))}
+        {process.env.NEXT_PUBLIC_APP_VERSION && (
+          <span className="nav-version" aria-hidden="true">
+            v{process.env.NEXT_PUBLIC_APP_VERSION}
+          </span>
+        )}
       </nav>
       <SettingsOverlay open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </>

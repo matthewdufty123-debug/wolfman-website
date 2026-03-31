@@ -21,14 +21,18 @@ interface Props {
   wolfbotReviews:  WolfBotReviews | null
   isOwnPost:       boolean
   postId:          string
+  promptVersion:   number
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const BOOT_LINES = [
-  'WOLF|BOT REVIEW INITIATED',
-  'PROCESSING JOURNAL ENTRY...',
-]
+function makeBootLines(promptVersion: number): string[] {
+  return [
+    'WOLF|BOT REVIEW INITIATED',
+    `LOADING WOLF BRAIN v${promptVersion}...`,
+    'PROCESSING JOURNAL ENTRY...',
+  ]
+}
 
 const WOLFBOT_QUIPS = [
   'Time for my take',
@@ -48,7 +52,7 @@ const TAB_ORDER: Tab[] = ['HELPFUL', 'INTELLECTUAL', 'LOVELY', 'SASSY']
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 /** State A — reviews exist: boot then tab switcher */
-function NewReviewTerminal({ wolfbotReviews }: { wolfbotReviews: WolfBotReviews }) {
+function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: WolfBotReviews; promptVersion: number }) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const [revealed,     setRevealed]     = useState(false)
   const [bootLine,     setBootLine]     = useState(0)
@@ -83,6 +87,8 @@ function NewReviewTerminal({ wolfbotReviews }: { wolfbotReviews: WolfBotReviews 
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
+
+  const BOOT_LINES = makeBootLines(promptVersion)
 
   // Boot sequence
   useEffect(() => {
@@ -262,7 +268,7 @@ function TriggerTerminal({ postId }: { postId: string }) {
 }
 
 /** Legacy fallback — synthesis only, no personality reviews */
-function LegacyTerminal({ synthesis }: { synthesis: string }) {
+function LegacyTerminal({ synthesis, promptVersion }: { synthesis: string; promptVersion: number }) {
   const sectionRef                              = useRef<HTMLDivElement>(null)
   const [revealed,     setRevealed]             = useState(false)
   const [phase,        setPhase]                = useState<'idle' | 'booting' | 'typing' | 'done'>('idle')
@@ -283,6 +289,8 @@ function LegacyTerminal({ synthesis }: { synthesis: string }) {
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
+
+  const BOOT_LINES = makeBootLines(promptVersion)
 
   function startReview() {
     if (phase !== 'idle') return
@@ -380,7 +388,7 @@ function LegacyTerminal({ synthesis }: { synthesis: string }) {
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
-export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, postId }: Props) {
+export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, postId, promptVersion }: Props) {
   const hasNewReviews = wolfbotReviews && (
     wolfbotReviews.reviewHelpful ||
     wolfbotReviews.reviewIntellectual ||
@@ -395,9 +403,9 @@ export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, p
     <section id="wolfbot-review" className="journal-section">
       <h2 className="journal-section-title">WOLF|BOT Review</h2>
       {hasNewReviews ? (
-        <NewReviewTerminal wolfbotReviews={wolfbotReviews!} />
+        <NewReviewTerminal wolfbotReviews={wolfbotReviews!} promptVersion={promptVersion} />
       ) : synthesis ? (
-        <LegacyTerminal synthesis={synthesis} />
+        <LegacyTerminal synthesis={synthesis} promptVersion={promptVersion} />
       ) : (
         <TriggerTerminal postId={postId} />
       )}

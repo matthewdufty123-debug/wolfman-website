@@ -5,7 +5,7 @@ import { auth } from '@/auth'
 import { PostContextSetter } from '@/lib/post-context'
 import JournalPage from '@/components/JournalPage'
 import { db } from '@/lib/db'
-import { posts as postsTable, morningState, dayScores, users as usersTable, wolfbotReviews as wolfbotReviewsTable } from '@/lib/db/schema'
+import { posts as postsTable, morningState, dayScores, users as usersTable, wolfbotReviews as wolfbotReviewsTable, wolfbotConfig } from '@/lib/db/schema'
 import { eq, gt, lt, and, or, desc, asc } from 'drizzle-orm'
 
 // Allow slugs not in generateStaticParams to be dynamically rendered (posts published after a build)
@@ -88,7 +88,7 @@ export default async function PostPage({
   const userId = session?.user?.id ?? null
 
   // Fetch morning state, day scores, post timestamps, and adjacent posts
-  const [ms, ds, postRow, wbr] = post.id
+  const [ms, ds, postRow, wbr, promptVersionRow] = post.id
     ? await Promise.all([
         db.select().from(morningState).where(eq(morningState.postId, post.id)).then(r => r[0] ?? null),
         db.select().from(dayScores).where(eq(dayScores.postId, post.id)).then(r => r[0] ?? null),
@@ -110,8 +110,14 @@ export default async function PostPage({
           .from(wolfbotReviewsTable)
           .where(eq(wolfbotReviewsTable.postId, post.id))
           .then(r => r[0] ?? null),
+        db.select({ value: wolfbotConfig.value })
+          .from(wolfbotConfig)
+          .where(eq(wolfbotConfig.key, 'prompt_version'))
+          .then(r => r[0] ?? null),
       ])
-    : [null, null, null, null]
+    : [null, null, null, null, null]
+
+  const promptVersion = (promptVersionRow?.value as number) ?? 1
 
   const postDates = postRow
     ? { createdAt: postRow.createdAt.toISOString(), updatedAt: postRow.updatedAt.toISOString() }
@@ -173,6 +179,7 @@ export default async function PostPage({
         prevPost={prevPost}
         nextPost={nextPost}
         wolfbotReviews={wbr}
+        promptVersion={promptVersion}
       />
     </>
   )

@@ -49,6 +49,7 @@ export interface JournalPageProps {
   prevPost: { slug: string; username: string } | null
   nextPost: { slug: string; username: string } | null
   wolfbotReviews: WolfBotReviews | null
+  promptVersion: number
 }
 
 // ── Date helper ───────────────────────────────────────────────────────────────
@@ -79,6 +80,7 @@ export default function JournalPage({
   prevPost,
   nextPost,
   wolfbotReviews,
+  promptVersion,
 }: JournalPageProps) {
   const router = useRouter()
   const { data: session } = useSession()
@@ -168,6 +170,7 @@ export default function JournalPage({
           wolfbotReviews={wolfbotReviews}
           isOwnPost={isOwner}
           postId={post.id ?? ''}
+          promptVersion={promptVersion}
         />
 
         <PostInfoSection post={post} postDates={postDates} />

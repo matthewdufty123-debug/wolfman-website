@@ -109,6 +109,19 @@ body {
   transition: opacity 0.3s ease;
 }
 
+/* Site version badge — inside upper nav, right edge, unobtrusive */
+.nav-version {
+  position: absolute;
+  right: 8px;
+  bottom: 5px;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+  color: rgba(74, 127, 165, 0.5);
+  pointer-events: none;
+  user-select: none;
+}
+
 /* ── Lower navigation bar ── */
 .lower-nav {
   position: fixed;
