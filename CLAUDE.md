@@ -34,7 +34,7 @@ authentic, personal, and real.
 - Schema managed via `drizzle-kit` — deploy changes with `npm run db:push`
 - Auth adapter: `@auth/drizzle-adapter` with explicit table references
 - Tables:
-  - `users` — id, email, passwordHash, name, displayName, bio, image, avatar, role, username, profession, humourSource
+  - `users` — id, email, passwordHash, name, displayName, bio, image, avatar, role, username, profession, humourSource, morningReminderEnabled, morningReminderTime, morningReminderTimezone, lastReminderSentAt
   - `accounts`, `sessions`, `verificationTokens` — Auth.js adapter tables
   - `orders`, `orderItems` — Stripe/Printful e-commerce
   - `posts` — blog posts (DB-backed; the `posts/` markdown directory is empty and unused). Includes `evening_reflection` (text), `feel_about_today` (integer 1–6), `image` (Vercel Blob URL)
@@ -66,6 +66,8 @@ authentic, personal, and real.
 - Custom domain: `orders@wolfman.blog` (DKIM/SPF/DMARC verified via Porkbun DNS)
 - Order confirmation emails sent automatically on successful checkout
 - Lazy-initialised (`function getResend()`) to avoid build-time env var errors
+- **Admin instant alerts** (live, #89): `notifyAdminNewRegistration`, `notifyAdminFeedbackSubmitted`, `notifyAdminFirstPost`, `notifyAdminClaudesTakeFailed` — all fire-and-forget via `.catch(() => {})`. Target: `ADMIN_NOTIFY_EMAIL` env var (falls back to `matthew@wolfman.blog`)
+- **Morning reminders** (live, #91): `sendMorningReminder()` — opt-in per-user reminder at chosen local time. Cron runs every 15 min, skips users who've already posted today. Unsubscribe via HMAC-signed one-click link. Requires `REMINDER_UNSUBSCRIBE_SECRET` env var.
 
 **AI:** Anthropic API (Claude)
 - **Claude's Take** — auto-generates a day synthesis (scores + narrative). Generated at Review time via `/api/posts/[id]/review` (all users) or `/api/admin/claude-take` (admin). Updated again when evening reflection is saved. Scores stored as flexible JSONB.
@@ -297,7 +299,7 @@ app/
     morning-stats/          — Redirects logged-in users → /[username], else → /login
     journal/                — Redirects logged-in users → /[username], else → /login
     register/               — Register page (includes beta terms summary)
-    settings/               — User settings (theme, font — persisted to DB)
+    settings/               — User settings (theme, font, morning reminder — persisted to DB)
     shop/                   — Shop listing + [id] product page
   (post)/                   — Route group for write/edit overlays
     posts/[slug]/           — Legacy URL — 301 redirects to /[username]/[slug]
@@ -324,6 +326,10 @@ app/
       avatar/               — Avatar upload (Vercel Blob)
       settings/             — Read/write user preferences (theme, font)
       username/             — Username availability check (GET ?u=foo)
+      reminders/            — GET/PATCH morning reminder prefs; /unsubscribe HMAC one-click opt-out
+    cron/
+      beta-emails/          — Daily cron: beta week-notice + go-live broadcast emails
+      morning-reminder/     — Every-15-min cron: sends morning reminder to opted-in users at their chosen local time
     webhooks/stripe/        — Stripe webhook handler
   layout.tsx                — Root layout with CartProvider
 
@@ -341,9 +347,11 @@ components/                 — Shared React components
   MorningRitualIconBar.tsx  — Ritual icons on post page
   MorningScaleBar.tsx       — Brain activity/body/happy scale display
   MorningZoneScatter.tsx    — Morning Zone scatter (body vs brain vs happiness)
+  AccountWolfBotProfileForm.tsx — WOLF|BOT personalisation dropdowns (profession + humour style) on /account
   NavBar.tsx                — Bottom circular dome navigation: wolf button opens a full-screen dome (120vw circle anchored at viewport bottom) with 5 arc-positioned icons, WOLF|BOT robot face placeholder (greeting/bored states, auto-closes at 10s), and "WOLF|BOT ONLINE" status strip. Login modal also handled here.
   PostFooter.tsx            — "You have been reading..." + wolf logo + owner actions
   PostForm.tsx              — Write/edit form with Review→Publish Claude flow
+  ReminderSettings.tsx      — Morning reminder toggle + time picker + timezone selector (shown on /settings)
   RoutineIcons.tsx          — Morning routine icon set
   ShareButton.tsx           — Post sharing
   StatsCharts.tsx           — Trend charts for profile/stats pages
@@ -407,19 +415,24 @@ All work is organised by **milestone**, then **label**. No stage codes — miles
 | Release 0.8 — Subscriptions | #23 | 31 Aug 2026 | Free vs premium tier, feature gating, paid tier live |
 | Release 0.9 — Legal | #24 | Before go-live | Data protection, T&Cs, GDPR, cookie consent, EU/US legal, shop and subscription terms. Must be signed off before production launch. |
 
-**Version numbering:** Each release is a major version (v0.1, v0.2 etc). Patches within a release are v0.1.1, v0.1.2 etc. The current version number is displayed on the site.
+**Version numbering:** Each release is a major version (v0.1, v0.2 etc). Patches within a release are v0.1.1, v0.1.2 etc. The current version number is displayed on the site. **Bump the patch version (`package.json`) on every commit** — even minor amends. The version badge on the live site should always reflect the latest deployment. Major/minor numbers only change on milestone releases.
 
-**Current status (31 March 2026):**
+**Current status (31 March 2026) — v0.2.9:**
 - Closed Alpha Development (#15): active queue — bugs, launch prep, branding, About page. Must ship by 30 April.
-- **Journal reading page fully redesigned** (shipped 29 Mar): Single vertically-scrolling page with 9 named sections replaces the 5-tab layout. Sections in order: Morning Rituals → How I Showed Up → The Journal → WOLF|BOT Review → Post Information → Evening Reflections → Journal Photo → About the Author → Audit Log. Swipe left/right for prev/next post (opacity fades 100%→25%). See `components/JournalPage.tsx` and `components/journal/`.
+- **Journal reading page fully redesigned** (shipped 29 Mar): Single vertically-scrolling page with 9 named sections replaces the 5-tab layout. Sections in order: Morning Rituals → How I Showed Up → The Journal → WOLF|BOT Review → Post Information → Evening Reflections → Journal Photo → About the Author → Audit Log. See `components/JournalPage.tsx` and `components/journal/`.
+- **Swipe navigation removed** (31 Mar, #207): Swipe left/right was removed entirely from `JournalPage.tsx`. No swipe-to-navigate anywhere on the site.
 - **Schema change** (29 Mar): `evening_reflection` table dropped. Evening data (`evening_reflection`, `feel_about_today`) now on `posts` table. `stress_scale` added to `morning_state`. Post image field added.
+- **Schema change** (31 Mar, #91): 4 new columns on `users` — `morningReminderEnabled`, `morningReminderTime`, `morningReminderTimezone`, `lastReminderSentAt`.
 - **PostForm redesigned** (29 Mar): Two-tab editing — "After Waking" (morning fields + stress scale + photo upload) and "Before Bed" (evening reflection + feel picker).
 - **Navigation** (29 Mar): Dual rectangular bar system (upper + lower). Standard lower bar NBLS2 = /about (BadgeInfo). Journal-reading bars: upper = prev/write+/feedback/edit/next; lower = share/export/feed-logo/profile/more.
 - **WOLF|BOT personality system shipped** (31 Mar, #184–#189, #133 closed): Four AI personalities (Helpful, Intellectual, Lovely, Sassy) via Claude Haiku. Trigger button in PostForm and journal reading page. Tab switcher with typewriter per tab. `wolfbot_reviews` table. `WolfBotLoadingOverlay` with eye-scan animation. Onboarding gains profession + humour source profiling fields.
 - **WOLF|BOT prompt versioning** (31 Mar): `prompt_version` auto-increments in `wolfbot_config` on any prompt or token cap change. `wolfbot_version_log` audit table. WOLF BRAIN vN shown in terminal boot. Admin panel `/admin/wolfbot` has live-editable prompts + token cap + version history table.
-- **Site version badge** (31 Mar): `v0.2.0` displayed in upper nav bar (bottom-right, disappears on journal reading pages). Controlled via `NEXT_PUBLIC_APP_VERSION` env var set from `package.json` at build time.
+- **Site version badge** (31 Mar): version displayed in upper nav bar (bottom-right, disappears on journal reading pages). Controlled via `NEXT_PUBLIC_APP_VERSION` env var set from `package.json` at build time.
 - **Shared pixel data** (31 Mar): `lib/wolfbot-pixel-data.ts` is single source of truth for WOLF|BOT sprite — `WOLFBOT_GRID`, `WOLFBOT_PALETTE`, `LEFT_EYE_CELLS`, `RIGHT_EYE_CELLS`. `WolfBotIcon.tsx` imports from here.
-- **Active bug**: #148 + #119 — favicon/site icon still needs fixing before public beta (30 Apr deadline).
+- **Beta bugs fixed** (31 Mar, #199–#208): Theme logo bleed on cool/warm themes, WOLF|BOT boot sequence not firing (#203 — missing useEffect dependency), journal title overflow, section header padding, nav icon sizing, feedback Blob upload error handling, swipe boundary crash, WOLF|BOT profile form unstyled (wrong CSS classes, now uses correct classes + select dropdowns).
+- **Admin instant alerts** (31 Mar, #89): New registration, first post, beta feedback, Claude's Take failure — all fire-and-forget via Resend to `ADMIN_NOTIFY_EMAIL`.
+- **Morning reminders** (31 Mar, #91): Opt-in per-user reminder at chosen local time + timezone. `/api/user/reminders` GET/PATCH, HMAC-signed `/unsubscribe`. `ReminderSettings` component on `/settings`. Vercel cron every 15 min. Requires `REMINDER_UNSUBSCRIBE_SECRET` env var.
+- **Active bugs**: #148 + #119 — favicon/site icon still needs fixing before public beta (30 Apr deadline).
 - Releases 0.1–0.9: planned, scoped, and milestoned. Beta runs 1 May – 31 August 2026. Release 0.9 (Legal) must complete before production go-live.
 
 ### Feature freeze
