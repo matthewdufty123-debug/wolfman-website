@@ -1,7 +1,5 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import type { ProcessedPost } from '@/lib/posts'
 import ThemeLogo from '@/components/ThemeLogo'
@@ -64,8 +62,6 @@ function formatPostDate(dateStr: string): string {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-const MAX_SWIPE_DISTANCE = 160 // px at which navigation triggers
-
 export default function JournalPage({
   post,
   username,
@@ -81,69 +77,17 @@ export default function JournalPage({
   wolfbotReviews,
   promptVersion,
 }: JournalPageProps) {
-  const router = useRouter()
   const { data: session } = useSession()
   const isOwner = session?.user?.id != null && session.user.id === authorId
-
-  const [contentOpacity, setContentOpacity] = useState(1)
-  const touchStartX = useRef<number | null>(null)
-  const navigatingRef = useRef(false)
 
   const prevHref = prevPost ? `/${prevPost.username}/${prevPost.slug}` : null
   const nextHref = nextPost ? `/${nextPost.username}/${nextPost.slug}` : null
 
-  function handleTouchStart(e: React.TouchEvent) {
-    touchStartX.current = e.touches[0].clientX
-  }
-
-  function handleTouchMove(e: React.TouchEvent) {
-    if (touchStartX.current === null || navigatingRef.current) return
-    const delta = e.touches[0].clientX - touchStartX.current
-    const abs = Math.abs(delta)
-    if (abs > 10) {
-      // Only fade if there is a post to navigate to in this direction
-      const href = delta < 0 ? nextHref : prevHref
-      if (href) {
-        const opacity = Math.max(0.25, 1 - (abs / MAX_SWIPE_DISTANCE) * 0.75)
-        setContentOpacity(opacity)
-      }
-    }
-  }
-
-  function handleTouchEnd(e: React.TouchEvent) {
-    if (touchStartX.current === null || navigatingRef.current) return
-    const delta = e.changedTouches[0].clientX - touchStartX.current
-    touchStartX.current = null
-
-    if (Math.abs(delta) >= MAX_SWIPE_DISTANCE) {
-      const href = delta < 0 ? nextHref : prevHref
-      if (href) {
-        navigatingRef.current = true
-        setContentOpacity(0.25)
-        router.push(href)
-        return
-      }
-    }
-    // Not enough — restore opacity
-    setContentOpacity(1)
-  }
-
   const synthesis = dayScores?.synthesis ?? post.review ?? null
 
   return (
-    <div
-      className="journal-scroll-page"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
-      <div
-        className="journal-scroll-content"
-        style={{
-          opacity: contentOpacity,
-          transition: contentOpacity === 1 ? 'opacity 0.3s ease' : 'none',
-        }}
-      >
+    <div className="journal-scroll-page">
+      <div className="journal-scroll-content">
         {/* Post title — sits at top, below the fixed upper nav bar */}
         <header className="journal-page-title-header">
           <h1 className="journal-page-title">{post.title}</h1>
