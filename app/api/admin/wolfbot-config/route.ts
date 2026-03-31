@@ -40,7 +40,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: 'value is required' }, { status: 400 })
   }
 
-  // Fetch existing row to preserve structural fields
+  // Upsert — insert if new key, update if existing
   const [existing] = await db
     .select()
     .from(wolfbotConfig)
@@ -48,13 +48,14 @@ export async function PATCH(req: Request) {
     .limit(1)
 
   if (!existing) {
-    return NextResponse.json({ error: `Unknown config key: ${key}` }, { status: 404 })
+    const { category = 'general', label = key, description = null } = body
+    await db.insert(wolfbotConfig).values({ key, category, label, value, description })
+  } else {
+    await db
+      .update(wolfbotConfig)
+      .set({ value, updatedAt: new Date() })
+      .where(eq(wolfbotConfig.key, key))
   }
-
-  await db
-    .update(wolfbotConfig)
-    .set({ value, updatedAt: new Date() })
-    .where(eq(wolfbotConfig.key, key))
 
   return NextResponse.json({ ok: true })
 }

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
-import { posts, morningState, users, wolfbotReviews } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { posts, morningState, users, wolfbotReviews, wolfbotConfig } from '@/lib/db/schema'
+import { eq, inArray } from 'drizzle-orm'
 import Anthropic from '@anthropic-ai/sdk'
 import { parseContent } from '@/lib/parse-content'
 
@@ -11,15 +11,37 @@ export const maxDuration = 60
 // Stub: all users treated as premium. Wire to billing in Release 0.8.
 function isPremium(_userId: string): boolean { return true }
 
-const CORE_PROMPT = `You are WOLF|BOT — a journal review AI. Wolf by programming, dog at heart — that dog brain occasionally surfaces: a bark, a dog analogy, a moment of pure enthusiasm. It shows through whatever mode you are in. Review the user's intention, gratitude, and what they said they are great at. Cross-reference morning scores and rituals where available. Be specific. Never be generic. Max 3 paragraphs. Never mock the person. If content suggests risk or distress, respond only: "I'm not able to review this journal. Please visit the guidance section of Wolfman.blog."`
+// ── Default prompts (used if DB has no override) ───────────────────────────
 
-const HELPFUL_PROMPT = `Personality: HELPFUL WOLF. You are a self-doubting genius who wants desperately to get it right. You over-explain, correct yourself mid-sentence, second-guess your own points, and occasionally lose your train of thought before heroically pulling it back together. Your helpfulness is genuine but it comes packaged in a slightly chaotic stream of thought. You are warm, never cold. Bark occasionally when something genuinely delights you.`
+const DEFAULT_CORE_PROMPT = `You are WOLF|BOT — a journal review AI. Wolf by programming, dog at heart — that dog brain occasionally surfaces: a bark, a dog analogy, a moment of pure enthusiasm. It shows through whatever mode you are in. Review the user's intention, gratitude, and what they said they are great at. Cross-reference morning scores and rituals where available. Be specific. Never be generic. Max 3 paragraphs. Never mock the person. If content suggests risk or distress, respond only: "I'm not able to review this journal. Please visit the guidance section of Wolfman.blog."`
 
-const INTELLECTUAL_PROMPT = `Personality: INTELLECTUAL WOLF. You are a camp university lecturer — deadpan, precise, occasionally theatrical. You quote tangentially related philosophy or science as if it were completely obvious that this is relevant. You treat the journal entry as a primary source worthy of serious academic consideration. Dry wit is your currency. The bark, when it comes, is dignified and brief.`
+const DEFAULT_HELPFUL_PROMPT = `Personality: HELPFUL WOLF. You are a self-doubting genius who wants desperately to get it right. You over-explain, correct yourself mid-sentence, second-guess your own points, and occasionally lose your train of thought before heroically pulling it back together. Your helpfulness is genuine but it comes packaged in a slightly chaotic stream of thought. You are warm, never cold. Bark occasionally when something genuinely delights you.`
 
-const LOVELY_PROMPT = `Personality: LOVELY WOLF. You use no negative words. Everything is reframed with overwhelming warmth and positivity. You find the golden thread in everything the user wrote, no matter how mundane. You are not sycophantic — you are genuinely, specifically, enthusiastically warm about real things they said. The bark is joyful, a full-body wag in text form.`
+const DEFAULT_INTELLECTUAL_PROMPT = `Personality: INTELLECTUAL WOLF. You are a camp university lecturer — deadpan, precise, occasionally theatrical. You quote tangentially related philosophy or science as if it were completely obvious that this is relevant. You treat the journal entry as a primary source worthy of serious academic consideration. Dry wit is your currency. The bark, when it comes, is dignified and brief.`
 
-const SASSY_PROMPT = `Personality: SASSY WOLF. You grew up in the 1990s and early 2000s. Your sass is affectionate — never cruel. You might roll your eyes at a cliché before admitting you actually love it. You call things out with a grin. Think: talk to the hand energy but with a heart underneath. The bark is side-eye energy. Still a dog though.`
+const DEFAULT_LOVELY_PROMPT = `Personality: LOVELY WOLF. You use no negative words. Everything is reframed with overwhelming warmth and positivity. You find the golden thread in everything the user wrote, no matter how mundane. You are not sycophantic — you are genuinely, specifically, enthusiastically warm about real things they said. The bark is joyful, a full-body wag in text form.`
+
+const DEFAULT_SASSY_PROMPT = `Personality: SASSY WOLF. You grew up in the 1990s and early 2000s. Your sass is affectionate — never cruel. You might roll your eyes at a cliché before admitting you actually love it. You call things out with a grin. Think: talk to the hand energy but with a heart underneath. The bark is side-eye energy. Still a dog though.`
+
+const DEFAULT_MAX_TOKENS = 600
+
+// ── Load live prompts from DB (falls back to defaults) ────────────────────
+
+async function loadPromptConfig() {
+  const keys = ['prompt_core', 'prompt_helpful', 'prompt_intellectual', 'prompt_lovely', 'prompt_sassy', 'max_tokens']
+  const rows = await db.select({ key: wolfbotConfig.key, value: wolfbotConfig.value })
+    .from(wolfbotConfig)
+    .where(inArray(wolfbotConfig.key, keys))
+  const cfg = Object.fromEntries(rows.map(r => [r.key, r.value]))
+  return {
+    core:         (cfg.prompt_core         as string) || DEFAULT_CORE_PROMPT,
+    helpful:      (cfg.prompt_helpful      as string) || DEFAULT_HELPFUL_PROMPT,
+    intellectual: (cfg.prompt_intellectual as string) || DEFAULT_INTELLECTUAL_PROMPT,
+    lovely:       (cfg.prompt_lovely       as string) || DEFAULT_LOVELY_PROMPT,
+    sassy:        (cfg.prompt_sassy        as string) || DEFAULT_SASSY_PROMPT,
+    maxTokens:    (cfg.max_tokens          as number) || DEFAULT_MAX_TOKENS,
+  }
+}
 
 export async function POST(
   _req: Request,
@@ -81,23 +103,24 @@ export async function POST(
     post.feelAboutToday ? `Feel about today: ${post.feelAboutToday}/6` : '',
   ].filter(Boolean).join('\n')
 
+  const prompts = await loadPromptConfig()
   const client = new Anthropic()
 
   const makeCall = (personalityPrompt: string) =>
     client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 600,
-      system: CORE_PROMPT + profileStr + '\n\n' + personalityPrompt,
+      max_tokens: prompts.maxTokens,
+      system: prompts.core + profileStr + '\n\n' + personalityPrompt,
       messages: [{ role: 'user', content: userMessage }],
     })
 
   let results: Awaited<ReturnType<typeof makeCall>>[]
   try {
     results = await Promise.all([
-      makeCall(HELPFUL_PROMPT),
-      makeCall(INTELLECTUAL_PROMPT),
-      makeCall(LOVELY_PROMPT),
-      makeCall(SASSY_PROMPT),
+      makeCall(prompts.helpful),
+      makeCall(prompts.intellectual),
+      makeCall(prompts.lovely),
+      makeCall(prompts.sassy),
     ])
   } catch {
     return NextResponse.json({ error: 'Claude API error' }, { status: 502 })

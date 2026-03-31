@@ -5346,6 +5346,24 @@ html[data-theme="dark"] .stats-chart-card {
    All classes prefixed wolfbot- to avoid collisions with dash-* admin styles
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* ── Prompt editor ──────────────────────────────────────────────────────── */
+.wb-prompt-editor {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.wb-prompt-editor:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.wb-prompt-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.6rem;
+}
+
 /* ── Identity section ──────────────────────────────────────────────────── */
 .wolfbot-identity-wrap {
   display: flex;
