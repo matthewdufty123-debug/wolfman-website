@@ -161,9 +161,8 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * /admin and /admin/*
    */
   admin: {
-    upper: [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
-    lower: [FEED, ADMIN, EMPTY, ACCOUNT, MORE_PAGES],
-    //       NBLS1  NBLS2  NBLS3  NBLS4    NBLS5
+    upper: [WRITE_PLUS, EMPTY, FEEDBACK_TEXT, BETA_LINK, SETTINGS],
+    lower: [WOLFBOT, ABOUT, FEED_LOGO, ACCOUNT, MORE_PAGES],
   },
 }
 

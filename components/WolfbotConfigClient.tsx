@@ -237,9 +237,12 @@ export default function WolfbotConfigClient({ rows, versionLog }: { rows: Wolfbo
   const promptLovely       = (cfg.prompt_lovely       as string) || DEFAULT_LOVELY
   const promptSassy        = (cfg.prompt_sassy        as string) || DEFAULT_SASSY
   const maxTokens          = (cfg.max_tokens          as number) ?? 600
+  const currentModel       = (cfg.model               as string) || 'claude-haiku-4-5-20251001'
 
   const tokenSave = useSaveState()
+  const modelSave = useSaveState()
   const [tokenVal, setTokenVal] = useState(String(maxTokens))
+  const [modelVal, setModelVal] = useState(currentModel)
 
   return (
     <div>
@@ -308,6 +311,39 @@ export default function WolfbotConfigClient({ rows, versionLog }: { rows: Wolfbo
       {/* ── Generation settings ─────────────────────────────────────────── */}
       <section className="dash-section">
         <h2 className="dash-section-title">Generation Settings</h2>
+
+        {/* Model selector */}
+        <div className="dash-config-row" style={{ marginBottom: '1.5rem' }}>
+          <label className="dash-config-label">
+            Claude model
+            <span className="dash-muted" style={{ fontWeight: 400, marginLeft: 8 }}>
+              Used for all 4 personality calls. Changes take effect on next generation.
+            </span>
+          </label>
+          <select
+            className="dash-config-input"
+            style={{ width: 320 }}
+            value={modelVal}
+            onChange={e => setModelVal(e.target.value)}
+          >
+            <option value="claude-haiku-4-5-20251001">Haiku 4.5 — fast &amp; cheap</option>
+            <option value="claude-sonnet-4-6">Sonnet 4.6 — balanced</option>
+            <option value="claude-opus-4-6">Opus 4.6 — most capable</option>
+          </select>
+          <div className="dash-config-actions">
+            <button
+              className="dash-action-btn"
+              onClick={() => modelSave.save('model', modelVal, { category: 'generation', label: 'Model' })}
+              disabled={modelSave.saving}
+            >
+              {modelSave.saving ? 'Saving…' : 'Save'}
+            </button>
+            {modelSave.saved && <span className="dash-config-saved">Saved</span>}
+            {modelSave.error && <span className="dash-config-error">{modelSave.error}</span>}
+          </div>
+        </div>
+
+        {/* Max tokens */}
         <div className="dash-config-row">
           <label className="dash-config-label">
             Max tokens per review

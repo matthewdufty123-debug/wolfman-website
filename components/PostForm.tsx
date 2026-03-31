@@ -49,7 +49,7 @@ type PostFormData = {
   morning: MorningState
   image: string | null
   eveningReflection: string
-  feelAboutToday: number
+  feelAboutToday: number | null
 }
 
 interface PostFormProps {
@@ -128,7 +128,7 @@ export default function PostForm({
   const [image, setImage] = useState<string | null>(initialData?.image ?? null)
   const [showCropUpload, setShowCropUpload] = useState(false)
   const [eveningReflection, setEveningReflection] = useState(initialData?.eveningReflection ?? '')
-  const [feelAboutToday, setFeelAboutToday] = useState<number>(initialData?.feelAboutToday ?? 4)
+  const [feelAboutToday, setFeelAboutToday] = useState<number | null>(initialData?.feelAboutToday ?? null)
   const [isPublic, setIsPublic] = useState<boolean>(initialIsPublic ?? defaultPublic)
 
   const [saving, setSaving] = useState(false)

@@ -183,6 +183,9 @@ export const wolfbotReviews = pgTable('wolfbot_reviews', {
   reviewSassy:        text('review_sassy'),
   generatedAt:        timestamp('generated_at').notNull().defaultNow(),
   triggeredBy:        uuid('triggered_by').references(() => users.id),
+  modelUsed:          text('model_used'),
+  inputTokensTotal:   integer('input_tokens_total'),
+  outputTokensTotal:  integer('output_tokens_total'),
 })
 
 // ── Claude-generated synthesis ────────────────────────────────────────────

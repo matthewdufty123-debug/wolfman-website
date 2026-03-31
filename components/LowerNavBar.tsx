@@ -63,7 +63,13 @@ const PAGE_GROUPS: PageGroup[] = [
       { href: '/',        label: 'Feed',            icon: <Home         size={16} strokeWidth={1.5} /> },
       { href: '/write',   label: 'Write a Journal', icon: <Pencil       size={16} strokeWidth={1.5} /> },
       { href: '/guide',   label: 'The Guide',       icon: <BookOpen     size={16} strokeWidth={1.5} /> },
-      { href: '/wolfbot', label: 'WOLF|BOT',        icon: <Bot          size={16} strokeWidth={1.5} /> },
+    ],
+  },
+  {
+    title: 'WOLF|BOT',
+    color: '#C8B020',
+    links: [
+      { href: '/wolfbot', label: 'WOLF|BOT', icon: <WolfBotIcon size={16} /> },
     ],
   },
   {
@@ -458,21 +464,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
               </div>
             ))}
           </nav>
-
-          {/* ── WOLF|BOT link card ── */}
-          <div className="more-pages-wolfbot">
-            <Link
-              href="/wolfbot"
-              className="more-pages-wolfbot-card"
-              onClick={() => setMorePagesOpen(false)}
-            >
-              <WolfBotIcon size={72} />
-              <div className="more-pages-wolfbot-title-block">
-                <span className="more-pages-wolfbot-banner-title">WOLF|BOT</span>
-                <span className="more-pages-wolfbot-banner-sub">SEARCH &amp; ASSIST</span>
-              </div>
-            </Link>
-          </div>
 
         </div>
       </div>

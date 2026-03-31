@@ -14,6 +14,11 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <ClosedAlphaBanner />
       {children}
       <LowerNavBar registrationOpen={registrationOpen} />
+      {process.env.NEXT_PUBLIC_APP_VERSION && (
+        <span className="app-version-badge" aria-hidden="true">
+          v{process.env.NEXT_PUBLIC_APP_VERSION}
+        </span>
+      )}
     </PostContextProvider>
   )
 }

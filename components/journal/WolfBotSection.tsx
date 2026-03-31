@@ -55,6 +55,7 @@ const TAB_ORDER: Tab[] = ['HELPFUL', 'INTELLECTUAL', 'LOVELY', 'SASSY']
 function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: WolfBotReviews; promptVersion: number }) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const [revealed,     setRevealed]     = useState(false)
+  const [userTriggered,setUserTriggered]= useState(false)
   const [bootLine,     setBootLine]     = useState(0)
   const [displayedBoot,setDisplayedBoot]= useState('')
   const [bootDone,     setBootDone]     = useState(false)
@@ -92,7 +93,7 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: 
 
   // Boot sequence
   useEffect(() => {
-    if (!revealed) return
+    if (!revealed || !userTriggered) return
     const line = BOOT_LINES[bootLine] ?? null
     if (!line) {
       setTimeout(() => {
@@ -170,14 +171,24 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: 
       </div>
 
       <div className="wolfbot-bubble-inner">
+        {/* Generate button — shown until user triggers */}
+        {!userTriggered && (
+          <button
+            className="wolfbot-yellow-btn"
+            onClick={() => setUserTriggered(true)}
+          >
+            ▶ GENERATE WOLF|BOT REVIEW
+          </button>
+        )}
+
         {/* Boot lines */}
-        {BOOT_LINES.slice(0, bootLine).map((line, idx) => (
+        {userTriggered && BOOT_LINES.slice(0, bootLine).map((line, idx) => (
           <p key={idx} className="wolfbot-terminal-line">
             <span className="wbt-prompt">&#62;&nbsp;</span>
             <span className="wbt-boot">{line}</span>
           </p>
         ))}
-        {!bootDone && (
+        {userTriggered && !bootDone && (
           <p className="wolfbot-terminal-line">
             <span className="wbt-prompt">&#62;&nbsp;</span>
             <span className="wbt-boot">{displayedBoot}</span>
@@ -186,7 +197,7 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: 
         )}
 
         {/* Tab switcher + review — shown after boot */}
-        {bootDone && (
+        {userTriggered && bootDone && (
           <>
             <div className="wb-tabs">
               {TAB_ORDER.map(tab => (
