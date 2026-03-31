@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { Maximize2 } from 'lucide-react'
 import { ROUTINE_ICON_MAP } from './RoutineIcons'
 import PhotoCropUpload from './PhotoCropUpload'
 import WolfBotLoadingOverlay from './WolfBotLoadingOverlay'
@@ -48,6 +49,7 @@ type PostFormData = {
   greatAt: string
   morning: MorningState
   image: string | null
+  videoId: string | null
   eveningReflection: string
   feelAboutToday: number | null
 }
@@ -56,6 +58,7 @@ interface PostFormProps {
   mode: 'create' | 'edit'
   postId?: string
   initialData?: Partial<PostFormData>
+  initialTitleSuggestionsUsed?: number
   onDelete?: () => void
   communityEnabled?: boolean
   defaultPublic?: boolean
@@ -74,6 +77,31 @@ function today(): string {
 
 function buildContent(intention: string, grateful: string, greatAt: string): string {
   return `## Today's Intention\n\n${intention}\n\n## I'm Grateful For\n\n${grateful}\n\n## Something I'm Great At\n\n${greatAt}`
+}
+
+function defaultJournalTitle(): string {
+  const now = new Date()
+  const day = now.getDate()
+  const ordinal =
+    [1, 21, 31].includes(day) ? 'st' :
+    [2, 22].includes(day) ? 'nd' :
+    [3, 23].includes(day) ? 'rd' : 'th'
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const year = String(now.getFullYear()).slice(2)
+  return `Today's Intentional Journal — ${day}${ordinal} ${months[now.getMonth()]} '${year}`
+}
+
+function extractYouTubeId(url: string): string | null {
+  const s = url.trim()
+  if (!s) return null
+  if (/^[a-zA-Z0-9_-]{11}$/.test(s)) return s
+  const short = s.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/)
+  if (short) return short[1]
+  const watch = s.match(/[?&]v=([a-zA-Z0-9_-]{11})/)
+  if (watch) return watch[1]
+  const embed = s.match(/\/embed\/([a-zA-Z0-9_-]{11})/)
+  if (embed) return embed[1]
+  return null
 }
 
 function ScaleSelector({ label, value, onChange, color, labels }: {
@@ -102,6 +130,7 @@ export default function PostForm({
   mode,
   postId: initialPostId,
   initialData,
+  initialTitleSuggestionsUsed = 0,
   onDelete,
   communityEnabled = false,
   defaultPublic = false,
@@ -113,7 +142,9 @@ export default function PostForm({
   const { data: session } = useSession()
   const [activeTab, setActiveTab] = useState<'after-waking' | 'before-bed'>('after-waking')
   const [postId, setPostId] = useState<string | null>(initialPostId ?? null)
-  const [title, setTitle] = useState(initialData?.title ?? '')
+  const [title, setTitle] = useState(
+    initialData?.title ?? (mode === 'create' ? defaultJournalTitle() : '')
+  )
   const [date, setDate] = useState(initialData?.date ?? today())
   const [intention, setIntention] = useState(initialData?.intention ?? '')
   const [grateful, setGrateful] = useState(initialData?.grateful ?? '')
@@ -127,14 +158,17 @@ export default function PostForm({
   })
   const [image, setImage] = useState<string | null>(initialData?.image ?? null)
   const [showCropUpload, setShowCropUpload] = useState(false)
+  const [youtubeUrl, setYoutubeUrl] = useState(
+    initialData?.videoId ? `https://youtu.be/${initialData.videoId}` : ''
+  )
   const [eveningReflection, setEveningReflection] = useState(initialData?.eveningReflection ?? '')
   const [feelAboutToday, setFeelAboutToday] = useState<number | null>(initialData?.feelAboutToday ?? null)
   const [isPublic, setIsPublic] = useState<boolean>(initialIsPublic ?? defaultPublic)
 
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
-  const [reviewing, setReviewing] = useState(false)
-  const [reviewed, setReviewed] = useState(false)
+  const [suggesting, setSuggesting] = useState(false)
+  const [suggestionsLeft, setSuggestionsLeft] = useState(Math.max(0, 2 - initialTitleSuggestionsUsed))
   const [saveMsg, setSaveMsg] = useState('')
   const [error, setError] = useState('')
   const [isDirty, setIsDirty] = useState(false)
@@ -147,11 +181,12 @@ export default function PostForm({
   const lastSavedRef = useRef<PostFormData | null>(null)
 
   function markDirty() { setIsDirty(true); setSaveMsg('') }
-  function markDirtyAndUnreview() { markDirty(); setReviewed(false) }
 
   const currentData = useCallback((): PostFormData => ({
-    title, date, intention, grateful, greatAt, morning, image, eveningReflection, feelAboutToday,
-  }), [title, date, intention, grateful, greatAt, morning, image, eveningReflection, feelAboutToday])
+    title, date, intention, grateful, greatAt, morning, image,
+    videoId: extractYouTubeId(youtubeUrl),
+    eveningReflection, feelAboutToday,
+  }), [title, date, intention, grateful, greatAt, morning, image, youtubeUrl, eveningReflection, feelAboutToday])
 
   // Auto-save every 30s
   useEffect(() => {
@@ -172,6 +207,7 @@ export default function PostForm({
       status: 'draft',
       morning: data.morning,
       image: data.image,
+      videoId: data.videoId,
       eveningReflection: data.eveningReflection || null,
       feelAboutToday: data.feelAboutToday,
     }
@@ -212,30 +248,26 @@ export default function PostForm({
     setSaving(false)
   }
 
-  async function handleReview() {
-    const data = currentData()
-    if (!data.title.trim()) { setError('Add a title first.'); return }
-    if (!data.intention.trim()) { setError('Write your intention first.'); return }
-    setReviewing(true)
+  async function handleSuggestTitle() {
+    if (!postId) {
+      setError('Save a draft first before requesting a title suggestion.')
+      return
+    }
+    setSuggesting(true)
     setError('')
-    const id = await saveDraft(data, false)
-    if (!id) { setError('Could not save before review. Try again.'); setReviewing(false); return }
-    const content = buildContent(data.intention, data.grateful, data.greatAt)
     try {
-      const res = await fetch(`/api/posts/${id}/review`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: data.title, content }),
-      })
-      if (!res.ok) throw new Error('Review failed')
-      const result = await res.json()
-      if (result.suggestedTitle) setTitle(result.suggestedTitle)
-      setReviewed(true)
-      setSaveMsg("Claude's reviewed your journal. Ready to publish.")
+      const res = await fetch(`/api/posts/${postId}/suggest-title`, { method: 'POST' })
+      const d = await res.json()
+      if (!res.ok) {
+        if (d.error === 'limit_reached') { setSuggestionsLeft(0); return }
+        throw new Error('Failed')
+      }
+      setTitle(d.title)
+      setSuggestionsLeft(d.suggestionsLeft)
     } catch {
-      setError('Review failed. Try again.')
+      setError('Could not suggest title. Try again.')
     } finally {
-      setReviewing(false)
+      setSuggesting(false)
     }
   }
 
@@ -269,6 +301,7 @@ export default function PostForm({
       morning: data.morning,
       isPublic,
       image: data.image,
+      videoId: data.videoId,
       eveningReflection: data.eveningReflection || null,
       feelAboutToday: data.feelAboutToday,
     }
@@ -371,8 +404,20 @@ export default function PostForm({
               className="pf-input pf-input--title"
               placeholder="Give this day a title…"
               value={title}
-              onChange={e => { setTitle(e.target.value); markDirtyAndUnreview() }}
+              onChange={e => { setTitle(e.target.value); markDirty() }}
             />
+            {suggestionsLeft > 0 ? (
+              <button
+                type="button"
+                className="pf-suggest-btn"
+                onClick={handleSuggestTitle}
+                disabled={suggesting}
+              >
+                {suggesting ? 'Thinking…' : '▶ SUGGEST TITLE'}
+              </button>
+            ) : (
+              <span className="pf-suggest-locked">WOLF|BOT cannot think of any more suggestions for this post</span>
+            )}
           </div>
 
           {/* Content sections */}
@@ -385,14 +430,17 @@ export default function PostForm({
                   placeholder={placeholder}
                   value={value}
                   rows={9}
-                  onChange={e => { set(e.target.value); markDirtyAndUnreview() }}
+                  onChange={e => { set(e.target.value); markDirty() }}
                 />
                 <button
                   type="button"
                   className="pf-expand-btn"
                   aria-label={`Expand ${label}`}
                   onClick={() => setFullscreenKey(key)}
-                >⤢</button>
+                >
+                  <Maximize2 size={11} strokeWidth={2} />
+                  <span>EXPAND</span>
+                </button>
               </div>
             </div>
           ))}
@@ -403,7 +451,7 @@ export default function PostForm({
             <ScaleSelector label="Brain Activity" value={morning.brainScale}  color="#4A7FA5" labels={BRAIN_LABELS}  onChange={n => { setMorning(m => ({ ...m, brainScale:  n })); markDirty() }} />
             <ScaleSelector label="Body Energy"    value={morning.bodyScale}   color="#A0622A" labels={BODY_LABELS}   onChange={n => { setMorning(m => ({ ...m, bodyScale:   n })); markDirty() }} />
             <ScaleSelector label="Happy Scale"    value={morning.happyScale}  color="#3AB87A" labels={HAPPY_LABELS}  onChange={n => { setMorning(m => ({ ...m, happyScale:  n })); markDirty() }} />
-            <ScaleSelector label="Stress Level"   value={morning.stressScale} color="#A82020" labels={STRESS_LABELS} onChange={n => { setMorning(m => ({ ...m, stressScale: n })); markDirty() }} />
+            <ScaleSelector label="Stress Level"   value={morning.stressScale} color="#C87840" labels={STRESS_LABELS} onChange={n => { setMorning(m => ({ ...m, stressScale: n })); markDirty() }} />
 
             {/* Rituals */}
             <div className="pf-rituals">
@@ -451,6 +499,23 @@ export default function PostForm({
                 + Add a journal photo
               </button>
             )}
+          </div>
+
+          {/* YouTube URL */}
+          <div className="pf-section">
+            <p className="pf-section-title">YouTube Video</p>
+            <div className="pf-field">
+              <input
+                type="url"
+                className="pf-input"
+                placeholder="Paste a YouTube link… (optional)"
+                value={youtubeUrl}
+                onChange={e => { setYoutubeUrl(e.target.value); markDirty() }}
+              />
+              {youtubeUrl && !extractYouTubeId(youtubeUrl) && (
+                <p className="pf-field-hint">Could not extract a video ID from this URL</p>
+              )}
+            </div>
           </div>
 
           {/* Visibility toggle */}
@@ -517,27 +582,17 @@ export default function PostForm({
         <button
           className="pf-btn pf-btn--draft"
           onClick={handleSaveDraft}
-          disabled={saving || reviewing || publishing}
+          disabled={saving || publishing}
         >
           {saving ? 'Saving…' : 'Save Draft'}
         </button>
-        {!reviewed ? (
-          <button
-            className="pf-btn pf-btn--review"
-            onClick={handleReview}
-            disabled={saving || reviewing || publishing}
-          >
-            {reviewing ? 'Reviewing…' : 'Review'}
-          </button>
-        ) : (
-          <button
-            className="pf-btn pf-btn--publish"
-            onClick={handlePublish}
-            disabled={saving || reviewing || publishing}
-          >
-            {publishing ? 'Publishing…' : 'Publish'}
-          </button>
-        )}
+        <button
+          className="pf-btn pf-btn--publish"
+          onClick={handlePublish}
+          disabled={saving || publishing}
+        >
+          {publishing ? 'Publishing…' : 'Publish'}
+        </button>
       </div>
 
       {/* WOLF|BOT review trigger */}
@@ -607,8 +662,11 @@ export default function PostForm({
               className="pf-fullscreen-textarea"
               value={value}
               autoFocus
-              onChange={e => { set(e.target.value); markDirtyAndUnreview() }}
+              onChange={e => { set(e.target.value); markDirty() }}
             />
+            <div className="pf-fullscreen-footer">
+              <button type="button" className="pf-fullscreen-done" onClick={() => setFullscreenKey(null)}>Done</button>
+            </div>
           </div>
         )
       })()}

@@ -30,8 +30,9 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
     grateful,
     greatAt,
     image: post.image ?? null,
+    videoId: post.videoId ?? null,
     eveningReflection: post.eveningReflection ?? '',
-    feelAboutToday: post.feelAboutToday ?? 4,
+    feelAboutToday: post.feelAboutToday ?? null,
     morning: ms ? {
       brainScale: ms.brainScale,
       bodyScale: ms.bodyScale,
@@ -45,6 +46,7 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
     <EditPageClient
       postId={id}
       initialData={initialData}
+      initialTitleSuggestionsUsed={post.titleSuggestionsUsed ?? 0}
       communityEnabled={user?.communityEnabled ?? false}
       defaultPublic={user?.defaultPublic ?? false}
       initialIsPublic={post.isPublic}

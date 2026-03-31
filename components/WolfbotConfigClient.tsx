@@ -238,11 +238,14 @@ export default function WolfbotConfigClient({ rows, versionLog }: { rows: Wolfbo
   const promptSassy        = (cfg.prompt_sassy        as string) || DEFAULT_SASSY
   const maxTokens          = (cfg.max_tokens          as number) ?? 600
   const currentModel       = (cfg.model               as string) || 'claude-haiku-4-5-20251001'
+  const titleMaxChars      = (cfg.title_max_chars      as number) ?? 80
 
-  const tokenSave = useSaveState()
-  const modelSave = useSaveState()
-  const [tokenVal, setTokenVal] = useState(String(maxTokens))
-  const [modelVal, setModelVal] = useState(currentModel)
+  const tokenSave     = useSaveState()
+  const modelSave     = useSaveState()
+  const titleCharSave = useSaveState()
+  const [tokenVal, setTokenVal]         = useState(String(maxTokens))
+  const [modelVal, setModelVal]         = useState(currentModel)
+  const [titleCharVal, setTitleCharVal] = useState(String(titleMaxChars))
 
   return (
     <div>
@@ -371,6 +374,37 @@ export default function WolfbotConfigClient({ rows, versionLog }: { rows: Wolfbo
             </button>
             {tokenSave.saved  && <span className="dash-config-saved">Saved</span>}
             {tokenSave.error  && <span className="dash-config-error">{tokenSave.error}</span>}
+          </div>
+        </div>
+
+        {/* Title max chars */}
+        <div className="dash-config-row" style={{ marginTop: '1.5rem' }}>
+          <label className="dash-config-label">
+            Title max characters
+            <span className="dash-muted" style={{ fontWeight: 400, marginLeft: 8 }}>
+              Applied to the title input and WOLF|BOT title suggestions (max 10 words regardless).
+            </span>
+          </label>
+          <input
+            type="number"
+            className="dash-config-input"
+            style={{ width: 120 }}
+            value={titleCharVal}
+            min={40}
+            max={200}
+            step={10}
+            onChange={e => setTitleCharVal(e.target.value)}
+          />
+          <div className="dash-config-actions">
+            <button
+              className="dash-action-btn"
+              onClick={() => titleCharSave.save('title_max_chars', Number(titleCharVal), { category: 'generation', label: 'Title Max Chars' })}
+              disabled={titleCharSave.saving}
+            >
+              {titleCharSave.saving ? 'Saving…' : 'Save'}
+            </button>
+            {titleCharSave.saved && <span className="dash-config-saved">Saved</span>}
+            {titleCharSave.error && <span className="dash-config-error">{titleCharSave.error}</span>}
           </div>
         </div>
       </section>

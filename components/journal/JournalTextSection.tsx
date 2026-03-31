@@ -27,16 +27,6 @@ function MorningWalkPost({ post }: { post: ProcessedPost }) {
       {post.contextHtml && (
         <div className="post-body" dangerouslySetInnerHTML={{ __html: post.contextHtml }} />
       )}
-      {post.videoId && (
-        <div className="post-video">
-          <iframe
-            src={`https://www.youtube.com/embed/${post.videoId}?rel=0`}
-            allowFullScreen
-            loading="lazy"
-            title={post.title}
-          />
-        </div>
-      )}
     </article>
   )
 }

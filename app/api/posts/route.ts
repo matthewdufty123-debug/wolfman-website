@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
 
   const body = await request.json()
-  const { title, date, content, category, excerpt, status: reqStatus, morning, isPublic, image, eveningReflection, feelAboutToday } = body
+  const { title, date, content, category, excerpt, status: reqStatus, morning, isPublic, image, videoId, eveningReflection, feelAboutToday } = body
 
   if (!title || !date || !content) {
     return NextResponse.json({ error: 'title, date and content are required' }, { status: 400 })
@@ -58,6 +58,7 @@ export async function POST(request: Request) {
     content,
     excerpt: excerpt || null,
     image: image || null,
+    videoId: videoId || null,
     authorId: session.user.id,
     status,
     isPublic: Boolean(isPublic),

@@ -14,10 +14,10 @@ const STRESS_LABELS = ['Calm', 'Relaxed', 'Mild', 'Tense', 'Stressed', 'Overwhel
 function getScaleColor(value: number, isStress = false): string {
   const t = (value - 1) / 5  // 0 at value=1, 1 at value=6
   if (isStress) {
-    // Pale blue → crimson: #A8D0E0 → #A82020 (red channel stays at 0xa8)
-    const rVal = 0xa8
-    const gVal = Math.round(0xd0 + (0x20 - 0xd0) * t)
-    const bVal = Math.round(0xe0 + (0x20 - 0xe0) * t)
+    // Pale blue → copper/terracotta: #A8D0E0 → #C87840 (warm, not alarming)
+    const rVal = Math.round(0xa8 + (0xc8 - 0xa8) * t)
+    const gVal = Math.round(0xd0 + (0x78 - 0xd0) * t)
+    const bVal = Math.round(0xe0 + (0x40 - 0xe0) * t)
     return `rgb(${rVal},${gVal},${bVal})`
   }
   // Pale blue → royal blue: #A8D0E0 → #2A6AB0

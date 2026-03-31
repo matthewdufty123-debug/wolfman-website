@@ -89,6 +89,10 @@ export const posts = pgTable('posts', {
   // Evening reflection — stored directly on post (no separate table)
   eveningReflection: text('evening_reflection'),     // "How did the day go?" free text
   feelAboutToday: integer('feel_about_today'),        // 1–6 sentiment scale
+  // WOLF|BOT title suggestions — premium feature, max 2 per post
+  titleSuggestionsUsed: integer('title_suggestions_used').notNull().default(0),
+  titleTokensInput:     integer('title_tokens_input'),
+  titleTokensOutput:    integer('title_tokens_output'),
 })
 
 // Captured at publish time — how Matthew arrived at the day

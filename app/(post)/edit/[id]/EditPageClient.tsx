@@ -6,6 +6,7 @@ import PostForm from '@/components/PostForm'
 interface Props {
   postId: string
   initialData?: Parameters<typeof PostForm>[0]['initialData']
+  initialTitleSuggestionsUsed?: number
   communityEnabled: boolean
   defaultPublic: boolean
   initialIsPublic: boolean
@@ -13,13 +14,14 @@ interface Props {
   wolfbotReviewExists: boolean
 }
 
-export default function EditPageClient({ postId, initialData, communityEnabled, defaultPublic, initialIsPublic, username, wolfbotReviewExists }: Props) {
+export default function EditPageClient({ postId, initialData, initialTitleSuggestionsUsed, communityEnabled, defaultPublic, initialIsPublic, username, wolfbotReviewExists }: Props) {
   const router = useRouter()
   return (
     <PostForm
       mode="edit"
       postId={postId}
       initialData={initialData}
+      initialTitleSuggestionsUsed={initialTitleSuggestionsUsed}
       onDelete={() => router.push('/write')}
       communityEnabled={communityEnabled}
       defaultPublic={defaultPublic}

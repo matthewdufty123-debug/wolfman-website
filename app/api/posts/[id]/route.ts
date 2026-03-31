@@ -34,7 +34,7 @@ export async function PUT(
   if (error) return NextResponse.json({ error }, { status })
 
   const body = await request.json()
-  const { title, date, content, excerpt, status: reqStatus, morning, isPublic, image, eveningReflection, feelAboutToday } = body
+  const { title, date, content, excerpt, status: reqStatus, morning, isPublic, image, videoId, eveningReflection, feelAboutToday } = body
 
   const updateData: Record<string, unknown> = { updatedAt: new Date() }
   if (title) updateData.title = title
@@ -43,6 +43,7 @@ export async function PUT(
   if (excerpt !== undefined) updateData.excerpt = excerpt || null
   if (isPublic !== undefined) updateData.isPublic = Boolean(isPublic)
   if (image !== undefined) updateData.image = image || null
+  if (videoId !== undefined) updateData.videoId = videoId || null
   if (eveningReflection !== undefined) updateData.eveningReflection = eveningReflection || null
   if (feelAboutToday !== undefined) updateData.feelAboutToday = feelAboutToday ?? null
   if (reqStatus === 'published') {

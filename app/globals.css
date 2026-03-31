@@ -4120,8 +4120,11 @@ html[data-theme="dark"] .stats-chart-card {
   top: 6px; right: 6px;
   background: none; border: none; cursor: pointer;
   color: var(--nav-btn-icon, rgba(255,255,255,0.35));
-  font-size: 2rem; line-height: 1;
-  padding: 2px 5px;
+  font-size: 0.6rem; font-weight: 700; line-height: 1;
+  letter-spacing: 0.08em;
+  font-family: var(--font-jetbrains), monospace;
+  padding: 4px 6px;
+  display: flex; align-items: center; gap: 4px;
   transition: color 0.15s;
 }
 .pf-expand-btn:hover { color: var(--heading); }
@@ -4164,6 +4167,50 @@ html[data-theme="dark"] .stats-chart-card {
   font-size: 1.05rem; line-height: 1.8;
   padding: 20px 24px;
   box-sizing: border-box;
+}
+
+.pf-fullscreen-footer {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pf-field-hint {
+  font-size: 0.72rem;
+  opacity: 0.5;
+  margin-top: 4px;
+  font-family: var(--font-inter), sans-serif;
+  color: var(--body-text);
+}
+
+.pf-suggest-btn {
+  margin-top: 6px;
+  background: none;
+  border: 1px solid rgba(200,176,32,0.35);
+  color: #C8B020;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: var(--font-jetbrains), monospace;
+  padding: 4px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  display: block;
+}
+.pf-suggest-btn:hover:not(:disabled) { background: rgba(200,176,32,0.1); }
+.pf-suggest-btn:disabled { opacity: 0.4; cursor: default; }
+
+.pf-suggest-locked {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--nav-btn-icon, rgba(255,255,255,0.4));
+  font-family: var(--font-jetbrains), monospace;
+  opacity: 0.7;
+  margin-top: 6px;
 }
 
 .pf-delete-wrap {
@@ -4610,7 +4657,7 @@ html[data-theme="dark"] .stats-chart-card {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  padding: 3rem 1.5rem 9rem;
+  padding: 1.5rem 1.5rem 9rem;
 }
 
 .feedback-card {
@@ -7669,7 +7716,7 @@ html[data-fontsize="xlarge"] .dev-body {
    ═══════════════════════════════════════════════════════════ */
 
 .section-hdr {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--card-border, rgba(74,127,165,0.15));
 }

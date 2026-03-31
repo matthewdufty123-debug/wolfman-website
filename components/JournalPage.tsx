@@ -12,6 +12,7 @@ import WolfBotSection, { type WolfBotReviews } from '@/components/journal/WolfBo
 import PostInfoSection from '@/components/journal/PostInfoSection'
 import EveningSection from '@/components/journal/EveningSection'
 import JournalPhotoSection from '@/components/journal/JournalPhotoSection'
+import JournalVideoSection from '@/components/journal/JournalVideoSection'
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -175,13 +176,15 @@ export default function JournalPage({
           <MorningRitualsSection checklist={morningState.routineChecklist} />
         )}
 
-        <WolfBotSection
-          synthesis={synthesis}
-          wolfbotReviews={wolfbotReviews}
-          isOwnPost={isOwner}
-          postId={post.id ?? ''}
-          promptVersion={promptVersion}
-        />
+        {(wolfbotReviews !== null || synthesis !== null) && (
+          <WolfBotSection
+            synthesis={synthesis}
+            wolfbotReviews={wolfbotReviews}
+            isOwnPost={isOwner}
+            postId={post.id ?? ''}
+            promptVersion={promptVersion}
+          />
+        )}
 
         <EveningSection
           postId={post.id ?? ''}
@@ -192,6 +195,10 @@ export default function JournalPage({
 
         {post.image && (
           <JournalPhotoSection imageUrl={post.image} title={post.title} />
+        )}
+
+        {post.videoId && (
+          <JournalVideoSection videoId={post.videoId} title={post.title} />
         )}
 
         <PostInfoSection post={post} postDates={postDates} />
