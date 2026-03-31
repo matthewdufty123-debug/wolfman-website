@@ -5181,6 +5181,62 @@ html[data-theme="dark"] .stats-chart-card {
   text-align: center;
 }
 
+/* ── Reminder settings toggle ── */
+.reminder-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.reminder-toggle-label {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.85rem;
+  color: var(--body-text);
+}
+
+.reminder-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: #909090;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.reminder-toggle--on {
+  background: #4A7FA5;
+}
+
+.reminder-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+  pointer-events: none;
+}
+
+.reminder-toggle--on .reminder-toggle-thumb {
+  transform: translateX(20px);
+}
+
+.settings-reminder-note {
+  font-size: 0.78rem;
+  color: var(--body-text);
+  opacity: 0.6;
+  line-height: 1.6;
+  margin: 0.25rem 0 1rem;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
 /* ── Onboarding page ── */
 .onboarding-page {
   min-height: 100vh;

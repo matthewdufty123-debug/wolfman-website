@@ -414,6 +414,32 @@ export function notifyAdminFirstPost(params: {
   adminSend(`First post: ${params.username} — "${params.postTitle.slice(0, 50)}"`, html).catch(() => {})
 }
 
+// ── Morning reminder ──────────────────────────────────────────────────────────
+
+export async function sendMorningReminder(params: {
+  to: string
+  name: string | null
+  unsubscribeUrl: string
+}): Promise<void> {
+  const first = params.name?.split(' ')[0] ?? 'there'
+  const html = emailWrapper(`
+    ${h1('Good morning.')}
+    ${p(`Hi ${first},`)}
+    ${p("This is your morning reminder to set your intention for today. It only takes a few minutes — and it's always worth it.")}
+    ${cta('Write today\'s journal', 'https://wolfman.blog/write')}
+    <p style="margin: 28px 0 0; font-size: 12px; color: #b0b0b0; text-align: center; line-height: 1.6;">
+      You asked for this reminder via wolfman.blog settings.<br>
+      <a href="${params.unsubscribeUrl}" style="color: #b0b0b0;">Turn off reminders</a>
+    </p>
+  `)
+  await getResend().emails.send({
+    from: 'Matthew at Wolfman <orders@wolfman.blog>',
+    to: params.to,
+    subject: 'Good morning — time to set your intention',
+    html,
+  })
+}
+
 export function notifyAdminClaudesTakeFailed(params: {
   userId: string
   postId: string

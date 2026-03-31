@@ -18,6 +18,11 @@ export const users = pgTable('users', {
   onboardingComplete: boolean('onboarding_complete').notNull().default(false), // completed onboarding flow
   profession:    text('profession'),          // user's profession — personalises WOLF|BOT prompts
   humourSource:  text('humour_source'),       // where user finds humour — calibrates WOLF|BOT wit
+  // Morning reminder
+  morningReminderEnabled:  boolean('morning_reminder_enabled').notNull().default(false),
+  morningReminderTime:     text('morning_reminder_time'),      // 'HH:MM' in user's local time
+  morningReminderTimezone: text('morning_reminder_timezone'),  // IANA tz string e.g. 'Europe/London'
+  lastReminderSentAt:      timestamp('last_reminder_sent_at'), // guards against double-sends
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
