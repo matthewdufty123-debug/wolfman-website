@@ -77,7 +77,7 @@ export async function register(_prev: ActionState, formData: FormData): Promise<
     username,
     email,
     userCount: Number(total) + 1,
-    userCap: config.userCap,
+    userCap: config.userCap ?? 51,
   })
 
   // Auto sign-in and redirect to onboarding
