@@ -13,8 +13,8 @@ import MorningZoneScatter, { type ZonePoint } from './MorningZoneScatter'
 export interface StatRow {
   date: string
   slug?: string
-  brainScale: number
-  bodyScale: number
+  brainScale: number | null
+  bodyScale: number | null
   happyScale: number | null
   ritualCount: number
 }

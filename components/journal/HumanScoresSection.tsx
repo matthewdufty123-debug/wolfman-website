@@ -142,8 +142,8 @@ function ScaleCol({ title, value, labels, isStress = false, revealed }: ScaleCol
 // ── Main section ─────────────────────────────────────────────────────────────
 
 interface Props {
-  brainScale: number
-  bodyScale: number
+  brainScale: number | null
+  bodyScale: number | null
   happyScale: number | null
   stressScale: number | null
 }

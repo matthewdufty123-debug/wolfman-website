@@ -15,9 +15,9 @@ export interface ZonePoint {
   postId: string
   date: string
   slug: string
-  brainScale: number
-  bodyScale: number
-  happyScale: number
+  brainScale: number | null
+  bodyScale: number | null
+  happyScale: number | null
 }
 
 const HAPPY_COLOURS = ['', '#5B8FBF', '#7BAED4', '#A8C8E0', '#F0D878', '#ECC832', '#F5B800']
@@ -40,7 +40,10 @@ function hashJitter(postId: string, axis: 'x' | 'y'): number {
   return ((hash % 1000) / 1000 - 0.5) * 0.6 // range: [-0.3, 0.3]
 }
 
-type PreparedPoint = ZonePoint & {
+type PreparedPoint = Omit<ZonePoint, 'brainScale' | 'bodyScale' | 'happyScale'> & {
+  brainScale: number
+  bodyScale: number
+  happyScale: number
   jx: number
   jy: number
   opacity: number
@@ -122,11 +125,15 @@ export default function MorningZoneScatter({ data, todayPostId, username }: { da
   if (!data.length) return null
 
   // data arrives sorted oldest-first; opacity increases with index (oldest = dim, newest = vivid)
-  const prepared: PreparedPoint[] = data.map((point, i) => ({
+  // Filter out points missing required axes (brain/body/happy can be null on new journals)
+  const validData = data.filter(p => p.brainScale != null && p.bodyScale != null && p.happyScale != null) as (ZonePoint & { brainScale: number; bodyScale: number; happyScale: number })[]
+  if (!validData.length) return null
+
+  const prepared: PreparedPoint[] = validData.map((point, i) => ({
     ...point,
-    jx: point.bodyScale + hashJitter(point.postId, 'x'),
-    jy: point.brainScale + hashJitter(point.postId, 'y'),
-    opacity: data.length <= 1 ? 1 : 0.15 + (0.85 * i / (data.length - 1)),
+    jx: point.bodyScale! + hashJitter(point.postId, 'x'),
+    jy: point.brainScale! + hashJitter(point.postId, 'y'),
+    opacity: validData.length <= 1 ? 1 : 0.15 + (0.85 * i / (validData.length - 1)),
     isToday: point.postId === todayPostId,
     username,
   }))

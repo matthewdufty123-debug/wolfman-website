@@ -27,8 +27,8 @@ export interface JournalPageProps {
     role: string
   }
   morningState: {
-    brainScale: number
-    bodyScale: number
+    brainScale: number | null
+    bodyScale: number | null
     happyScale: number | null
     stressScale: number | null
     routineChecklist: Record<string, boolean>

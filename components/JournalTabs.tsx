@@ -24,8 +24,8 @@ export interface JournalTabsProps {
     role: string
   }
   morningState: {
-    brainScale: number
-    bodyScale: number
+    brainScale: number | null
+    bodyScale: number | null
     happyScale: number | null
     routineChecklist: Record<string, boolean>
   } | null
@@ -188,14 +188,18 @@ function TabStats({ ms, username }: {
       </div>
 
       <div className="post-day-scales">
-        <div className="post-day-scale-col">
-          <span className="post-day-scale-name">Brain Activity</span>
-          <MorningScaleBar scaleName="Brain Activity" value={ms.brainScale} labels={BRAIN_LABELS} color="#4A7FA5" />
-        </div>
-        <div className="post-day-scale-col">
-          <span className="post-day-scale-name">Body Energy</span>
-          <MorningScaleBar scaleName="Body Energy" value={ms.bodyScale} labels={BODY_LABELS} color="#A0622A" />
-        </div>
+        {ms.brainScale != null && (
+          <div className="post-day-scale-col">
+            <span className="post-day-scale-name">Brain Activity</span>
+            <MorningScaleBar scaleName="Brain Activity" value={ms.brainScale} labels={BRAIN_LABELS} color="#4A7FA5" />
+          </div>
+        )}
+        {ms.bodyScale != null && (
+          <div className="post-day-scale-col">
+            <span className="post-day-scale-name">Body Energy</span>
+            <MorningScaleBar scaleName="Body Energy" value={ms.bodyScale} labels={BODY_LABELS} color="#A0622A" />
+          </div>
+        )}
         {ms.happyScale != null && (
           <div className="post-day-scale-col">
             <span className="post-day-scale-name">Happy Scale</span>
