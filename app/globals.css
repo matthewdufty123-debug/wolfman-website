@@ -7154,6 +7154,61 @@ html[data-theme="dark"] .stats-chart-card {
   border-color: #C8B020;
 }
 
+/* Voice selector row */
+.wb-voice-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+}
+
+.wb-voice-label {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: rgba(200, 176, 32, 0.55);
+  flex-shrink: 0;
+}
+
+.wb-voice-select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.wb-voice-select {
+  appearance: none;
+  background: transparent;
+  border: 1px solid rgba(200, 176, 32, 0.3);
+  border-radius: 3px;
+  color: #C8B020;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 1.4rem 0.2rem 0.5rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.wb-voice-select:hover {
+  border-color: rgba(200, 176, 32, 0.7);
+}
+
+.wb-voice-select option {
+  background: #0d1117;
+  color: #C8B020;
+}
+
+.wb-voice-chevron {
+  position: absolute;
+  right: 0.35rem;
+  font-size: 0.6rem;
+  color: rgba(200, 176, 32, 0.6);
+  pointer-events: none;
+}
+
 /* WOLF|BOT PostForm section */
 .pf-wolfbot-section {
   margin-top: 1.25rem;

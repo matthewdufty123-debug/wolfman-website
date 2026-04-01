@@ -50,6 +50,30 @@ const WOLFBOT_QUIPS = [
 
 const TAB_ORDER: Tab[] = ['HELPFUL', 'INTELLECTUAL', 'LOVELY', 'SASSY']
 
+// ── Curated voice slots ────────────────────────────────────────────────────────
+
+type VoiceSlot = { id: string; label: string; patterns: string[] }
+
+const VOICE_SLOTS: VoiceSlot[] = [
+  { id: 'default',   label: 'DEFAULT',   patterns: [] },
+  { id: 'daniel',    label: 'DANIEL',    patterns: ['daniel'] },
+  { id: 'samantha',  label: 'SAMANTHA',  patterns: ['samantha'] },
+  { id: 'british',   label: 'BRITISH',   patterns: ['google uk english', 'kate', 'serena'] },
+  { id: 'google-us', label: 'GOOGLE US', patterns: ['google us english', 'google american'] },
+]
+
+const VOICE_PREF_KEY = 'wb-voice-slot'
+
+function matchVoice(slot: VoiceSlot, voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+  if (slot.patterns.length === 0) return null // default — no specific voice
+  const lower = voices.map(v => ({ voice: v, name: v.name.toLowerCase() }))
+  for (const pattern of slot.patterns) {
+    const match = lower.find(v => v.name.includes(pattern))
+    if (match) return match.voice
+  }
+  return null
+}
+
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 /** State A — reviews exist: boot then tab switcher */
@@ -73,6 +97,34 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion, postId }: { wolfbotR
   const [typedTabs,    setTypedTabs]    = useState<Set<Tab>>(new Set())
   const [cursorVisible,setCursorVisible]= useState(true)
   const [speaking,     setSpeaking]     = useState(false)
+  const [availableSlots, setAvailableSlots] = useState<VoiceSlot[]>([VOICE_SLOTS[0]])
+  const [selectedSlotId, setSelectedSlotId] = useState<string>(() =>
+    typeof window !== 'undefined' ? (localStorage.getItem(VOICE_PREF_KEY) ?? 'default') : 'default'
+  )
+  const voiceListRef = useRef<SpeechSynthesisVoice[]>([])
+
+  // Load voices — async on Chrome, sync on Safari/Firefox
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return
+    function load() {
+      const all = window.speechSynthesis.getVoices()
+      if (!all.length) return
+      voiceListRef.current = all
+      const matched = VOICE_SLOTS.filter(slot =>
+        slot.patterns.length === 0 || matchVoice(slot, all) !== null
+      )
+      setAvailableSlots(matched.length > 1 ? matched : [VOICE_SLOTS[0]])
+    }
+    load()
+    window.speechSynthesis.addEventListener('voiceschanged', load)
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', load)
+  }, [])
+
+  function handleVoiceChange(slotId: string) {
+    setSelectedSlotId(slotId)
+    localStorage.setItem(VOICE_PREF_KEY, slotId)
+    if (speaking) { window.speechSynthesis.cancel(); setSpeaking(false) }
+  }
 
   // Auto-start if TriggerTerminal saved a personality choice before generating
   useEffect(() => {
@@ -193,6 +245,11 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion, postId }: { wolfbotR
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.rate  = 0.88
     utterance.pitch = 0.75
+    const slot = VOICE_SLOTS.find(s => s.id === selectedSlotId)
+    if (slot) {
+      const voice = matchVoice(slot, voiceListRef.current)
+      if (voice) utterance.voice = voice
+    }
     utterance.onend = () => setSpeaking(false)
     utterance.onerror = () => setSpeaking(false)
     window.speechSynthesis.cancel()
@@ -285,6 +342,27 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion, postId }: { wolfbotR
                 </button>
               ))}
             </div>
+
+            {/* Voice selector — only shown when device has recognisable voices */}
+            {availableSlots.length > 1 && (
+              <div className="wb-voice-row">
+                <span className="wbt-prompt">&#62;&nbsp;</span>
+                <span className="wb-voice-label">VOICE</span>
+                <div className="wb-voice-select-wrap">
+                  <select
+                    className="wb-voice-select"
+                    value={selectedSlotId}
+                    onChange={e => handleVoiceChange(e.target.value)}
+                    aria-label="Select WOLF|BOT voice"
+                  >
+                    {availableSlots.map(slot => (
+                      <option key={slot.id} value={slot.id}>{slot.label}</option>
+                    ))}
+                  </select>
+                  <span className="wb-voice-chevron" aria-hidden="true">▾</span>
+                </div>
+              </div>
+            )}
 
             <p className="wolfbot-terminal-line wolfbot-terminal-review">
               <span className="wbt-prompt">&#62;&nbsp;</span>
