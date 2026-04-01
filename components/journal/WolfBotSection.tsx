@@ -212,6 +212,17 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: 
           <span className="wolfbot-integrated-name">WOLF|BOT</span>
           <span className="wolfbot-integrated-sub">REVIEW MODE</span>
         </div>
+        {bootDone && typeof window !== 'undefined' && !!window.speechSynthesis && (
+          <button
+            type="button"
+            className={`wb-play-circle${speaking ? ' wb-play-circle--speaking' : ''}`}
+            onClick={handleSpeak}
+            title={speaking ? 'Stop reading' : 'Read aloud'}
+          >
+            <span className="wb-play-circle-icon">{speaking ? '■' : '▶'}</span>
+            <span className="wb-play-circle-label">{speaking ? 'stop' : 'play'}</span>
+          </button>
+        )}
       </div>
 
       <div className="wolfbot-bubble-inner">
@@ -263,17 +274,6 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: 
                   {tab}
                 </button>
               ))}
-              {typeof window !== 'undefined' && !!window.speechSynthesis && (
-                <button
-                  type="button"
-                  className={`wb-tab wb-tab-speak${speaking ? ' wb-tab--active' : ''}`}
-                  onClick={handleSpeak}
-                  title={speaking ? 'Stop reading' : 'Read aloud'}
-                  style={speaking ? { background: '#C87840', borderColor: '#C87840', color: '#fff' } : {}}
-                >
-                  {speaking ? '■ STOP' : '▶ PLAY'}
-                </button>
-              )}
             </div>
 
             <p className="wolfbot-terminal-line wolfbot-terminal-review">
