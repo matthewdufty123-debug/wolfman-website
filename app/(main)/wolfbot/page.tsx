@@ -1,167 +1,166 @@
-'use client'
-
-import { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
+import type { Metadata } from 'next'
+import { siteMetadata } from '@/lib/metadata'
+import SectionHeader from '@/components/SectionHeader'
 import WolfBotIcon from '@/components/WolfBotIcon'
+import { db } from '@/lib/db'
+import { wolfbotReviews } from '@/lib/db/schema'
+import { sql } from 'drizzle-orm'
 
+export const metadata: Metadata = siteMetadata({
+  title: 'WOLF|BOT — The AI Journalling Companion',
+  description: 'Meet WOLF|BOT — an AI companion that reads every journal entry and responds in four distinct personalities. Practical, deep, warm, or sharp. Your call.',
+  path: '/wolfbot',
+})
 
-const PAGE_BOOT_SETS = [
-  [
-    'WOLF|BOT v0.0.1-alpha INITIALISING...',
-    'SEARCH ENGINE: OFFLINE',
-    'STAND BY...',
-  ],
-  [
-    'LOADING WOLF BRAIN v4.2.0...',
-    'SNIFFING FOR SEARCH INDEX... NOPE',
-    'STANDING BY ANYWAY.',
-  ],
-  [
-    'NEURAL PATHWAYS CALIBRATED',
-    'SEARCH CORPUS: 0 ITEMS',
-    'OPTIMISTIC. I LIKE IT.',
-  ],
+export const revalidate = 300 // refresh stats every 5 minutes
+
+async function getStats() {
+  const [row] = await db
+    .select({
+      totalReviews:       sql<number>`count(*)::int`,
+      totalTriggers:      sql<number>`coalesce(sum(trigger_count), 0)::int`,
+      totalHelpful:       sql<number>`coalesce(sum(count_helpful), 0)::int`,
+      totalIntellectual:  sql<number>`coalesce(sum(count_intellectual), 0)::int`,
+      totalLovely:        sql<number>`coalesce(sum(count_lovely), 0)::int`,
+      totalSassy:         sql<number>`coalesce(sum(count_sassy), 0)::int`,
+      totalPlay:          sql<number>`coalesce(sum(count_play), 0)::int`,
+    })
+    .from(wolfbotReviews)
+
+  return row ?? {
+    totalReviews: 0, totalTriggers: 0, totalHelpful: 0,
+    totalIntellectual: 0, totalLovely: 0, totalSassy: 0, totalPlay: 0,
+  }
+}
+
+const PERSONALITIES = [
+  {
+    name: 'HELPFUL',
+    color: '#4A7FA5',
+    desc: 'Practical and grounded. Cuts through to what actually matters in your entry, offers a clear perspective, and leaves you with something you can use.',
+  },
+  {
+    name: 'INTELLECTUAL',
+    color: '#C8B020',
+    desc: 'Goes deep. Finds the ideas, patterns, and meaning beneath the surface of what you wrote. Not afraid to get philosophical if the moment calls for it.',
+  },
+  {
+    name: 'LOVELY',
+    color: '#3AB87A',
+    desc: 'Warm and genuinely encouraging. Sees what is good in your entry and reflects it back with care. The voice you need on a hard morning.',
+  },
+  {
+    name: 'SASSY',
+    color: '#C87840',
+    desc: "Witty, sharp, and doesn't pull punches. Will notice things you missed, call out the contradictions, and somehow make you feel better about all of it.",
+  },
 ]
 
-type BootPhase = 'idle' | 'booting' | 'done'
+export default async function WolfbotPage() {
+  const stats = await getStats()
 
-export default function WolfBotPage() {
-  const [bootPhase, setBootPhase]           = useState<BootPhase>('idle')
-  const [bootSetIdx]                        = useState(() => Math.floor(Math.random() * PAGE_BOOT_SETS.length))
-  const [bootLineIdx, setBootLineIdx]       = useState(0)
-  const [displayedBoot, setDisplayedBoot]   = useState('')
-  const [bootDone, setBootDone]             = useState(false)
-  const [searchInput, setSearchInput]       = useState('')
-  const [searchErrors, setSearchErrors]     = useState<string[]>([])
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  // Auto-start boot on mount
-  useEffect(() => {
-    const t = setTimeout(() => setBootPhase('booting'), 600)
-    return () => clearTimeout(t)
-  }, [])
-
-  // Boot line typer
-  useEffect(() => {
-    if (bootPhase !== 'booting') return
-    const lines = PAGE_BOOT_SETS[bootSetIdx]
-    const line = lines[bootLineIdx] ?? null
-    if (!line) {
-      setBootPhase('done')
-      setBootDone(true)
-      setTimeout(() => inputRef.current?.focus(), 150)
-      return
-    }
-    setDisplayedBoot('')
-    let i = 0
-    const interval = setInterval(() => {
-      if (i >= line.length) {
-        clearInterval(interval)
-        setTimeout(() => { setBootLineIdx(prev => prev + 1); setDisplayedBoot('') }, 280)
-        return
-      }
-      setDisplayedBoot(line.slice(0, i + 1))
-      i++
-    }, 20)
-    return () => clearInterval(interval)
-  }, [bootPhase, bootLineIdx, bootSetIdx])
-
-  function handleSearch(e: React.KeyboardEvent) {
-    if (e.key !== 'Enter' || !searchInput.trim()) return
-    setSearchErrors(prev => [...prev, searchInput.trim()])
-    setSearchInput('')
-  }
+  const statItems = [
+    { number: stats.totalReviews,      label: 'Reviews Generated' },
+    { number: stats.totalTriggers,     label: 'Reviews Opened' },
+    { number: stats.totalHelpful,      label: 'Helpful Reads' },
+    { number: stats.totalIntellectual, label: 'Intellectual Reads' },
+    { number: stats.totalLovely,       label: 'Lovely Reads' },
+    { number: stats.totalSassy,        label: 'Sassy Reads' },
+    { number: stats.totalPlay,         label: 'Times Read Aloud' },
+  ]
 
   return (
-    <main className="wolfbot-page wolfbot-page--full">
-      <div className="wolfbot-integrated wolfbot-page-terminal">
+    <main className="wolfbot-page">
+      <SectionHeader section="discover" current="/wolfbot" />
 
-        {/* Integrated header */}
-        <div className="wolfbot-integrated-header">
-          <WolfBotIcon size={72} className="wolfbot-page-icon" />
-          <div className="wolfbot-integrated-title">
-            <span className="wolfbot-integrated-name">WOLF|BOT</span>
-            <span className="wolfbot-integrated-sub">SEARCH &amp; ASSIST</span>
-            <span className="wolfbot-integrated-mode">Current Mode: Standard</span>
+      <div className="wolfbot-page-content">
+
+        {/* Hero */}
+        <div className="wolfbot-page-hero">
+          <WolfBotIcon size={80} />
+          <div className="wolfbot-page-hero-title">
+            <span className="wolfbot-page-hero-name">WOLF|BOT</span>
+            <p className="wolfbot-page-hero-tagline">
+              An AI companion that reads every journal and responds — honestly, warmly, or with a raised eyebrow.
+            </p>
           </div>
         </div>
 
-        {/* Dev log button — directly under header */}
-        <div style={{ padding: '0.75rem 1.25rem 0' }}>
-          <Link href="/dev" className="wolfbot-yellow-btn" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>
-            VIEW DEV LOG →
-          </Link>
+        {/* What is WOLF|BOT */}
+        <div className="wolfbot-page-section">
+          <p className="wolfbot-page-section-label">The companion</p>
+          <h1 className="wolfbot-page-section-heading">What is WOLF|BOT?</h1>
+          <p className="wolfbot-page-body">
+            Every journal written on this site gets a visit from WOLF|BOT. It reads the entry — the intention,
+            the gratitude, the morning scores — and offers a perspective. Not a summary. Not an evaluation.
+            A genuine response, the kind you might get from someone who actually paid attention.
+          </p>
+          <p className="wolfbot-page-body">
+            The character is consistent: curious, direct, and engaged with what you have actually written.
+            It notices the specific things — the word you chose, the score that contradicts the mood, the
+            moment of honesty buried in the third paragraph. It does not deal in generics.
+          </p>
+          <p className="wolfbot-page-body">
+            What changes is the personality you choose to hear it through.
+          </p>
         </div>
 
-        {/* Terminal content */}
-        <div className="wolfbot-bubble-inner wolfbot-page-content">
-
-          {/* Completed boot lines */}
-          {(bootPhase === 'booting' || bootDone) &&
-            PAGE_BOOT_SETS[bootSetIdx].slice(0, bootLineIdx).map((line, idx) => (
-              <p key={idx} className="wolfbot-terminal-line">
-                <span className="wbt-prompt">&gt;&nbsp;</span>
-                <span className="wbt-boot">{line}</span>
-              </p>
-            ))
-          }
-
-          {/* Currently typing boot line */}
-          {bootPhase === 'booting' && (
-            <p className="wolfbot-terminal-line">
-              <span className="wbt-prompt">&gt;&nbsp;</span>
-              <span className="wbt-boot">{displayedBoot}</span>
-              <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
-            </p>
-          )}
-
-          {/* Idle cursor */}
-          {bootPhase === 'idle' && (
-            <p className="wolfbot-terminal-line">
-              <span className="wbt-prompt">&gt;&nbsp;</span>
-              <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
-            </p>
-          )}
-
-          {/* Search attempts + offline errors */}
-          {searchErrors.map((query, idx) => (
-            <div key={idx}>
-              <p className="wolfbot-terminal-line">
-                <span className="wbt-prompt">&gt;&nbsp;</span>
-                <span className="wbt-boot">{query}</span>
-              </p>
-              <p className="wolfbot-terminal-line">
-                <span className="wbt-prompt">&gt;&nbsp;</span>
-                <span className="wbt-error">SEARCH OFFLINE — feature under development.</span>
-              </p>
-            </div>
-          ))}
-
-          {/* Search prompt — shown after boot */}
-          {bootDone && (
-            <>
-              <p className="wolfbot-terminal-line more-pages-wolfbot-prompt-label">
-                What would you like to search for?
-              </p>
-              <div className="more-pages-wolfbot-input-row">
-                <span className="wbt-prompt">&gt;&nbsp;</span>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  className="more-pages-wolfbot-input"
-                  value={searchInput}
-                  onChange={e => setSearchInput(e.target.value)}
-                  onKeyDown={handleSearch}
-                  placeholder="type and press Enter..."
-                  aria-label="Search WOLF|BOT"
-                  autoComplete="off"
-                  spellCheck={false}
-                />
+        {/* Four personalities */}
+        <div className="wolfbot-page-section">
+          <p className="wolfbot-page-section-label">Four lenses</p>
+          <h2 className="wolfbot-page-section-heading">Choose your personality</h2>
+          <p className="wolfbot-page-body">
+            Each journal gets four reviews — all generated at once, each through a different lens.
+            Same entry. Four completely different responses. Pick the one you are ready to hear.
+          </p>
+          <div className="wolfbot-page-personalities">
+            {PERSONALITIES.map(p => (
+              <div key={p.name} className="wolfbot-page-personality">
+                <p className="wolfbot-page-personality-name" style={{ color: p.color }}>{p.name}</p>
+                <p className="wolfbot-page-personality-desc">{p.desc}</p>
               </div>
-            </>
-          )}
-
+            ))}
+          </div>
         </div>
+
+        {/* Sample review */}
+        <div className="wolfbot-page-section">
+          <p className="wolfbot-page-section-label">In the wild</p>
+          <h2 className="wolfbot-page-section-heading">What it actually sounds like</h2>
+          <p className="wolfbot-page-body">
+            A real WOLF|BOT review, unedited — SASSY mode, responding to a journal about a good gym session
+            after a rough few days.
+          </p>
+          <div className="wolfbot-page-sample">
+            <p className="wolfbot-page-sample-tab">▶ SASSY</p>
+            <p className="wolfbot-page-sample-text">
+              *ears perk up*{' '}
+              Okay, I&apos;m gonna call it — you wrote &ldquo;oh so claim&rdquo; when you meant &ldquo;calm,&rdquo;
+              and honestly? That typo is chef&apos;s kiss because it accidentally captures what&apos;s
+              happening here. You&apos;re not just feeling calm, you&apos;re claiming it.
+              There&apos;s a difference, and your body already knew that before your brain caught up.
+              That gym session yesterday wasn&apos;t you dragging 6000 iron bells — it was you
+              proving to yourself that the shift had already happened.
+            </p>
+            <p className="wolfbot-page-sample-note">Real review. Real journal. Nothing staged.</p>
+          </div>
+        </div>
+
+        {/* By the numbers */}
+        <div className="wolfbot-page-section">
+          <p className="wolfbot-page-section-label">By the numbers</p>
+          <h2 className="wolfbot-page-section-heading">WOLF|BOT in use</h2>
+          <p className="wolfbot-page-body">Live counts across every journal on the site. Updated every five minutes.</p>
+          <div className="wolfbot-page-stats">
+            {statItems.map(s => (
+              <div key={s.label} className="wolfbot-page-stat">
+                <p className="wolfbot-page-stat-number">{s.number.toLocaleString()}</p>
+                <p className="wolfbot-page-stat-label">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </div>
     </main>
   )

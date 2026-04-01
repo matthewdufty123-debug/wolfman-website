@@ -8647,3 +8647,198 @@ html[data-fontsize="xlarge"] .dev-body {
     flex: 1;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   WOLFBOT PAGE  (/wolfbot)
+   ═══════════════════════════════════════════════════════════ */
+
+.wolfbot-page {
+  min-height: 100vh;
+  padding: 0 0 5rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.wolfbot-page-content {
+  padding: 1.5rem 1.25rem 0;
+}
+
+/* Hero */
+.wolfbot-page-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.wolfbot-page-hero-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.wolfbot-page-hero-name {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #C8B020;
+  line-height: 1;
+}
+
+.wolfbot-page-hero-tagline {
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 1rem;
+  color: var(--body-text, #4A4A4A);
+  line-height: 1.5;
+  max-width: 460px;
+}
+
+/* Section headings */
+.wolfbot-page-section {
+  margin-bottom: 2.5rem;
+}
+
+.wolfbot-page-section-label {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #A0622A;
+  margin-bottom: 0.6rem;
+}
+
+.wolfbot-page-section-heading {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin: 0 0 0.9rem;
+  line-height: 1.2;
+}
+
+.wolfbot-page-body {
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--body-text, #4A4A4A);
+  margin-bottom: 0.75rem;
+}
+
+/* Personality grid */
+.wolfbot-page-personalities {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.wolfbot-page-personality {
+  background: #0d1117;
+  border: 1px solid #1e3a50;
+  border-radius: 6px;
+  padding: 1rem 1.1rem;
+}
+
+.wolfbot-page-personality-name {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin: 0 0 0.4rem;
+}
+
+.wolfbot-page-personality-desc {
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.65);
+  margin: 0;
+}
+
+/* Sample review terminal */
+.wolfbot-page-sample {
+  background: #0d1117;
+  border: 1px solid #1e3a50;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.wolfbot-page-sample-tab {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #1e3a50;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #C8B020;
+}
+
+.wolfbot-page-sample-text {
+  padding: 1rem 1.25rem;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  line-height: 1.75;
+  color: rgba(255,255,255,0.8);
+  margin: 0;
+}
+
+.wolfbot-page-sample-text em {
+  font-style: italic;
+  color: #C8B020;
+}
+
+.wolfbot-page-sample-note {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: rgba(200,176,32,0.4);
+  padding: 0 1.25rem 0.75rem;
+  margin: 0;
+}
+
+/* Stats grid */
+.wolfbot-page-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.wolfbot-page-stat {
+  background: var(--card-bg, #f8f9fa);
+  border: 1px solid var(--card-border, rgba(74,127,165,0.15));
+  border-radius: 6px;
+  padding: 1rem 0.85rem;
+  text-align: center;
+}
+
+.wolfbot-page-stat-number {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #C8B020;
+  line-height: 1;
+  margin-bottom: 0.35rem;
+}
+
+.wolfbot-page-stat-label {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.6;
+}
+
+@media (max-width: 480px) {
+  .wolfbot-page-personalities {
+    grid-template-columns: 1fr;
+  }
+  .wolfbot-page-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -53,7 +53,15 @@ const TAB_ORDER: Tab[] = ['HELPFUL', 'INTELLECTUAL', 'LOVELY', 'SASSY']
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 /** State A — reviews exist: boot then tab switcher */
-function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: WolfBotReviews; promptVersion: number }) {
+function trackEvent(postId: string, action: string) {
+  fetch(`/api/posts/${postId}/wolfbot-event`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action }),
+  }).catch(() => {})
+}
+
+function NewReviewTerminal({ wolfbotReviews, promptVersion, postId }: { wolfbotReviews: WolfBotReviews; promptVersion: number; postId: string }) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const [revealed,     setRevealed]     = useState(false)
   const [userTriggered,setUserTriggered]= useState(false)
@@ -179,6 +187,7 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: 
       setSpeaking(false)
       return
     }
+    trackEvent(postId, 'play')
     const text = getReviewText(activeTab)
     if (!text) return
     const utterance = new SpeechSynthesisUtterance(text)
@@ -193,6 +202,7 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: 
 
   function handleTabClick(tab: Tab) {
     if (tab === activeTab) return
+    trackEvent(postId, tab.toLowerCase())
     setActiveTab(tab)
   }
 
@@ -297,6 +307,7 @@ function TriggerTerminal({ postId }: { postId: string }) {
   async function handleTrigger() {
     setLoading(true)
     setError(false)
+    trackEvent(postId, 'trigger')
     try {
       const res = await fetch(`/api/posts/${postId}/wolfbot-reviews`, { method: 'POST' })
       if (res.ok || res.status === 409) {
@@ -490,7 +501,7 @@ export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, p
         popupBody="WOLF|BOT is powered by Claude AI. It reads the journal through four lenses: Helpful is practical and grounded; Intellectual goes deep on themes and meaning; Lovely is warm and encouraging; Sassy is witty and doesn't pull punches. Each review is generated fresh from the journal content."
       />
       {hasNewReviews ? (
-        <NewReviewTerminal wolfbotReviews={wolfbotReviews!} promptVersion={promptVersion} />
+        <NewReviewTerminal wolfbotReviews={wolfbotReviews!} promptVersion={promptVersion} postId={postId} />
       ) : synthesis ? (
         <LegacyTerminal synthesis={synthesis} promptVersion={promptVersion} />
       ) : (

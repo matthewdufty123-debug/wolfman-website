@@ -18,6 +18,11 @@ const CARDS = [
     body: 'Four scales recorded each morning — Brain Activity, Body Energy, Happiness, and Stress, rated 1 to 6. Over time they reveal honest patterns about how inner state shapes intention.',
   },
   {
+    href: '/wolfbot',
+    title: 'WOLF|BOT',
+    body: 'The AI journalling companion built into every journal on this site. Four distinct personalities — Helpful, Intellectual, Lovely, and Sassy — each reading the same entry through a completely different lens.',
+  },
+  {
     href: '/rituals',
     title: 'Morning Rituals',
     body: 'The daily practices Matthew completes before sitting down to write — sunlight, breathwork, movement, and stillness. Browse journals by ritual and see which ones appear in the moments that matter.',

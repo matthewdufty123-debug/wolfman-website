@@ -195,6 +195,13 @@ export const wolfbotReviews = pgTable('wolfbot_reviews', {
   modelUsed:          text('model_used'),
   inputTokensTotal:   integer('input_tokens_total'),
   outputTokensTotal:  integer('output_tokens_total'),
+  // Engagement counters
+  triggerCount:       integer('trigger_count').notNull().default(0),
+  countHelpful:       integer('count_helpful').notNull().default(0),
+  countIntellectual:  integer('count_intellectual').notNull().default(0),
+  countLovely:        integer('count_lovely').notNull().default(0),
+  countSassy:         integer('count_sassy').notNull().default(0),
+  countPlay:          integer('count_play').notNull().default(0),
 })
 
 // ── Claude-generated synthesis ────────────────────────────────────────────

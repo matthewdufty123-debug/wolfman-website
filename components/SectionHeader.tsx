@@ -12,6 +12,7 @@ const DISCOVER_PAGES = [
   { href: '/features',      label: 'Features & Roadmap' },
   { href: '/journaling',    label: 'The Journalling Practice' },
   { href: '/scores',        label: 'Morning Scores' },
+  { href: '/wolfbot',       label: 'WOLF|BOT' },
   { href: '/rituals',       label: 'Rituals' },
   { href: '/achievements',  label: 'Achievements' },
 ]
