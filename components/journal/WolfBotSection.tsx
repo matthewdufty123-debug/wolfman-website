@@ -343,8 +343,8 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion, postId }: { wolfbotR
               ))}
             </div>
 
-            {/* Voice selector — only shown when device has recognisable voices */}
-            {availableSlots.length > 1 && (
+            {/* Voice selector — shown whenever speech synthesis is available */}
+            {typeof window !== 'undefined' && !!window.speechSynthesis && (
               <div className="wb-voice-row">
                 <span className="wbt-prompt">&#62;&nbsp;</span>
                 <span className="wb-voice-label">VOICE</span>
