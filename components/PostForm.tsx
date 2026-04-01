@@ -34,10 +34,10 @@ const FEEL_COLORS: Record<number, string> = {
 }
 
 type MorningState = {
-  brainScale: number
-  bodyScale: number
-  happyScale: number
-  stressScale: number
+  brainScale: number | null
+  bodyScale: number | null
+  happyScale: number | null
+  stressScale: number | null
   routineChecklist: Record<string, boolean>
 }
 
@@ -105,7 +105,7 @@ function extractYouTubeId(url: string): string | null {
 }
 
 function ScaleSelector({ label, value, onChange, color, labels }: {
-  label: string; value: number; onChange: (n: number) => void; color: string; labels: string[]
+  label: string; value: number | null; onChange: (n: number) => void; color: string; labels: string[]
 }) {
   return (
     <div className="pf-scale">
@@ -121,7 +121,7 @@ function ScaleSelector({ label, value, onChange, color, labels }: {
           >{n}</button>
         ))}
       </div>
-      <p className="pf-scale-value" style={{ color }}>{labels[value - 1]}</p>
+      <p className="pf-scale-value" style={{ color }}>{value !== null ? labels[value - 1] : ''}</p>
     </div>
   )
 }
@@ -150,10 +150,10 @@ export default function PostForm({
   const [grateful, setGrateful] = useState(initialData?.grateful ?? '')
   const [greatAt, setGreatAt] = useState(initialData?.greatAt ?? '')
   const [morning, setMorning] = useState<MorningState>({
-    brainScale:  initialData?.morning?.brainScale  ?? 3,
-    bodyScale:   initialData?.morning?.bodyScale   ?? 3,
-    happyScale:  initialData?.morning?.happyScale  ?? 3,
-    stressScale: initialData?.morning?.stressScale ?? 3,
+    brainScale:  initialData?.morning?.brainScale  ?? null,
+    bodyScale:   initialData?.morning?.bodyScale   ?? null,
+    happyScale:  initialData?.morning?.happyScale  ?? null,
+    stressScale: initialData?.morning?.stressScale ?? null,
     routineChecklist: initialData?.morning?.routineChecklist ?? defaultChecklist(),
   })
   const [image, setImage] = useState<string | null>(initialData?.image ?? null)

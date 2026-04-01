@@ -79,8 +79,8 @@ export async function PUT(
     if (existing) {
       await db.update(morningState)
         .set({
-          brainScale: morning.brainScale,
-          bodyScale: morning.bodyScale,
+          brainScale: morning.brainScale ?? null,
+          bodyScale: morning.bodyScale ?? null,
           happyScale: morning.happyScale ?? null,
           stressScale: morning.stressScale ?? null,
           routineChecklist: morning.routineChecklist,
@@ -89,8 +89,8 @@ export async function PUT(
     } else {
       await db.insert(morningState).values({
         postId: id,
-        brainScale: morning.brainScale,
-        bodyScale: morning.bodyScale,
+        brainScale: morning.brainScale ?? null,
+        bodyScale: morning.bodyScale ?? null,
         happyScale: morning.happyScale ?? null,
         stressScale: morning.stressScale ?? null,
         routineChecklist: morning.routineChecklist,

@@ -109,10 +109,10 @@ export const posts = pgTable('posts', {
 export const morningState = pgTable('morning_state', {
   id: uuid('id').primaryKey().defaultRandom(),
   postId: uuid('post_id').notNull().unique().references(() => posts.id, { onDelete: 'cascade' }),
-  brainScale: smallint('brain_scale').notNull(),   // 1–6
-  bodyScale: smallint('body_scale').notNull(),     // 1–6
-  happyScale: smallint('happy_scale'),             // 1–6, nullable (added later)
-  stressScale: smallint('stress_scale'),           // 1–6, nullable (added in redesign)
+  brainScale: smallint('brain_scale'),   // 1–6, nullable (user may skip)
+  bodyScale: smallint('body_scale'),     // 1–6, nullable (user may skip)
+  happyScale: smallint('happy_scale'),   // 1–6, nullable
+  stressScale: smallint('stress_scale'), // 1–6, nullable
   routineChecklist: jsonb('routine_checklist').notNull().default({}),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
