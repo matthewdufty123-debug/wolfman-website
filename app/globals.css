@@ -8657,10 +8657,18 @@ html[data-fontsize="xlarge"] .dev-body {
   padding: 0 0 5rem;
   max-width: 720px;
   margin: 0 auto;
+  /* reset old flex layout from the previous wolfbot page */
+  display: block;
+  align-items: unset;
+  justify-content: unset;
 }
 
 .wolfbot-page-content {
   padding: 1.5rem 1.25rem 0;
+  /* reset old flex properties */
+  flex: unset;
+  display: block;
+  overflow-y: unset;
 }
 
 /* Hero */
