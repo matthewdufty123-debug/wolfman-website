@@ -64,6 +64,7 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: 
   const [displayedText,setDisplayedText]= useState('')
   const [typedTabs,    setTypedTabs]    = useState<Set<Tab>>(new Set())
   const [cursorVisible,setCursorVisible]= useState(true)
+  const [speaking,     setSpeaking]     = useState(false)
 
   // Auto-start if TriggerTerminal saved a personality choice before generating
   useEffect(() => {
@@ -160,6 +161,36 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bootDone, activeTab])
 
+  // Stop speech when tab changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
+    setSpeaking(false)
+  }, [activeTab])
+
+  // Stop speech on unmount
+  useEffect(() => {
+    return () => { if (typeof window !== 'undefined') window.speechSynthesis?.cancel() }
+  }, [])
+
+  function handleSpeak() {
+    if (!window.speechSynthesis) return
+    if (speaking) {
+      window.speechSynthesis.cancel()
+      setSpeaking(false)
+      return
+    }
+    const text = getReviewText(activeTab)
+    if (!text) return
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.rate  = 0.88
+    utterance.pitch = 0.75
+    utterance.onend = () => setSpeaking(false)
+    utterance.onerror = () => setSpeaking(false)
+    window.speechSynthesis.cancel()
+    window.speechSynthesis.speak(utterance)
+    setSpeaking(true)
+  }
+
   function handleTabClick(tab: Tab) {
     if (tab === activeTab) return
     setActiveTab(tab)
@@ -232,6 +263,17 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion }: { wolfbotReviews: 
                   {tab}
                 </button>
               ))}
+              {typeof window !== 'undefined' && !!window.speechSynthesis && (
+                <button
+                  type="button"
+                  className={`wb-tab wb-tab-speak${speaking ? ' wb-tab--active' : ''}`}
+                  onClick={handleSpeak}
+                  title={speaking ? 'Stop reading' : 'Read aloud'}
+                  style={speaking ? { background: '#C87840', borderColor: '#C87840', color: '#fff' } : {}}
+                >
+                  {speaking ? '■ STOP' : '▶ PLAY'}
+                </button>
+              )}
             </div>
 
             <p className="wolfbot-terminal-line wolfbot-terminal-review">
