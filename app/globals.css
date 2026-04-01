@@ -7928,13 +7928,13 @@ html[data-fontsize="xlarge"] .dev-body {
 
 .placeholder-page {
   min-height: 100vh;
-  padding: 3rem 1.25rem 5rem;
+  padding: 0 1.25rem 5rem;
   max-width: 720px;
   margin: 0 auto;
 }
 
 .placeholder-content {
-  padding-top: 0.5rem;
+  padding-top: 1.5rem;
 }
 
 .placeholder-eyebrow {
@@ -8009,9 +8009,6 @@ html[data-fontsize="xlarge"] .dev-body {
   text-transform: uppercase;
   color: #A0622A;
   margin: 0 0 0.6rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* Dropdown wrapper */
@@ -8028,7 +8025,7 @@ html[data-fontsize="xlarge"] .dev-body {
   background: var(--bg, #fff);
   border: 1px solid rgba(74,127,165,0.3);
   border-radius: 8px;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: 600;
   color: var(--heading, #193343);

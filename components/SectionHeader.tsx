@@ -32,7 +32,7 @@ interface SectionHeaderProps {
 export default function SectionHeader({ section, current }: SectionHeaderProps) {
   const router = useRouter()
   const pages = section === 'discover' ? DISCOVER_PAGES : BETA_PAGES
-  const title = section === 'discover' ? 'ABOUT THIS PROJECT' : 'ABOUT THE BETA'
+  const title = section === 'discover' ? 'WHAT WOULD YOU LIKE TO LEARN ABOUT?' : 'ABOUT THE BETA'
 
   return (
     <div className="section-hdr">
