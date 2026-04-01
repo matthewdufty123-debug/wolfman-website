@@ -58,8 +58,8 @@ const VOICE_SLOTS: VoiceSlot[] = [
   { id: 'default',   label: 'DEFAULT',   patterns: [] },
   { id: 'daniel',    label: 'DANIEL',    patterns: ['daniel'] },
   { id: 'samantha',  label: 'SAMANTHA',  patterns: ['samantha'] },
-  { id: 'british',   label: 'BRITISH',   patterns: ['google uk english', 'kate', 'serena'] },
-  { id: 'google-us', label: 'GOOGLE US', patterns: ['google us english', 'google american'] },
+  { id: 'british',   label: 'BRITISH',   patterns: ['google uk english', 'kate', 'serena', 'english (united kingdom)', 'en-gb'] },
+  { id: 'google-us', label: 'GOOGLE US', patterns: ['google us english', 'google american', 'english (united states)', 'en-us'] },
 ]
 
 const VOICE_PREF_KEY = 'wb-voice-slot'
@@ -72,6 +72,12 @@ function matchVoice(slot: VoiceSlot, voices: SpeechSynthesisVoice[]): SpeechSynt
     if (match) return match.voice
   }
   return null
+}
+
+// If curated slots don't match, pick up to 4 English voices from the device
+function buildFallbackSlots(voices: SpeechSynthesisVoice[]): VoiceSlot[] {
+  const english = voices.filter(v => v.lang.startsWith('en')).slice(0, 4)
+  return english.map(v => ({ id: v.voiceURI, label: v.name.toUpperCase().slice(0, 16), patterns: [v.name.toLowerCase()] }))
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -110,10 +116,12 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion, postId }: { wolfbotR
       const all = window.speechSynthesis.getVoices()
       if (!all.length) return
       voiceListRef.current = all
-      const matched = VOICE_SLOTS.filter(slot =>
+      const curated = VOICE_SLOTS.filter(slot =>
         slot.patterns.length === 0 || matchVoice(slot, all) !== null
       )
-      setAvailableSlots(matched.length > 1 ? matched : [VOICE_SLOTS[0]])
+      // If only DEFAULT matched, fall back to device English voices
+      const slots = curated.length > 1 ? curated : [VOICE_SLOTS[0], ...buildFallbackSlots(all)]
+      setAvailableSlots(slots)
     }
     load()
     window.speechSynthesis.addEventListener('voiceschanged', load)
@@ -216,7 +224,7 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion, postId }: { wolfbotR
       }
       setDisplayedText(text.slice(0, i + 1))
       i++
-    }, 12)
+    }, 6)
     return () => clearInterval(interval)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bootDone, activeTab])
@@ -490,7 +498,7 @@ function LegacyTerminal({ synthesis, promptVersion }: { synthesis: string; promp
     const interval = setInterval(() => {
       if (i >= synthesis.length) { clearInterval(interval); setCursorVisible(false); setPhase('done'); return }
       setDisplayedReview(synthesis.slice(0, i + 1)); i++
-    }, 12)
+    }, 6)
     return () => clearInterval(interval)
   }, [phase, synthesis])
 
