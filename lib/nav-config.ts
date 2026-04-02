@@ -107,7 +107,7 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    */
   standard: {
     upper: [WOLFMAN_LOGO, FEEDBACK_TEXT, WRITE_PLUS, SETTINGS, SHOP],
-    lower: [WOLFBOT, DISCOVER, FEED_LOGO, PROFILE_LINK, MORE_PAGES],
+    lower: [WOLFBOT, DISCOVER, FEED_LOGO, ACCOUNT, MORE_PAGES],
   },
 
   /**
@@ -130,7 +130,7 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
       WOLFBOT,       // NBLS1 — 30%
       EXPORT,        // NBLS2 — 40% — download data
       FEED_LOGO,     // NBLS3 — 10% — wolf logo, links to feed
-      PROFILE_LINK,  // NBLS4 — 10%
+      ACCOUNT,       // NBLS4 — 10%
       MORE_PAGES,    // NBLS5 — 10%
     ],
     fadeOnInactivity: true,
