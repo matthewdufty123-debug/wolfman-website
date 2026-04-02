@@ -113,7 +113,7 @@ async function markdownToHtml(markdown: string): Promise<string> {
   return result.toString()
 }
 
-function deriveExcerpt(content: string): string {
+export function deriveExcerpt(content: string): string {
   const firstPara = content
     .split('\n\n')
     .map(p => p.trim())

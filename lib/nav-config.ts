@@ -47,6 +47,7 @@ export type NavIcon =
   | 'BookOpen'
   | 'Menu'
   | 'X'
+  | 'Search'
 
 // Named actions handled by the nav components
 export type NavAction =
@@ -73,7 +74,7 @@ export type NavConfigKey = 'standard' | 'journal-reading' | 'writing' | 'auth' |
 // ─── Shared slot shorthands ───────────────────────────────────────────────────
 
 const EMPTY: SlotType         = { kind: 'empty' }
-const WOLFBOT: SlotType       = { kind: 'wolfbot' }
+const WOLFBOT: SlotType       = { kind: 'link', href: '/wolfbot', label: 'search', icon: 'Search', hideLabel: true }
 const ACCOUNT: SlotType       = { kind: 'account' }
 const WRITE_PLUS: SlotType    = { kind: 'write-plus' }
 const PROFILE_LINK: SlotType  = { kind: 'profile-link' }

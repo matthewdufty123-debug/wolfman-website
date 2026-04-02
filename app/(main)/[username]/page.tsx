@@ -203,7 +203,7 @@ export default async function ProfilePage(
     brainScale: r.brainScale,
     bodyScale: r.bodyScale,
     happyScale: r.happyScale ?? null,
-    ritualCount: Object.values(r.routineChecklist as Record<string, boolean>).filter(Boolean).length,
+    ritualCount: r.routineChecklist ? Object.values(r.routineChecklist as Record<string, boolean>).filter(Boolean).length : 0,
   }))
 
   const dateToSlug: Record<string, string> = {}

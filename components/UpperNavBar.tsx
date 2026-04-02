@@ -7,7 +7,7 @@ import Image from 'next/image'
 import {
   Home, Sunrise, Pencil, ShoppingBag, User, UserCircle2, Settings,
   Share2, Download, ArrowLeft, ChevronLeft, ChevronRight,
-  LayoutDashboard, BadgeInfo, Bot, Plus, Building2, Rss, BookOpen, Menu, X,
+  LayoutDashboard, BadgeInfo, Bot, Plus, Building2, Rss, BookOpen, Menu, X, Search,
 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { getNavConfigKey, NAV_CONFIGS, type NavIcon, type SlotType } from '@/lib/nav-config'
@@ -38,6 +38,7 @@ function NavIconEl({ icon, size = 18 }: { icon: NavIcon; size?: number }) {
     case 'BookOpen':        return <BookOpen {...p} />
     case 'Menu':            return <Menu {...p} />
     case 'X':               return <X {...p} />
+    case 'Search':          return <Search {...p} />
     default:                return null
   }
 }

@@ -16,6 +16,7 @@ import { db } from '@/lib/db'
 import { posts, morningState, users } from '@/lib/db/schema'
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import AnimatedRoutineIcons from '@/components/AnimatedRoutineIcons'
+import { deriveExcerpt } from '@/lib/posts'
 
 function formatDate(iso: string) {
   const d = new Date(iso + 'T00:00:00')
@@ -119,6 +120,7 @@ export default async function FeedPage({
         title: posts.title,
         date: posts.date,
         excerpt: posts.excerpt,
+        content: posts.content,
         status: posts.status,
         authorId: posts.authorId,
         authorUsername: users.username,
@@ -138,8 +140,9 @@ export default async function FeedPage({
       : []
     const stateMap = new Map(states.map(s => [s.postId, s]))
 
-    feedPosts = rows.map(r => ({
+    feedPosts = rows.map(({ content, ...r }) => ({
       ...r,
+      excerpt: r.excerpt || deriveExcerpt(content) || null,
       checklist: stateMap.get(r.id)?.routineChecklist as Record<string, boolean> | undefined,
     }))
   } else {
@@ -151,6 +154,7 @@ export default async function FeedPage({
         title: posts.title,
         date: posts.date,
         excerpt: posts.excerpt,
+        content: posts.content,
         status: posts.status,
         authorId: posts.authorId,
         authorUsername: users.username,
@@ -174,8 +178,9 @@ export default async function FeedPage({
       : []
     const stateMap = new Map(states.map(s => [s.postId, s]))
 
-    feedPosts = rows.map(r => ({
+    feedPosts = rows.map(({ content, ...r }) => ({
       ...r,
+      excerpt: r.excerpt || deriveExcerpt(content) || null,
       checklist: stateMap.get(r.id)?.routineChecklist as Record<string, boolean> | undefined,
     }))
   }

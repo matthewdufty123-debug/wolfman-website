@@ -105,7 +105,7 @@ function extractYouTubeId(url: string): string | null {
 }
 
 function ScaleSelector({ label, value, onChange, color, labels }: {
-  label: string; value: number | null; onChange: (n: number) => void; color: string; labels: string[]
+  label: string; value: number | null; onChange: (n: number | null) => void; color: string; labels: string[]
 }) {
   return (
     <div className="pf-scale">
@@ -117,7 +117,7 @@ function ScaleSelector({ label, value, onChange, color, labels }: {
             type="button"
             className={`pf-scale-pill${value === n ? ' pf-scale-pill--active' : ''}`}
             style={value === n ? { background: color, borderColor: color } : {}}
-            onClick={() => onChange(n)}
+            onClick={() => onChange(value === n ? null : n)}
           >{n}</button>
         ))}
       </div>
@@ -563,7 +563,7 @@ export default function PostForm({
                   type="button"
                   className={`pf-feel-btn${feelAboutToday === n ? ' pf-feel-btn--active' : ''}`}
                   style={feelAboutToday === n ? { borderColor: FEEL_COLORS[n], background: `${FEEL_COLORS[n]}18`, color: FEEL_COLORS[n] } : {}}
-                  onClick={() => { setFeelAboutToday(n); markDirty() }}
+                  onClick={() => { setFeelAboutToday(feelAboutToday === n ? null : n); markDirty() }}
                 >
                   {FEEL_LABELS[n]}
                 </button>

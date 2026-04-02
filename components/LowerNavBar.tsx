@@ -7,7 +7,7 @@ import Image from 'next/image'
 import {
   Home, Sunrise, Pencil, ShoppingBag, User, UserCircle2, Settings,
   Share2, Download, ArrowLeft, ChevronLeft, ChevronRight,
-  LayoutDashboard, BadgeInfo, Bot, Plus, Building2, Rss, BookOpen, Menu, X,
+  LayoutDashboard, BadgeInfo, Bot, Plus, Building2, Rss, BookOpen, Menu, X, Search,
   TrendingUp, Trophy, Sparkles, ShoppingCart, MessageSquare, Code2, FileText,
 } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
@@ -22,7 +22,7 @@ import ThemeLogo from './ThemeLogo'
 
 // ─── Icon renderer ────────────────────────────────────────────────────────────
 
-function NavIconEl({ icon, size = 23 }: { icon: NavIcon; size?: number }) {
+function NavIconEl({ icon, size = 28 }: { icon: NavIcon; size?: number }) {
   const p = { size, strokeWidth: 1.5 }
   switch (icon) {
     case 'Home':            return <Home {...p} />
@@ -46,6 +46,7 @@ function NavIconEl({ icon, size = 23 }: { icon: NavIcon; size?: number }) {
     case 'BookOpen':        return <BookOpen {...p} />
     case 'Menu':            return <Menu {...p} />
     case 'X':               return <X {...p} />
+    case 'Search':          return <Search {...p} />
     default:                return null
   }
 }

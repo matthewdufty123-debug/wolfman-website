@@ -47,16 +47,6 @@ export default async function BetaPage() {
           </div>
         )}
 
-        {/* ── Subscriber stats ── */}
-        <div className="beta-stats">
-          <p className="beta-stats-number">
-            <span className="beta-stats-count">{subscriberCount}</span>
-            <span className="beta-stats-of"> of {cap}</span>
-          </p>
-          <p className="beta-stats-label">subscribed for Public Beta Testing</p>
-          <p className="beta-stats-percent">{percentage}% subscribed</p>
-        </div>
-
         {/* ── What is wolfman.blog? ── */}
         <p className="beta-eyebrow">Public Beta</p>
         <h1 className={showInterestForm ? 'beta-section-title' : 'beta-title'}>
@@ -141,6 +131,11 @@ export default async function BetaPage() {
             your data is deleted completely and permanently. No backups, no exceptions &mdash; your
             journal is yours to take or leave.
           </p>
+        </div>
+
+        {/* ── Subscriber stats ── */}
+        <div className="beta-stats beta-stats--subtle">
+          <p className="beta-stats-label">{subscriberCount} of {cap} subscribed for Public Beta — {percentage}% full</p>
         </div>
 
         {/* ── Questions ── */}
