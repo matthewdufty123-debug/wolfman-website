@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import UpperNavBar from '@/components/UpperNavBar'
 import LowerNavBar from '@/components/LowerNavBar'
 import ClosedAlphaBanner from '@/components/ClosedAlphaBanner'
@@ -15,11 +14,6 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       <ClosedAlphaBanner />
       {children}
       <LowerNavBar registrationOpen={registrationOpen} />
-      {process.env.NEXT_PUBLIC_APP_VERSION && (
-        <Link href="/dev" className="app-version-badge" aria-label="Version — view development log">
-          v{process.env.NEXT_PUBLIC_APP_VERSION}
-        </Link>
-      )}
     </PostContextProvider>
   )
 }

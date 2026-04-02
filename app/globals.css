@@ -109,24 +109,17 @@ body {
   transition: opacity 0.3s ease;
 }
 
-/* Site version badge — anchored inside upper nav bar, bottom-right */
-.app-version-badge {
-  position: fixed;
-  top: 30px;
-  right: 8px;
-  z-index: 51;
+/* Version number embedded under SEND FEEDBACK in the nav slot */
+.nav-slot-version {
+  display: block;
   font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
-  font-size: 0.55rem;
+  font-size: 0.46rem;
   letter-spacing: 0.06em;
-  color: var(--version-badge-color, rgba(255, 255, 255, 0.35));
-  text-decoration: none;
-  user-select: none;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 2px;
+  line-height: 1;
 }
 
-html[data-theme="dark"]  { --version-badge-color: rgba(255, 255, 255, 0.25); }
-html[data-theme="light"] { --version-badge-color: rgba(255, 255, 255, 0.55); }
-html[data-theme="cool"]  { --version-badge-color: rgba(255, 255, 255, 0.35); }
-html[data-theme="warm"]  { --version-badge-color: rgba(51, 63, 80, 0.4); }
 
 /* ── Lower navigation bar ── */
 .lower-nav {
@@ -147,7 +140,7 @@ html[data-theme="warm"]  { --version-badge-color: rgba(51, 63, 80, 0.4); }
 /* Fade state — journal reading inactivity */
 .upper-nav.nav--faded,
 .lower-nav.nav--faded {
-  opacity: 0.25;
+  opacity: 0;
 }
 
 /* ── Nav slots ── */
@@ -314,11 +307,11 @@ html[data-theme="light"] .feed-logo-img {
   .wolfbot-coming-icon-wrap { animation: none; }
 }
 
-/* ── Upper nav slot widths: 35 / 25 / 20 / 20 ── */
-.upper-nav .nav-slot:nth-child(1) { flex: 0 0 35%; }
-.upper-nav .nav-slot:nth-child(2) { flex: 0 0 25%; }
-.upper-nav .nav-slot:nth-child(3) { flex: 0 0 20%; }
-.upper-nav .nav-slot:nth-child(4) { flex: 0 0 20%; }
+/* ── Upper nav slot widths: 40 / 30 / 15 / 15 ── */
+.upper-nav .nav-slot:nth-child(1) { flex: 0 0 40%; }
+.upper-nav .nav-slot:nth-child(2) { flex: 0 0 30%; }
+.upper-nav .nav-slot:nth-child(3) { flex: 0 0 15%; }
+.upper-nav .nav-slot:nth-child(4) { flex: 0 0 15%; }
 
 /* Logo slot — left-aligned wordmark, vertically centered */
 .nav-slot--logo {
@@ -6792,6 +6785,13 @@ html[data-theme="dark"] .stats-chart-card {
 
 .journal-section--text {
   padding-top: 1.5rem;  /* text section sits flush after journal-section-title */
+}
+
+/* WOLF|BOT section — full viewport width, no side constraints */
+.journal-section--wolfbot {
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 /* .post inside a journal-section inherits 1rem side padding from the parent —

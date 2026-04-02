@@ -4,7 +4,6 @@ import { useRef, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import WolfBotIcon from '@/components/WolfBotIcon'
 import WolfBotLoadingOverlay from '@/components/WolfBotLoadingOverlay'
-import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -574,12 +573,7 @@ export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, p
   if (!hasNewReviews && !synthesis && !isOwnPost) return null
 
   return (
-    <section id="wolfbot-review" className="journal-section">
-      <SectionInfoHeader
-        title="WOLF|BOT Review"
-        description="An AI companion's perspective on this entry, offered in two distinct personalities."
-        popupBody="WOLF|BOT is powered by Claude AI. It reads the journal through two lenses: Helpful is practical and grounded, cutting through to what actually matters; Sassy is witty and doesn't pull punches, noticing what you missed and calling it out with a grin. Each review is generated fresh from the journal content."
-      />
+    <section id="wolfbot-review" className="journal-section journal-section--wolfbot">
       {hasNewReviews ? (
         <NewReviewTerminal wolfbotReviews={wolfbotReviews!} promptVersion={promptVersion} postId={postId} />
       ) : synthesis ? (

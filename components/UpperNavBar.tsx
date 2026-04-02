@@ -14,7 +14,7 @@ import { getNavConfigKey, NAV_CONFIGS, type NavIcon, type SlotType } from '@/lib
 import { usePostContext } from '@/lib/post-context'
 import SettingsOverlay from './SettingsOverlay'
 
-function NavIconEl({ icon, size = 16 }: { icon: NavIcon; size?: number }) {
+function NavIconEl({ icon, size = 18 }: { icon: NavIcon; size?: number }) {
   const p = { size, strokeWidth: 1.5 }
   switch (icon) {
     case 'Home':            return <Home {...p} />
@@ -64,7 +64,7 @@ export default function UpperNavBar() {
     function resetTimer() {
       setFaded(false)
       clearTimeout(timer)
-      timer = setTimeout(() => setFaded(true), 3000)
+      timer = setTimeout(() => setFaded(true), 2000)
     }
     resetTimer()
     window.addEventListener('scroll', resetTimer, { passive: true })
@@ -107,7 +107,7 @@ export default function UpperNavBar() {
         if (status !== 'authenticated') return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
         return (
           <Link key={key} href="/write" className="nav-slot nav-slot--link" aria-label="Write a journal">
-            <Plus size={16} strokeWidth={2} />
+            <Plus size={18} strokeWidth={2} />
           </Link>
         )
 
@@ -133,7 +133,10 @@ export default function UpperNavBar() {
       case 'text-link':
         return (
           <Link key={key} href={slot.href} className="nav-slot nav-slot--text-link">
-            {slot.text}
+            <span>{slot.text}</span>
+            {process.env.NEXT_PUBLIC_APP_VERSION && (
+              <span className="nav-slot-version">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
+            )}
           </Link>
         )
 

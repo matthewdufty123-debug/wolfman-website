@@ -22,7 +22,7 @@ import ThemeLogo from './ThemeLogo'
 
 // ─── Icon renderer ────────────────────────────────────────────────────────────
 
-function NavIconEl({ icon, size = 20 }: { icon: NavIcon; size?: number }) {
+function NavIconEl({ icon, size = 23 }: { icon: NavIcon; size?: number }) {
   const p = { size, strokeWidth: 1.5 }
   switch (icon) {
     case 'Home':            return <Home {...p} />
@@ -151,7 +151,7 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
     function resetTimer() {
       setFaded(false)
       clearTimeout(timer)
-      timer = setTimeout(() => setFaded(true), 3000)
+      timer = setTimeout(() => setFaded(true), 2000)
     }
     resetTimer()
     window.addEventListener('scroll', resetTimer, { passive: true })
