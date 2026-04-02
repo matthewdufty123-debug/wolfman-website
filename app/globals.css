@@ -307,11 +307,19 @@ html[data-theme="light"] .feed-logo-img {
   .wolfbot-coming-icon-wrap { animation: none; }
 }
 
-/* ── Upper nav slot widths: 40 / 30 / 15 / 15 ── */
-.upper-nav .nav-slot:nth-child(1) { flex: 0 0 40%; }
-.upper-nav .nav-slot:nth-child(2) { flex: 0 0 30%; }
-.upper-nav .nav-slot:nth-child(3) { flex: 0 0 15%; }
-.upper-nav .nav-slot:nth-child(4) { flex: 0 0 15%; }
+/* ── Upper nav slot widths: 30 / 40 / 10 / 10 / 10 ── */
+.upper-nav .nav-slot:nth-child(1) { flex: 0 0 30%; }
+.upper-nav .nav-slot:nth-child(2) { flex: 0 0 40%; }
+.upper-nav .nav-slot:nth-child(3) { flex: 0 0 10%; }
+.upper-nav .nav-slot:nth-child(4) { flex: 0 0 10%; }
+.upper-nav .nav-slot:nth-child(5) { flex: 0 0 10%; }
+
+/* ── Lower nav slot widths: 30 / 40 / 10 / 10 / 10 ── */
+.lower-nav .nav-slot:nth-child(1) { flex: 0 0 30%; }
+.lower-nav .nav-slot:nth-child(2) { flex: 0 0 40%; }
+.lower-nav .nav-slot:nth-child(3) { flex: 0 0 10%; }
+.lower-nav .nav-slot:nth-child(4) { flex: 0 0 10%; }
+.lower-nav .nav-slot:nth-child(5) { flex: 0 0 10%; }
 
 /* Logo slot — left-aligned wordmark, vertically centered */
 .nav-slot--logo {

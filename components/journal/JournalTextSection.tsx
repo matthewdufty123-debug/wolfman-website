@@ -9,12 +9,14 @@ function MorningIntentionPost({ post }: { post: ProcessedPost }) {
   return (
     <article className="post">
       {hasSections
-        ? post.sections!.map((section: ParsedSection) => (
-            <div key={section.label} className="post-section">
-              <p className="post-section-label">{section.label}</p>
-              <div className="post-body" dangerouslySetInnerHTML={{ __html: section.html }} />
-            </div>
-          ))
+        ? post.sections!
+            .filter((section: ParsedSection) => section.html.trim().length > 0)
+            .map((section: ParsedSection) => (
+              <div key={section.label} className="post-section">
+                <p className="post-section-label">{section.label}</p>
+                <div className="post-body" dangerouslySetInnerHTML={{ __html: section.html }} />
+              </div>
+            ))
         : <div className="post-body" dangerouslySetInnerHTML={{ __html: post.bodyHtml }} />
       }
     </article>

@@ -46,11 +46,11 @@ export async function POST(
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-  const systemPrompt = `${corePrompt}\n\nYou are now in title-suggestion mode. Suggest a single vivid, specific title for this journal entry. Return ONLY the title — no quotes, no punctuation at the end, no explanation, nothing else. Maximum 10 words.`
+  const systemPrompt = `${corePrompt}\n\nYou are now in title-suggestion mode. Suggest a single vivid, specific title for this journal entry. Return ONLY the title — no quotes, no punctuation at the end, no explanation, nothing else. Maximum 6 words and 50 characters.`
 
   const response = await client.messages.create({
     model,
-    max_tokens: 40,
+    max_tokens: 25,
     system: systemPrompt,
     messages: [{ role: 'user', content: `Journal entry:\n\n${post.content}` }],
   })
