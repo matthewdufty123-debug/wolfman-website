@@ -92,7 +92,14 @@ export default function UpperNavBar() {
       case 'wolfman-logo':
         return (
           <Link key={key} href="/" className="nav-slot nav-slot--logo" aria-label="Wolfman — home">
-            <span className="nav-wordmark">WOLFMAN</span>
+            <Image
+              src="/images/site_images/Grey No LogoAsset 9300.png"
+              alt="Wolfman"
+              width={160}
+              height={50}
+              unoptimized
+              priority
+            />
           </Link>
         )
 

@@ -328,16 +328,15 @@ html[data-theme="light"] .feed-logo-img {
   /* justify-content inherits 'center' from .nav-slot — vertically centered */
 }
 
-/* CSS wordmark — no image dependency */
-.nav-wordmark {
-  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.88);
-  text-transform: uppercase;
-  white-space: nowrap;
-  line-height: 1;
+/* Logo image — white on dark nav */
+.nav-slot--logo img {
+  height: 26px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
 }
 
 /* ── Upper nav extras ── */
