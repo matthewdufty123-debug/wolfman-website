@@ -367,7 +367,11 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
 
   return (
     <>
-      <nav className={`lower-nav${faded ? ' nav--faded' : ''}`} aria-label="Lower navigation">
+      <nav
+        className={`lower-nav${faded ? ' nav--faded' : ''}`}
+        style={configKey === 'journal-reading' ? { background: '#0d1117', borderTopColor: 'rgba(255,255,255,0.06)' } : undefined}
+        aria-label="Lower navigation"
+      >
         {config.lower.map((slot, idx) => renderSlot(slot, idx))}
       </nav>
 

@@ -6868,7 +6868,8 @@ html[data-theme="light"] .pf-scale-pill {
   padding-left: 0;
   padding-right: 0;
   background: #0d1117;
-  padding-bottom: 80px;
+  padding-bottom: 200px;
+  margin-top: 3rem;
 }
 
 /* Remove rounded corners/borders when terminal fills full width at page bottom */
