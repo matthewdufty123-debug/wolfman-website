@@ -100,7 +100,7 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  height: 55px;
+  height: 48px;
   z-index: 50;
   display: flex;
   align-items: stretch;
@@ -109,10 +109,10 @@ body {
   transition: opacity 0.3s ease;
 }
 
-/* Site version badge — fixed below upper nav bar, right edge */
+/* Site version badge — anchored inside upper nav bar, bottom-right */
 .app-version-badge {
   position: fixed;
-  top: 63px;
+  top: 30px;
   right: 8px;
   z-index: 48;
   font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
@@ -323,18 +323,20 @@ html[data-theme="light"] .feed-logo-img {
 /* Logo slot — left-aligned wordmark */
 .nav-slot--logo {
   justify-content: flex-start;
-  padding-left: 12px;
+  padding-left: 14px;
   overflow: hidden;
 }
-.nav-slot--logo img {
-  height: 22px;
-  width: auto;
-  max-width: 100%;
-  object-fit: contain;
-  display: block;
-  /* Invert grey wordmark to white on dark nav */
-  filter: brightness(0) invert(1);
-  opacity: 0.9;
+
+/* CSS wordmark — no image dependency */
+.nav-wordmark {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.88);
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 /* ── Upper nav extras ── */
@@ -377,7 +379,7 @@ html[data-theme="light"] .feed-logo-img {
   bottom: 64px;  /* sits above lower nav */
   left: 0;
   right: 0;
-  top: 55px;     /* sits below upper nav */
+  top: 48px;     /* sits below upper nav */
   background: var(--nav-fill, #193343);
   z-index: 49;
   overflow-y: auto;
@@ -868,7 +870,7 @@ html[data-theme="light"] .more-pages-link:hover {
 /* ── WOLF|BOT page — full-page terminal ──────────────────────────────────── */
 .wolfbot-page--full {
   position: fixed;
-  inset: 55px 0 64px 0;
+  inset: 48px 0 64px 0;
   min-height: unset;
   padding: 0;
   align-items: stretch;
@@ -6691,7 +6693,7 @@ html[data-theme="dark"] .stats-chart-card {
 
 .journal-scroll-content {
   will-change: opacity;
-  padding-top: 55px;  /* clear the fixed upper nav bar */
+  padding-top: 48px;  /* clear the fixed upper nav bar */
 }
 
 /* ── Journal page title — shown at the very top ─────────────────────────── */
@@ -8259,7 +8261,7 @@ html[data-fontsize="xlarge"] .dev-body {
 
 .section-hdr {
   position: sticky;
-  top: 55px;
+  top: 48px;
   z-index: 10;
   background: var(--bg, #ffffff);
   margin-bottom: 1rem;
