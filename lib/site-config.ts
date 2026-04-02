@@ -11,6 +11,7 @@ export type SiteConfig = {
   userCap: number | null
   statusMessage: string | null
   betaOpensAt: Date | null
+  currentRelease: string
 }
 
 // Cached per request — deduplicates multiple calls within a single render cycle.
@@ -23,8 +24,9 @@ export const getSiteConfig = cache(async (): Promise<SiteConfig> => {
       id: 1,
       status: 'closed_alpha',
       userCap: 51,
+      currentRelease: 'closed_alpha_dev',
     })
-    return { status: 'closed_alpha', userCap: 51, statusMessage: null, betaOpensAt: null }
+    return { status: 'closed_alpha', userCap: 51, statusMessage: null, betaOpensAt: null, currentRelease: 'closed_alpha_dev' }
   }
 
   return {
@@ -32,6 +34,7 @@ export const getSiteConfig = cache(async (): Promise<SiteConfig> => {
     userCap: row.userCap ?? null,
     statusMessage: row.statusMessage ?? null,
     betaOpensAt: row.betaOpensAt ?? null,
+    currentRelease: row.currentRelease ?? 'closed_alpha_dev',
   }
 })
 

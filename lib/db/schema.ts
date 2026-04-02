@@ -132,8 +132,26 @@ export const siteConfig = pgTable('site_config', {
   statusMessage: text('status_message'),  // optional custom closed/full message
   betaOpensAt: timestamp('beta_opens_at'), // drives countdowns when status = closed_beta
   betaEmailsSent: jsonb('beta_emails_sent').notNull().default({}), // { week_notice: true, go_live: true }
+  currentRelease: text('current_release').notNull().default('closed_alpha_dev'), // active release milestone
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   updatedBy: text('updated_by'),          // admin user ID who last changed it
+})
+
+// ── Version history ────────────────────────────────────────────────────────
+// Append-only log of deployments. Manually entered by admin after each deploy.
+// version format: [site_state].[release_state].[feature_state].[minor_update]
+// e.g. "0.1.0.0" = closed alpha baseline, "0.1.2.1" = 2nd feature, 1st bugfix
+export const versionHistory = pgTable('version_history', {
+  id:           serial('id').primaryKey(),
+  version:      text('version').notNull(),            // "0.1.2.1"
+  releasePhase: text('release_phase').notNull(),       // "closed_alpha" | "open_beta" | etc.
+  releaseName:  text('release_name').notNull(),        // "Closed Alpha Development"
+  commitHashes: text('commit_hashes').array(),         // ["abc1234", "def5678"]
+  summary:      text('summary').notNull(),             // one-line summary
+  changes:      jsonb('changes').notNull().default([]), // string[] — bullet point list
+  deployedAt:   timestamp('deployed_at', { withTimezone: true }).notNull(),
+  createdAt:    timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  createdBy:    uuid('created_by').references(() => users.id),
 })
 
 // ── Beta interest registrations ───────────────────────────────────────────

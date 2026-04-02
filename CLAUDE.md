@@ -420,9 +420,17 @@ All work is organised by **milestone**, then **label**. No stage codes — miles
 | Release 0.8 — Subscriptions | #23 | 31 Aug 2026 | Free vs premium tier, feature gating, paid tier live |
 | Release 0.9 — Legal | #24 | Before go-live | Data protection, T&Cs, GDPR, cookie consent, EU/US legal, shop and subscription terms. Must be signed off before production launch. |
 
-**Version numbering:** Each release is a major version (v0.1, v0.2 etc). Patches within a release are v0.1.1, v0.1.2 etc. The current version number is displayed on the site. **Bump the patch version (`package.json`) on every commit** — even minor amends. The version badge on the live site should always reflect the latest deployment. Major/minor numbers only change on milestone releases.
+**Version numbering:** Four-part format `[site state].[release state].[feature state].[minor update]`. Full details and process in `VERSIONING.md`.
 
-**Current status (31 March 2026) — v0.2.9:**
+Quick rules:
+- **Bump `appVersion` in `package.json` on every commit** — even minor amends. The `version` field mirrors the first three parts (npm semver, no fourth decimal).
+- **Minor fix** (bug, copy, style): increment the fourth part only. E.g. `0.1.2.0` → `0.1.2.1`.
+- **New feature**: increment the third part, reset fourth to `0`. E.g. `0.1.2.1` → `0.1.3.0`.
+- **New release milestone**: increment the second part, reset third and fourth to `0`. E.g. `0.1.X.Y` → `0.2.0.0`.
+- **Current baseline**: `0.1.0.0` (Closed Alpha, no features yet logged).
+- After every deploy, log a version entry in the admin panel at `/admin` → "Log version entry".
+
+**Current status (2 April 2026) — v0.1.0.0:**
 - Closed Alpha Development (#15): active queue — bugs, launch prep, branding, About page. Must ship by 30 April.
 - **Journal reading page fully redesigned** (shipped 29 Mar): Single vertically-scrolling page with 9 named sections replaces the 5-tab layout. Sections in order: Morning Rituals → How I Showed Up → The Journal → WOLF|BOT Review → Post Information → Evening Reflections → Journal Photo → About the Author → Audit Log. See `components/JournalPage.tsx` and `components/journal/`.
 - **Swipe navigation removed** (31 Mar, #207): Swipe left/right was removed entirely from `JournalPage.tsx`. No swipe-to-navigate anywhere on the site.

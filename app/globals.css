@@ -1764,6 +1764,116 @@ html[data-theme="light"] .more-pages-link:hover {
   border-radius: 3px;
 }
 
+/* ── Dev page — release notes ── */
+
+.dev-release-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dev-release-entry {
+  padding: 1.25rem 0;
+  border-bottom: 1px solid #21262d;
+}
+
+.dev-release-entry:last-child {
+  border-bottom: none;
+}
+
+.dev-release-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.dev-release-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.dev-release-version {
+  font-family: 'JetBrains Mono', 'Cascadia Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #4A7FA5;
+  background: rgba(74, 127, 165, 0.1);
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.dev-release-name {
+  font-size: 0.82rem;
+  color: #909090;
+  font-style: italic;
+}
+
+.dev-release-date {
+  font-size: 0.78rem;
+  color: #8b949e;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.dev-release-time {
+  color: #606870;
+}
+
+.dev-release-summary {
+  font-size: 0.9rem;
+  color: #cdd6df;
+  margin: 0 0 0.6rem 0;
+  line-height: 1.5;
+}
+
+.dev-release-changes {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.dev-release-changes li {
+  font-size: 0.82rem;
+  color: #8b949e;
+  line-height: 1.6;
+  padding: 0.1rem 0;
+}
+
+/* ── Admin — toggle button for collapsible sections ── */
+
+.dash-toggle-btn {
+  all: unset;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4A7FA5;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--dash-border, #e5e7eb);
+  width: 100%;
+  display: block;
+}
+
+.dash-config-textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--dash-border, #e5e7eb);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--dash-input-bg, #fff);
+  color: var(--dash-text, #111);
+  font-family: var(--font-lora), Georgia, serif;
+  resize: vertical;
+  min-height: 80px;
+}
+
 /* ── Post reading experience ── */
 
 .post {

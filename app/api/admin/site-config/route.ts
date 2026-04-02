@@ -19,7 +19,7 @@ export async function PATCH(req: Request) {
   }
 
   const body = await req.json()
-  const { status, userCap, statusMessage, betaOpensAt } = body
+  const { status, userCap, statusMessage, betaOpensAt, currentRelease } = body
 
   const validStatuses = ['closed_alpha', 'closed_beta', 'open_beta', 'live']
   if (!validStatuses.includes(status)) {
@@ -34,6 +34,7 @@ export async function PATCH(req: Request) {
       userCap: userCap ?? null,
       statusMessage: statusMessage || null,
       betaOpensAt: betaOpensAt ? new Date(betaOpensAt) : null,
+      currentRelease: currentRelease || 'closed_alpha_dev',
       updatedAt: new Date(),
       updatedBy: session.user.id ?? null,
     })
@@ -44,6 +45,7 @@ export async function PATCH(req: Request) {
         userCap: userCap ?? null,
         statusMessage: statusMessage || null,
         betaOpensAt: betaOpensAt ? new Date(betaOpensAt) : null,
+        currentRelease: currentRelease || 'closed_alpha_dev',
         updatedAt: new Date(),
         updatedBy: session.user.id ?? null,
       },

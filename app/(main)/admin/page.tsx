@@ -7,6 +7,7 @@ import { desc, count, sum, eq } from 'drizzle-orm'
 import { getAllPosts } from '@/lib/posts'
 import { getSiteConfig } from '@/lib/site-config'
 import SiteConfigPanel from '@/components/SiteConfigPanel'
+import VersionLogForm from '@/components/VersionLogForm'
 
 export default async function AdminDashboard() {
   const session = await auth()
@@ -120,6 +121,9 @@ export default async function AdminDashboard() {
 
         {/* Site status */}
         <SiteConfigPanel initial={currentSiteConfig} />
+
+        {/* Version log */}
+        <VersionLogForm />
 
         {/* Quick links */}
         <section className="dash-section">
