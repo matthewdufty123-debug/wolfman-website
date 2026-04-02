@@ -6737,6 +6737,13 @@ html[data-theme="dark"] .stats-chart-card {
   padding-top: 1.5rem;  /* text section sits flush after journal-section-title */
 }
 
+/* .post inside a journal-section inherits 1rem side padding from the parent —
+   remove its own horizontal padding to avoid double-indenting the body text */
+.journal-section .post {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .journal-section-header {
   display: flex;
   align-items: center;
