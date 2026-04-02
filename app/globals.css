@@ -381,7 +381,7 @@ html[data-theme="light"] .feed-logo-img {
   left: 0;
   right: 0;
   top: 48px;     /* sits below upper nav */
-  background: var(--nav-fill, #193343);
+  background: var(--menu-bg, #1E2E3D);
   z-index: 49;
   overflow-y: auto;
   transform: translateY(100%);
@@ -543,6 +543,28 @@ html[data-theme="light"] .more-pages-link {
 }
 html[data-theme="light"] .more-pages-link:hover {
   color: #193343;
+}
+
+/* Light theme — panel text colours for pale background */
+html[data-theme="light"] .more-pages-title {
+  color: rgba(25, 51, 67, 0.55);
+}
+html[data-theme="light"] .more-pages-user-row {
+  border-bottom-color: rgba(25, 51, 67, 0.12);
+}
+html[data-theme="light"] .more-pages-user-profile {
+  color: #193343;
+}
+html[data-theme="light"] .more-pages-user-profile:hover {
+  color: #4A7FA5;
+}
+html[data-theme="light"] .more-pages-signout-btn {
+  color: rgba(25, 51, 67, 0.70);
+  border-color: rgba(25, 51, 67, 0.2);
+}
+html[data-theme="light"] .more-pages-signout-btn:hover {
+  color: #193343;
+  border-color: rgba(25, 51, 67, 0.5);
 }
 
 /* Admin button */
