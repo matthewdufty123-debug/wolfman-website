@@ -56,6 +56,13 @@ export default function UpperNavBar() {
 
   if (config.hideBars) return null
 
+  async function handleShare() {
+    try {
+      if (navigator.share) await navigator.share({ title: document.title, url: window.location.href })
+      else await navigator.clipboard.writeText(window.location.href)
+    } catch {}
+  }
+
   // Fade on inactivity — journal reading only
   useEffect(() => {
     if (!config.fadeOnInactivity) { setFaded(false); return }
@@ -160,6 +167,14 @@ export default function UpperNavBar() {
         if (slot.action === 'open-settings') {
           return (
             <button key={key} className="nav-slot nav-slot--btn" aria-label="Settings" onClick={() => setSettingsOpen(true)}>
+              <NavIconEl icon={slot.icon} />
+              {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
+            </button>
+          )
+        }
+        if (slot.action === 'share') {
+          return (
+            <button key={key} className="nav-slot nav-slot--btn" aria-label="Share" onClick={handleShare}>
               <NavIconEl icon={slot.icon} />
               {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
             </button>
