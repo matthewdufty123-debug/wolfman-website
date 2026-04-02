@@ -1893,6 +1893,13 @@ html[data-theme="light"] .more-pages-link:hover {
   min-height: 80px;
 }
 
+select.dash-config-textarea {
+  min-height: unset;
+  height: auto;
+  padding: 0.4rem 0.6rem;
+  resize: none;
+}
+
 /* ── Post reading experience ── */
 
 .post {
