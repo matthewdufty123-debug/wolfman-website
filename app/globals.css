@@ -106,7 +106,7 @@ body {
   align-items: stretch;
   background: var(--nav-fill, #193343);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  transition: opacity 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 /* Version number embedded under SEND FEEDBACK in the nav slot */
@@ -137,10 +137,9 @@ body {
   overflow: visible; /* allows feed-logo to float above the bar */
 }
 
-/* Fade state — journal reading inactivity */
-.upper-nav.nav--faded,
-.lower-nav.nav--faded {
-  opacity: 0;
+/* Inactivity state — upper nav slides off top; lower nav never hides */
+.upper-nav.nav--faded {
+  transform: translateY(-100%);
 }
 
 /* ── Nav slots ── */
@@ -9151,4 +9150,36 @@ html[data-fontsize="xlarge"] .dev-body {
   .wolfbot-page-stats {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* ── WOLF|BOT sticky review banner ── */
+.wolfbot-banner {
+  position: fixed;
+  bottom: 64px;
+  left: 0;
+  right: 0;
+  height: 42px;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 48;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  border-top: 1px solid rgba(200, 176, 32, 0.25);
+}
+
+.wolfbot-banner--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.wolfbot-banner-text {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #C8B020;
 }

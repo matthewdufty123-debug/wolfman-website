@@ -7,6 +7,7 @@ import HumanScoresSection from '@/components/journal/HumanScoresSection'
 import JournalTextSection from '@/components/journal/JournalTextSection'
 import WolfBotSection, { type WolfBotReviews } from '@/components/journal/WolfBotSection'
 import PostInfoSection from '@/components/journal/PostInfoSection'
+import WolfBotBanner from '@/components/WolfBotBanner'
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -64,47 +65,54 @@ export default function JournalPage({
 
   const synthesis = dayScores?.synthesis ?? post.review ?? null
 
+  const hasReview = !!(
+    (wolfbotReviews?.reviewHelpful || wolfbotReviews?.reviewSassy) || synthesis
+  )
+
   return (
-    <div className="journal-scroll-page">
-      <div className="journal-scroll-content">
+    <>
+      <div className="journal-scroll-page">
+        <div className="journal-scroll-content">
 
-        {/* Section order: Journal → WOLF|BOT → How I Showed Up → Morning Rituals → Post Info → Next */}
+          {/* Section order: Journal → How I Showed Up → Morning Rituals → Post Info → Next → WOLF|BOT */}
 
-        <JournalTextSection post={post} />
+          <JournalTextSection post={post} />
 
-        <WolfBotSection
-          synthesis={synthesis}
-          wolfbotReviews={wolfbotReviews}
-          isOwnPost={isOwner}
-          postId={post.id ?? ''}
-          promptVersion={promptVersion}
-        />
+          {morningState && (
+            <HumanScoresSection
+              brainScale={morningState.brainScale}
+              bodyScale={morningState.bodyScale}
+              happyScale={morningState.happyScale}
+              stressScale={morningState.stressScale}
+            />
+          )}
 
-        {morningState && (
-          <HumanScoresSection
-            brainScale={morningState.brainScale}
-            bodyScale={morningState.bodyScale}
-            happyScale={morningState.happyScale}
-            stressScale={morningState.stressScale}
+          {morningState && (
+            <MorningRitualsSection checklist={morningState.routineChecklist} />
+          )}
+
+          <PostInfoSection post={post} postDates={postDates} />
+
+          {/* Next Journal button */}
+          {nextHref && (
+            <div className="journal-next-post-wrap">
+              <a href={nextHref} className="journal-next-post-btn">
+                NEXT JOURNAL →
+              </a>
+            </div>
+          )}
+
+          <WolfBotSection
+            synthesis={synthesis}
+            wolfbotReviews={wolfbotReviews}
+            isOwnPost={isOwner}
+            postId={post.id ?? ''}
+            promptVersion={promptVersion}
           />
-        )}
 
-        {morningState && (
-          <MorningRitualsSection checklist={morningState.routineChecklist} />
-        )}
-
-        <PostInfoSection post={post} postDates={postDates} />
-
-        {/* Next Journal button */}
-        {nextHref && (
-          <div className="journal-next-post-wrap">
-            <a href={nextHref} className="journal-next-post-btn">
-              NEXT JOURNAL →
-            </a>
-          </div>
-        )}
-
+        </div>
       </div>
-    </div>
+      {hasReview && <WolfBotBanner />}
+    </>
   )
 }
