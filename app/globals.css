@@ -6867,18 +6867,76 @@ html[data-theme="light"] .pf-scale-pill {
   max-width: none;
   padding-left: 0;
   padding-right: 0;
-  background: #0d1117;
   padding-bottom: 200px;
   margin-top: 3rem;
 }
 
-/* Remove rounded corners/borders when terminal fills full width at page bottom */
+/* De-terminalize: replace black terminal shell with page-themed styling */
 .journal-section--wolfbot .wolfbot-integrated {
+  background: var(--bg);
+  border: 1px solid rgba(74, 127, 165, 0.25);
   border-radius: 0;
   border-left: none;
   border-right: none;
   border-bottom: none;
   box-shadow: none;
+}
+.journal-section--wolfbot .wolfbot-integrated-header {
+  border-bottom-color: rgba(74, 127, 165, 0.15);
+}
+.journal-section--wolfbot .wolfbot-integrated-name { color: #4A7FA5; }
+.journal-section--wolfbot .wolfbot-integrated-sub  { color: rgba(74, 127, 165, 0.6); }
+.journal-section--wolfbot .wolfbot-integrated-mode { color: rgba(74, 127, 165, 0.45); }
+
+/* Play button */
+.journal-section--wolfbot .wb-play-circle {
+  border-color: #4A7FA5;
+  background: var(--bg);
+  color: #4A7FA5;
+  animation: none;
+}
+.journal-section--wolfbot .wb-play-circle:hover {
+  background: #4A7FA5;
+  color: #fff;
+  box-shadow: none;
+}
+
+/* Personality selector buttons */
+.journal-section--wolfbot .wb-personality-prompt { color: rgba(74, 127, 165, 0.7); }
+.journal-section--wolfbot .wb-personality-btn {
+  background: rgba(74, 127, 165, 0.08);
+  border-color: rgba(74, 127, 165, 0.35);
+  color: #4A7FA5;
+}
+.journal-section--wolfbot .wb-personality-btn:hover:not(:disabled) {
+  background: rgba(74, 127, 165, 0.18);
+  border-color: rgba(74, 127, 165, 0.65);
+}
+
+/* Terminal text */
+.journal-section--wolfbot .wbt-prompt { color: #4A7FA5; }
+.journal-section--wolfbot .wbt-boot   { color: #4A7FA5; }
+.journal-section--wolfbot .wbt-body   { color: var(--body-text); opacity: 1; }
+.journal-section--wolfbot .wbt-quip   { color: var(--body-text); }
+
+/* Tab switcher */
+.journal-section--wolfbot .wb-tab {
+  color: #4A7FA5;
+  border-color: rgba(74, 127, 165, 0.4);
+}
+.journal-section--wolfbot .wb-tab--active {
+  background: #4A7FA5;
+  color: #fff;
+  border-color: #4A7FA5;
+}
+
+/* Trigger button */
+.journal-section--wolfbot .wolfbot-yellow-btn {
+  background: #4A7FA5;
+  color: #fff;
+}
+.journal-section--wolfbot .wolfbot-yellow-btn:hover:not(:disabled) {
+  background: #3d6d8f;
 }
 
 /* .post inside a journal-section inherits 1rem side padding from the parent —
