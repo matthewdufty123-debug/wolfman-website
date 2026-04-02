@@ -7,7 +7,6 @@ import HumanScoresSection from '@/components/journal/HumanScoresSection'
 import JournalTextSection from '@/components/journal/JournalTextSection'
 import WolfBotSection, { type WolfBotReviews } from '@/components/journal/WolfBotSection'
 import PostInfoSection from '@/components/journal/PostInfoSection'
-import WolfBotBanner from '@/components/WolfBotBanner'
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -65,10 +64,6 @@ export default function JournalPage({
 
   const synthesis = dayScores?.synthesis ?? post.review ?? null
 
-  const hasReview = !!(
-    (wolfbotReviews?.reviewHelpful || wolfbotReviews?.reviewSassy) || synthesis
-  )
-
   return (
     <>
       <div className="journal-scroll-page">
@@ -112,7 +107,6 @@ export default function JournalPage({
 
         </div>
       </div>
-      {hasReview && <WolfBotBanner />}
     </>
   )
 }

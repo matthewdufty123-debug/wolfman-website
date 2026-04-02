@@ -133,13 +133,16 @@ body {
   align-items: stretch;
   background: var(--nav-fill, #193343);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  transition: opacity 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
   overflow: visible; /* allows feed-logo to float above the bar */
 }
 
-/* Inactivity state — upper nav slides off top; lower nav never hides */
+/* Inactivity state — upper nav slides off top, lower nav slides off bottom */
 .upper-nav.nav--faded {
   transform: translateY(-100%);
+}
+.lower-nav.nav--faded {
+  transform: translateY(100%);
 }
 
 /* ── Nav slots ── */
@@ -6864,6 +6867,17 @@ html[data-theme="light"] .pf-scale-pill {
   max-width: none;
   padding-left: 0;
   padding-right: 0;
+  background: #0d1117;
+  padding-bottom: 80px;
+}
+
+/* Remove rounded corners/borders when terminal fills full width at page bottom */
+.journal-section--wolfbot .wolfbot-integrated {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  box-shadow: none;
 }
 
 /* .post inside a journal-section inherits 1rem side padding from the parent —
@@ -9152,34 +9166,3 @@ html[data-fontsize="xlarge"] .dev-body {
   }
 }
 
-/* ── WOLF|BOT sticky review banner ── */
-.wolfbot-banner {
-  position: fixed;
-  bottom: 64px;
-  left: 0;
-  right: 0;
-  height: 42px;
-  background: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 48;
-  opacity: 1;
-  transition: opacity 0.3s ease;
-  border-top: 1px solid rgba(200, 176, 32, 0.25);
-}
-
-.wolfbot-banner--hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.wolfbot-banner-text {
-  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #C8B020;
-}
