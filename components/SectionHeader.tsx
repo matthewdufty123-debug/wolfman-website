@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 // ─── Section definitions ──────────────────────────────────────────────────────
@@ -37,19 +36,6 @@ export default function SectionHeader({ section, current }: SectionHeaderProps) 
 
   return (
     <div className="section-hdr">
-      {/* Logo banner — grey in light mode, white-inverted in dark mode via CSS */}
-      <div className="section-hdr-logo-wrap">
-        <Image
-          src="/images/site_images/Grey No LogoAsset 91000.png"
-          alt="Wolfman"
-          width={1000}
-          height={300}
-          className="section-hdr-logo"
-          priority
-          unoptimized
-        />
-      </div>
-
       {/* Section title + dropdown nav */}
       <div className="section-hdr-nav">
         <p className="section-hdr-title">{title}</p>

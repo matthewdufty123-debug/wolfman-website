@@ -17,19 +17,16 @@ export const revalidate = 300 // refresh stats every 5 minutes
 async function getStats() {
   const [row] = await db
     .select({
-      totalReviews:       sql<number>`count(*)::int`,
-      totalTriggers:      sql<number>`coalesce(sum(trigger_count), 0)::int`,
-      totalHelpful:       sql<number>`coalesce(sum(count_helpful), 0)::int`,
-      totalIntellectual:  sql<number>`coalesce(sum(count_intellectual), 0)::int`,
-      totalLovely:        sql<number>`coalesce(sum(count_lovely), 0)::int`,
-      totalSassy:         sql<number>`coalesce(sum(count_sassy), 0)::int`,
-      totalPlay:          sql<number>`coalesce(sum(count_play), 0)::int`,
+      totalReviews:  sql<number>`count(*)::int`,
+      totalTriggers: sql<number>`coalesce(sum(trigger_count), 0)::int`,
+      totalHelpful:  sql<number>`coalesce(sum(count_helpful), 0)::int`,
+      totalSassy:    sql<number>`coalesce(sum(count_sassy), 0)::int`,
+      totalPlay:     sql<number>`coalesce(sum(count_play), 0)::int`,
     })
     .from(wolfbotReviews)
 
   return row ?? {
-    totalReviews: 0, totalTriggers: 0, totalHelpful: 0,
-    totalIntellectual: 0, totalLovely: 0, totalSassy: 0, totalPlay: 0,
+    totalReviews: 0, totalTriggers: 0, totalHelpful: 0, totalSassy: 0, totalPlay: 0,
   }
 }
 
@@ -38,16 +35,6 @@ const PERSONALITIES = [
     name: 'HELPFUL',
     color: '#4A7FA5',
     desc: 'Practical and grounded. Cuts through to what actually matters in your entry, offers a clear perspective, and leaves you with something you can use.',
-  },
-  {
-    name: 'INTELLECTUAL',
-    color: '#C8B020',
-    desc: 'Goes deep. Finds the ideas, patterns, and meaning beneath the surface of what you wrote. Not afraid to get philosophical if the moment calls for it.',
-  },
-  {
-    name: 'LOVELY',
-    color: '#3AB87A',
-    desc: 'Warm and genuinely encouraging. Sees what is good in your entry and reflects it back with care. The voice you need on a hard morning.',
   },
   {
     name: 'SASSY',
@@ -60,13 +47,11 @@ export default async function WolfbotPage() {
   const stats = await getStats()
 
   const statItems = [
-    { number: stats.totalReviews,      label: 'Reviews Generated' },
-    { number: stats.totalTriggers,     label: 'Reviews Opened' },
-    { number: stats.totalHelpful,      label: 'Helpful Reads' },
-    { number: stats.totalIntellectual, label: 'Intellectual Reads' },
-    { number: stats.totalLovely,       label: 'Lovely Reads' },
-    { number: stats.totalSassy,        label: 'Sassy Reads' },
-    { number: stats.totalPlay,         label: 'Times Read Aloud' },
+    { number: stats.totalReviews,  label: 'Reviews Generated' },
+    { number: stats.totalTriggers, label: 'Reviews Opened' },
+    { number: stats.totalHelpful,  label: 'Helpful Reads' },
+    { number: stats.totalSassy,    label: 'Sassy Reads' },
+    { number: stats.totalPlay,     label: 'Times Read Aloud' },
   ]
 
   return (
@@ -107,11 +92,11 @@ export default async function WolfbotPage() {
 
         {/* Four personalities */}
         <div className="wolfbot-page-section">
-          <p className="wolfbot-page-section-label">Four lenses</p>
+          <p className="wolfbot-page-section-label">Two lenses</p>
           <h2 className="wolfbot-page-section-heading">Choose your personality</h2>
           <p className="wolfbot-page-body">
-            Each journal gets four reviews — all generated at once, each through a different lens.
-            Same entry. Four completely different responses. Pick the one you are ready to hear.
+            Each journal gets two reviews — both generated at once, each through a different lens.
+            Same entry. Two completely different responses. Pick the one you are ready to hear.
           </p>
           <div className="wolfbot-page-personalities">
             {PERSONALITIES.map(p => (

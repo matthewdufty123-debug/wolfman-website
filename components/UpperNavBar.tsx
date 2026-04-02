@@ -42,8 +42,6 @@ function NavIconEl({ icon, size = 16 }: { icon: NavIcon; size?: number }) {
   }
 }
 
-type AdjacentPost = { slug: string; authorUsername: string | null } | null
-
 export default function UpperNavBar() {
   const pathname = usePathname()
   const { data: session, status } = useSession()
@@ -54,7 +52,6 @@ export default function UpperNavBar() {
 
   const [faded, setFaded] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [adjacent, setAdjacent] = useState<{ prev: AdjacentPost; next: AdjacentPost } | null>(null)
 
   if (config.hideBars) return null
 
@@ -81,15 +78,6 @@ export default function UpperNavBar() {
     }
   }, [config.fadeOnInactivity])
 
-  // Fetch prev/next for journal reading
-  useEffect(() => {
-    if (configKey !== 'journal-reading' || !postCtx?.postId) { setAdjacent(null); return }
-    fetch(`/api/posts/${postCtx.postId}/adjacent`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => setAdjacent(data))
-      .catch(() => {})
-  }, [configKey, postCtx?.postId])
-
   const segments = pathname.split('/').filter(Boolean)
   const avatarUrl = session?.user?.avatar ?? session?.user?.image ?? null
   const profileHref = session?.user?.username ? `/${session.user.username}` : '/account'
@@ -100,6 +88,20 @@ export default function UpperNavBar() {
     switch (slot.kind) {
       case 'empty':
         return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
+
+      case 'wolfman-logo':
+        return (
+          <Link key={key} href="/" className="nav-slot nav-slot--logo" aria-label="Wolfman — home">
+            <Image
+              src="/images/site_images/Grey No LogoAsset 9300.png"
+              alt="Wolfman"
+              width={160}
+              height={50}
+              unoptimized
+              priority
+            />
+          </Link>
+        )
 
       case 'write-plus':
         if (status !== 'authenticated') return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
@@ -160,28 +162,6 @@ export default function UpperNavBar() {
           )
         }
         return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
-
-      case 'prev-post': {
-        if (!adjacent?.prev) return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
-        const href = `/${adjacent.prev.authorUsername ?? segments[0]}/${adjacent.prev.slug}`
-        return (
-          <Link key={key} href={href} className="nav-slot nav-slot--link" aria-label="Previous post">
-            <ChevronLeft size={16} strokeWidth={1.5} />
-            <span className="nav-slot-label">prev</span>
-          </Link>
-        )
-      }
-
-      case 'next-post': {
-        if (!adjacent?.next) return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
-        const href = `/${adjacent.next.authorUsername ?? segments[0]}/${adjacent.next.slug}`
-        return (
-          <Link key={key} href={href} className="nav-slot nav-slot--link" aria-label="Next post">
-            <ChevronRight size={16} strokeWidth={1.5} />
-            <span className="nav-slot-label">next</span>
-          </Link>
-        )
-      }
 
       default:
         return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />

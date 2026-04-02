@@ -8,13 +8,11 @@ import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type Tab = 'HELPFUL' | 'INTELLECTUAL' | 'LOVELY' | 'SASSY'
+type Tab = 'HELPFUL' | 'SASSY'
 
 export type WolfBotReviews = {
-  reviewHelpful:      string | null
-  reviewIntellectual: string | null
-  reviewLovely:       string | null
-  reviewSassy:        string | null
+  reviewHelpful: string | null
+  reviewSassy:   string | null
 }
 
 interface Props {
@@ -48,7 +46,7 @@ const WOLFBOT_QUIPS = [
   "Alright. Let's do this",
 ]
 
-const TAB_ORDER: Tab[] = ['HELPFUL', 'INTELLECTUAL', 'LOVELY', 'SASSY']
+const TAB_ORDER: Tab[] = ['HELPFUL', 'SASSY']
 
 // ── Curated voice slots ────────────────────────────────────────────────────────
 
@@ -147,10 +145,8 @@ function NewReviewTerminal({ wolfbotReviews, promptVersion, postId }: { wolfbotR
 
   function getReviewText(tab: Tab): string | null {
     switch (tab) {
-      case 'HELPFUL':      return wolfbotReviews.reviewHelpful
-      case 'INTELLECTUAL': return wolfbotReviews.reviewIntellectual
-      case 'LOVELY':       return wolfbotReviews.reviewLovely
-      case 'SASSY':        return wolfbotReviews.reviewSassy
+      case 'HELPFUL': return wolfbotReviews.reviewHelpful
+      case 'SASSY':   return wolfbotReviews.reviewSassy
     }
   }
 
@@ -571,8 +567,6 @@ function LegacyTerminal({ synthesis, promptVersion }: { synthesis: string; promp
 export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, postId, promptVersion }: Props) {
   const hasNewReviews = wolfbotReviews && (
     wolfbotReviews.reviewHelpful ||
-    wolfbotReviews.reviewIntellectual ||
-    wolfbotReviews.reviewLovely ||
     wolfbotReviews.reviewSassy
   )
 
@@ -583,8 +577,8 @@ export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, p
     <section id="wolfbot-review" className="journal-section">
       <SectionInfoHeader
         title="WOLF|BOT Review"
-        description="An AI companion's perspective on this entry, offered in four distinct personalities."
-        popupBody="WOLF|BOT is powered by Claude AI. It reads the journal through four lenses: Helpful is practical and grounded; Intellectual goes deep on themes and meaning; Lovely is warm and encouraging; Sassy is witty and doesn't pull punches. Each review is generated fresh from the journal content."
+        description="An AI companion's perspective on this entry, offered in two distinct personalities."
+        popupBody="WOLF|BOT is powered by Claude AI. It reads the journal through two lenses: Helpful is practical and grounded, cutting through to what actually matters; Sassy is witty and doesn't pull punches, noticing what you missed and calling it out with a grin. Each review is generated fresh from the journal content."
       />
       {hasNewReviews ? (
         <NewReviewTerminal wolfbotReviews={wolfbotReviews!} promptVersion={promptVersion} postId={postId} />

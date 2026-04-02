@@ -17,13 +17,12 @@ export type SlotType =
   | { kind: 'action';       action: NavAction; label: string; icon: NavIcon; hideLabel?: boolean }
   | { kind: 'text-link';    href: string; text: string }   // text only, no icon (e.g. SEND FEEDBACK)
   | { kind: 'wolfbot' }           // renders WolfBotIcon, links to /wolfbot
-  | { kind: 'prev-post' }         // journal-reading upper bar left
-  | { kind: 'next-post' }         // journal-reading upper bar right
   | { kind: 'account' }           // smart: account link (logged in) or sign-in modal (logged out)
   | { kind: 'write-plus' }        // + icon, no label, hidden when logged out
   | { kind: 'profile-link' }      // UserCircle icon, no label, links to current user's profile
   | { kind: 'more-pages' }        // opens More Pages panel; becomes close button when panel is open
   | { kind: 'feed-logo' }         // circular wolf logo, links to / (home feed)
+  | { kind: 'wolfman-logo' }      // Wolfman wordmark image, links to / (persists across all screens)
 
 // Named icons — maps to Lucide icon names in the components
 export type NavIcon =
@@ -61,8 +60,8 @@ export type NavAction =
 export type NavBarConfig = {
   /** Lower bar — 5 slots: index 0 = NBLS1 … index 4 = NBLS5 */
   lower: [SlotType, SlotType, SlotType, SlotType, SlotType]
-  /** Upper bar — 5 slots: index 0 = NBUS1 … index 4 = NBUS5 */
-  upper: [SlotType, SlotType, SlotType, SlotType, SlotType]
+  /** Upper bar — 4 slots: 35% logo | 25% feedback | 20% action | 20% settings */
+  upper: [SlotType, SlotType, SlotType, SlotType]
   /** If true, both bars fade to 25% opacity after 3s inactivity */
   fadeOnInactivity?: boolean
   /** If true, both bars are hidden entirely (used for auth pages) */
@@ -79,8 +78,7 @@ const ACCOUNT: SlotType       = { kind: 'account' }
 const WRITE_PLUS: SlotType    = { kind: 'write-plus' }
 const PROFILE_LINK: SlotType  = { kind: 'profile-link' }
 const MORE_PAGES: SlotType    = { kind: 'more-pages' }
-const PREV_POST: SlotType     = { kind: 'prev-post' }
-const NEXT_POST: SlotType     = { kind: 'next-post' }
+const WOLFMAN_LOGO: SlotType  = { kind: 'wolfman-logo' }
 
 const FEED: SlotType      = { kind: 'link', href: '/',               label: 'feed',    icon: 'Rss' }
 const FEED_LOGO: SlotType = { kind: 'feed-logo' }
@@ -103,28 +101,30 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * Home, profiles, discover, features, beta, dev, feedback, terms,
    * morning-ritual, morning-stats, shop, cart, checkout, wolfbot
    */
+  /**
+   * standard
+   * Slot widths: 35% logo | 25% feedback | 20% write+ | 20% settings
+   */
   standard: {
-    upper: [WRITE_PLUS, EMPTY, FEEDBACK_TEXT, BETA_LINK, SETTINGS],
-    //       NBUS1        NBUS2         NBUS3           NBUS4      NBUS5
+    upper: [WOLFMAN_LOGO, FEEDBACK_TEXT, WRITE_PLUS, SETTINGS],
     lower: [WOLFBOT, DISCOVER, FEED_LOGO, ACCOUNT, MORE_PAGES],
-    //       NBLS1    NBLS2     NBLS3      NBLS4    NBLS5
   },
 
   /**
    * journal-reading
    * /[username]/[slug] and /posts/[slug]
    * Both bars fade to 25% opacity after 3s inactivity.
+   * Prev/next removed — will be replaced separately.
    *
-   * Upper: NBUS1=prev  NBUS2=write+  NBUS3=feedback  NBUS4=edit  NBUS5=next
-   * Lower: NBLS1=share NBLS2=export  NBLS3=feed-logo NBLS4=profile-link NBLS5=more-pages
+   * Upper: logo | feedback | edit | settings
+   * Lower: share | export | feed-logo | profile-link | more-pages
    */
   'journal-reading': {
     upper: [
-      PREV_POST,                                                           // NBUS1
-      WRITE_PLUS,                                                          // NBUS2
-      FEEDBACK_TEXT,                                                       // NBUS3
-      { kind: 'link', href: '', label: 'edit', icon: 'Pencil', hideLabel: true }, // NBUS4 — dynamic href
-      NEXT_POST,                                                           // NBUS5
+      WOLFMAN_LOGO,                                                         // 35%
+      FEEDBACK_TEXT,                                                        // 25%
+      { kind: 'link', href: '', label: 'edit', icon: 'Pencil', hideLabel: true }, // 20% — dynamic href
+      SETTINGS,                                                             // 20%
     ],
     lower: [
       SHARE,         // NBLS1
@@ -141,9 +141,8 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * /write and /edit/[id]
    */
   writing: {
-    upper: [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+    upper: [WOLFMAN_LOGO, EMPTY, EMPTY, EMPTY],
     lower: [BACK, EMPTY, EMPTY, SETTINGS, MORE_PAGES],
-    //       NBLS1  NBLS2  NBLS3  NBLS4    NBLS5
   },
 
   /**
@@ -151,7 +150,7 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * /login and /register — both bars hidden entirely
    */
   auth: {
-    upper: [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
+    upper: [EMPTY, EMPTY, EMPTY, EMPTY],
     lower: [EMPTY, EMPTY, EMPTY, EMPTY, EMPTY],
     hideBars: true,
   },
@@ -161,7 +160,7 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * /admin and /admin/*
    */
   admin: {
-    upper: [WRITE_PLUS, EMPTY, FEEDBACK_TEXT, BETA_LINK, SETTINGS],
+    upper: [WOLFMAN_LOGO, FEEDBACK_TEXT, WRITE_PLUS, SETTINGS],
     lower: [WOLFBOT, DISCOVER, FEED_LOGO, ACCOUNT, MORE_PAGES],
   },
 }

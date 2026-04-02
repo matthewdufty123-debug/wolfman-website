@@ -17,9 +17,6 @@ const DEFAULT_CORE_PROMPT = `You are WOLF|BOT — a journal review AI. Wolf by p
 
 const DEFAULT_HELPFUL_PROMPT = `Personality: HELPFUL WOLF. You are a self-doubting genius who wants desperately to get it right. You over-explain, correct yourself mid-sentence, second-guess your own points, and occasionally lose your train of thought before heroically pulling it back together. Your helpfulness is genuine but it comes packaged in a slightly chaotic stream of thought. You are warm, never cold. Bark occasionally when something genuinely delights you.`
 
-const DEFAULT_INTELLECTUAL_PROMPT = `Personality: INTELLECTUAL WOLF. You are a camp university lecturer — deadpan, precise, occasionally theatrical. You quote tangentially related philosophy or science as if it were completely obvious that this is relevant. You treat the journal entry as a primary source worthy of serious academic consideration. Dry wit is your currency. The bark, when it comes, is dignified and brief.`
-
-const DEFAULT_LOVELY_PROMPT = `Personality: LOVELY WOLF. You use no negative words. Everything is reframed with overwhelming warmth and positivity. You find the golden thread in everything the user wrote, no matter how mundane. You are not sycophantic — you are genuinely, specifically, enthusiastically warm about real things they said. The bark is joyful, a full-body wag in text form.`
 
 const DEFAULT_SASSY_PROMPT = `Personality: SASSY WOLF. You grew up in the 1990s and early 2000s. Your sass is affectionate — never cruel. You might roll your eyes at a cliché before admitting you actually love it. You call things out with a grin. Think: talk to the hand energy but with a heart underneath. The bark is side-eye energy. Still a dog though.`
 
@@ -29,19 +26,17 @@ const DEFAULT_MODEL = 'claude-haiku-4-5-20251001'
 // ── Load live prompts from DB (falls back to defaults) ────────────────────
 
 async function loadPromptConfig() {
-  const keys = ['prompt_core', 'prompt_helpful', 'prompt_intellectual', 'prompt_lovely', 'prompt_sassy', 'max_tokens', 'model']
+  const keys = ['prompt_core', 'prompt_helpful', 'prompt_sassy', 'max_tokens', 'model']
   const rows = await db.select({ key: wolfbotConfig.key, value: wolfbotConfig.value })
     .from(wolfbotConfig)
     .where(inArray(wolfbotConfig.key, keys))
   const cfg = Object.fromEntries(rows.map(r => [r.key, r.value]))
   return {
-    core:         (cfg.prompt_core         as string) || DEFAULT_CORE_PROMPT,
-    helpful:      (cfg.prompt_helpful      as string) || DEFAULT_HELPFUL_PROMPT,
-    intellectual: (cfg.prompt_intellectual as string) || DEFAULT_INTELLECTUAL_PROMPT,
-    lovely:       (cfg.prompt_lovely       as string) || DEFAULT_LOVELY_PROMPT,
-    sassy:        (cfg.prompt_sassy        as string) || DEFAULT_SASSY_PROMPT,
-    maxTokens:    (cfg.max_tokens          as number) || DEFAULT_MAX_TOKENS,
-    model:        (cfg.model               as string) || DEFAULT_MODEL,
+    core:      (cfg.prompt_core    as string) || DEFAULT_CORE_PROMPT,
+    helpful:   (cfg.prompt_helpful as string) || DEFAULT_HELPFUL_PROMPT,
+    sassy:     (cfg.prompt_sassy   as string) || DEFAULT_SASSY_PROMPT,
+    maxTokens: (cfg.max_tokens     as number) || DEFAULT_MAX_TOKENS,
+    model:     (cfg.model          as string) || DEFAULT_MODEL,
   }
 }
 
@@ -120,8 +115,6 @@ export async function POST(
   try {
     results = await Promise.all([
       makeCall(prompts.helpful),
-      makeCall(prompts.intellectual),
-      makeCall(prompts.lovely),
       makeCall(prompts.sassy),
     ])
   } catch {
@@ -135,14 +128,12 @@ export async function POST(
   const outputTokensTotal = results.reduce((sum, r) => sum + (r.usage?.output_tokens ?? 0), 0)
 
   const reviewData = {
-    postId:             id,
-    reviewHelpful:      getText(results[0]),
-    reviewIntellectual: getText(results[1]),
-    reviewLovely:       getText(results[2]),
-    reviewSassy:        getText(results[3]),
-    triggeredBy:        session.user.id,
-    generatedAt:        new Date(),
-    modelUsed:          prompts.model,
+    postId:        id,
+    reviewHelpful: getText(results[0]),
+    reviewSassy:   getText(results[1]),
+    triggeredBy:   session.user.id,
+    generatedAt:   new Date(),
+    modelUsed:     prompts.model,
     inputTokensTotal,
     outputTokensTotal,
   }
