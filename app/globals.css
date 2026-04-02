@@ -485,7 +485,7 @@ html[data-theme="warm"]  .theme-logo--light { display: none;  }
 .more-pages-nav {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 .more-pages-group {
   border-radius: 10px;
