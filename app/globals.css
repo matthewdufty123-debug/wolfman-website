@@ -114,11 +114,11 @@ body {
   position: fixed;
   top: 30px;
   right: 8px;
-  z-index: 48;
+  z-index: 51;
   font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
   font-size: 0.55rem;
   letter-spacing: 0.06em;
-  color: var(--version-badge-color, rgba(74, 127, 165, 0.6));
+  color: var(--version-badge-color, rgba(255, 255, 255, 0.35));
   text-decoration: none;
   user-select: none;
 }
@@ -320,11 +320,12 @@ html[data-theme="light"] .feed-logo-img {
 .upper-nav .nav-slot:nth-child(3) { flex: 0 0 20%; }
 .upper-nav .nav-slot:nth-child(4) { flex: 0 0 20%; }
 
-/* Logo slot — left-aligned wordmark */
+/* Logo slot — left-aligned wordmark, vertically centered */
 .nav-slot--logo {
-  justify-content: flex-start;
+  align-items: flex-start;   /* left-align text horizontally */
   padding-left: 14px;
   overflow: hidden;
+  /* justify-content inherits 'center' from .nav-slot — vertically centered */
 }
 
 /* CSS wordmark — no image dependency */
