@@ -35,22 +35,26 @@ export async function POST(
     return NextResponse.json({ error: 'limit_reached' }, { status: 403 })
   }
 
-  // Load model + core prompt from wolfbot_config
+  // Load config from wolfbot_config
   const cfgRows = await db
     .select({ key: wolfbotConfig.key, value: wolfbotConfig.value })
     .from(wolfbotConfig)
-    .where(inArray(wolfbotConfig.key, ['model', 'prompt_core']))
+    .where(inArray(wolfbotConfig.key, ['model', 'prompt_core', 'title_model', 'title_max_tokens', 'title_prompt']))
   const cfg = Object.fromEntries(cfgRows.map(r => [r.key, r.value]))
-  const model = (cfg.model as string) || DEFAULT_MODEL
+  // Title suggestion uses title_model if set, otherwise falls back to review model
+  const model = (cfg.title_model as string) || (cfg.model as string) || DEFAULT_MODEL
   const corePrompt = (cfg.prompt_core as string) || DEFAULT_CORE_PROMPT
+  const titleMaxTokens = (cfg.title_max_tokens as number) || 25
+  const titleSuffix = (cfg.title_prompt as string) ||
+    'You are now in title-suggestion mode. Suggest a single vivid, specific title for this journal entry. Return ONLY the title — no quotes, no punctuation at the end, no explanation, nothing else. Maximum 6 words and 50 characters.'
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-  const systemPrompt = `${corePrompt}\n\nYou are now in title-suggestion mode. Suggest a single vivid, specific title for this journal entry. Return ONLY the title — no quotes, no punctuation at the end, no explanation, nothing else. Maximum 6 words and 50 characters.`
+  const systemPrompt = `${corePrompt}\n\n${titleSuffix}`
 
   const response = await client.messages.create({
     model,
-    max_tokens: 25,
+    max_tokens: titleMaxTokens,
     system: systemPrompt,
     messages: [{ role: 'user', content: `Journal entry:\n\n${post.content}` }],
   })

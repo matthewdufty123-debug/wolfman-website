@@ -392,17 +392,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
             <ThemeLogo className="more-pages-logo" />
           </div>
 
-          {/* Admin button — admin users only */}
-          {session?.user?.role === 'admin' && (
-            <Link
-              href="/admin"
-              className="more-pages-admin-btn"
-              onClick={() => setMorePagesOpen(false)}
-            >
-              ADMIN
-            </Link>
-          )}
-
           {/* User row — profile link + sign out */}
           {session && (
             <div className="more-pages-user-row">
@@ -464,6 +453,30 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
               </div>
             ))}
           </nav>
+
+          {/* Admin section — admin users only */}
+          {session?.user?.role === 'admin' && (
+            <div
+              className="more-pages-group"
+              style={{ '--group-color': '#6090C0' } as React.CSSProperties}
+            >
+              <p className="more-pages-group-title">Administration</p>
+              <ul className="more-pages-list">
+                <li>
+                  <Link href="/admin" className="more-pages-link" onClick={() => setMorePagesOpen(false)}>
+                    <span className="more-pages-link-icon"><LayoutDashboard size={16} strokeWidth={1.5} /></span>
+                    <span>Admin Dashboard</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/admin/wolfbot" className="more-pages-link" onClick={() => setMorePagesOpen(false)}>
+                    <span className="more-pages-link-icon"><Bot size={16} strokeWidth={1.5} /></span>
+                    <span>WOLF|BOT Config</span>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          )}
 
         </div>
       </div>

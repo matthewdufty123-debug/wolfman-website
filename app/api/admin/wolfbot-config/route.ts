@@ -6,8 +6,9 @@ import { NextResponse } from 'next/server'
 
 // Keys that bump the WOLF|BOT prompt version when changed
 const PROMPT_KEYS = new Set([
-  'prompt_core', 'prompt_helpful', 'prompt_intellectual',
-  'prompt_lovely', 'prompt_sassy', 'max_tokens',
+  'prompt_core', 'prompt_helpful', 'prompt_sassy',
+  'max_tokens', 'model',
+  'title_prompt', 'title_model', 'title_max_tokens',
 ])
 
 async function requireAdmin() {
