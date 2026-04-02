@@ -8,7 +8,7 @@ import { NextResponse } from 'next/server'
 const PROMPT_KEYS = new Set([
   'prompt_core', 'prompt_helpful', 'prompt_sassy',
   'max_tokens', 'model',
-  'title_prompt', 'title_model', 'title_max_tokens',
+  'title_prompt', 'title_model', 'title_max_tokens', 'title_max_words', 'title_max_chars',
 ])
 
 async function requireAdmin() {
