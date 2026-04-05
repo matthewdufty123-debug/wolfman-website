@@ -100,7 +100,7 @@ export default async function MorningRitualPage({
       )}
 
       <div style={{ maxWidth: 640, margin: '2rem auto 0', padding: '0 1.5rem' }}>
-        <Link href="/" className="ritual-back-link">← All Journals</Link>
+        <Link href="/feed" className="ritual-back-link">← All Journals</Link>
       </div>
     </>
   )

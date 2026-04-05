@@ -9433,3 +9433,296 @@ html[data-fontsize="xlarge"] .dev-body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Homepage ────────────────────────────────────────────────────────────── */
+
+.home-page {
+  min-height: 100vh;
+}
+
+.home-hero {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1.5rem 4rem;
+  text-align: center;
+  background: var(--card-bg, #f9f9f9);
+  border-bottom: 1px solid var(--border, #eee);
+}
+
+.home-hero-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.home-hero-strapline {
+  font-family: var(--font-lora), Lora, serif;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-style: italic;
+  color: var(--heading, #193343);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.home-cta-btn {
+  display: inline-block;
+  background: #214459;
+  color: #fff;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.9rem 2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  text-align: center;
+}
+
+.home-cta-btn:hover {
+  opacity: 0.88;
+}
+
+.home-section {
+  padding: 4rem 1.5rem;
+  border-bottom: 1px solid var(--border, #eee);
+}
+
+.home-section-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.home-section-inner--centered {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.home-eyebrow {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #4A7FA5;
+  margin: 0 0 0.75rem;
+}
+
+.home-section-heading {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin: 0 0 1.5rem;
+}
+
+.home-idea-body {
+  font-family: var(--font-lora), Lora, serif;
+  font-size: 1.05rem;
+  color: var(--body-text, #4A4A4A);
+  line-height: 1.75;
+  margin: 0 0 1rem;
+}
+
+.home-idea-supporting {
+  font-family: var(--font-lora), Lora, serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.75;
+  margin: 0;
+}
+
+.home-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.home-step {
+  padding: 1.25rem;
+  border: 1.5px solid var(--border, #eee);
+  border-radius: 10px;
+}
+
+.home-step-number {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #4A7FA5;
+  margin: 0 0 0.5rem;
+}
+
+.home-step-label {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin: 0 0 0.5rem;
+}
+
+.home-step-body {
+  font-family: var(--font-lora), Lora, serif;
+  font-size: 0.9rem;
+  color: var(--body-text, #4A4A4A);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.home-data-commitments {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.home-commitment {
+  padding: 1rem 1.25rem;
+  background: var(--card-bg, #f9f9f9);
+  border-radius: 8px;
+  border: 1px solid var(--border, #eee);
+}
+
+.home-commitment-title {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin: 0 0 0.35rem;
+}
+
+.home-commitment-body {
+  font-family: var(--font-lora), Lora, serif;
+  font-size: 0.85rem;
+  color: var(--body-text, #4A4A4A);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.home-data-link {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4A7FA5;
+  text-decoration: none;
+}
+
+.home-data-link:hover {
+  text-decoration: underline;
+}
+
+.home-matthew-inner {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.home-matthew-photo-placeholder {
+  aspect-ratio: 3/4;
+  background: var(--card-bg, #f0f0f0);
+  border: 1.5px dashed var(--border, #ddd);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-matthew-photo-label {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.75rem;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.4;
+  margin: 0;
+}
+
+.home-matthew-body {
+  font-family: var(--font-lora), Lora, serif;
+  font-size: 0.95rem;
+  color: var(--body-text, #4A4A4A);
+  line-height: 1.75;
+  margin: 0 0 1rem;
+}
+
+.home-journal-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.home-journal-card {
+  display: block;
+  padding: 1.25rem;
+  border: 1.5px solid var(--border, #eee);
+  border-radius: 10px;
+  text-decoration: none;
+  transition: border-color 0.2s;
+}
+
+.home-journal-card:hover {
+  border-color: #4A7FA5;
+}
+
+.home-journal-card-meta {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.55;
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+}
+
+.home-journal-card-title {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin: 0 0 0.5rem;
+  line-height: 1.35;
+}
+
+.home-journal-card-excerpt {
+  font-family: var(--font-lora), Lora, serif;
+  font-size: 0.85rem;
+  color: var(--body-text, #4A4A4A);
+  line-height: 1.55;
+  margin: 0;
+  opacity: 0.8;
+}
+
+.home-cta-repeat-line {
+  font-family: var(--font-lora), Lora, serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--body-text, #4A4A4A);
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .home-steps {
+    grid-template-columns: 1fr;
+  }
+  .home-data-commitments {
+    grid-template-columns: 1fr;
+  }
+  .home-journal-cards {
+    grid-template-columns: 1fr;
+  }
+  .home-matthew-inner {
+    grid-template-columns: 1fr;
+  }
+  .home-matthew-photo-placeholder {
+    aspect-ratio: 16/9;
+    max-height: 200px;
+  }
+}

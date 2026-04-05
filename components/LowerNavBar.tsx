@@ -278,7 +278,7 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
       case 'feed-logo':
         return (
           <div key={key} className="nav-slot nav-slot--feed-logo">
-            <Link href="/" className="feed-logo-btn" aria-label="Home feed">
+            <Link href="/feed" className="feed-logo-btn" aria-label="Journal feed">
               <WolfLogo size={72} className="feed-logo-img" />
             </Link>
           </div>
