@@ -168,7 +168,7 @@ function ReviewTerminal({
     const interval = setInterval(() => {
       if (i >= review.length) { clearInterval(interval); setCursorVisible(false); setTypingDone(true); return }
       setDisplayedText(review.slice(0, i + 1)); i++
-    }, 6)
+    }, 3)
     return () => clearInterval(interval)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bootDone])
@@ -340,7 +340,7 @@ function LegacyTerminal({ text, promptVersion, pixelGrid, pixelPalette }: {
     const interval = setInterval(() => {
       if (i >= text.length) { clearInterval(interval); setCursorVisible(false); setPhase('done'); return }
       setDisplayedReview(text.slice(0, i + 1)); i++
-    }, 6)
+    }, 3)
     return () => clearInterval(interval)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, text])
