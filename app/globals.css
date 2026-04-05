@@ -9696,6 +9696,40 @@ html[data-fontsize="xlarge"] .dev-body {
   }
 }
 
+/* ── Subscriptions — dark mode overrides ─────────────────────────────────── */
+html[data-theme="dark"] .subs-disclaimer-text {
+  color: #C8B020;
+}
+
+html[data-theme="dark"] .subs-tier {
+  background: #2D3D50;
+  border-color: rgba(160, 190, 220, 0.18);
+}
+
+html[data-theme="dark"] .subs-tier--premium {
+  background: #172739;
+  border-color: #4A7FA5;
+}
+
+html[data-theme="dark"] .subs-feature--highlight {
+  color: #A8D0E0;
+}
+
+html[data-theme="dark"] .subs-saving {
+  background: rgba(58, 184, 122, 0.18);
+  color: #3AB87A;
+}
+
+html[data-theme="dark"] .subs-trial-note {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+html[data-theme="dark"] .subs-cta--free {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
 /* ── Homepage ────────────────────────────────────────────────────────────── */
 
 .home-page {
