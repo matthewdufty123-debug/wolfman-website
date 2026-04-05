@@ -2,7 +2,6 @@ import type { ProcessedPost } from '@/lib/posts'
 
 interface Props {
   post: ProcessedPost
-  postDates: { createdAt: string; updatedAt: string } | null
 }
 
 function formatPostDate(dateStr: string): string {
@@ -22,7 +21,7 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, ' ')
 }
 
-export default function PostInfoSection({ post, postDates }: Props) {
+export default function PostInfoSection({ post }: Props) {
   const wordCount = countWords(stripHtml(post.bodyHtml))
 
   return (
@@ -45,22 +44,6 @@ export default function PostInfoSection({ post, postDates }: Props) {
           <span className="post-info-label">Status</span>
           <span className={`post-info-badge post-info-badge--${post.status}`}>{post.status}</span>
         </div>
-        {postDates && (
-          <div className="post-info-row">
-            <span className="post-info-label">Created</span>
-            <span className="post-info-value">
-              {new Date(postDates.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-            </span>
-          </div>
-        )}
-        {postDates && postDates.updatedAt !== postDates.createdAt && (
-          <div className="post-info-row">
-            <span className="post-info-label">Last edited</span>
-            <span className="post-info-value">
-              {new Date(postDates.updatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-            </span>
-          </div>
-        )}
       </div>
     </section>
   )

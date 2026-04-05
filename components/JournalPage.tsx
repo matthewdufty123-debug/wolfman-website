@@ -86,7 +86,7 @@ export default function JournalPage({
             <MorningRitualsSection checklist={morningState.routineChecklist} />
           )}
 
-          <PostInfoSection post={post} postDates={postDates} />
+          <PostInfoSection post={post} />
 
           {/* Next Journal button */}
           {nextHref && (
