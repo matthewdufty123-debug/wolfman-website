@@ -45,7 +45,8 @@ export default function TermsPage() {
             Your journal entries, mood scales, and ritual logs are private by default. Only you
             can see them. Matthew&apos;s posts are the only ones visible to the public.
             Your data is stored securely on Neon PostgreSQL servers and is never sold or shared
-            with third parties.
+            with third parties. Read the full{' '}
+            <Link href="/data-policy" className="beta-link">Data Policy</Link> for details.
           </p>
           <p className="beta-section-body" style={{ marginTop: '0.75rem' }}>
             You can request deletion of your account and all associated data at any time.

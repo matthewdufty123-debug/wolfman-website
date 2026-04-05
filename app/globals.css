@@ -9225,3 +9225,211 @@ html[data-fontsize="xlarge"] .dev-body {
   }
 }
 
+
+/* ── About page ─────────────────────────────────────────────────────────── */
+
+.about-links-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.about-story-placeholder,
+.about-photo-placeholder {
+  background: var(--card-bg, #f5f5f5);
+  border: 1.5px dashed var(--border, #ddd);
+  border-radius: 10px;
+  padding: 2rem 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.about-placeholder-note {
+  font-family: var(--font-lora), Lora, serif;
+  font-size: 0.95rem;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.6;
+  font-style: italic;
+  margin: 0;
+}
+
+.about-cta-button {
+  display: inline-block;
+  margin-top: 1.25rem;
+  background: #214459;
+  color: #fff;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.85rem 1.75rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.about-cta-button:hover {
+  opacity: 0.88;
+}
+
+/* ── Subscriptions page ──────────────────────────────────────────────────── */
+
+.subs-disclaimer {
+  background: #C8B02015;
+  border: 1.5px solid #C8B020;
+  border-radius: 8px;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.subs-disclaimer-text {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #8a7a00;
+  margin: 0;
+}
+
+.subs-tiers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.subs-tier {
+  border: 1.5px solid var(--border, #ddd);
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: var(--card-bg, #fff);
+}
+
+.subs-tier--premium {
+  border-color: #214459;
+  background: #21445908;
+}
+
+.subs-tier-header {
+  margin-bottom: 1.25rem;
+}
+
+.subs-tier-name {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.6;
+  margin: 0 0 0.5rem;
+}
+
+.subs-tier-price {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin: 0;
+}
+
+.subs-tier-period {
+  font-size: 0.95rem;
+  font-weight: 400;
+  opacity: 0.6;
+}
+
+.subs-tier-annual {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.85rem;
+  color: var(--body-text, #4A4A4A);
+  margin: 0.25rem 0 0;
+}
+
+.subs-saving {
+  display: inline-block;
+  background: #3AB87A20;
+  color: #1a7a4a;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  margin-left: 0.4rem;
+}
+
+.subs-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.subs-feature {
+  font-family: var(--font-lora), Lora, serif;
+  font-size: 0.9rem;
+  color: var(--body-text, #4A4A4A);
+  padding-left: 1.25rem;
+  position: relative;
+}
+
+.subs-feature::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #3AB87A;
+  font-weight: 700;
+}
+
+.subs-feature--highlight {
+  font-weight: 600;
+  color: #214459;
+}
+
+.subs-trial-note {
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.8rem;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.7;
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--card-bg, #f5f5f5);
+  border-radius: 6px;
+}
+
+.subs-trial-note p {
+  margin: 0;
+}
+
+.subs-cta {
+  display: block;
+  text-align: center;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.subs-cta--free {
+  background: var(--card-bg, #f5f5f5);
+  color: var(--body-text, #4A4A4A);
+  border: 1.5px solid var(--border, #ddd);
+}
+
+.subs-cta--premium {
+  background: #214459;
+  color: #fff;
+}
+
+.subs-cta:hover {
+  opacity: 0.85;
+}
+
+@media (max-width: 540px) {
+  .subs-tiers {
+    grid-template-columns: 1fr;
+  }
+}

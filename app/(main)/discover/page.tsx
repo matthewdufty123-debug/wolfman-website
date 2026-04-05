@@ -5,7 +5,7 @@ const CARDS = [
   {
     href: '/about',
     title: 'About Wolfman',
-    body: "Matthew's story — data engineer, mountain biker, photographer, and the human behind this site. Find out who he is, how he lives, and what the Wolfman brand actually means.",
+    body: "Matthew's story — data engineer, mountain biker, photographer, wood carver, and the human behind this site. Who he is, how he lives, and why the morning journalling practice matters.",
   },
   {
     href: '/journaling',
@@ -15,12 +15,12 @@ const CARDS = [
   {
     href: '/scores',
     title: 'Morning Scores',
-    body: 'Four scales recorded each morning — Brain Activity, Body Energy, Happiness, and Stress, rated 1 to 6. Over time they reveal honest patterns about how inner state shapes intention.',
+    body: 'Four scales recorded each morning — Brain, Body, Happiness, and Stress State, rated 1 to 8. Over time they reveal honest patterns about how inner state shapes intention.',
   },
   {
     href: '/wolfbot',
     title: 'WOLF|BOT',
-    body: 'The AI journalling companion built into every journal on this site. Four distinct personalities — Helpful, Intellectual, Lovely, and Sassy — each reading the same entry through a completely different lens.',
+    body: 'The AI journalling companion built into every journal on this site. It reads your entry — the intention, the scores, the rituals — and gives you something you could not have seen yourself.',
   },
   {
     href: '/rituals',
