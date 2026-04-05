@@ -131,7 +131,7 @@ Return ONLY valid JSON in this exact shape (no markdown fences, no explanation):
 {
   "review": "the review text — max 3 paragraphs",
   "themeWords": "3–5 comma-separated theme words drawn from recent journal patterns (or from this entry alone if no context available)",
-  "moodSignal": "one short sentence interpreting the morning state scores",
+  "moodSignal": "one word from: ascending / stable / declining / turbulent — based on scores and recent context",
   "profileNote": "one short sentence on how the user profile shapes the lens — or empty string if no profile"
 }`
 
