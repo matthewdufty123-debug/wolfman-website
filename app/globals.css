@@ -1953,6 +1953,8 @@ select.dash-config-textarea {
   font-size: clamp(1rem, 2.5vw, 1.125rem);
   line-height: 1.5;
   color: var(--body-text, #4A4A4A);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .post-body p {
@@ -6932,6 +6934,7 @@ html[data-theme="light"] .pf-scale-pill {
 .journal-scroll-page {
   position: relative;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .journal-scroll-content {
