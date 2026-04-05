@@ -245,3 +245,31 @@ export const dayScores = pgTable('day_scores', {
   dataCompleteness: text('data_completeness').notNull().default('post_only'),
   generatedAt: timestamp('generated_at').notNull().defaultNow(),
 })
+
+// ── Journal Analytics (Release 0.5) ───────────────────────────────────────
+// Aggregated per-user analytics table. Populated by a background job / cron
+// that re-aggregates on each new post or scale update.
+// NOT YET DEPLOYED — schema design for Release 0.5. Run db:push when ready.
+//
+// Design rationale:
+//   - Store rolling aggregates so profile/stats pages don't need heavy queries.
+//   - JSONB `streakData` holds current/longest streak + last activity date.
+//   - JSONB `scaleAverages` holds 30d/90d/all-time averages per scale.
+//   - JSONB `ritualFrequency` holds per-ritual completion rates (0.0–1.0).
+//   - JSONB `wolfbotThemes` accumulates rolling themeWords from WOLF|BOT reviews.
+//   - `lastCalculatedAt` guards against redundant recalculations.
+//
+// export const journalAnalytics = pgTable('journal_analytics', {
+//   id:                uuid('id').primaryKey().defaultRandom(),
+//   userId:            uuid('user_id').notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
+//   totalPosts:        integer('total_posts').notNull().default(0),
+//   publishedPosts:    integer('published_posts').notNull().default(0),
+//   currentStreak:     integer('current_streak').notNull().default(0),
+//   longestStreak:     integer('longest_streak').notNull().default(0),
+//   streakData:        jsonb('streak_data').notNull().default({}),      // { lastPostDate, streakStart }
+//   scaleAverages:     jsonb('scale_averages').notNull().default({}),   // { brain30d, body30d, happy30d, stress30d, brainAll, ... }
+//   ritualFrequency:   jsonb('ritual_frequency').notNull().default({}), // { sunlight: 0.72, breathwork: 0.55, ... }
+//   wolfbotThemes:     jsonb('wolfbot_themes').notNull().default({}),   // { words: [{word, count}], lastUpdated }
+//   lastCalculatedAt:  timestamp('last_calculated_at'),
+//   updatedAt:         timestamp('updated_at').notNull().defaultNow(),
+// })
