@@ -19,9 +19,9 @@ export interface StatRow {
   ritualCount: number
 }
 
-const BRAIN_LABELS  = ['','Peaceful','Quiet','Active','Busy','Racing','Manic']
-const BODY_LABELS   = ['','Lethargic','Slow','Steady','Energised','Strong','Buzzing']
-const HAPPY_LABELS  = ['','Far from happy','Low','Okay','Good','Happy','Joyful']
+const BRAIN_LABELS  = ['','Completely Silent','Very Peaceful','Quite Quiet','Chill','Active','Busy','Hyper Focused','Totally Manic']
+const BODY_LABELS   = ['','Nothing to Give','Running Empty','Sluggish','Slow','Steady','Energised','Firing Hard','Absolutely Buzzing']
+const HAPPY_LABELS  = ['','Completely Lost','Struggling','Bit Low','Flat','Okay','Happy','Bike Smiles','Absolutely Joyful']
 
 function fmtDate(iso: string) {
   const d = new Date(iso + 'T00:00:00')
@@ -141,7 +141,7 @@ export default function StatsCharts({ data, scatterData = [], dateToSlug = {}, u
           <LineChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(74,127,165,0.1)" vertical={false} />
             <XAxis {...xAxisProps} />
-            <YAxis {...yAxisProps} domain={[1, 6]} ticks={[1,2,3,4,5,6]} />
+            <YAxis {...yAxisProps} domain={[1, 8]} ticks={[1,2,3,4,5,6,7,8]} />
             <Tooltip content={<ScaleTooltip labelMap={BRAIN_LABELS} />} />
             <Line dataKey="brainScale" stroke="#4A7FA5" strokeWidth={2} dot={{ r: 3, fill: '#4A7FA5' }} activeDot={{ r: 5, cursor: 'pointer', onClick: (_: unknown, p: unknown) => { const s = dateToSlug[(p as { payload: StatRow }).payload.date]; if (s) router.push(username ? `/${username}/${s}` : `/posts/${s}`) } }} connectNulls />
           </LineChart>
@@ -153,7 +153,7 @@ export default function StatsCharts({ data, scatterData = [], dateToSlug = {}, u
           <LineChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(160,98,42,0.1)" vertical={false} />
             <XAxis {...xAxisProps} />
-            <YAxis {...yAxisProps} domain={[1, 6]} ticks={[1,2,3,4,5,6]} />
+            <YAxis {...yAxisProps} domain={[1, 8]} ticks={[1,2,3,4,5,6,7,8]} />
             <Tooltip content={<ScaleTooltip labelMap={BODY_LABELS} />} />
             <Line dataKey="bodyScale" stroke="#A0622A" strokeWidth={2} dot={{ r: 3, fill: '#A0622A' }} activeDot={{ r: 5, cursor: 'pointer', onClick: (_: unknown, p: unknown) => { const s = dateToSlug[(p as { payload: StatRow }).payload.date]; if (s) router.push(username ? `/${username}/${s}` : `/posts/${s}`) } }} connectNulls />
           </LineChart>
@@ -165,7 +165,7 @@ export default function StatsCharts({ data, scatterData = [], dateToSlug = {}, u
           <LineChart data={data.filter(d => d.happyScale != null)} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(58,184,122,0.1)" vertical={false} />
             <XAxis {...xAxisProps} />
-            <YAxis {...yAxisProps} domain={[1, 6]} ticks={[1,2,3,4,5,6]} />
+            <YAxis {...yAxisProps} domain={[1, 8]} ticks={[1,2,3,4,5,6,7,8]} />
             <Tooltip content={<ScaleTooltip labelMap={HAPPY_LABELS} />} />
             <Line dataKey="happyScale" stroke="#3AB87A" strokeWidth={2} dot={{ r: 3, fill: '#3AB87A' }} activeDot={{ r: 5, cursor: 'pointer', onClick: (_: unknown, p: unknown) => { const s = dateToSlug[(p as { payload: StatRow }).payload.date]; if (s) router.push(username ? `/${username}/${s}` : `/posts/${s}`) } }} connectNulls />
           </LineChart>

@@ -20,10 +20,10 @@ export interface ZonePoint {
   happyScale: number | null
 }
 
-const HAPPY_COLOURS = ['', '#5B8FBF', '#7BAED4', '#A8C8E0', '#F0D878', '#ECC832', '#F5B800']
-const BRAIN_LABELS  = ['', 'Peaceful', 'Quiet', 'Active', 'Busy', 'Racing', 'Manic']
-const BODY_LABELS   = ['', 'Lethargic', 'Slow', 'Steady', 'Energised', 'Strong', 'Buzzing']
-const HAPPY_LABELS  = ['', 'Far from happy', 'Low', 'Okay', 'Good', 'Happy', 'Joyful']
+const HAPPY_COLOURS = ['', '#5B8FBF', '#7BAED4', '#A8C8E0', '#C8D0A0', '#F0D878', '#ECC832', '#F5B800', '#FF9900']
+const BRAIN_LABELS  = ['', 'Completely Silent', 'Very Peaceful', 'Quite Quiet', 'Chill', 'Active', 'Busy', 'Hyper Focused', 'Totally Manic']
+const BODY_LABELS   = ['', 'Nothing to Give', 'Running Empty', 'Sluggish', 'Slow', 'Steady', 'Energised', 'Firing Hard', 'Absolutely Buzzing']
+const HAPPY_LABELS  = ['', 'Completely Lost', 'Struggling', 'Bit Low', 'Flat', 'Okay', 'Happy', 'Bike Smiles', 'Absolutely Joyful']
 
 function fmtDate(iso: string) {
   const d = new Date(iso + 'T00:00:00')
@@ -159,8 +159,8 @@ export default function MorningZoneScatter({ data, todayPostId, username }: { da
           <XAxis
             type="number"
             dataKey="jx"
-            domain={[0.5, 6.5]}
-            ticks={[1, 2, 3, 4, 5, 6]}
+            domain={[0.5, 8.5]}
+            ticks={[1, 2, 3, 4, 5, 6, 7, 8]}
             tick={{ fontSize: 12, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", fill: 'currentColor' }}
             tickLine={false}
             axisLine={false}
@@ -169,8 +169,8 @@ export default function MorningZoneScatter({ data, todayPostId, username }: { da
           <YAxis
             type="number"
             dataKey="jy"
-            domain={[0.5, 6.5]}
-            ticks={[1, 2, 3, 4, 5, 6]}
+            domain={[0.5, 8.5]}
+            ticks={[1, 2, 3, 4, 5, 6, 7, 8]}
             tick={{ fontSize: 12, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", fill: 'currentColor' }}
             tickLine={false}
             axisLine={false}

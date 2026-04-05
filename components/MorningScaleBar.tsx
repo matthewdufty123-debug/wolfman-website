@@ -6,7 +6,7 @@ import Link from 'next/link'
 interface Props {
   scaleName: string
   value: number
-  labels: [string, string, string, string, string, string]  // labels for values 1–6
+  labels: [string, string, string, string, string, string, string, string]  // labels for values 1–8
   color: string
   statsLink?: string
 }

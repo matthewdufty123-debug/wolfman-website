@@ -10,10 +10,10 @@ import WolfBotLoadingOverlay from './WolfBotLoadingOverlay'
 
 const RITUAL_KEYS = Object.keys(ROUTINE_ICON_MAP)
 
-const BRAIN_LABELS  = ['Peaceful', 'Quiet', 'Active', 'Busy', 'Racing', 'Manic']
-const BODY_LABELS   = ['Lethargic', 'Slow', 'Steady', 'Energised', 'Strong', 'Buzzing']
-const HAPPY_LABELS  = ['Far from happy', 'Low', 'Okay', 'Good', 'Happy', 'Joyful']
-const STRESS_LABELS = ['Calm', 'Relaxed', 'Mild', 'Tense', 'Stressed', 'Overwhelmed']
+const BRAIN_LABELS  = ['Completely Silent', 'Very Peaceful', 'Quite Quiet', 'Chill', 'Active', 'Busy', 'Hyper Focused', 'Totally Manic']
+const BODY_LABELS   = ['Nothing to Give', 'Running Empty', 'Sluggish', 'Slow', 'Steady', 'Energised', 'Firing Hard', 'Absolutely Buzzing']
+const HAPPY_LABELS  = ['Completely Lost', 'Struggling', 'Bit Low', 'Flat', 'Okay', 'Happy', 'Bike Smiles', 'Absolutely Joyful']
+const STRESS_LABELS = ['Completely Overwhelmed', 'Anxious', 'Stressed', 'Unsettled', 'Peaceful', 'Focused', 'Primed', 'Hunt Mode']
 
 const FEEL_LABELS: Record<number, string> = {
   1: 'Want to Forget',
@@ -111,15 +111,19 @@ function ScaleSelector({ label, value, onChange, color, labels }: {
     <div className="pf-scale">
       <span className="pf-scale-label">{label}</span>
       <div className="pf-scale-pills">
-        {[1, 2, 3, 4, 5, 6].map(n => (
-          <button
-            key={n}
-            type="button"
-            className={`pf-scale-pill${value === n ? ' pf-scale-pill--active' : ''}`}
-            style={value === n ? { background: color, borderColor: color } : {}}
-            onClick={() => onChange(value === n ? null : n)}
-          >{n}</button>
-        ))}
+        {[1, 2, 3, 4, 5, 6, 7, 8].map(n => {
+          const isFilled = value !== null && n <= value
+          return (
+            <button
+              key={n}
+              type="button"
+              className={`pf-scale-pill${isFilled ? ' pf-scale-pill--filled' : ''}`}
+              style={isFilled ? { background: color, borderColor: color } : {}}
+              onClick={() => onChange(value === n ? null : n)}
+              aria-label={`${label}: ${labels[n - 1]}`}
+            />
+          )
+        })}
       </div>
       <p className="pf-scale-value" style={{ color }}>{value !== null ? labels[value - 1] : ''}</p>
     </div>
@@ -448,10 +452,10 @@ export default function PostForm({
           {/* Morning state */}
           <div className="pf-section">
             <p className="pf-section-title">Morning State</p>
-            <ScaleSelector label="Brain Activity" value={morning.brainScale}  color="#4A7FA5" labels={BRAIN_LABELS}  onChange={n => { setMorning(m => ({ ...m, brainScale:  n })); markDirty() }} />
-            <ScaleSelector label="Body Energy"    value={morning.bodyScale}   color="#A0622A" labels={BODY_LABELS}   onChange={n => { setMorning(m => ({ ...m, bodyScale:   n })); markDirty() }} />
-            <ScaleSelector label="Happy Scale"    value={morning.happyScale}  color="#3AB87A" labels={HAPPY_LABELS}  onChange={n => { setMorning(m => ({ ...m, happyScale:  n })); markDirty() }} />
-            <ScaleSelector label="Stress Level"   value={morning.stressScale} color="#C87840" labels={STRESS_LABELS} onChange={n => { setMorning(m => ({ ...m, stressScale: n })); markDirty() }} />
+            <ScaleSelector label="Brain"        value={morning.brainScale}  color="#4A7FA5" labels={BRAIN_LABELS}  onChange={n => { setMorning(m => ({ ...m, brainScale:  n })); markDirty() }} />
+            <ScaleSelector label="Body"         value={morning.bodyScale}   color="#A0622A" labels={BODY_LABELS}   onChange={n => { setMorning(m => ({ ...m, bodyScale:   n })); markDirty() }} />
+            <ScaleSelector label="Happy"        value={morning.happyScale}  color="#3AB87A" labels={HAPPY_LABELS}  onChange={n => { setMorning(m => ({ ...m, happyScale:  n })); markDirty() }} />
+            <ScaleSelector label="Stress State" value={morning.stressScale} color="#C87840" labels={STRESS_LABELS} onChange={n => { setMorning(m => ({ ...m, stressScale: n })); markDirty() }} />
 
             {/* Rituals */}
             <div className="pf-rituals">
