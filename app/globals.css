@@ -7441,6 +7441,59 @@ html[data-theme="light"] .pf-scale-pill {
   text-align: center;
 }
 
+/* ── WOLF|BOT review rating ──────────────────────────────────────────────── */
+.wb-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(74, 127, 165, 0.15);
+}
+
+.wb-rating-label {
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: rgba(74, 127, 165, 0.55);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.wb-rating-btns {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.wb-rating-btn {
+  font-size: 1.15rem;
+  background: none;
+  border: 1.5px solid rgba(74, 127, 165, 0.2);
+  border-radius: 6px;
+  padding: 0.2rem 0.45rem;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, transform 0.12s;
+  line-height: 1;
+  opacity: 0.65;
+}
+
+.wb-rating-btn:hover:not(:disabled) {
+  opacity: 1;
+  border-color: rgba(74, 127, 165, 0.5);
+  transform: scale(1.15);
+}
+
+.wb-rating-btn--active {
+  opacity: 1;
+  background: rgba(74, 127, 165, 0.1);
+  border-color: rgba(74, 127, 165, 0.6);
+  transform: scale(1.1);
+}
+
+.wb-rating-btn:disabled {
+  cursor: default;
+}
+
 /* ── WOLF|BOT personality tab switcher ───────────────────────────────────── */
 .wb-tabs {
   display: flex;
@@ -9210,6 +9263,37 @@ html[data-fontsize="xlarge"] .dev-body {
   text-transform: uppercase;
   color: var(--body-text, #4A4A4A);
   opacity: 0.6;
+}
+
+/* Troubleshooting reasons list */
+.wolfbot-page-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.wolfbot-page-reason {
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  border-left: 3px solid rgba(74, 127, 165, 0.35);
+  background: rgba(74, 127, 165, 0.04);
+}
+
+.wolfbot-page-reason-title {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--heading, #193343);
+  margin: 0 0 0.35rem;
+}
+
+.wolfbot-page-reason-body {
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 0.9rem;
+  color: var(--body-text, #4A4A4A);
+  margin: 0;
+  line-height: 1.6;
 }
 
 @media (max-width: 480px) {

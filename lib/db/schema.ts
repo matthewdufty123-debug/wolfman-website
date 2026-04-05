@@ -101,18 +101,18 @@ export const posts = pgTable('posts', {
 })
 
 // Captured at publish time — how Matthew arrived at the day
-// Brain (My Thoughts): 1 (Peaceful) → 6 (Manic)
-// Body:  1 (Lethargic) → 6 (Buzzing)
-// Happy: 1 (Far from happy) → 6 (Joyful)
-// Stress: 1 (Calm) → 6 (Overwhelmed)
+// Brain: 1 (Completely Silent) → 8 (Totally Manic)
+// Body:  1 (Nothing to Give) → 8 (Absolutely Buzzing)
+// Happy: 1 (Completely Lost) → 8 (Absolutely Joyful)
+// Stress State: 1 (Completely Overwhelmed) → 8 (Hunt Mode)
 // Routine: { sunlight, breathwork, cacao, meditation, coldShower, walk, animalLove } — true/false
 export const morningState = pgTable('morning_state', {
   id: uuid('id').primaryKey().defaultRandom(),
   postId: uuid('post_id').notNull().unique().references(() => posts.id, { onDelete: 'cascade' }),
-  brainScale: smallint('brain_scale'),   // 1–6, nullable (user may skip)
-  bodyScale: smallint('body_scale'),     // 1–6, nullable (user may skip)
-  happyScale: smallint('happy_scale'),   // 1–6, nullable
-  stressScale: smallint('stress_scale'), // 1–6, nullable
+  brainScale: smallint('brain_scale'),   // 1–8, nullable (user may skip)
+  bodyScale: smallint('body_scale'),     // 1–8, nullable (user may skip)
+  happyScale: smallint('happy_scale'),   // 1–8, nullable
+  stressScale: smallint('stress_scale'), // 1–8, nullable
   routineChecklist: jsonb('routine_checklist').notNull().default({}),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
@@ -199,11 +199,19 @@ export const wolfbotVersionLog = pgTable('wolfbot_version_log', {
 })
 
 // ── WOLF|BOT personality reviews ──────────────────────────────────────────
-// One row per post — four personality reviews generated together in a single
-// user-triggered action. Admin can re-trigger to regenerate. Unique on postId.
+// One row per post — single review generated in a user-triggered action.
+// Admin can re-trigger to regenerate. Unique on postId.
+// Legacy columns (reviewHelpful, reviewSassy, etc.) retained for backward compat.
 export const wolfbotReviews = pgTable('wolfbot_reviews', {
   id:                 uuid('id').primaryKey().defaultRandom(),
   postId:             uuid('post_id').notNull().unique().references(() => posts.id, { onDelete: 'cascade' }),
+  // Current: single review
+  review:             text('review'),             // the generated review text
+  reviewRating:       smallint('review_rating'),  // null=unrated, 1=👎, 2=👍, 3=🔥
+  themeWords:         text('theme_words'),        // comma-separated recurring themes across recent posts
+  moodSignal:         text('mood_signal'),        // one-line morning state interpretation
+  profileNote:        text('profile_note'),       // how user's profile shapes the review lens
+  // Legacy (pre-refactor): kept for backward compat, no longer written
   reviewHelpful:      text('review_helpful'),
   reviewIntellectual: text('review_intellectual'),
   reviewLovely:       text('review_lovely'),

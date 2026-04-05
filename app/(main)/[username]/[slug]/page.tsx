@@ -102,10 +102,10 @@ export default async function PostPage({
           .where(eq(postsTable.id, post.id))
           .then(r => r[0] ?? null),
         db.select({
-          reviewHelpful:      wolfbotReviewsTable.reviewHelpful,
-          reviewIntellectual: wolfbotReviewsTable.reviewIntellectual,
-          reviewLovely:       wolfbotReviewsTable.reviewLovely,
-          reviewSassy:        wolfbotReviewsTable.reviewSassy,
+          review:        wolfbotReviewsTable.review,
+          reviewRating:  wolfbotReviewsTable.reviewRating,
+          reviewHelpful: wolfbotReviewsTable.reviewHelpful,
+          reviewSassy:   wolfbotReviewsTable.reviewSassy,
         })
           .from(wolfbotReviewsTable)
           .where(eq(wolfbotReviewsTable.postId, post.id))
