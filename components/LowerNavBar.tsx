@@ -8,7 +8,7 @@ import {
   Home, Sunrise, Pencil, ShoppingBag, User, UserCircle2, Settings,
   Share2, Download, ArrowLeft, ChevronLeft, ChevronRight,
   LayoutDashboard, BadgeInfo, Bot, Plus, Building2, Rss, BookOpen, Menu, X, Search,
-  TrendingUp, Trophy, Sparkles, ShoppingCart, MessageSquare, Code2, FileText,
+  TrendingUp, Trophy, Sparkles, ShoppingCart, MessageSquare, Code2, FileText, Shield,
 } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 import { signInWithGoogle, signInWithGitHub } from '@/lib/actions/oauth'
@@ -61,9 +61,10 @@ const PAGE_GROUPS: PageGroup[] = [
     title: 'Your Space',
     color: '#4A7FA5',
     links: [
-      { href: '/',         label: 'Feed',            icon: <Home         size={16} strokeWidth={1.5} /> },
-      { href: '/write',    label: 'Write a Journal', icon: <Pencil       size={16} strokeWidth={1.5} /> },
-      { href: '/discover', label: 'Discover',        icon: <BadgeInfo    size={16} strokeWidth={1.5} /> },
+      { href: '/',                label: 'Feed',            icon: <Home         size={16} strokeWidth={1.5} /> },
+      { href: '/write',           label: 'Write a Journal', icon: <Pencil       size={16} strokeWidth={1.5} /> },
+      { href: '/subscriptions',   label: 'Subscriptions',   icon: <Sparkles     size={16} strokeWidth={1.5} /> },
+      { href: '/discover',        label: 'Discover',        icon: <BadgeInfo    size={16} strokeWidth={1.5} /> },
     ],
   },
   {
@@ -105,7 +106,8 @@ const PAGE_GROUPS: PageGroup[] = [
     title: 'Legal',
     color: '#909090',
     links: [
-      { href: '/terms', label: 'Terms', icon: <FileText size={16} strokeWidth={1.5} /> },
+      { href: '/terms',       label: 'Terms',       icon: <FileText size={16} strokeWidth={1.5} /> },
+      { href: '/data-policy', label: 'Data Policy', icon: <Shield   size={16} strokeWidth={1.5} /> },
     ],
   },
 ]
