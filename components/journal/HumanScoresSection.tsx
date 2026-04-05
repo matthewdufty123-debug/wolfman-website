@@ -28,7 +28,12 @@ function getScaleColor(value: number, isStress = false): string {
   return `rgb(${rVal},${gVal},${bVal})`
 }
 
-// ── Segmented ring — 8 arc segments, animated CCW on reveal ──────────────────
+// ── Segmented ring — 8 arc segments, sequential CCW fill from top ────────────
+//
+// Segments are positioned counter-clockwise from 12 o'clock.
+// Segment 0 is nearest the top; segment 7 completes the ring going left/down/right.
+// On reveal, filled segments animate in order 0→value-1 with staggered delays,
+// creating the effect of the ring filling from zero up to the scored value CCW.
 
 function SegmentedRing({ value, color, size = 64, revealed }: {
   value: number
@@ -39,11 +44,12 @@ function SegmentedRing({ value, color, size = 64, revealed }: {
   const cx = size / 2
   const cy = size / 2
   const r  = size / 2 - 5
-  const SEGMENTS = 8
-  const GAP_DEG   = 4
-  const ARC_DEG   = 360 / SEGMENTS - GAP_DEG  // 41°
+  const SEGMENTS    = 8
+  const GAP_DEG     = 4
+  const ARC_DEG     = 360 / SEGMENTS - GAP_DEG  // 41° per segment
+  const STAGGER_S   = 0.13  // seconds between each segment starting
 
-  // Arc length for dasharray (circumference fraction)
+  // True arc length for strokeDasharray
   const arcLength = (ARC_DEG / 360) * 2 * Math.PI * r
 
   function toXY(deg: number) {
@@ -51,14 +57,15 @@ function SegmentedRing({ value, color, size = 64, revealed }: {
     return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
   }
 
+  // Segments go CCW from top: segment i starts just CCW of 12 o'clock.
+  // Path drawn CCW (sweep-flag 0) so dashoffset reveals from the 12-o'clock end
+  // toward the CCW end, matching the fill direction.
   function arcPath(i: number) {
-    const start = i * 45 + GAP_DEG / 2
-    const end   = start + ARC_DEG
-    const s = toXY(start)
-    const e = toXY(end)
-    // Reversed path: start from the clockwise-end and sweep counter-clockwise back to start.
-    // sweep-flag 0 = CCW. This makes the stroke-dashoffset animation grow anti-clockwise.
-    return `M ${e.x.toFixed(2)} ${e.y.toFixed(2)} A ${r} ${r} 0 0 0 ${s.x.toFixed(2)} ${s.y.toFixed(2)}`
+    const startAngle = -(i * 45 + GAP_DEG / 2)
+    const endAngle   = startAngle - ARC_DEG
+    const s = toXY(startAngle)
+    const e = toXY(endAngle)
+    return `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${r} ${r} 0 0 0 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`
   }
 
   return (
@@ -79,7 +86,7 @@ function SegmentedRing({ value, color, size = 64, revealed }: {
               strokeDashoffset={isFilled ? (revealed ? 0 : arcLength) : undefined}
               style={isFilled ? {
                 transition: revealed
-                  ? 'stroke-dashoffset 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0s'
+                  ? `stroke-dashoffset 0.45s cubic-bezier(0.16, 1, 0.3, 1) ${i * STAGGER_S}s`
                   : 'none',
               } : undefined}
             />
