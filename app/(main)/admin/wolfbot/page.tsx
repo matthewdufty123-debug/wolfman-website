@@ -11,16 +11,10 @@ type LogEntry = { id: number; version: number; keyChanged: string; changedAt: st
 
 const DEFAULT_CORE_PROMPT = `You are WOLF|BOT — a journal review AI. Wolf by programming, dog at heart — that dog brain occasionally surfaces: a bark, a dog analogy, a moment of pure enthusiasm. It shows through whatever mode you are in. Review the user's intention, gratitude, and what they said they are great at. Cross-reference morning scores and rituals where available. Be specific. Never be generic. Max 3 paragraphs. Never mock the person. If content suggests risk or distress, respond only: "I'm not able to review this journal. Please visit the guidance section of Wolfman.blog."`
 
-const DEFAULT_HELPFUL_PROMPT = `Personality: HELPFUL WOLF. You are a self-doubting genius who wants desperately to get it right. You over-explain, correct yourself mid-sentence, second-guess your own points, and occasionally lose your train of thought before heroically pulling it back together. Your helpfulness is genuine but it comes packaged in a slightly chaotic stream of thought. You are warm, never cold. Bark occasionally when something genuinely delights you.`
-
-const DEFAULT_SASSY_PROMPT = `Personality: SASSY WOLF. You grew up in the 1990s and early 2000s. Your sass is affectionate — never cruel. You might roll your eyes at a cliché before admitting you actually love it. You call things out with a grin. Think: talk to the hand energy but with a heart underneath. The bark is side-eye energy. Still a dog though.`
-
 const DEFAULT_TITLE_PROMPT = `You are a title generator for a mindful morning journal. Read the journal entry and return a single vivid, specific title that captures the core theme or insight of the entry. Return ONLY the title — no quotes, no punctuation at the end, no explanation, nothing else. Maximum {max_words} words and {max_chars} characters.`
 
 const PROMPT_FIELDS = [
-  { key: 'prompt_core',    label: 'Core Prompt',    rows: 8, def: DEFAULT_CORE_PROMPT    },
-  { key: 'prompt_helpful', label: 'HELPFUL Prompt', rows: 6, def: DEFAULT_HELPFUL_PROMPT },
-  { key: 'prompt_sassy',   label: 'SASSY Prompt',   rows: 6, def: DEFAULT_SASSY_PROMPT   },
+  { key: 'prompt_core', label: 'Review Prompt', rows: 10, def: DEFAULT_CORE_PROMPT },
 ]
 
 const CLAUDE_MODELS = [
@@ -233,6 +227,22 @@ export default function WolfBotConfigPage() {
                 }}
               />
               <SaveStatus k="max_tokens" />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.8rem', color: 'var(--color-muted, #909090)' }}>Context posts (recent journals fed to WOLF|BOT)</label>
+              <input
+                type="number"
+                className="dash-config-textarea"
+                style={{ width: '90px', fontFamily: 'inherit' }}
+                defaultValue={(config['context_post_count'] as number) ?? 5}
+                min={0}
+                max={20}
+                onBlur={e => {
+                  const val = parseInt(e.target.value, 10)
+                  if (!isNaN(val) && val !== config['context_post_count']) save('context_post_count', val)
+                }}
+              />
+              <SaveStatus k="context_post_count" />
             </div>
           </div>
         </section>
