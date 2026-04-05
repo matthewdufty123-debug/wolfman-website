@@ -43,6 +43,8 @@ export interface JournalPageProps {
   nextPost: { slug: string; username: string } | null
   wolfbotReviews: WolfBotReviews | null
   promptVersion: number
+  pixelGrid?:    number[][]
+  pixelPalette?: Record<string, string>
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -56,6 +58,8 @@ export default function JournalPage({
   nextPost,
   wolfbotReviews,
   promptVersion,
+  pixelGrid,
+  pixelPalette,
 }: JournalPageProps) {
   const { data: session } = useSession()
   const isOwner = session?.user?.id != null && session.user.id === authorId
@@ -103,6 +107,8 @@ export default function JournalPage({
             isOwnPost={isOwner}
             postId={post.id ?? ''}
             promptVersion={promptVersion}
+            pixelGrid={pixelGrid}
+            pixelPalette={pixelPalette}
           />
 
         </div>

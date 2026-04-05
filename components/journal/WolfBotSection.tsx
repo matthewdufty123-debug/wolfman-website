@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 import WolfBotIcon from '@/components/WolfBotIcon'
 import WolfBotLoadingOverlay from '@/components/WolfBotLoadingOverlay'
 
+type PixelGrid    = number[][]
+type PixelPalette = Record<string, string>
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export type WolfBotReviews = {
@@ -21,6 +24,8 @@ interface Props {
   isOwnPost:      boolean
   postId:         string
   promptVersion:  number
+  pixelGrid?:     PixelGrid
+  pixelPalette?:  PixelPalette
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -51,35 +56,6 @@ const RATINGS = [
   { value: 2, emoji: '👍', label: 'Good review' },
   { value: 3, emoji: '🔥', label: 'Nailed it' },
 ]
-
-// ── Curated voice slots ────────────────────────────────────────────────────────
-
-type VoiceSlot = { id: string; label: string; patterns: string[] }
-
-const VOICE_SLOTS: VoiceSlot[] = [
-  { id: 'default',   label: 'DEFAULT',   patterns: [] },
-  { id: 'daniel',    label: 'DANIEL',    patterns: ['daniel'] },
-  { id: 'samantha',  label: 'SAMANTHA',  patterns: ['samantha'] },
-  { id: 'british',   label: 'BRITISH',   patterns: ['google uk english', 'kate', 'serena', 'english (united kingdom)', 'en-gb'] },
-  { id: 'google-us', label: 'GOOGLE US', patterns: ['google us english', 'google american', 'english (united states)', 'en-us'] },
-]
-
-const VOICE_PREF_KEY = 'wb-voice-slot'
-
-function matchVoice(slot: VoiceSlot, voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
-  if (slot.patterns.length === 0) return null
-  const lower = voices.map(v => ({ voice: v, name: v.name.toLowerCase() }))
-  for (const pattern of slot.patterns) {
-    const match = lower.find(v => v.name.includes(pattern))
-    if (match) return match.voice
-  }
-  return null
-}
-
-function buildFallbackSlots(voices: SpeechSynthesisVoice[]): VoiceSlot[] {
-  const english = voices.filter(v => v.lang.startsWith('en')).slice(0, 4)
-  return english.map(v => ({ id: v.voiceURI, label: v.name.toUpperCase().slice(0, 16), patterns: [v.name.toLowerCase()] }))
-}
 
 // ── Rating widget ─────────────────────────────────────────────────────────────
 
@@ -132,47 +108,25 @@ function ReviewTerminal({
   promptVersion,
   postId,
   isOwnPost,
+  pixelGrid,
+  pixelPalette,
 }: {
-  review:       string
-  reviewRating: number | null
+  review:        string
+  reviewRating:  number | null
   promptVersion: number
   postId:        string
   isOwnPost:     boolean
+  pixelGrid?:    PixelGrid
+  pixelPalette?: PixelPalette
 }) {
-  const sectionRef     = useRef<HTMLDivElement>(null)
-  const [revealed,     setRevealed]     = useState(false)
-  const [bootLine,     setBootLine]     = useState(0)
-  const [displayedBoot,setDisplayedBoot]= useState('')
-  const [bootDone,     setBootDone]     = useState(false)
-  const [displayedText,setDisplayedText]= useState('')
-  const [typingDone,   setTypingDone]   = useState(false)
-  const [cursorVisible,setCursorVisible]= useState(true)
-  const [speaking,     setSpeaking]     = useState(false)
-  const [availableSlots,setAvailableSlots] = useState<VoiceSlot[]>([VOICE_SLOTS[0]])
-  const [selectedSlotId,setSelectedSlotId] = useState<string>(() =>
-    typeof window !== 'undefined' ? (localStorage.getItem(VOICE_PREF_KEY) ?? 'default') : 'default'
-  )
-  const voiceListRef = useRef<SpeechSynthesisVoice[]>([])
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return
-    function load() {
-      const all = window.speechSynthesis.getVoices()
-      if (!all.length) return
-      voiceListRef.current = all
-      const curated = VOICE_SLOTS.filter(s => s.patterns.length === 0 || matchVoice(s, all) !== null)
-      setAvailableSlots(curated.length > 1 ? curated : [VOICE_SLOTS[0], ...buildFallbackSlots(all)])
-    }
-    load()
-    window.speechSynthesis.addEventListener('voiceschanged', load)
-    return () => window.speechSynthesis.removeEventListener('voiceschanged', load)
-  }, [])
-
-  function handleVoiceChange(slotId: string) {
-    setSelectedSlotId(slotId)
-    localStorage.setItem(VOICE_PREF_KEY, slotId)
-    if (speaking) { window.speechSynthesis.cancel(); setSpeaking(false) }
-  }
+  const sectionRef      = useRef<HTMLDivElement>(null)
+  const [revealed,      setRevealed]      = useState(false)
+  const [bootLine,      setBootLine]      = useState(0)
+  const [displayedBoot, setDisplayedBoot] = useState('')
+  const [bootDone,      setBootDone]      = useState(false)
+  const [displayedText, setDisplayedText] = useState('')
+  const [typingDone,    setTypingDone]    = useState(false)
+  const [cursorVisible, setCursorVisible] = useState(true)
 
   useEffect(() => {
     const el = sectionRef.current
@@ -188,7 +142,7 @@ function ReviewTerminal({
 
   const BOOT_LINES = makeBootLines(promptVersion)
 
-  // Boot sequence
+  // Boot sequence — auto-starts on scroll into view
   useEffect(() => {
     if (!revealed) return
     const line = BOOT_LINES[bootLine] ?? null
@@ -203,7 +157,7 @@ function ReviewTerminal({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revealed, bootLine])
 
-  // Typewriter
+  // Typewriter — auto-starts after boot
   useEffect(() => {
     if (!bootDone) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -219,23 +173,6 @@ function ReviewTerminal({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bootDone])
 
-  useEffect(() => { return () => { if (typeof window !== 'undefined') window.speechSynthesis?.cancel() } }, [])
-
-  function handleSpeak() {
-    if (!window.speechSynthesis) return
-    if (speaking) { window.speechSynthesis.cancel(); setSpeaking(false); return }
-    const utterance = new SpeechSynthesisUtterance(review)
-    utterance.rate  = 0.88
-    utterance.pitch = 0.75
-    const slot = VOICE_SLOTS.find(s => s.id === selectedSlotId)
-    if (slot) { const voice = matchVoice(slot, voiceListRef.current); if (voice) utterance.voice = voice }
-    utterance.onend  = () => setSpeaking(false)
-    utterance.onerror = () => setSpeaking(false)
-    window.speechSynthesis.cancel()
-    window.speechSynthesis.speak(utterance)
-    setSpeaking(true)
-  }
-
   return (
     <div
       ref={sectionRef}
@@ -247,22 +184,11 @@ function ReviewTerminal({
       }}
     >
       <div className="wolfbot-integrated-header">
-        <WolfBotIcon size={72} />
+        <WolfBotIcon size={72} grid={pixelGrid} palette={pixelPalette} />
         <div className="wolfbot-integrated-title">
           <span className="wolfbot-integrated-name">WOLF|BOT</span>
           <span className="wolfbot-integrated-sub">REVIEW MODE</span>
         </div>
-        {bootDone && typeof window !== 'undefined' && !!window.speechSynthesis && (
-          <button
-            type="button"
-            className={`wb-play-circle${speaking ? ' wb-play-circle--speaking' : ''}`}
-            onClick={handleSpeak}
-            title={speaking ? 'Stop reading' : 'Read aloud'}
-          >
-            <span className="wb-play-circle-icon">{speaking ? '■' : '▶'}</span>
-            <span className="wb-play-circle-label">{speaking ? 'stop' : 'play'}</span>
-          </button>
-        )}
       </div>
 
       <div className="wolfbot-bubble-inner">
@@ -284,26 +210,6 @@ function ReviewTerminal({
         {/* Review text */}
         {bootDone && (
           <>
-            {typeof window !== 'undefined' && !!window.speechSynthesis && (
-              <div className="wb-voice-row">
-                <span className="wbt-prompt">&#62;&nbsp;</span>
-                <span className="wb-voice-label">VOICE</span>
-                <div className="wb-voice-select-wrap">
-                  <select
-                    className="wb-voice-select"
-                    value={selectedSlotId}
-                    onChange={e => handleVoiceChange(e.target.value)}
-                    aria-label="Select WOLF|BOT voice"
-                  >
-                    {availableSlots.map(slot => (
-                      <option key={slot.id} value={slot.id}>{slot.label}</option>
-                    ))}
-                  </select>
-                  <span className="wb-voice-chevron" aria-hidden="true">▾</span>
-                </div>
-              </div>
-            )}
-
             <p className="wolfbot-terminal-line wolfbot-terminal-review">
               <span className="wbt-prompt">&#62;&nbsp;</span>
               <span className="wbt-body">{displayedText}</span>
@@ -323,7 +229,7 @@ function ReviewTerminal({
 
 // ── Trigger terminal — no review yet, own post ────────────────────────────────
 
-function TriggerTerminal({ postId }: { postId: string }) {
+function TriggerTerminal({ postId, pixelGrid, pixelPalette }: { postId: string; pixelGrid?: PixelGrid; pixelPalette?: PixelPalette }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState(false)
@@ -350,7 +256,7 @@ function TriggerTerminal({ postId }: { postId: string }) {
       <WolfBotLoadingOverlay open={loading} />
       <div className="wolfbot-integrated">
         <div className="wolfbot-integrated-header">
-          <WolfBotIcon size={72} />
+          <WolfBotIcon size={72} grid={pixelGrid} palette={pixelPalette} />
           <div className="wolfbot-integrated-title">
             <span className="wolfbot-integrated-name">WOLF|BOT</span>
             <span className="wolfbot-integrated-sub">REVIEW MODE</span>
@@ -380,7 +286,9 @@ function TriggerTerminal({ postId }: { postId: string }) {
 
 // ── Legacy terminal — old synthesis-only reviews ──────────────────────────────
 
-function LegacyTerminal({ text, promptVersion }: { text: string; promptVersion: number }) {
+function LegacyTerminal({ text, promptVersion, pixelGrid, pixelPalette }: {
+  text: string; promptVersion: number; pixelGrid?: PixelGrid; pixelPalette?: PixelPalette
+}) {
   const sectionRef  = useRef<HTMLDivElement>(null)
   const [revealed,  setRevealed]  = useState(false)
   const [phase,     setPhase]     = useState<'idle' | 'booting' | 'typing' | 'done'>('idle')
@@ -388,7 +296,6 @@ function LegacyTerminal({ text, promptVersion }: { text: string; promptVersion: 
   const [displayedBoot,   setDisplayedBoot]   = useState('')
   const [displayedReview, setDisplayedReview] = useState('')
   const [cursorVisible,   setCursorVisible]   = useState(true)
-  const [quip] = useState(() => WOLFBOT_QUIPS[Math.floor(Math.random() * WOLFBOT_QUIPS.length)])
 
   useEffect(() => {
     const el = sectionRef.current
@@ -404,13 +311,15 @@ function LegacyTerminal({ text, promptVersion }: { text: string; promptVersion: 
 
   const BOOT_LINES = makeBootLines(promptVersion)
 
-  function startReview() {
-    if (phase !== 'idle') return
+  // Auto-start when scrolled into view
+  useEffect(() => {
+    if (!revealed || phase !== 'idle') return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setPhase('done'); setDisplayedReview(text); setCursorVisible(false); return
     }
     setPhase('booting'); setCursorVisible(true); setDisplayedBoot(''); setBootLine(0)
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealed])
 
   useEffect(() => {
     if (phase !== 'booting') return
@@ -447,28 +356,14 @@ function LegacyTerminal({ text, promptVersion }: { text: string; promptVersion: 
       }}
     >
       <div className="wolfbot-integrated-header">
-        <WolfBotIcon size={72} />
+        <WolfBotIcon size={72} grid={pixelGrid} palette={pixelPalette} />
         <div className="wolfbot-integrated-title">
           <span className="wolfbot-integrated-name">WOLF|BOT</span>
           <span className="wolfbot-integrated-sub">REVIEW MODE</span>
         </div>
       </div>
       <div className="wolfbot-bubble-inner">
-        <button
-          className="wolfbot-yellow-btn"
-          onClick={startReview}
-          disabled={phase !== 'idle'}
-        >
-          {phase === 'idle' ? '▶ REVIEW JOURNAL' : phase === 'done' ? '✦ REVIEW COMPLETE' : '▌ REVIEWING...'}
-        </button>
-        {phase === 'idle' && (
-          <p className="wolfbot-terminal-line">
-            <span className="wbt-prompt">&#62;&nbsp;</span>
-            <span className="wbt-quip">{quip}</span>
-            <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
-          </p>
-        )}
-        {phase !== 'idle' && (
+        {(phase === 'booting' || phase === 'typing' || phase === 'done') && (
           <>
             {BOOT_LINES.slice(0, bootLine).map((line, idx) => (
               <p key={idx} className="wolfbot-terminal-line">
@@ -499,7 +394,7 @@ function LegacyTerminal({ text, promptVersion }: { text: string; promptVersion: 
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
-export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, postId, promptVersion }: Props) {
+export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, postId, promptVersion, pixelGrid, pixelPalette }: Props) {
   // New review takes priority
   const hasReview = !!wolfbotReviews?.review
   // Legacy: old multi-personality reviews
@@ -518,16 +413,20 @@ export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, p
           promptVersion={promptVersion}
           postId={postId}
           isOwnPost={isOwnPost}
+          pixelGrid={pixelGrid}
+          pixelPalette={pixelPalette}
         />
       ) : hasLegacy ? (
         <LegacyTerminal
           text={wolfbotReviews!.reviewHelpful || wolfbotReviews!.reviewSassy || ''}
           promptVersion={promptVersion}
+          pixelGrid={pixelGrid}
+          pixelPalette={pixelPalette}
         />
       ) : hasSynthesis ? (
-        <LegacyTerminal text={synthesis!} promptVersion={promptVersion} />
+        <LegacyTerminal text={synthesis!} promptVersion={promptVersion} pixelGrid={pixelGrid} pixelPalette={pixelPalette} />
       ) : (
-        <TriggerTerminal postId={postId} />
+        <TriggerTerminal postId={postId} pixelGrid={pixelGrid} pixelPalette={pixelPalette} />
       )}
     </section>
   )

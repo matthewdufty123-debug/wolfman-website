@@ -88,7 +88,7 @@ export default async function PostPage({
   const userId = session?.user?.id ?? null
 
   // Fetch morning state, day scores, post timestamps, and adjacent posts
-  const [ms, ds, postRow, wbr, promptVersionRow] = post.id
+  const [ms, ds, postRow, wbr, promptVersionRow, pixelGridRow, pixelPaletteRow] = post.id
     ? await Promise.all([
         db.select().from(morningState).where(eq(morningState.postId, post.id)).then(r => r[0] ?? null),
         db.select().from(dayScores).where(eq(dayScores.postId, post.id)).then(r => r[0] ?? null),
@@ -114,10 +114,20 @@ export default async function PostPage({
           .from(wolfbotConfig)
           .where(eq(wolfbotConfig.key, 'prompt_version'))
           .then(r => r[0] ?? null),
+        db.select({ value: wolfbotConfig.value })
+          .from(wolfbotConfig)
+          .where(eq(wolfbotConfig.key, 'pixel_grid'))
+          .then(r => r[0] ?? null),
+        db.select({ value: wolfbotConfig.value })
+          .from(wolfbotConfig)
+          .where(eq(wolfbotConfig.key, 'pixel_palette'))
+          .then(r => r[0] ?? null),
       ])
-    : [null, null, null, null, null]
+    : [null, null, null, null, null, null, null]
 
   const promptVersion = (promptVersionRow?.value as number) ?? 1
+  const pixelGrid    = pixelGridRow?.value    ? (pixelGridRow.value    as number[][])           : undefined
+  const pixelPalette = pixelPaletteRow?.value ? (pixelPaletteRow.value as Record<string,string>) : undefined
 
   const postDates = postRow
     ? { createdAt: postRow.createdAt.toISOString(), updatedAt: postRow.updatedAt.toISOString() }
@@ -180,6 +190,8 @@ export default async function PostPage({
         nextPost={nextPost}
         wolfbotReviews={wbr}
         promptVersion={promptVersion}
+        pixelGrid={pixelGrid}
+        pixelPalette={pixelPalette}
       />
     </>
   )
