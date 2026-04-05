@@ -107,10 +107,43 @@ function extractYouTubeId(url: string): string | null {
 function ScaleSelector({ label, value, onChange, color, labels }: {
   label: string; value: number | null; onChange: (n: number | null) => void; color: string; labels: string[]
 }) {
+  const pillsRef = useRef<HTMLDivElement>(null)
+  const isDragging = useRef(false)
+
+  function valueFromTouchX(clientX: number): number {
+    const rect = pillsRef.current?.getBoundingClientRect()
+    if (!rect) return 1
+    const fraction = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
+    return Math.max(1, Math.min(8, Math.ceil(fraction * 8)))
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    isDragging.current = true
+    const n = valueFromTouchX(e.touches[0].clientX)
+    onChange(n)
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (!isDragging.current) return
+    e.preventDefault()
+    const n = valueFromTouchX(e.touches[0].clientX)
+    onChange(n)
+  }
+
+  function handleTouchEnd() {
+    isDragging.current = false
+  }
+
   return (
     <div className="pf-scale">
       <span className="pf-scale-label">{label}</span>
-      <div className="pf-scale-pills">
+      <div
+        ref={pillsRef}
+        className="pf-scale-pills"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         {[1, 2, 3, 4, 5, 6, 7, 8].map(n => {
           const isFilled = value !== null && n <= value
           return (
