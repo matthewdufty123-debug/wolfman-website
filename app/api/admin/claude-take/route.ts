@@ -69,10 +69,13 @@ export async function POST(request: Request) {
 
   if (morning) {
     contextParts.push(`\nMORNING STATE (captured at publish time):`)
-    contextParts.push(`Brain Activity: ${morning.brainScale}/6 (1=Peaceful, 6=Manic)`)
-    contextParts.push(`Body Energy: ${morning.bodyScale}/6 (1=Lethargic, 6=Buzzing)`)
+    contextParts.push(`Brain Activity: ${morning.brainScale}/8 (1=Completely Silent, 8=Totally Manic)`)
+    contextParts.push(`Body Energy: ${morning.bodyScale}/8 (1=Nothing to Give, 8=Absolutely Buzzing)`)
     if (morning.happyScale != null) {
-      contextParts.push(`Happy Scale: ${morning.happyScale}/6 (1=Far from happy, 6=Joyful)`)
+      contextParts.push(`Happy: ${morning.happyScale}/8 (1=Completely Lost, 8=Absolutely Joyful)`)
+    }
+    if (morning.stressScale != null) {
+      contextParts.push(`Stress State: ${morning.stressScale}/8 (1=Completely Overwhelmed, 8=Hunt Mode)`)
     }
     contextParts.push(`Routine completed:\n${routineLines}`)
   }

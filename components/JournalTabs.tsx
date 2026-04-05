@@ -48,9 +48,9 @@ export interface JournalTabsProps {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const BRAIN_LABELS: [string, string, string, string, string, string] = ['Peaceful', 'Quiet', 'Active', 'Busy', 'Racing', 'Manic']
-const BODY_LABELS:  [string, string, string, string, string, string] = ['Lethargic', 'Slow', 'Steady', 'Energised', 'Strong', 'Buzzing']
-const HAPPY_LABELS: [string, string, string, string, string, string] = ['Far from happy', 'Low', 'Okay', 'Good', 'Happy', 'Joyful']
+const BRAIN_LABELS: [string,string,string,string,string,string,string,string] = ['Completely Silent','Very Peaceful','Quite Quiet','Chill','Active','Busy','Hyper Focused','Totally Manic']
+const BODY_LABELS:  [string,string,string,string,string,string,string,string] = ['Nothing to Give','Running Empty','Sluggish','Slow','Steady','Energised','Firing Hard','Absolutely Buzzing']
+const HAPPY_LABELS: [string,string,string,string,string,string,string,string] = ['Completely Lost','Struggling','Bit Low','Flat','Okay','Happy','Bike Smiles','Absolutely Joyful']
 
 const COMPLETENESS_LABELS: Record<string, string> = {
   post_only:            'from intention alone',

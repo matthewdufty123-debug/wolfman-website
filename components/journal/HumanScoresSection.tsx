@@ -5,15 +5,15 @@ import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
 
 // ── Labels for each scale ───────────────────────────────────────────────────
 
-const BRAIN_LABELS = ['Peaceful', 'Quiet', 'Active', 'Busy', 'Racing', 'Manic']
-const BODY_LABELS  = ['Lethargic', 'Slow', 'Steady', 'Energised', 'Strong', 'Buzzing']
-const HAPPY_LABELS = ['Far from happy', 'Low', 'Okay', 'Good', 'Happy', 'Joyful']
-const STRESS_LABELS = ['Calm', 'Relaxed', 'Mild', 'Tense', 'Stressed', 'Overwhelmed']
+const BRAIN_LABELS  = ['Completely Silent', 'Very Peaceful', 'Quite Quiet', 'Chill', 'Active', 'Busy', 'Hyper Focused', 'Totally Manic']
+const BODY_LABELS   = ['Nothing to Give', 'Running Empty', 'Sluggish', 'Slow', 'Steady', 'Energised', 'Firing Hard', 'Absolutely Buzzing']
+const HAPPY_LABELS  = ['Completely Lost', 'Struggling', 'Bit Low', 'Flat', 'Okay', 'Happy', 'Bike Smiles', 'Absolutely Joyful']
+const STRESS_LABELS = ['Completely Overwhelmed', 'Anxious', 'Stressed', 'Unsettled', 'Peaceful', 'Focused', 'Primed', 'Hunt Mode']
 
-// ── Colour interpolation — 1 = pale blue, 6 = intense (blue or crimson for stress) ──
+// ── Colour interpolation — 1 = pale blue, 8 = intense (blue or crimson for stress) ──
 
 function getScaleColor(value: number, isStress = false): string {
-  const t = (value - 1) / 5  // 0 at value=1, 1 at value=6
+  const t = (value - 1) / 7  // 0 at value=1, 1 at value=8
   if (isStress) {
     // Pale blue → copper/terracotta: #A8D0E0 → #C87840 (warm, not alarming)
     const rVal = Math.round(0xa8 + (0xc8 - 0xa8) * t)
@@ -28,7 +28,7 @@ function getScaleColor(value: number, isStress = false): string {
   return `rgb(${rVal},${gVal},${bVal})`
 }
 
-// ── Segmented ring — 6 arc segments, animated CCW on reveal ──────────────────
+// ── Segmented ring — 8 arc segments, animated CCW on reveal ──────────────────
 
 function SegmentedRing({ value, color, size = 64, revealed }: {
   value: number
@@ -39,9 +39,9 @@ function SegmentedRing({ value, color, size = 64, revealed }: {
   const cx = size / 2
   const cy = size / 2
   const r  = size / 2 - 5
-  const SEGMENTS = 6
-  const GAP_DEG   = 5
-  const ARC_DEG   = 360 / SEGMENTS - GAP_DEG  // 55°
+  const SEGMENTS = 8
+  const GAP_DEG   = 4
+  const ARC_DEG   = 360 / SEGMENTS - GAP_DEG  // 41°
 
   // Arc length for dasharray (circumference fraction)
   const arcLength = (ARC_DEG / 360) * 2 * Math.PI * r
@@ -52,7 +52,7 @@ function SegmentedRing({ value, color, size = 64, revealed }: {
   }
 
   function arcPath(i: number) {
-    const start = i * 60 + GAP_DEG / 2
+    const start = i * 45 + GAP_DEG / 2
     const end   = start + ARC_DEG
     const s = toXY(start)
     const e = toXY(end)

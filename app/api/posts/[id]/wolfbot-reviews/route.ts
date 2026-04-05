@@ -94,7 +94,7 @@ export async function POST(
     `Today's Intention:\n${intention}`,
     grateful ? `\nI'm Grateful For:\n${grateful}` : '',
     greatAt ? `\nSomething I'm Great At:\n${greatAt}` : '',
-    ms ? `\nMorning scores — Brain: ${ms.brainScale}/6, Body: ${ms.bodyScale}/6, Happy: ${ms.happyScale ?? '—'}/6, Stress: ${ms.stressScale ?? '—'}/6` : '',
+    ms ? `\nMorning scores — Brain: ${ms.brainScale}/8 (1=Completely Silent, 8=Totally Manic), Body: ${ms.bodyScale}/8 (1=Nothing to Give, 8=Absolutely Buzzing), Happy: ${ms.happyScale ?? '—'}/8 (1=Completely Lost, 8=Absolutely Joyful), Stress State: ${ms.stressScale ?? '—'}/8 (1=Completely Overwhelmed, 8=Hunt Mode)` : '',
     routineLines ? `Rituals completed: ${routineLines}` : '',
     post.eveningReflection ? `\nEvening reflection:\n${post.eveningReflection}` : '',
     post.feelAboutToday ? `Feel about today: ${post.feelAboutToday}/6` : '',
