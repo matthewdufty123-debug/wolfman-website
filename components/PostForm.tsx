@@ -442,6 +442,7 @@ export default function PostForm({
               placeholder="Give this day a title…"
               value={title}
               onChange={e => { setTitle(e.target.value); markDirty() }}
+              onBlur={() => { if (isDirty && title.trim() && postId) saveDraft(currentData(), false) }}
             />
             {suggestionsLeft > 0 ? (
               <button
