@@ -2,7 +2,7 @@
  * nav-config.ts — Navigation slot configuration for all named layouts.
  *
  * This is the TypeScript source of truth that UpperNavBar and LowerNavBar read.
- * The human-readable spec lives in docs/Navigation.md — keep them in sync.
+ * The human-readable spec lives in docs/NAVIGATION.md — keep them in sync.
  *
  * Slot numbering:
  *   Lower bar: NBLS1 = index 0 … NBLS5 = index 4
