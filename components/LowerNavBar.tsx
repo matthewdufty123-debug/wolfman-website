@@ -131,6 +131,7 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
   const [morePagesOpen, setMorePagesOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
@@ -190,58 +191,116 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
     } catch {}
   }
 
-  function handleExport() {
+  const SCALE_META: Record<string, { emoji: string; display: string }> = {
+    'Brain':  { emoji: '🧠', display: 'Brain Energy' },
+    'Body':   { emoji: '💪', display: 'Body Energy' },
+    'Happy':  { emoji: '😊', display: 'Happiness' },
+    'Stress': { emoji: '🌊', display: 'Stress' },
+  }
+
+  const RITUAL_META: Record<string, { emoji: string; hashtag: string }> = {
+    'Sunlight':         { emoji: '🌅', hashtag: '#sunlight' },
+    'Breathwork':       { emoji: '🌬️', hashtag: '#breathwork' },
+    'Ceremonial Drink': { emoji: '🍫', hashtag: '#ceremonialdrink' },
+    'Still Meditation': { emoji: '🧘', hashtag: '#meditation' },
+    'Cold Shower':      { emoji: '🧊', hashtag: '#coldshower' },
+    'Outside Walk':     { emoji: '🌿', hashtag: '#morningwalk' },
+    'Animal Love':      { emoji: '🐾', hashtag: '#animallove' },
+    'Drink Caffeine':   { emoji: '☕', hashtag: '#morningcoffee' },
+    'Yoga Movement':    { emoji: '🧘', hashtag: '#yoga' },
+    'Workout':          { emoji: '💪', hashtag: '#morningworkout' },
+  }
+
+  async function handleCopyForSocial() {
+    const SEP = '🟦🟫🟦🟫🟦🟫🟦🟫🟦🟫🟦'
     const lines: string[] = []
-    const RULE_HEAVY = '═'.repeat(50)
-    const RULE_LIGHT = '─'.repeat(50)
 
-    // Header
-    lines.push(RULE_HEAVY)
-    lines.push('  WOLFMAN MORNING JOURNAL')
-    lines.push(RULE_HEAVY)
-    lines.push('')
+    // Today's Intention
+    let intentionText = ''
+    document.querySelectorAll('.post-section').forEach(sec => {
+      const label = sec.querySelector('.post-section-label')?.textContent?.trim() ?? ''
+      if (label === "Today's Intention") {
+        intentionText = sec.querySelector('.post-body')?.textContent?.trim() ?? ''
+      }
+    })
 
-    // Title + date
-    const titleEl = document.querySelector('.post-reading-end-title')
-    const dateEl  = document.querySelector('.post-reading-end-date')
-    if (titleEl?.textContent) lines.push(titleEl.textContent.trim())
-    if (dateEl?.textContent)  lines.push(dateEl.textContent.trim())
-    lines.push('')
+    if (intentionText) {
+      lines.push(`Today's Intention : ${intentionText}`)
+      lines.push('')
+      lines.push('...')
+      lines.push('...')
+      lines.push('...')
+      lines.push(`Read more — full journal including What I'm Grateful For and Something I'm Great At at wolfman.app${pathname}`)
+    }
 
-    // Journal sections
-    const sections = document.querySelectorAll('.post-section')
-    if (sections.length > 0) {
-      sections.forEach(sec => {
-        const label = sec.querySelector('.post-section-label')?.textContent?.trim() ?? ''
-        const body  = sec.querySelector('.post-body')?.textContent?.trim() ?? ''
+    // Scales
+    const scales: { title: string; word: string }[] = []
+    document.querySelectorAll('.hss-col').forEach(col => {
+      const title = col.querySelector('.hss-col-title')?.textContent?.trim() ?? ''
+      const word  = col.querySelector('.hss-col-word')?.textContent?.trim() ?? ''
+      if (title && word) scales.push({ title, word })
+    })
+
+    if (scales.length > 0) {
+      lines.push('')
+      lines.push('')
+      lines.push(SEP)
+      lines.push('')
+      lines.push('◼ HOW DID I SHOW UP TODAY? ◼')
+      scales.forEach(({ title, word }) => {
+        const meta = SCALE_META[title]
         lines.push('')
-        lines.push(`✦ ${label} ✦`)
-        lines.push(RULE_LIGHT)
-        lines.push('')
-        lines.push(body)
+        lines.push(`${meta?.emoji ?? '●'} ${meta?.display ?? title} → ${word}`)
       })
-    } else {
-      // Fallback — plain article text
-      const postEl = document.querySelector('.post')
-      if (postEl?.textContent) lines.push(postEl.textContent.trim())
+    }
+
+    // Rituals
+    const ritualLabels: string[] = []
+    document.querySelectorAll('.morning-rituals-grid button').forEach(btn => {
+      const label = btn.querySelector('span')?.textContent?.trim() ?? ''
+      if (label) ritualLabels.push(label)
+    })
+
+    if (ritualLabels.length > 0) {
+      lines.push('')
+      lines.push('')
+      lines.push(SEP)
+      lines.push('')
+      lines.push('◼ MORNING RITUALS COMPLETED ◼')
+      lines.push('')
+      ritualLabels.forEach(label => {
+        const meta = RITUAL_META[label]
+        lines.push(`${meta?.emoji ?? '●'} ${label}`)
+      })
     }
 
     // Footer
     lines.push('')
     lines.push('')
-    lines.push(RULE_HEAVY)
-    lines.push('  Exported from Wolfman.blog')
-    lines.push(`  ${window.location.href}`)
-    lines.push(`  ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`)
-    lines.push(RULE_HEAVY)
+    lines.push(SEP)
+    lines.push('')
+    lines.push('You can start logging your morning information for free at wolfman.app')
+    lines.push('')
+    lines.push('Built by Matthew Wolfman.')
+    lines.push('Journals designed to improve your mornings and create a richer day.')
+    lines.push('Contact me through the DMs.')
 
-    const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${segments[1] ?? 'journal'}.txt`
-    a.click()
-    URL.revokeObjectURL(url)
+    // Hashtags
+    const hashtags = ['#wolfman', '#morningjournal']
+    ritualLabels.forEach(label => {
+      const h = RITUAL_META[label]?.hashtag
+      if (h) hashtags.push(h)
+    })
+
+    lines.push('')
+    lines.push('')
+    lines.push(SEP)
+    lines.push('')
+    lines.push(hashtags.join(' '))
+
+    await navigator.clipboard.writeText(lines.join('\n'))
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   async function handleEmailLogin(e: React.FormEvent) {
@@ -322,8 +381,11 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
             )
           case 'export-txt':
             return (
-              <button key={key} className="nav-slot nav-slot--btn" aria-label="Export as text" onClick={handleExport}>
-                <NavIconEl icon={slot.icon} />
+              <button key={key} className={`nav-slot nav-slot--btn${copied ? ' nav-slot--active' : ''}`} aria-label={copied ? 'Copied!' : 'Copy for social media'} onClick={handleCopyForSocial}>
+                {copied
+                  ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
+                  : <NavIconEl icon={slot.icon} />
+                }
               </button>
             )
           case 'go-back':

@@ -1,7 +1,7 @@
 {
   "name": "wolfman-website",
   "version": "0.1.10",
-  "appVersion": "0.1.10.18",
+  "appVersion": "0.1.10.19",
   "private": true,
   "scripts": {
     "dev": "next dev",
