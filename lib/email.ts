@@ -21,7 +21,7 @@ function emailWrapper(content: string) {
           <tr>
             <td style="background: #193343; padding: 32px 40px; text-align: center;">
               <p style="margin: 0; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(229,203,187,0.6);">Wolfman</p>
-              <p style="margin: 6px 0 0; font-size: 13px; color: rgba(229,203,187,0.4); letter-spacing: 0.06em;">wolfman.blog</p>
+              <p style="margin: 6px 0 0; font-size: 13px; color: rgba(229,203,187,0.4); letter-spacing: 0.06em;">wolfman.app</p>
             </td>
           </tr>
           <tr>
@@ -31,12 +31,12 @@ function emailWrapper(content: string) {
           </tr>
           <tr>
             <td style="padding: 24px 40px 32px; border-top: 1px solid #f0ebe6; text-align: center;">
-              <a href="https://wolfman.blog" style="display: inline-block; margin-bottom: 16px;">
-                <img src="https://wolfman.blog/images/wolfman-icon.png" alt="Wolfman" width="48" height="48" style="border-radius: 50%;" />
+              <a href="https://wolfman.app" style="display: inline-block; margin-bottom: 16px;">
+                <img src="https://wolfman.app/images/wolfman-icon.png" alt="Wolfman" width="48" height="48" style="border-radius: 50%;" />
               </a>
               <p style="margin: 0; font-size: 13px; color: #909090; line-height: 1.6;">
                 Wolfman &mdash; mindful living, made with care.<br>
-                <a href="https://wolfman.blog" style="color: #A0622A; text-decoration: none;">wolfman.blog</a>
+                <a href="https://wolfman.app" style="color: #A0622A; text-decoration: none;">wolfman.app</a>
               </p>
             </td>
           </tr>
@@ -77,15 +77,15 @@ export async function sendBetaWeekNotice({ recipients, betaOpensAt }: BetaBroadc
       const html = emailWrapper(`
         ${h1('One week to go.')}
         ${p(greeting)}
-        ${p(`The wolfman.blog beta opens in one week — on <strong>${dateStr}</strong>.`)}
+        ${p(`The wolfman.app beta opens in one week — on <strong>${dateStr}</strong>.`)}
         ${p('You signed up to be one of the first testers. That spot is still yours. On launch day you\'ll receive a direct link to register and get started.')}
         ${p('In the meantime, if you have any questions just hit reply — I read everything.<br><br>— Matthew')}
-        ${cta('Learn more about the beta', 'https://wolfman.blog/beta')}
+        ${cta('Learn more about the beta', 'https://wolfman.app/beta')}
       `)
       return getResend().emails.send({
         from: 'Matthew at Wolfman <orders@wolfman.blog>',
         to: email,
-        subject: 'One week until the wolfman.blog beta opens',
+        subject: 'One week until the wolfman.app beta opens',
         html,
       })
     })
@@ -99,14 +99,14 @@ export async function sendBetaGoLive({ recipients }: BetaBroadcastParams) {
       const html = emailWrapper(`
         ${h1('We\'re live.')}
         ${p(greeting)}
-        ${p('The wolfman.blog beta is open. You\'re in.')}
+        ${p('The wolfman.app beta is open. You\'re in.')}
         ${p('Head over and create your account. Your first journal is waiting.<br><br>— Matthew')}
-        ${cta('Register now', 'https://wolfman.blog/register')}
+        ${cta('Register now', 'https://wolfman.app/register')}
       `)
       return getResend().emails.send({
         from: 'Matthew at Wolfman <orders@wolfman.blog>',
         to: email,
-        subject: 'The wolfman.blog beta is live — register now',
+        subject: 'The wolfman.app beta is live — register now',
         html,
       })
     })
@@ -205,12 +205,12 @@ export async function sendOrderConfirmation({
           <!-- Footer -->
           <tr>
             <td style="padding: 24px 40px 32px; border-top: 1px solid #f0ebe6; text-align: center;">
-              <a href="https://wolfman.blog" style="display: inline-block; margin-bottom: 16px;">
-                <img src="https://wolfman.blog/images/wolfman-icon.png" alt="Wolfman" width="48" height="48" style="border-radius: 50%;" />
+              <a href="https://wolfman.app" style="display: inline-block; margin-bottom: 16px;">
+                <img src="https://wolfman.app/images/wolfman-icon.png" alt="Wolfman" width="48" height="48" style="border-radius: 50%;" />
               </a>
               <p style="margin: 0; font-size: 13px; color: #909090; line-height: 1.6;">
                 Wolfman &mdash; mindful living, made with care.<br>
-                <a href="https://wolfman.blog" style="color: #A0622A; text-decoration: none;">wolfman.blog</a>
+                <a href="https://wolfman.app" style="color: #A0622A; text-decoration: none;">wolfman.app</a>
               </p>
             </td>
           </tr>
@@ -260,11 +260,11 @@ export async function sendBetaInterestConfirmation(email: string, name: string) 
                 Hi ${name},
               </p>
               <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.7; color: #4A4A4A;">
-                We&rsquo;ve noted your interest in the wolfman.blog public beta. When registration opens on
+                We&rsquo;ve noted your interest in the wolfman.app public beta. When registration opens on
                 <strong>1 May 2026</strong>, you&rsquo;ll be one of the first to hear about it.
               </p>
               <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.7; color: #4A4A4A;">
-                wolfman.blog is a mindful morning journaling app &mdash; a place to set daily intentions,
+                wolfman.app is a mindful morning journaling app &mdash; a place to set daily intentions,
                 track your morning rituals, and watch honest patterns emerge over time.
               </p>
               <p style="margin: 0; font-size: 16px; line-height: 1.7; color: #4A4A4A;">
@@ -277,15 +277,15 @@ export async function sendBetaInterestConfirmation(email: string, name: string) 
           <!-- Footer -->
           <tr>
             <td style="padding: 24px 40px 32px; border-top: 1px solid #f0ebe6; text-align: center;">
-              <a href="https://wolfman.blog" style="display: inline-block; margin-bottom: 16px;">
-                <img src="https://wolfman.blog/images/wolfman-icon.png" alt="Wolfman" width="48" height="48" style="border-radius: 50%;" />
+              <a href="https://wolfman.app" style="display: inline-block; margin-bottom: 16px;">
+                <img src="https://wolfman.app/images/wolfman-icon.png" alt="Wolfman" width="48" height="48" style="border-radius: 50%;" />
               </a>
               <p style="margin: 0; font-size: 13px; color: #909090; line-height: 1.6;">
                 Wolfman &mdash; mindful living, made with care.<br>
-                <a href="https://wolfman.blog" style="color: #A0622A; text-decoration: none;">wolfman.blog</a>
+                <a href="https://wolfman.app" style="color: #A0622A; text-decoration: none;">wolfman.app</a>
               </p>
               <p style="margin: 12px 0 0; font-size: 12px; color: #b0b0b0; line-height: 1.5;">
-                You registered your interest via wolfman.blog. We&rsquo;ll only contact you
+                You registered your interest via wolfman.app. We&rsquo;ll only contact you
                 once &mdash; when the beta opens. No spam, no marketing.
               </p>
             </td>
@@ -302,7 +302,7 @@ export async function sendBetaInterestConfirmation(email: string, name: string) 
   await getResend().emails.send({
     from: 'Wolfman <orders@wolfman.blog>',
     to: email,
-    subject: "You're on the list — wolfman.blog public beta",
+    subject: "You're on the list — wolfman.app public beta",
     html,
   })
 }
@@ -357,7 +357,7 @@ function adminHtml(heading: string, rows: Array<[string, string]>): string {
 <body style="margin:0;padding:24px;background:#fff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#333;">
   <p style="margin:0 0 16px;font-size:15px;font-weight:bold;color:#193343;">${heading}</p>
   <table cellpadding="0" cellspacing="0" style="border-collapse:collapse;">${tableRows}</table>
-  <p style="margin:20px 0 0;font-size:11px;color:#bbb;">wolfman.blog &mdash; ${new Date().toUTCString()}</p>
+  <p style="margin:20px 0 0;font-size:11px;color:#bbb;">wolfman.app &mdash; ${new Date().toUTCString()}</p>
 </body></html>`
 }
 
@@ -426,9 +426,9 @@ export async function sendMorningReminder(params: {
     ${h1('Good morning.')}
     ${p(`Hi ${first},`)}
     ${p("This is your morning reminder to set your intention for today. It only takes a few minutes — and it's always worth it.")}
-    ${cta('Write today\'s journal', 'https://wolfman.blog/write')}
+    ${cta('Write today\'s journal', 'https://wolfman.app/write')}
     <p style="margin: 28px 0 0; font-size: 12px; color: #b0b0b0; text-align: center; line-height: 1.6;">
-      You asked for this reminder via wolfman.blog settings.<br>
+      You asked for this reminder via wolfman.app settings.<br>
       <a href="${params.unsubscribeUrl}" style="color: #b0b0b0;">Turn off reminders</a>
     </p>
   `)

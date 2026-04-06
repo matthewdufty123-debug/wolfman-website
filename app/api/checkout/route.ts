@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'No items in cart' }, { status: 400 })
   }
 
-  const origin = request.headers.get('origin') ?? process.env.NEXTAUTH_URL ?? 'https://wolfman.blog'
+  const origin = request.headers.get('origin') ?? process.env.NEXTAUTH_URL ?? 'https://wolfman.app'
 
   const lineItems = items.map((item) => ({
     price_data: {

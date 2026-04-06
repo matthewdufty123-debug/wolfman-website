@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     default: 'Wolfman',
   },
   description: 'Mindful living. Morning intentions. Matthew Wolfman.',
-  metadataBase: new URL('https://wolfman.blog'),
+  metadataBase: new URL('https://wolfman.app'),
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,

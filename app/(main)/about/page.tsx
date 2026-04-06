@@ -6,7 +6,7 @@ import SectionHeader from '@/components/SectionHeader'
 
 export const metadata: Metadata = siteMetadata({
   title: 'About Wolfman',
-  description: 'Matthew Wolfman — data engineer, mountain biker, photographer, wood carver, and mindful human being. The story behind wolfman.blog and the morning journalling practice.',
+  description: 'Matthew Wolfman — data engineer, mountain biker, photographer, wood carver, and mindful human being. The story behind wolfman.app and the morning journalling practice.',
   path: '/about',
 })
 
@@ -25,7 +25,7 @@ export default async function AboutPage() {
           <p className="wolfbot-page-section-label">The practice</p>
           <h1 className="wolfbot-page-section-heading">What is Wolfman?</h1>
           <p className="wolfbot-page-body">
-            wolfman.blog is a mindful morning journalling app. Every morning, you write your
+            wolfman.app is a mindful morning journalling app. Every morning, you write your
             intention for the day, note something you are grateful for, and name one thing you
             are genuinely great at. You log how your brain, body, happiness, and stress felt
             when you woke up. You record which morning rituals you completed.

@@ -4,7 +4,7 @@ import { siteMetadata } from '@/lib/metadata'
 
 export const metadata: Metadata = siteMetadata({
   title: 'Data Policy',
-  description: 'How wolfman.blog handles your data. Plain English, no jargon. We do not sell it, we do not share it, and it is always yours.',
+  description: 'How wolfman.app handles your data. Plain English, no jargon. We do not sell it, we do not share it, and it is always yours.',
   path: '/data-policy',
 })
 
@@ -16,7 +16,7 @@ export default function DataPolicyPage() {
         <h1 className="beta-title">Your data. Your rules. Always.</h1>
 
         <p className="beta-intro">
-          wolfman.blog handles deeply personal information — your mood, your intentions, your
+          wolfman.app handles deeply personal information — your mood, your intentions, your
           private journal entries. You deserve to know exactly what we do with it. This page
           says it plainly, without legal jargon, because that is the only honest way to do it.
         </p>

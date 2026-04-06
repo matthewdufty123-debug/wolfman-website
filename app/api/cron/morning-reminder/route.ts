@@ -11,7 +11,7 @@ export const maxDuration = 60
 function makeUnsubscribeUrl(userId: string): string {
   const secret = process.env.REMINDER_UNSUBSCRIBE_SECRET ?? ''
   const token = createHmac('sha256', secret).update(userId).digest('hex')
-  return `https://wolfman.blog/api/user/reminders/unsubscribe?uid=${userId}&token=${token}`
+  return `https://wolfman.app/api/user/reminders/unsubscribe?uid=${userId}&token=${token}`
 }
 
 function getUserLocalHHMM(timezone: string): string {

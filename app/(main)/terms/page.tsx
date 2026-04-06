@@ -4,7 +4,7 @@ import { siteMetadata } from '@/lib/metadata'
 
 export const metadata: Metadata = siteMetadata({
   title: 'Terms',
-  description: 'Terms of use, privacy summary, and data handling for wolfman.blog.',
+  description: 'Terms of use, privacy summary, and data handling for wolfman.app.',
   path: '/terms',
 })
 
@@ -16,7 +16,7 @@ export default function TermsPage() {
         <h1 className="beta-title">The small print, plainly stated.</h1>
 
         <p className="beta-intro">
-          These are the terms that govern your use of wolfman.blog during the beta period.
+          These are the terms that govern your use of wolfman.app during the beta period.
           They are written to be read, not hidden. A full legal review will be completed
           before v1.0 goes live — see{' '}
           <Link href="/features" className="beta-link">Release 0.9 — Legal</Link>.
@@ -25,7 +25,7 @@ export default function TermsPage() {
         <div className="beta-section">
           <h2 className="beta-section-title">Who runs this site</h2>
           <p className="beta-section-body">
-            wolfman.blog is operated by Matthew Wolfman, an individual based in the United Kingdom.
+            wolfman.app is operated by Matthew Wolfman, an individual based in the United Kingdom.
             This is not a corporate product — it is a personal project built in public.
           </p>
         </div>
@@ -34,7 +34,7 @@ export default function TermsPage() {
           <h2 className="beta-section-title">What you are agreeing to</h2>
           <p className="beta-section-body">
             By using this site and creating an account, you agree to use it honestly and respectfully.
-            You own the content you write here — your journal entries are yours. You grant wolfman.blog
+            You own the content you write here — your journal entries are yours. You grant wolfman.app
             no rights to your writing beyond what is needed to display it back to you.
           </p>
         </div>

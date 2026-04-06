@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin', '/account', '/settings', '/api/'],
     },
-    sitemap: 'https://wolfman.blog/sitemap.xml',
+    sitemap: 'https://wolfman.app/sitemap.xml',
   }
 }

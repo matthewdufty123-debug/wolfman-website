@@ -3,7 +3,7 @@ import { db } from '@/lib/db'
 import { posts, users } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 
-const SITE_URL = 'https://wolfman.blog'
+const SITE_URL = 'https://wolfman.app'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const publishedPosts = await db

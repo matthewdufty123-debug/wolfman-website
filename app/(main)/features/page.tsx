@@ -6,7 +6,7 @@ import SectionHeader from '@/components/SectionHeader'
 
 export const metadata: Metadata = siteMetadata({
   title: 'Features',
-  description: 'What we are building and when — the wolfman.blog release roadmap.',
+  description: 'What we are building and when — the wolfman.app release roadmap.',
   path: '/features',
 })
 
@@ -31,7 +31,7 @@ export default function FeaturesPage() {
         <h1 className="features-title">What we&apos;re building.</h1>
         <p className="features-intro">
           Nine releases. Each one adds something real. This is the honest, plain-English
-          version of where wolfman.blog is going and what arrives in each release.
+          version of where wolfman.app is going and what arrives in each release.
           If you want to see the technical detail behind this —
           the GitHub issues, open branches, and development stats —
           head to the{' '}

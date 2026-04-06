@@ -32,7 +32,7 @@ export default async function AdminDashboard() {
 
         <header className="dash-header">
           <div>
-            <h1 className="dash-title">wolfman.blog</h1>
+            <h1 className="dash-title">wolfman.app</h1>
             <p className="dash-subtitle">admin dashboard</p>
           </div>
         </header>

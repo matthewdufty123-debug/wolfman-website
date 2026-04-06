@@ -11,8 +11,8 @@ export default async function RegisterPage() {
   if (!registrationOpen) {
     const message = config.statusMessage ?? (
       config.status === 'closed_alpha'
-        ? 'wolfman.blog is currently in private alpha. Registration is not open yet.'
-        : 'wolfman.blog is coming soon. Registration is not open yet.'
+        ? 'wolfman.app is currently in private alpha. Registration is not open yet.'
+        : 'wolfman.app is coming soon. Registration is not open yet.'
     )
     return (
       <main className="auth-main">
@@ -40,7 +40,7 @@ export default async function RegisterPage() {
 
   // Open but cap reached
   if (capReached) {
-    const message = config.statusMessage ?? 'The wolfman.blog beta has reached its limit of testers. Thank you for your interest — it means a lot.'
+    const message = config.statusMessage ?? 'The wolfman.app beta has reached its limit of testers. Thank you for your interest — it means a lot.'
     return (
       <main className="auth-main">
         <div className="auth-card">

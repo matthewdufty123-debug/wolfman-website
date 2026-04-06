@@ -23,7 +23,7 @@ export async function generateMetadata(
   const displayName = user.displayName ?? user.name ?? username
   const description = user.bio ?? `${displayName}'s morning intentions and habit data on Wolfman.`
   const avatarUrl = user.avatar ?? user.image ?? undefined
-  const url = `https://wolfman.blog/${username}`
+  const url = `https://wolfman.app/${username}`
   const fullTitle = `${displayName} — Wolfman`
   return {
     title: fullTitle,

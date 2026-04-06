@@ -11,7 +11,7 @@ import SectionHeader from '@/components/SectionHeader'
 
 export const metadata: Metadata = siteMetadata({
   title: 'Public Beta',
-  description: 'What the wolfman.blog public beta is, when it opens, and how to register your interest.',
+  description: 'What the wolfman.app public beta is, when it opens, and how to register your interest.',
   path: '/beta',
 })
 
@@ -47,13 +47,13 @@ export default async function BetaPage() {
           </div>
         )}
 
-        {/* ── What is wolfman.blog? ── */}
+        {/* ── What is wolfman.app? ── */}
         <p className="beta-eyebrow">Public Beta</p>
         <h1 className={showInterestForm ? 'beta-section-title' : 'beta-title'}>
           {showInterestForm ? 'A mindful morning journaling app.' : 'You\u2019re part of something real.'}
         </h1>
         <p className="beta-intro">
-          wolfman.blog is a public beta for a mindful morning journalling app. Real people, real
+          wolfman.app is a public beta for a mindful morning journalling app. Real people, real
           mornings, real data. You log your intentions, your mood, your rituals &mdash; and gradually,
           a picture of your inner life starts to form.
         </p>

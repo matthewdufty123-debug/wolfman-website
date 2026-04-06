@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-const SITE_URL = 'https://wolfman.blog'
+const SITE_URL = 'https://wolfman.app'
 const SITE_NAME = 'Wolfman'
 const DEFAULT_DESCRIPTION = 'Mindful living. Morning intentions. Matthew Wolfman.'
 

@@ -22,7 +22,7 @@ export async function generateMetadata(
   const { username, slug } = await params
   const post = await getPostBySlug(slug)
   if (!post) return { title: 'Post not found — Wolfman' }
-  const url = `https://wolfman.blog/${username}/${post.slug}`
+  const url = `https://wolfman.app/${username}/${post.slug}`
   return {
     title: `${post.title} — Wolfman`,
     description: post.excerpt,

@@ -118,7 +118,7 @@ export default function DevPageClient() {
 
       {/* Header + description */}
       <section className="dev-section">
-        <h1 className="dev-page-title">wolfman.blog / development</h1>
+        <h1 className="dev-page-title">wolfman.app / development</h1>
 
         <div className="dev-collab">
           <div className="dev-collab-logos">
@@ -140,7 +140,7 @@ export default function DevPageClient() {
             />
           </div>
           <p className="dev-collab-caption">
-            wolfman.blog is built in the open, in real-time collaboration with Claude Code.
+            wolfman.app is built in the open, in real-time collaboration with Claude Code.
             Every feature starts as a GitHub Issue. Every release is a named milestone.
             What you see below is the actual deployment history — every version logged, every change listed.
             No spin. Just the build.
@@ -191,7 +191,7 @@ export default function DevPageClient() {
             <span className="dev-workflow-label">03 — Releases</span>
             <p className="dev-workflow-desc">
               Features ship in named releases (Closed Alpha through Release 0.9 — Legal).
-              Merging to main triggers an automatic production deploy to wolfman.blog.
+              Merging to main triggers an automatic production deploy to wolfman.app.
               Every deployment is logged above with version number and change list.
             </p>
           </div>

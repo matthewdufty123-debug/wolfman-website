@@ -69,7 +69,7 @@ export async function PUT(
       notifyAdminFirstPost({
         username,
         postTitle: String(updateData.title ?? existingPost?.title ?? ''),
-        postUrl: `https://wolfman.blog/${username}/${updated.slug}`,
+        postUrl: `https://wolfman.app/${username}/${updated.slug}`,
       })
     }
   }

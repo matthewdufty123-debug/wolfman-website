@@ -19,7 +19,7 @@ continues as a separate feed visible to all.
 
 ## The Website
 
-**Domain:** wolfman.blog
+**Domain:** wolfman.app (wolfman.blog redirects here)
 **Deployment:** Git → GitHub → Vercel (auto-deploys on push)
 **Local folder:** D:\Websites\Wolfman.blog
 
