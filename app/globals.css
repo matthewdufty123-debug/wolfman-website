@@ -7094,8 +7094,37 @@ html[data-theme="light"] .pf-scale-pill {
 /* Terminal text */
 .journal-section--wolfbot .wbt-prompt { color: #4A7FA5; }
 .journal-section--wolfbot .wbt-boot   { color: #4A7FA5; }
-.journal-section--wolfbot .wbt-body   { color: var(--body-text); opacity: 1; }
+.journal-section--wolfbot .wbt-body   { color: var(--body-text); opacity: 1; text-shadow: 0 0 8px rgba(74, 127, 165, 0.28); }
 .journal-section--wolfbot .wbt-quip   { color: var(--body-text); }
+
+/* Scan-line overlay — dark/cool themes only */
+html[data-theme="dark"] .journal-section--wolfbot .wolfbot-integrated,
+html[data-theme="cool"] .journal-section--wolfbot .wolfbot-integrated {
+  position: relative;
+  overflow: hidden;
+}
+html[data-theme="dark"] .journal-section--wolfbot .wolfbot-integrated::after,
+html[data-theme="cool"] .journal-section--wolfbot .wolfbot-integrated::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.05) 3px,
+    rgba(0, 0, 0, 0.05) 4px
+  );
+  z-index: 0;
+}
+html[data-theme="dark"] .journal-section--wolfbot .wolfbot-integrated-header,
+html[data-theme="cool"] .journal-section--wolfbot .wolfbot-integrated-header,
+html[data-theme="dark"] .journal-section--wolfbot .wolfbot-bubble-inner,
+html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
+  position: relative;
+  z-index: 1;
+}
 
 /* Tab switcher */
 .journal-section--wolfbot .wb-tab {
