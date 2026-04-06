@@ -83,7 +83,7 @@ export async function sendBetaWeekNotice({ recipients, betaOpensAt }: BetaBroadc
         ${cta('Learn more about the beta', 'https://wolfman.app/beta')}
       `)
       return getResend().emails.send({
-        from: 'Matthew at Wolfman <orders@wolfman.blog>',
+        from: 'Matthew at Wolfman <orders@wolfman.app>',
         to: email,
         subject: 'One week until the wolfman.app beta opens',
         html,
@@ -104,7 +104,7 @@ export async function sendBetaGoLive({ recipients }: BetaBroadcastParams) {
         ${cta('Register now', 'https://wolfman.app/register')}
       `)
       return getResend().emails.send({
-        from: 'Matthew at Wolfman <orders@wolfman.blog>',
+        from: 'Matthew at Wolfman <orders@wolfman.app>',
         to: email,
         subject: 'The wolfman.app beta is live — register now',
         html,
@@ -224,7 +224,7 @@ export async function sendOrderConfirmation({
   `
 
   await getResend().emails.send({
-    from: 'Wolfman <orders@wolfman.blog>',
+    from: 'Wolfman <orders@wolfman.app>',
     to,
     subject: 'Your Wolfman order is confirmed',
     html,
@@ -300,7 +300,7 @@ export async function sendBetaInterestConfirmation(email: string, name: string) 
   `
 
   await getResend().emails.send({
-    from: 'Wolfman <orders@wolfman.blog>',
+    from: 'Wolfman <orders@wolfman.app>',
     to: email,
     subject: "You're on the list — wolfman.app public beta",
     html,
@@ -333,8 +333,8 @@ export async function sendAdminBetaInterestAlert(email: string, name: string) {
   `
 
   await getResend().emails.send({
-    from: 'Wolfman <orders@wolfman.blog>',
-    to: process.env.ADMIN_NOTIFY_EMAIL ?? 'matthew@wolfman.blog',
+    from: 'Wolfman <orders@wolfman.app>',
+    to: process.env.ADMIN_NOTIFY_EMAIL ?? 'matthew@wolfman.app',
     subject: `Beta interest: ${name} <${email}>`,
     html,
   })
@@ -362,9 +362,9 @@ function adminHtml(heading: string, rows: Array<[string, string]>): string {
 }
 
 function adminSend(subject: string, html: string): Promise<void> {
-  const to = process.env.ADMIN_NOTIFY_EMAIL ?? 'matthew@wolfman.blog'
+  const to = process.env.ADMIN_NOTIFY_EMAIL ?? 'matthew@wolfman.app'
   return getResend().emails.send({
-    from: 'Wolfman Admin <orders@wolfman.blog>',
+    from: 'Wolfman Admin <orders@wolfman.app>',
     to,
     subject,
     html,
@@ -433,7 +433,7 @@ export async function sendMorningReminder(params: {
     </p>
   `)
   await getResend().emails.send({
-    from: 'Matthew at Wolfman <orders@wolfman.blog>',
+    from: 'Matthew at Wolfman <orders@wolfman.app>',
     to: params.to,
     subject: 'Good morning — time to set your intention',
     html,
