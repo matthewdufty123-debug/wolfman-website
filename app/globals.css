@@ -418,7 +418,7 @@ html[data-theme="light"] .feed-logo-img {
 
 .more-pages-inner {
   padding: 1.5rem 1.5rem 2rem;
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
 }
 
@@ -1927,7 +1927,7 @@ select.dash-config-textarea {
 /* ── Post reading experience ── */
 
 .post {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 4rem 1rem 2rem;
 }
@@ -1968,7 +1968,7 @@ select.dash-config-textarea {
 /* ── Post footer / colophon ── */
 
 .post-footer {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 3rem 1.5rem 9rem;
   text-align: center;
@@ -2004,7 +2004,7 @@ select.dash-config-textarea {
 
 .intentions-header {
   padding: 4rem 1.5rem 2rem;
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   display: flex;
   align-items: baseline;
@@ -2042,7 +2042,7 @@ select.dash-config-textarea {
   list-style: none;
   margin: 0 auto;
   padding: 0 1.5rem 8rem;
-  max-width: 640px;
+  max-width: 720px;
 }
 
 .post-list-item {
@@ -2120,7 +2120,7 @@ select.dash-config-textarea {
 /* ── Post bottom navigation ── */
 
 .post-nav {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 2rem 1.5rem calc(7rem + 100px);
   display: flex;
@@ -3187,7 +3187,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 }
 
 .cart-wrap {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
 }
 
@@ -3351,7 +3351,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 /* ── Post author + Claude review blocks ── */
 
 .post-author-review-wrap {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
@@ -3399,7 +3399,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 }
 
 .post-reading-end {
-  max-width: 640px;
+  max-width: 720px;
   margin: 3rem auto 0;
   padding: 2rem 1.5rem 1.5rem;
   text-align: center;
@@ -3476,7 +3476,7 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
 /* ── Day data blocks (morning state, evening reflection, Claude's Take) ── */
 
 .post-day-block {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto 2rem;
   padding: 1.5rem 1.5rem 1.25rem;
   border-radius: 12px;
@@ -3722,7 +3722,7 @@ html[data-theme="dark"] .post-day-score-card {
 /* ── Morning Ritual filter page ── */
 
 .ritual-header {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto 2.5rem;
   padding: 2.5rem 1.5rem 2rem;
   text-align: center;
@@ -3801,7 +3801,7 @@ html[data-theme="dark"] .post-day-score-card {
 /* ── Morning Stats page ── */
 
 .stats-page {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 2.5rem 1.5rem 9rem;
 }
@@ -4897,7 +4897,7 @@ html[data-theme="light"] .pf-scale-pill {
 
 .beta-card {
   width: 100%;
-  max-width: 600px;
+  max-width: 720px;
 }
 
 .beta-eyebrow {
@@ -5448,7 +5448,7 @@ html[data-theme="light"] .pf-scale-pill {
 /* ── Journal Feed ── */
 
 .feed-page {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 0 0 8rem;
 }
@@ -6945,7 +6945,7 @@ html[data-theme="light"] .pf-scale-pill {
 /* ── Journal page title — shown at the very top ─────────────────────────── */
 
 .journal-page-title-header {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 1.75rem 1rem 1.5rem;
   text-align: center;
@@ -7004,7 +7004,7 @@ html[data-theme="light"] .pf-scale-pill {
 /* ── Next Journal button — full-width at bottom of page ─────────────────── */
 
 .journal-next-post-wrap {
-  max-width: 640px;
+  max-width: 720px;
   margin: 2rem auto 0;
   padding: 0 1.5rem;
 }
@@ -7031,7 +7031,7 @@ html[data-theme="light"] .pf-scale-pill {
 /* ── Section base ───────────────────────────────────────────────────────── */
 
 .journal-section {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 1.5rem 1rem 0.75rem;
 }
@@ -8390,7 +8390,7 @@ html[data-theme="dark"] .pf-photo-add    { border-color: rgba(255,255,255,0.2); 
 /* ── PostFooter reading-end ─────────────────────────────────────────────── */
 
 .post-reading-end {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 3rem 1.5rem 5rem;
   text-align: center;
@@ -8476,7 +8476,7 @@ html[data-theme="dark"] .pf-photo-add    { border-color: rgba(255,255,255,0.2); 
 .tab-orb-circle--outline { border: 1.75px solid currentColor; background: transparent; }
 
 .tab-empty-state {
-  max-width: 640px;
+  max-width: 720px;
   margin: 4rem auto;
   padding: 0 1.5rem;
   text-align: center;
@@ -8540,7 +8540,7 @@ html[data-theme="dark"] .tab-evening-edit-btn {
 /* ── WOLF|BOT Review tab ──────────────────────────────────────────────────── */
 
 .wolfbot-review-wrap {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 2.5rem 1.5rem 4rem;
 }
@@ -8669,6 +8669,11 @@ html[data-fontsize="xlarge"] .dev-body {
   border-bottom: 1px solid var(--card-border, rgba(74,127,165,0.15));
 }
 
+.section-hdr-nav {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
 /* Logo banner */
 .section-hdr-logo-wrap {
   width: 100%;
@@ -8747,7 +8752,7 @@ html[data-fontsize="xlarge"] .dev-body {
    ═══════════════════════════════════════════════════════════ */
 
 .discover-hub {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 1.5rem 1rem 4rem;
 }
@@ -9772,7 +9777,7 @@ html[data-theme="dark"] .subs-cta--free {
 }
 
 .home-hero-inner {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
