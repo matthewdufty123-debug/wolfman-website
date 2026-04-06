@@ -385,12 +385,12 @@ export function notifyAdminNewRegistration(params: {
   adminSend(`New registration: ${params.username}`, html).catch(() => {})
 }
 
-export function notifyAdminFeedbackSubmitted(params: {
+export async function notifyAdminFeedbackSubmitted(params: {
   category: string
   messagePreview: string
   anonymous: boolean
   pageUrl?: string | null
-}): void {
+}): Promise<void> {
   const rows: Array<[string, string]> = [
     ['Category', params.category],
     ['Message', params.messagePreview],
@@ -398,7 +398,7 @@ export function notifyAdminFeedbackSubmitted(params: {
   ]
   if (!params.anonymous && params.pageUrl) rows.push(['Page', params.pageUrl])
   const html = adminHtml(`Beta feedback: ${params.category}`, rows)
-  adminSend(`Feedback [${params.category}]: ${params.messagePreview.slice(0, 55)}`, html).catch(() => {})
+  await adminSend(`Feedback [${params.category}]: ${params.messagePreview.slice(0, 55)}`, html).catch(() => {})
 }
 
 export function notifyAdminFirstPost(params: {

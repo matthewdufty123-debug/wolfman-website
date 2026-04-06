@@ -96,7 +96,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Failed to submit feedback.' }, { status: 502 })
   }
 
-  notifyAdminFeedbackSubmitted({
+  await notifyAdminFeedbackSubmitted({
     category,
     messagePreview: message.trim().slice(0, 120),
     anonymous,
