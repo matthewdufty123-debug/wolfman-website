@@ -1888,6 +1888,38 @@ html[data-theme="light"] .more-pages-signout-btn:hover {
   padding: 0.1rem 0;
 }
 
+/* ── Dev page — dark mode contrast fixes ──────────────────────────────────
+   Dev page text uses GitHub dark-palette greys (#6e7681, #8b949e, #909090)
+   designed for a near-black canvas. In dark mode the body is #333F50, so
+   those greys need lifting to maintain readable contrast.
+   ─────────────────────────────────────────────────────────────────────────── */
+html[data-theme="dark"] .dev-collab-caption,
+html[data-theme="dark"] .dev-subtitle,
+html[data-theme="dark"] .dev-col-detail,
+html[data-theme="dark"] .dev-col-id,
+html[data-theme="dark"] .dev-progress-legend,
+html[data-theme="dark"] .dev-progress-legend-pct,
+html[data-theme="dark"] .dev-desc-row td,
+html[data-theme="dark"] .dev-desc-row--meta td,
+html[data-theme="dark"] .dev-loading,
+html[data-theme="dark"] .dev-empty,
+html[data-theme="dark"] .dev-prompt-cell,
+html[data-theme="dark"] .dev-row-detail td,
+html[data-theme="dark"] .dev-row-detail--meta,
+html[data-theme="dark"] .dev-pipeline-intro,
+html[data-theme="dark"] .dev-stats-label,
+html[data-theme="dark"] .dev-group-count,
+html[data-theme="dark"] .dev-group-expand,
+html[data-theme="dark"] .dev-chart-title,
+html[data-theme="dark"] .dev-tag,
+html[data-theme="dark"] .dev-badge--default,
+html[data-theme="dark"] .dev-release-date,
+html[data-theme="dark"] .dev-release-time,
+html[data-theme="dark"] .dev-release-changes li,
+html[data-theme="dark"] .dev-workflow-desc {
+  color: #aab4be;
+}
+
 /* ── Admin — toggle button for collapsible sections ── */
 
 .dash-toggle-btn {
