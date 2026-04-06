@@ -7040,11 +7040,8 @@ html[data-theme="light"] .pf-scale-pill {
   padding-top: 1.5rem;  /* text section sits flush after journal-section-title */
 }
 
-/* WOLF|BOT section — full viewport width, no side constraints */
+/* WOLF|BOT section — matches other journal-section width */
 .journal-section--wolfbot {
-  max-width: none;
-  padding-left: 0;
-  padding-right: 0;
   padding-bottom: 200px;
   margin-top: 3rem;
 }
@@ -7052,11 +7049,9 @@ html[data-theme="light"] .pf-scale-pill {
 /* De-terminalize: replace black terminal shell with page-themed styling */
 .journal-section--wolfbot .wolfbot-integrated {
   background: var(--bg);
-  border: 1px solid rgba(74, 127, 165, 0.25);
+  border: none;
+  border-top: 1px solid rgba(74, 127, 165, 0.25);
   border-radius: 0;
-  border-left: none;
-  border-right: none;
-  border-bottom: none;
   box-shadow: none;
 }
 .journal-section--wolfbot .wolfbot-integrated-header {
