@@ -7878,6 +7878,63 @@ html[data-theme="light"] .wb-info-card {
 }
 .wb-info-link:hover { text-decoration: underline; }
 
+/* ── Suspense skeleton fallbacks ────────────────────────────────────────── */
+@keyframes skel-shimmer {
+  0%, 100% { opacity: 0.08; }
+  50%      { opacity: 0.16; }
+}
+
+.skel-pulse {
+  background: var(--body-text, #E5CBBB);
+  border-radius: 4px;
+  animation: skel-shimmer 1.6s ease-in-out infinite;
+}
+
+.skel-section { min-height: 60px; }
+
+.skel-line { height: 0.9rem; margin-bottom: 0.65rem; }
+.skel-line--title { width: 55%; height: 1.2rem; margin-bottom: 1.2rem; margin-inline: auto; }
+.skel-line--full  { width: 100%; }
+.skel-line--3q    { width: 75%; }
+.skel-line--half  { width: 50%; }
+
+.skel-spacer { height: 1.5rem; }
+
+.skel-label {
+  width: 40%;
+  height: 1rem;
+  margin: 0 auto 1.5rem;
+}
+
+.skel-rings {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+}
+.skel-ring {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+
+.skel-icons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.skel-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.skel-btn {
+  height: 2.75rem;
+  border-radius: 999px;
+  margin-bottom: 0.65rem;
+}
+
 /* ── Journal bottom navigation ─────────────────────────────────────────── */
 .journal-bottom-nav {
   display: flex;

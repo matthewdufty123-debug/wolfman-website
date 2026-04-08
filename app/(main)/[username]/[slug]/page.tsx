@@ -1,12 +1,23 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { getAllSlugsWithUsernames, getPostBySlug } from '@/lib/posts'
 import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
 import { PostContextSetter } from '@/lib/post-context'
-import JournalPage from '@/components/JournalPage'
 import { db } from '@/lib/db'
-import { posts as postsTable, morningState, dayScores, users as usersTable, wolfbotReviews as wolfbotReviewsTable, wolfbotConfig } from '@/lib/db/schema'
-import { eq, gt, lt, and, or, desc, asc } from 'drizzle-orm'
+import { users as usersTable } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
+
+import JournalWithReviewSection from './_sections/JournalWithReviewSection'
+import HowIShowedUpSection from './_sections/HowIShowedUpSection'
+import MorningRitualsServerSection from './_sections/MorningRitualsServerSection'
+import PostInfoNavSection from './_sections/PostInfoNavSection'
+import {
+  Section1Skeleton,
+  Section2Skeleton,
+  Section3Skeleton,
+  Section4Skeleton,
+} from './_sections/skeletons'
 
 // Allow slugs not in generateStaticParams to be dynamically rendered (posts published after a build)
 export const dynamicParams = true
@@ -54,14 +65,12 @@ export default async function PostPage({
 }) {
   const { username, slug } = await params
 
+  // ── Gate queries — must complete before any render ──────────────────────
   const [post, session] = await Promise.all([getPostBySlug(slug), auth()])
 
   if (!post) notFound()
-
-  // Guard against posts with no author
   if (!post.authorId) notFound()
 
-  // Fetch author info and verify the URL username matches
   const [author] = await db
     .select({
       id: usersTable.id,
@@ -78,122 +87,43 @@ export default async function PostPage({
     .limit(1)
 
   if (!author || author.username !== username) notFound()
-
-  // Draft posts are only visible to their author
   if (post.status === 'draft' && session?.user?.id !== post.authorId) notFound()
-
-  // Non-admin users' posts are private — only the author can view them
   if (author.role !== 'admin' && session?.user?.id !== post.authorId) notFound()
 
+  // ── Derived values shared across sections ──────────────────────────────
   const userId = session?.user?.id ?? null
+  const postId = post.id ?? ''
+  const isOwner = userId != null && userId === post.authorId
 
-  // Fetch morning state, day scores, post timestamps, and adjacent posts
-  const [ms, ds, postRow, wbr, promptVersionRow, pixelGridRow, pixelPaletteRow] = post.id
-    ? await Promise.all([
-        db.select().from(morningState).where(eq(morningState.postId, post.id)).then(r => r[0] ?? null),
-        db.select().from(dayScores).where(eq(dayScores.postId, post.id)).then(r => r[0] ?? null),
-        db.select({
-          date: postsTable.date,
-          createdAt: postsTable.createdAt,
-          updatedAt: postsTable.updatedAt,
-          eveningReflection: postsTable.eveningReflection,
-          feelAboutToday: postsTable.feelAboutToday,
-        })
-          .from(postsTable)
-          .where(eq(postsTable.id, post.id))
-          .then(r => r[0] ?? null),
-        db.select({
-          review:        wolfbotReviewsTable.review,
-          reviewRating:  wolfbotReviewsTable.reviewRating,
-          reviewHelpful: wolfbotReviewsTable.reviewHelpful,
-          reviewSassy:   wolfbotReviewsTable.reviewSassy,
-        })
-          .from(wolfbotReviewsTable)
-          .where(eq(wolfbotReviewsTable.postId, post.id))
-          .then(r => r[0] ?? null),
-        db.select({ value: wolfbotConfig.value })
-          .from(wolfbotConfig)
-          .where(eq(wolfbotConfig.key, 'prompt_version'))
-          .then(r => r[0] ?? null),
-        db.select({ value: wolfbotConfig.value })
-          .from(wolfbotConfig)
-          .where(eq(wolfbotConfig.key, 'pixel_grid'))
-          .then(r => r[0] ?? null),
-        db.select({ value: wolfbotConfig.value })
-          .from(wolfbotConfig)
-          .where(eq(wolfbotConfig.key, 'pixel_palette'))
-          .then(r => r[0] ?? null),
-      ])
-    : [null, null, null, null, null, null, null]
-
-  const promptVersion = (promptVersionRow?.value as number) ?? 1
-  const pixelGrid    = pixelGridRow?.value    ? (pixelGridRow.value    as number[][])           : undefined
-  const pixelPalette = pixelPaletteRow?.value ? (pixelPaletteRow.value as Record<string,string>) : undefined
-
-  const postDates = postRow
-    ? { createdAt: postRow.createdAt.toISOString(), updatedAt: postRow.updatedAt.toISOString() }
-    : null
-
-  // Fetch adjacent posts for swipe navigation
-  const visibilityFilter = userId
-    ? or(
-        and(eq(postsTable.status, 'published'), eq(postsTable.isPublic, true)),
-        eq(postsTable.authorId, userId)
-      )
-    : and(eq(postsTable.status, 'published'), eq(postsTable.isPublic, true))
-
-  const currentDate = postRow?.date ?? new Date().toISOString().slice(0, 10)
-
-  const [prevRow, nextRow] = await Promise.all([
-    db.select({ slug: postsTable.slug, username: usersTable.username })
-      .from(postsTable)
-      .innerJoin(usersTable, eq(postsTable.authorId, usersTable.id))
-      .where(and(visibilityFilter, gt(postsTable.date, currentDate)))
-      .orderBy(asc(postsTable.date))
-      .limit(1)
-      .then(r => r[0] ?? null),
-    db.select({ slug: postsTable.slug, username: usersTable.username })
-      .from(postsTable)
-      .innerJoin(usersTable, eq(postsTable.authorId, usersTable.id))
-      .where(and(visibilityFilter, lt(postsTable.date, currentDate)))
-      .orderBy(desc(postsTable.date))
-      .limit(1)
-      .then(r => r[0] ?? null),
-  ])
-
-  const prevPost = prevRow?.username ? { slug: prevRow.slug, username: prevRow.username } : null
-  const nextPost = nextRow?.username ? { slug: nextRow.slug, username: nextRow.username } : null
-
+  // ── Streaming layout — each section fetches its own data ───────────────
   return (
     <>
-      <PostContextSetter postId={post.id ?? ''} authorId={post.authorId ?? null} />
-      <JournalPage
-        post={post}
-        username={username}
-        author={author}
-        morningState={ms ? {
-          brainScale: ms.brainScale,
-          bodyScale: ms.bodyScale,
-          happyScale: ms.happyScale ?? null,
-          stressScale: ms.stressScale ?? null,
-          routineChecklist: ms.routineChecklist as Record<string, boolean>,
-        } : null}
-        eveningReflection={postRow?.eveningReflection ?? null}
-        feelAboutToday={postRow?.feelAboutToday ?? null}
-        dayScores={ds ? {
-          scores: ds.scores as Record<string, number>,
-          synthesis: ds.synthesis,
-          dataCompleteness: ds.dataCompleteness,
-        } : null}
-        postDates={postDates}
-        authorId={post.authorId ?? null}
-        prevPost={prevPost}
-        nextPost={nextPost}
-        wolfbotReviews={wbr}
-        promptVersion={promptVersion}
-        pixelGrid={pixelGrid}
-        pixelPalette={pixelPalette}
-      />
+      <PostContextSetter postId={postId} authorId={post.authorId ?? null} />
+      <div className="journal-scroll-page">
+        <div className="journal-scroll-content">
+
+          {/* Section 1: Journal text + WOLF|BOT review */}
+          <Suspense fallback={<Section1Skeleton />}>
+            <JournalWithReviewSection post={post} postId={postId} isOwner={isOwner} />
+          </Suspense>
+
+          {/* Section 2: How I Showed Up (morning scores + future charts) */}
+          <Suspense fallback={<Section2Skeleton />}>
+            <HowIShowedUpSection postId={postId} />
+          </Suspense>
+
+          {/* Section 3: Morning Rituals (+ future analysis) */}
+          <Suspense fallback={<Section3Skeleton />}>
+            <MorningRitualsServerSection postId={postId} />
+          </Suspense>
+
+          {/* Section 4: Post info + navigation */}
+          <Suspense fallback={<Section4Skeleton />}>
+            <PostInfoNavSection post={post} username={username} isOwner={isOwner} userId={userId} />
+          </Suspense>
+
+        </div>
+      </div>
     </>
   )
 }
