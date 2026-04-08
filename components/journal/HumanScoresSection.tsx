@@ -14,7 +14,6 @@ const STRESS_LABELS = ['Completely Overwhelmed', 'Anxious', 'Stressed', 'Unsettl
 // ── Brand colours ───────────────────────────────────────────────────────────
 
 const COPPER = '#A0622A'
-const OFF_WHITE = 'rgba(255, 255, 255, 0.7)'
 
 // ── Colour interpolation — 1 = pale blue, 8 = intense ──────────────────────
 
@@ -121,23 +120,19 @@ function ScaleTrendChart({ values, todayValue, revealed, chartId }: TrendChartPr
   const plotW = W - PAD_LEFT - PAD_RIGHT
   const plotH = H - PAD_TOP - PAD_BOTTOM
 
-  // Y maps score 1–8 to pixel
   const yForVal = (v: number) => PAD_TOP + plotH - ((v - 1) / 7) * plotH
 
-  // X maps index to pixel (evenly spaced)
   const pointCount = values.length
   const xForIdx = (i: number) => {
     if (pointCount <= 1) return PAD_LEFT + plotW / 2
     return PAD_LEFT + (i / (pointCount - 1)) * plotW
   }
 
-  // Calculate average of previous entries (everything except today)
   const previous = values.slice(0, -1).filter((v): v is number => v !== null)
   const avg = previous.length > 0
     ? previous.reduce((a, b) => a + b, 0) / previous.length
     : null
 
-  // Gradient IDs unique per chart
   const copperGradId = `copper-grad-${chartId}`
   const avgGradId = `avg-grad-${chartId}`
 
@@ -153,15 +148,13 @@ function ScaleTrendChart({ values, todayValue, revealed, chartId }: TrendChartPr
       }}
     >
       <defs>
-        {/* Copper line gradient: 25% opacity on left → 100% on right */}
         <linearGradient id={copperGradId} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor={COPPER} stopOpacity="0.25" />
+          <stop offset="0%" stopColor={COPPER} stopOpacity="0.4" />
           <stop offset="100%" stopColor={COPPER} stopOpacity="1" />
         </linearGradient>
-        {/* Average line gradient: 25% opacity on left → 70% on right */}
         <linearGradient id={avgGradId} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.15" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.5" />
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.6" />
         </linearGradient>
       </defs>
 
@@ -188,10 +181,10 @@ function ScaleTrendChart({ values, todayValue, revealed, chartId }: TrendChartPr
         x2={PAD_LEFT + plotW}
         y2={yForVal(todayValue)}
         stroke={`url(#${copperGradId})`}
-        strokeWidth="1.5"
+        strokeWidth="2"
       />
 
-      {/* Average line — full width, off-white gradient */}
+      {/* Average line — full width, off-white gradient, dashed */}
       {avg !== null && (
         <line
           x1={PAD_LEFT}
@@ -199,16 +192,15 @@ function ScaleTrendChart({ values, todayValue, revealed, chartId }: TrendChartPr
           x2={PAD_LEFT + plotW}
           y2={yForVal(avg)}
           stroke={`url(#${avgGradId})`}
-          strokeWidth="1"
-          strokeDasharray="4 3"
+          strokeWidth="1.5"
+          strokeDasharray="6 4"
         />
       )}
 
-      {/* Data points */}
+      {/* Data points — rendered after lines so dots sit on top */}
       {values.map((v, i) => {
         if (v === null) return null
         const isToday = i === values.length - 1
-        // Opacity: oldest = 0.25, newest (before today) = 0.85, today = 1
         const opacity = isToday
           ? 1
           : pointCount <= 2
@@ -240,7 +232,7 @@ function ScaleTrendChart({ values, todayValue, revealed, chartId }: TrendChartPr
         fontSize="7"
         fontFamily="var(--font-inter), sans-serif"
       >
-        {`Journal (today and ${Math.max(values.length - 1, 0)} journal history)`}
+        {`Today and ${Math.max(values.length - 1, 0)} journal history`}
       </text>
     </svg>
   )
@@ -270,31 +262,27 @@ function DeltaIndicator({ todayValue, avg, previousCount, revealed }: {
         transition: 'opacity 0.5s ease 0.8s, transform 0.5s ease 0.8s',
       }}
     >
-      {/* Arrow */}
       {!isEqual && (
-        <svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true" className="hss-delta-arrow">
+        <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true" className="hss-delta-arrow">
           {isUp ? (
-            <polygon points="10,0 20,16 0,16" fill={COPPER} />
+            <polygon points="8,0 16,12 0,12" fill={COPPER} />
           ) : (
-            <polygon points="0,0 20,0 10,16" fill={COPPER} />
+            <polygon points="0,0 16,0 8,12" fill={COPPER} />
           )}
         </svg>
       )}
-
-      {/* Value */}
       <span className="hss-delta-value" style={{ color: COPPER }}>
         {isEqual ? '=' : `${isUp ? '+' : '-'} ${displayDiff}`}
       </span>
       <span className="hss-delta-label">Points</span>
       <span className="hss-delta-sub">
-        Compared to<br />
-        <span className="hss-delta-underline">{previousCount} journal</span> average
+        Compared to <span className="hss-delta-underline">{previousCount} journal</span> average
       </span>
     </div>
   )
 }
 
-// ── Scale row (replaces old ScaleCol) ───────────────────────────────────────
+// ── Scale row ───────────────────────────────────────────────────────────────
 
 interface ScaleRowProps {
   title: string
@@ -302,7 +290,7 @@ interface ScaleRowProps {
   labels: string[]
   isStress?: boolean
   revealed: boolean
-  history: (number | null)[]  // oldest first, today last
+  history: (number | null)[]
   scaleKey: string
 }
 
@@ -310,8 +298,8 @@ function ScaleRow({ title, value, labels, isStress = false, revealed, history, s
   if (value == null) {
     return (
       <div className="hss-row">
-        <div className="hss-row-ring">
-          <span className="hss-col-title">{title}</span>
+        <div className="hss-row-left">
+          <span className="hss-row-title">{title}</span>
           <span className="hss-col-empty">—</span>
         </div>
       </div>
@@ -322,7 +310,6 @@ function ScaleRow({ title, value, labels, isStress = false, revealed, history, s
   const label = labels[value - 1]
   const hasEnoughData = history.filter(v => v !== null).length >= 3
 
-  // Calculate average of previous entries (everything except today)
   const previous = history.slice(0, -1).filter((v): v is number => v !== null)
   const avg = previous.length > 0
     ? previous.reduce((a, b) => a + b, 0) / previous.length
@@ -337,17 +324,17 @@ function ScaleRow({ title, value, labels, isStress = false, revealed, history, s
         transition: 'opacity 0.5s ease, transform 0.5s ease',
       }}
     >
-      {/* Left 25% — Ring + label */}
-      <div className="hss-row-ring">
-        <span className="hss-col-title">{title}</span>
+      {/* Left 25% — Title + Ring */}
+      <div className="hss-row-left">
+        <span className="hss-row-title">{title}</span>
         <div className="hss-digit-wrap">
           <SegmentedRing value={value} color={color} revealed={revealed} />
         </div>
-        <span className="hss-col-word" style={{ color }}>{label}</span>
       </div>
 
-      {/* Right 75% — Chart + delta below */}
-      <div className="hss-row-chart-area">
+      {/* Right 75% — Word label + Chart + Delta */}
+      <div className="hss-row-right">
+        <span className="hss-row-word" style={{ color }}>{label}</span>
         {hasEnoughData ? (
           <>
             <ScaleTrendChart
@@ -400,7 +387,6 @@ export default function HumanScoresSection({ brainScale, bodyScale, happyScale, 
     return () => observer.disconnect()
   }, [])
 
-  // Reverse history so index 0 = oldest, last = today (for chart left-to-right)
   const chronological = [...history].reverse()
 
   const brainHistory  = chronological.map(e => e.brainScale)

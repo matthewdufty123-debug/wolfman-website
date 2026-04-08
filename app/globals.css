@@ -7537,7 +7537,7 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
 .hss-stacked {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0;
   width: 100%;
 }
 
@@ -7546,48 +7546,56 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   align-items: flex-start;
   gap: 0;
   width: 100%;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.hss-row-ring {
+.hss-row:last-child {
+  border-bottom: none;
+}
+
+/* Left column — title + ring */
+.hss-row-left {
   flex: 0 0 25%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0;
-}
-
-.hss-row-chart-area {
-  flex: 0 0 75%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
+  gap: 0.5rem;
   padding-top: 0.25rem;
 }
 
-.hss-col-title {
+/* Right column — word label + chart + delta */
+.hss-row-right {
+  flex: 0 0 75%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.15rem;
+}
+
+/* Scale title — large and prominent */
+.hss-row-title {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.6rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--body-text, #4A4A4A);
-  opacity: 0.55;
+  opacity: 0.7;
+}
+
+/* Word label at top of right column */
+.hss-row-word {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  padding-left: 1.5rem;
 }
 
 .hss-digit-wrap {
   line-height: 0;
-}
-
-.hss-col-word {
-  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.58rem;
-  font-weight: 600;
-  text-align: center;
-  letter-spacing: 0.02em;
-  line-height: 1.3;
-  color: var(--body-text);
 }
 
 .hss-col-empty {
@@ -7597,22 +7605,24 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-/* Delta indicator (below chart) */
+/* Delta indicator — full width, horizontal layout */
 .hss-delta {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 0.15rem;
-  padding: 0.25rem 0 0.25rem;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0 0;
+  width: 100%;
 }
 
 .hss-delta-arrow {
-  margin-bottom: 0.1rem;
+  flex-shrink: 0;
 }
 
 .hss-delta-value {
   font-family: var(--font-inter), sans-serif;
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 700;
   line-height: 1;
 }
@@ -7630,8 +7640,7 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   font-family: var(--font-inter), sans-serif;
   font-size: 0.5rem;
   color: rgba(255, 255, 255, 0.35);
-  text-align: center;
-  line-height: 1.4;
+  line-height: 1.2;
 }
 
 .hss-delta-underline {
