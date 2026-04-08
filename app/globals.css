@@ -7811,6 +7811,40 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   border-color: #A0622A;
 }
 
+/* ── WOLF|BOT review header (icon + play button) ── */
+.wb-review-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.wb-review-header .wb-play-circle {
+  width: 56px;
+  height: 56px;
+  border-color: #A0622A;
+  color: #A0622A;
+  background: transparent;
+  animation: none;
+  border-width: 1.5px;
+}
+.wb-review-header .wb-play-circle:hover {
+  background: rgba(160, 98, 42, 0.12);
+  color: #A0622A;
+  box-shadow: none;
+}
+.wb-review-header .wb-play-circle--speaking {
+  background: #A0622A;
+  border-color: #A0622A;
+  color: #fff;
+}
+.wb-review-header .wb-play-circle--speaking:hover {
+  background: #8a5322;
+  border-color: #8a5322;
+  box-shadow: none;
+}
+
 /* ── WOLF|BOT info overlay ── */
 .wb-info-overlay {
   position: fixed;

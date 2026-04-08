@@ -76,12 +76,54 @@ function WolfBotInfoOverlay({ open, onClose }: { open: boolean; onClose: () => v
   )
 }
 
+// ── Read aloud button ─────────────────────────────────────────────────────────
+
+function ReadAloudButton({ text }: { text: string }) {
+  const [speaking, setSpeaking] = useState(false)
+  const utterRef = useRef<SpeechSynthesisUtterance | null>(null)
+
+  function toggle() {
+    if (speaking) {
+      window.speechSynthesis.cancel()
+      setSpeaking(false)
+      return
+    }
+    const utter = new SpeechSynthesisUtterance(text)
+    utter.rate = 1
+    utter.onend = () => setSpeaking(false)
+    utter.onerror = () => setSpeaking(false)
+    utterRef.current = utter
+    window.speechSynthesis.speak(utter)
+    setSpeaking(true)
+  }
+
+  // Cancel on unmount
+  useEffect(() => () => { window.speechSynthesis.cancel() }, [])
+
+  return (
+    <button
+      type="button"
+      className={`wb-play-circle${speaking ? ' wb-play-circle--speaking' : ''}`}
+      onClick={toggle}
+      aria-label={speaking ? 'Stop reading' : 'Read review aloud'}
+      title={speaking ? 'Stop' : 'Read aloud'}
+    >
+      <span className="wb-play-circle-icon">{speaking ? '■' : '▶'}</span>
+      <span className="wb-play-circle-label">{speaking ? 'STOP' : 'PLAY'}</span>
+    </button>
+  )
+}
+
 // ── Review section — integrated as a journal section ──────────────────────────
 
 function ReviewSection({
   review,
+  pixelGrid,
+  pixelPalette,
 }: {
   review:        string
+  pixelGrid?:    PixelGrid
+  pixelPalette?: PixelPalette
 }) {
   const [infoOpen, setInfoOpen] = useState(false)
 
@@ -99,6 +141,10 @@ function ReviewSection({
           <Info size={14} strokeWidth={2} />
         </button>
       </p>
+      <div className="wb-review-header">
+        <WolfBotIcon size={56} grid={pixelGrid} palette={pixelPalette} />
+        <ReadAloudButton text={review} />
+      </div>
       <div className="post-body">
         {review.split('\n\n').map((para, i) => (
           <p key={i}>{para}</p>
@@ -207,6 +253,8 @@ export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, p
       {hasReview ? (
         <ReviewSection
           review={wolfbotReviews!.review!}
+          pixelGrid={pixelGrid}
+          pixelPalette={pixelPalette}
         />
       ) : hasLegacy ? (
         <LegacySection
