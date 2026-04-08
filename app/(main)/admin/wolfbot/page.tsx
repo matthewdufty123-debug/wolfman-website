@@ -6,6 +6,12 @@ import { WOLFBOT_GRID, WOLFBOT_PALETTE } from '@/lib/wolfbot-pixel-data'
 
 type Config = Record<string, unknown>
 type LogEntry = { id: number; version: number; keyChanged: string; changedAt: string }
+type ReviewRow = {
+  id: string; postTitle: string; postDate: string; moodSignal: string | null
+  themeWords: string | null; journalContext: unknown; modelUsed: string | null
+  inputTokensTotal: number | null; outputTokensTotal: number | null; generatedAt: string
+  review: string | null
+}
 
 // ── Defaults (mirrored from API routes) ───────────────────────────────────────
 
@@ -108,6 +114,8 @@ export default function WolfBotConfigPage() {
   const [saved, setSaved] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [log, setLog] = useState<LogEntry[]>([])
+  const [reviews, setReviews] = useState<ReviewRow[]>([])
+  const [expandedReview, setExpandedReview] = useState<string | null>(null)
 
   const [gridText, setGridText] = useState(gridToText(WOLFBOT_GRID))
   const [gridError, setGridError] = useState('')
@@ -121,7 +129,8 @@ export default function WolfBotConfigPage() {
     Promise.all([
       fetch('/api/admin/wolfbot-config').then(r => r.json()),
       fetch('/api/admin/wolfbot-version-log').then(r => r.json()),
-    ]).then(([rows, logRows]) => {
+      fetch('/api/admin/wolfbot-reviews').then(r => r.json()),
+    ]).then(([rows, logRows, reviewRows]) => {
       const map: Config = {}
       for (const row of (rows as { key: string; value: unknown }[])) map[row.key] = row.value
       setConfig(map)
@@ -134,6 +143,7 @@ export default function WolfBotConfigPage() {
         setPalette(map['pixel_palette'] as Record<string, string>)
       }
       setLog(logRows)
+      setReviews(Array.isArray(reviewRows) ? reviewRows : [])
       setLoading(false)
     })
   }, [])
@@ -243,6 +253,22 @@ export default function WolfBotConfigPage() {
                 }}
               />
               <SaveStatus k="context_post_count" />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.8rem', color: 'var(--color-muted, #909090)' }}>Context day limit</label>
+              <input
+                type="number"
+                className="dash-config-textarea"
+                style={{ width: '90px', fontFamily: 'inherit' }}
+                defaultValue={(config['context_day_limit'] as number) ?? 30}
+                min={7}
+                max={90}
+                onBlur={e => {
+                  const val = parseInt(e.target.value, 10)
+                  if (!isNaN(val) && val !== config['context_day_limit']) save('context_day_limit', val)
+                }}
+              />
+              <SaveStatus k="context_day_limit" />
             </div>
           </div>
         </section>
@@ -439,6 +465,66 @@ export default function WolfBotConfigPage() {
         <p className="dash-muted" style={{ fontSize: '0.75rem', marginTop: '1rem' }}>
           Prompts and AI settings save on blur (auto-increments WOLF BRAIN version). Pixel grid saves on button click.
         </p>
+
+        {/* ── Recent Reviews ── */}
+        {reviews.length > 0 && (
+          <section className="dash-section">
+            <h2 className="dash-section-title">Recent Reviews</h2>
+            <p className="dash-muted" style={{ fontSize: '0.75rem', marginBottom: '0.75rem' }}>
+              Click a row to inspect its journalContext data.
+            </p>
+            <table className="dash-table">
+              <thead>
+                <tr><th>Date</th><th>Title</th><th>Mood</th><th>Themes</th><th>Context</th></tr>
+              </thead>
+              <tbody>
+                {reviews.map(r => (
+                  <tr key={r.id} style={{ cursor: 'pointer' }} onClick={() => setExpandedReview(expandedReview === r.id ? null : r.id)}>
+                    <td className="dash-muted" style={{ whiteSpace: 'nowrap' }}>
+                      {new Date(r.postDate + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                    </td>
+                    <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.postTitle}</td>
+                    <td>
+                      {r.moodSignal && <span className="dash-badge dash-badge--post">{r.moodSignal}</span>}
+                    </td>
+                    <td className="dash-muted" style={{ fontSize: '0.8rem', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {r.themeWords}
+                    </td>
+                    <td style={{ fontSize: '0.75rem' }}>
+                      {r.journalContext ? '✓' : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {expandedReview && (() => {
+              const r = reviews.find(rv => rv.id === expandedReview)
+              if (!r) return null
+              return (
+                <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(0,0,0,0.04)', borderRadius: 8, border: '1px solid rgba(74,127,165,0.15)' }}>
+                  <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>{r.postTitle} — {r.postDate}</p>
+                  {r.review && (
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <p className="dash-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>Review</p>
+                      <p style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>{r.review}</p>
+                    </div>
+                  )}
+                  <p className="dash-muted" style={{ fontSize: '0.7rem', marginBottom: '0.25rem' }}>Journal Context</p>
+                  <pre style={{
+                    fontFamily: 'var(--font-jetbrains)', fontSize: '0.75rem', lineHeight: 1.5,
+                    whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                    background: 'rgba(0,0,0,0.03)', padding: '0.75rem', borderRadius: 6,
+                  }}>
+                    {r.journalContext ? JSON.stringify(r.journalContext, null, 2) : 'null — no journalContext generated for this review'}
+                  </pre>
+                  <p className="dash-muted" style={{ fontSize: '0.7rem', marginTop: '0.5rem' }}>
+                    Model: {r.modelUsed} · In: {r.inputTokensTotal} · Out: {r.outputTokensTotal}
+                  </p>
+                </div>
+              )
+            })()}
+          </section>
+        )}
 
         {/* ── Version Log ── */}
         {log.length > 0 && (

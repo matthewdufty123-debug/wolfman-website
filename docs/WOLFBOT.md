@@ -74,6 +74,7 @@ Admin-only. Edited via `/admin/wolfbot`.
 | `title_max_words` | Max words in suggested title |
 | `title_max_chars` | Max characters in suggested title |
 | `context_post_count` | Number of recent posts included as context (default 5) |
+| `context_day_limit` | Max age in days for context entries (default 30) |
 | `grid` | 25×25 pixel art grid (JSONB) |
 | `palette` | 10-colour palette (JSONB) |
 
@@ -150,6 +151,67 @@ live config), it renders those; otherwise falls back to the hardcoded defaults.
 | `/api/admin/wolfbot-config` | GET | Fetch all config rows |
 | `/api/admin/wolfbot-config` | PATCH | Upsert config value by key |
 | `/api/admin/wolfbot-version-log` | GET | Fetch version audit log |
+| `/api/admin/wolfbot-reviews` | GET | Fetch 20 most recent reviews with post context |
+
+---
+
+## Journal Context System
+
+When WOLF|BOT generates a review, it also produces a `journalContext` JSONB object stored on the
+`wolfbotReviews` row. This structured summary replaces the old 200-character raw content truncation
+and provides richer signal for future reviews.
+
+### journalContext shape
+
+```json
+{
+  "tone": "reflective",
+  "scores": "brain busy, body sluggish, happy joyful, stress peaceful",
+  "rituals": ["breathwork", "coldShower", "walk"],
+  "wordCountBand": "long",
+  "themes": "physical recovery, long-term planning"
+}
+```
+
+### Two-phase context fetch
+
+When generating a review, the route fetches context in two phases:
+1. **Rich context** from `wolfbotReviews` rows with `journalContext` (formatted as structured prose)
+2. **Fallback** from `posts` table (200-char raw content) for entries without `journalContext`
+
+The `context_day_limit` config key (default 30) limits how far back the context fetch looks.
+
+### Context tiers (hardcoded in route)
+
+| journalContextCount | Tier | Behaviour |
+|---------------------|------|-----------|
+| Under 7 | NEW USER | Review today only, no trend analysis, brief acknowledgement |
+| 7 to 14 | EMERGING | Early comparisons, framed as developing |
+| 14+ | FULL | Full capability, no reference to data building |
+
+### Streak signal
+
+| daysSinceLastEntry | Signal |
+|--------------------|--------|
+| null | First journal entry — warm welcome |
+| 0 | Wrote twice today |
+| 1 | Consecutive day — no special instruction |
+| 2+ | Gap — warm welcome back, no guilt |
+
+Tier and streak instructions are hardcoded in the API route, not in `prompt_core`. The admin
+controls the creative voice via `prompt_core`; the code controls structural behaviour.
+
+---
+
+## Word Count
+
+Word counts are calculated at save time (drafts and published) using `parseContent()` from
+`lib/parse-content.ts`. Four columns on `posts`: `wordCountIntention`, `wordCountGratitude`,
+`wordCountGreatAt`, `wordCountTotal`. The API route derives `wordCountBand` (short/medium/long)
+from `wordCountTotal` and passes it to Claude.
+
+A stacked bar chart on the profile page shows the percentage breakdown per journal.
+Utility: `lib/word-count.ts`.
 
 ---
 
@@ -166,6 +228,7 @@ live config), it renders those; otherwise falls back to the hardcoded defaults.
 | themeWords | — | Theme keywords extracted |
 | moodSignal | — | Mood signal extracted |
 | profileNote | — | Profile-relevant note |
+| journalContext | JSONB | Structured summary for trend context (tone, scores, rituals, wordCountBand, themes) |
 | generatedAt | timestamp | When the review was generated |
 | triggeredBy | UUID | FK → users |
 | modelUsed | text | Which Claude model was used |

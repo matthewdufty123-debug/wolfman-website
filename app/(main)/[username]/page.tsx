@@ -2,10 +2,11 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
-import { posts, morningState, users } from '@/lib/db/schema'
-import { and, eq, gte, desc, sql } from 'drizzle-orm'
+import { posts, morningState, users, wolfbotReviews } from '@/lib/db/schema'
+import { and, eq, gte, desc, sql, isNotNull } from 'drizzle-orm'
 import StatsCharts, { StatRow } from '@/components/StatsCharts'
 import MorningZoneScatter, { type ZonePoint } from '@/components/MorningZoneScatter'
+import WordCountChart, { type WordCountRow } from '@/components/WordCountChart'
 import type { ZonePoint as ZP } from '@/components/MorningZoneScatter'
 
 export const dynamic = 'force-dynamic'
@@ -151,7 +152,7 @@ export default async function ProfilePage(
   const now = new Date()
   const firstOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
 
-  const [chartRows, allPostDates, [{ total }], scatterRows] = await Promise.all([
+  const [chartRows, allPostDates, [{ total }], scatterRows, wordCountRows, [{ wolfbotContextCount }]] = await Promise.all([
     // Chart data: last 3 months with morning state
     db
       .select({
@@ -195,6 +196,26 @@ export default async function ProfilePage(
       .where(eq(posts.authorId, userId))
       .orderBy(desc(posts.date))
       .limit(30),
+
+    // Word count breakdown for stacked bar chart
+    db
+      .select({
+        date: posts.date,
+        wordCountIntention: posts.wordCountIntention,
+        wordCountGratitude: posts.wordCountGratitude,
+        wordCountGreatAt: posts.wordCountGreatAt,
+        wordCountTotal: posts.wordCountTotal,
+      })
+      .from(posts)
+      .where(and(eq(posts.authorId, userId), eq(posts.status, 'published'), isNotNull(posts.wordCountTotal)))
+      .orderBy(posts.date),
+
+    // WOLF|BOT context count — entries with journalContext
+    db
+      .select({ wolfbotContextCount: sql<number>`COUNT(*)` })
+      .from(wolfbotReviews)
+      .innerJoin(posts, eq(wolfbotReviews.postId, posts.id))
+      .where(and(eq(posts.authorId, userId), isNotNull(wolfbotReviews.journalContext))),
   ])
 
   const chartData: StatRow[] = chartRows.map(r => ({
@@ -219,6 +240,16 @@ export default async function ProfilePage(
       brainScale: r.brainScale,
       bodyScale: r.bodyScale,
       happyScale: r.happyScale!,
+    }))
+
+  const wordCountData: WordCountRow[] = wordCountRows
+    .filter(r => r.wordCountTotal && r.wordCountTotal > 0)
+    .map(r => ({
+      date: r.date,
+      wordCountIntention: r.wordCountIntention ?? 0,
+      wordCountGratitude: r.wordCountGratitude ?? 0,
+      wordCountGreatAt: r.wordCountGreatAt ?? 0,
+      wordCountTotal: r.wordCountTotal!,
     }))
 
   const allDates = allPostDates.map(r => r.date)
@@ -303,6 +334,40 @@ export default async function ProfilePage(
             <StatCard value={thisMonth} label="This month" />
           </div>
 
+          {/* WOLF|BOT context progress — owner only, hidden at full capability */}
+          {isOwner && Number(wolfbotContextCount) < 14 && (
+            <div style={{
+              padding: '0.75rem 1rem',
+              borderRadius: 8,
+              background: 'rgba(74,127,165,0.06)',
+              border: '1px solid rgba(74,127,165,0.12)',
+              marginBottom: '1.25rem',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                <span style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", fontSize: '0.78rem', fontWeight: 600, color: 'var(--body-text)' }}>
+                  WOLF|BOT Context
+                </span>
+                <span style={{ fontFamily: 'var(--font-jetbrains)', fontSize: '0.72rem', color: 'var(--color-muted, #909090)' }}>
+                  {Number(wolfbotContextCount)}/14
+                </span>
+              </div>
+              <div style={{ height: 6, borderRadius: 3, background: 'rgba(74,127,165,0.12)', overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%',
+                  width: `${Math.min(100, (Number(wolfbotContextCount) / 14) * 100)}%`,
+                  background: '#4A7FA5',
+                  borderRadius: 3,
+                  transition: 'width 0.3s ease',
+                }} />
+              </div>
+              <p style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", fontSize: '0.72rem', color: 'var(--color-muted, #909090)', marginTop: '0.35rem' }}>
+                {Number(wolfbotContextCount) < 7
+                  ? 'More journal entries unlock WOLF|BOT trend analysis'
+                  : 'WOLF|BOT understanding is developing — nearly at full capability'}
+              </p>
+            </div>
+          )}
+
           {/* Morning Zone scatter */}
           {scatterData.length > 0 && (
             <div className="stats-chart-card">
@@ -320,6 +385,14 @@ export default async function ProfilePage(
               </p>
             )
           }
+
+          {/* Word count breakdown */}
+          {wordCountData.length > 0 && (
+            <div className="stats-chart-card">
+              <p className="stats-chart-title">Journal Word Count</p>
+              <WordCountChart data={wordCountData} />
+            </div>
+          )}
         </>
       )}
     </main>

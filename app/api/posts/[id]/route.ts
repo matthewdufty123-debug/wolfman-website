@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { posts, morningState } from '@/lib/db/schema'
 import { eq, and, count } from 'drizzle-orm'
 import { notifyAdminFirstPost } from '@/lib/email'
+import { calculateWordCounts } from '@/lib/word-count'
 
 async function requireOwner(postId: string) {
   const session = await auth()
@@ -40,7 +41,10 @@ export async function PUT(
   const updateData: Record<string, unknown> = { updatedAt: new Date() }
   if (title) updateData.title = title
   if (date) updateData.date = date
-  if (content) updateData.content = content
+  if (content) {
+    updateData.content = content
+    Object.assign(updateData, calculateWordCounts(content))
+  }
   if (excerpt !== undefined) updateData.excerpt = excerpt || null
   if (isPublic !== undefined) updateData.isPublic = Boolean(isPublic)
   if (image !== undefined) updateData.image = image || null

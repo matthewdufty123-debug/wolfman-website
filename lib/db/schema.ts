@@ -98,6 +98,11 @@ export const posts = pgTable('posts', {
   titleSuggestionsUsed: integer('title_suggestions_used').notNull().default(0),
   titleTokensInput:     integer('title_tokens_input'),
   titleTokensOutput:    integer('title_tokens_output'),
+  // Word counts — captured on every save (draft + published)
+  wordCountIntention:   integer('word_count_intention'),
+  wordCountGratitude:   integer('word_count_gratitude'),
+  wordCountGreatAt:     integer('word_count_great_at'),
+  wordCountTotal:       integer('word_count_total'),
 })
 
 // Captured at publish time — how Matthew arrived at the day
@@ -211,6 +216,7 @@ export const wolfbotReviews = pgTable('wolfbot_reviews', {
   themeWords:         text('theme_words'),        // comma-separated recurring themes across recent posts
   moodSignal:         text('mood_signal'),        // one-line morning state interpretation
   profileNote:        text('profile_note'),       // how user's profile shapes the review lens
+  journalContext:     jsonb('journal_context'),    // structured summary for trend context (JSONB)
   // Legacy (pre-refactor): kept for backward compat, no longer written
   reviewHelpful:      text('review_helpful'),
   reviewIntellectual: text('review_intellectual'),

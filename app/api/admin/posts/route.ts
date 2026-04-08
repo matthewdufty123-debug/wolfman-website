@@ -3,6 +3,7 @@ import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { posts, morningState } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
+import { calculateWordCounts } from '@/lib/word-count'
 
 async function requireAdmin() {
   const session = await auth()
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
     review: review || null,
     authorId: session.user.id ?? null,
     publishedAt: new Date(),
+    ...calculateWordCounts(content),
   }).returning({ id: posts.id, slug: posts.slug })
 
   // Save morning state if provided
@@ -97,7 +99,7 @@ export async function PUT(request: Request) {
       ...(title     && { title }),
       ...(date      && { date }),
       ...(category  && { category }),
-      ...(content   && { content }),
+      ...(content   && { content, ...calculateWordCounts(content) }),
       excerpt: excerpt || null,
       image:   image   || null,
       videoId: videoId || null,

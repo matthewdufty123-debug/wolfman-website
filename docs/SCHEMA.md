@@ -75,6 +75,10 @@ User-facing copy uses "journal" not "post".
 | titleSuggestionsUsed | int | Token tracking |
 | titleTokensInput | int | Token tracking |
 | titleTokensOutput | int | Token tracking |
+| wordCountIntention | int | Word count of Intention section |
+| wordCountGratitude | int | Word count of Gratitude section |
+| wordCountGreatAt | int | Word count of Something Great At section |
+| wordCountTotal | int | Sum of all three sections |
 
 ### `morningState`
 

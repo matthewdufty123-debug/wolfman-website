@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { posts, morningState } from '@/lib/db/schema'
+import { calculateWordCounts } from '@/lib/word-count'
 import { eq, and, desc } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
@@ -65,6 +66,7 @@ export async function POST(request: Request) {
     publishedAt: status === 'published' ? new Date() : new Date(0),
     eveningReflection: eveningReflection || null,
     feelAboutToday: feelAboutToday ?? null,
+    ...calculateWordCounts(content),
   }).returning({ id: posts.id, slug: posts.slug })
 
   if (morning && post) {
