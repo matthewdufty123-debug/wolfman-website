@@ -9,6 +9,8 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  console.error('[error.tsx]', error.message, error.digest, error.stack)
+
   return (
     <main
       style={{
