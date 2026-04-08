@@ -98,7 +98,6 @@ app/
 | `DevOverlay.tsx` / `DevPageClient.tsx` | /dev page client components |
 | `EveningReflection.tsx` | Evening reflection form + display (post owner) |
 | `FontFamilyButtons.tsx` / `FontSizeButtons.tsx` | Reader font controls |
-| `JournalPage.tsx` | Main journal reading page — 9 vertical sections |
 | `LandscapeBlock.tsx` | CSS-only portrait lock: full-screen overlay on touch devices in landscape |
 | `LowerNavBar.tsx` | Primary nav bar (6 slots). Login modal lives here. |
 | `MorningRitualIconBar.tsx` | Interactive ritual icon bar with popup + "see all journals" link |
@@ -123,7 +122,33 @@ app/
 
 | Component | Purpose |
 |-----------|---------|
-| `WolfBotSection.tsx` | Full WOLF|BOT review terminal on journal reading page |
+| `JournalTextSection.tsx` | Renders journal body HTML (intention, gratitude, great at) |
+| `WolfBotSection.tsx` | WOLF|BOT review display + trigger button (client component) |
+| `HumanScoresSection.tsx` | Animated score rings for brain/body/happy/stress (client component) |
+| `MorningRitualsSection.tsx` | Ritual icon grid with popup modals (client component) |
+| `PostInfoSection.tsx` | Post metadata: title, date, word count, status |
+| `BottomNav.tsx` | Bottom navigation pills: View Profile, Next Journal, Write, Edit |
+
+### Journal page Suspense sections (`app/(main)/[username]/[slug]/_sections/`)
+
+The journal reading page uses **Suspense streaming** — each section is an async server component
+that fetches its own data independently. The page sends HTML progressively: Section 1 (the reading
+content) arrives first, heavier sections stream in as their queries resolve.
+
+| Section | File | Fetches | Renders |
+|---------|------|---------|---------|
+| 1 — Journal + Review | `JournalWithReviewSection.tsx` | wolfbotReviews, wolfbotConfig, dayScores | JournalTextSection + WolfBotSection |
+| 2 — How I Showed Up | `HowIShowedUpSection.tsx` | morningState (scales) | HumanScoresSection |
+| 3 — Morning Rituals | `MorningRitualsServerSection.tsx` | morningState (checklist) | MorningRitualsSection |
+| 4 — Post Info + Nav | `PostInfoNavSection.tsx` | prev/next post navigation | PostInfoSection + BottomNav |
+
+**Adding content to a section:** Add queries and components inside the relevant async server
+component. The Suspense boundary is already in place — new queries won't block other sections.
+
+`skeletons.tsx` provides pulsing placeholder fallbacks for each Suspense boundary.
+
+`page.tsx` handles only gate queries (post lookup, auth, author verification, access control)
+then renders the 4 `<Suspense>` boundaries. `isOwner` is computed server-side.
 
 ---
 
