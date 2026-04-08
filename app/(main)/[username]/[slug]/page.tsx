@@ -107,9 +107,9 @@ export default async function PostPage({
             <JournalWithReviewSection post={post} postId={postId} isOwner={isOwner} />
           </Suspense>
 
-          {/* Section 2: How I Showed Up (morning scores + future charts) */}
+          {/* Section 2: How I Showed Up (morning scores + trend charts) */}
           <Suspense fallback={<Section2Skeleton />}>
-            <HowIShowedUpSection postId={postId} />
+            <HowIShowedUpSection postId={postId} authorId={post.authorId ?? ''} postDate={post.date ?? ''} />
           </Suspense>
 
           {/* Section 3: Morning Rituals (+ future analysis) */}

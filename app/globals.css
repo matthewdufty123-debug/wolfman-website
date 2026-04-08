@@ -7532,21 +7532,38 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   padding-bottom: 0;
 }
 
-/* ── How I Showed Up — 4-column score grid ──────────────────────────────── */
+/* ── How I Showed Up — stacked rows with trend charts ───────────────────── */
 
-.hss-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+.hss-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.hss-row {
+  display: flex;
+  align-items: flex-start;
   gap: 0;
   width: 100%;
 }
 
-.hss-col {
+.hss-row-ring {
+  flex: 0 0 25%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 0.25rem;
+  gap: 0.4rem;
+  padding: 0.5rem 0;
+}
+
+.hss-row-chart-area {
+  flex: 0 0 75%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding-top: 0.25rem;
 }
 
 .hss-col-title {
@@ -7578,6 +7595,68 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   color: var(--body-text);
   opacity: 0.2;
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Delta indicator (below chart) */
+.hss-delta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.25rem 0 0.25rem;
+}
+
+.hss-delta-arrow {
+  margin-bottom: 0.1rem;
+}
+
+.hss-delta-value {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.hss-delta-label {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hss-delta-sub {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.5rem;
+  color: rgba(255, 255, 255, 0.35);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.hss-delta-underline {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Building data state */
+.hss-building-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 100%;
+  min-height: 80px;
+  color: rgba(255, 255, 255, 0.35);
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.7rem;
+  font-style: italic;
+}
+
+.hss-building-sub {
+  font-size: 0.55rem;
+  opacity: 0.7;
 }
 
 /* ── WOLF|BOT Review section ────────────────────────────────────────────── */

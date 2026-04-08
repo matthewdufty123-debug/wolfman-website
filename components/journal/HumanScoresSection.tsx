@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react'
 import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
+import type { ScaleHistoryEntry } from '@/app/(main)/[username]/[slug]/_sections/HowIShowedUpSection'
 
 // ── Labels for each scale ───────────────────────────────────────────────────
 
@@ -10,30 +11,28 @@ const BODY_LABELS   = ['Nothing to Give', 'Running Empty', 'Sluggish', 'Slow', '
 const HAPPY_LABELS  = ['Completely Lost', 'Struggling', 'Bit Low', 'Flat', 'Okay', 'Happy', 'Bike Smiles', 'Absolutely Joyful']
 const STRESS_LABELS = ['Completely Overwhelmed', 'Anxious', 'Stressed', 'Unsettled', 'Peaceful', 'Focused', 'Primed', 'Hunt Mode']
 
-// ── Colour interpolation — 1 = pale blue, 8 = intense (blue or crimson for stress) ──
+// ── Brand colours ───────────────────────────────────────────────────────────
+
+const COPPER = '#A0622A'
+const OFF_WHITE = 'rgba(255, 255, 255, 0.7)'
+
+// ── Colour interpolation — 1 = pale blue, 8 = intense ──────────────────────
 
 function getScaleColor(value: number, isStress = false): string {
-  const t = (value - 1) / 7  // 0 at value=1, 1 at value=8
+  const t = (value - 1) / 7
   if (isStress) {
-    // Pale blue → copper/terracotta: #A8D0E0 → #C87840 (warm, not alarming)
     const rVal = Math.round(0xa8 + (0xc8 - 0xa8) * t)
     const gVal = Math.round(0xd0 + (0x78 - 0xd0) * t)
     const bVal = Math.round(0xe0 + (0x40 - 0xe0) * t)
     return `rgb(${rVal},${gVal},${bVal})`
   }
-  // Pale blue → royal blue: #A8D0E0 → #2A6AB0
   const rVal = Math.round(0xa8 + (0x2a - 0xa8) * t)
   const gVal = Math.round(0xd0 + (0x6a - 0xd0) * t)
   const bVal = Math.round(0xe0 + (0xb0 - 0xe0) * t)
   return `rgb(${rVal},${gVal},${bVal})`
 }
 
-// ── Segmented ring — 8 arc segments, sequential CCW fill from top ────────────
-//
-// Segments are positioned counter-clockwise from 12 o'clock.
-// Segment 0 is nearest the top; segment 7 completes the ring going left/down/right.
-// On reveal, filled segments animate in order 0→value-1 with staggered delays,
-// creating the effect of the ring filling from zero up to the scored value CCW.
+// ── Segmented ring ──────────────────────────────────────────────────────────
 
 function SegmentedRing({ value, color, size = 64, revealed }: {
   value: number
@@ -46,10 +45,9 @@ function SegmentedRing({ value, color, size = 64, revealed }: {
   const r  = size / 2 - 5
   const SEGMENTS    = 8
   const GAP_DEG     = 4
-  const ARC_DEG     = 360 / SEGMENTS - GAP_DEG  // 41° per segment
-  const STAGGER_S   = 0.13  // seconds between each segment starting
+  const ARC_DEG     = 360 / SEGMENTS - GAP_DEG
+  const STAGGER_S   = 0.13
 
-  // True arc length for strokeDasharray
   const arcLength = (ARC_DEG / 360) * 2 * Math.PI * r
 
   function toXY(deg: number) {
@@ -57,9 +55,6 @@ function SegmentedRing({ value, color, size = 64, revealed }: {
     return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
   }
 
-  // Segments go CCW from top: segment i starts just CCW of 12 o'clock.
-  // Path drawn CCW (sweep-flag 0) so dashoffset reveals from the 12-o'clock end
-  // toward the CCW end, matching the fill direction.
   function arcPath(i: number) {
     const startAngle = -(i * 45 + GAP_DEG / 2)
     const endAngle   = startAngle - ARC_DEG
@@ -107,55 +102,286 @@ function SegmentedRing({ value, color, size = 64, revealed }: {
   )
 }
 
-// ── Scale column ─────────────────────────────────────────────────────────────
+// ── Trend chart (pure SVG) ──────────────────────────────────────────────────
 
-interface ScaleColProps {
+interface TrendChartProps {
+  values: (number | null)[]  // index 0 = oldest, last = today
+  todayValue: number
+  revealed: boolean
+  chartId: string
+}
+
+function ScaleTrendChart({ values, todayValue, revealed, chartId }: TrendChartProps) {
+  const W = 280
+  const H = 120
+  const PAD_LEFT = 24
+  const PAD_RIGHT = 12
+  const PAD_TOP = 12
+  const PAD_BOTTOM = 24
+  const plotW = W - PAD_LEFT - PAD_RIGHT
+  const plotH = H - PAD_TOP - PAD_BOTTOM
+
+  // Y maps score 1–8 to pixel
+  const yForVal = (v: number) => PAD_TOP + plotH - ((v - 1) / 7) * plotH
+
+  // X maps index to pixel (evenly spaced)
+  const pointCount = values.length
+  const xForIdx = (i: number) => {
+    if (pointCount <= 1) return PAD_LEFT + plotW / 2
+    return PAD_LEFT + (i / (pointCount - 1)) * plotW
+  }
+
+  // Calculate average of previous entries (everything except today)
+  const previous = values.slice(0, -1).filter((v): v is number => v !== null)
+  const avg = previous.length > 0
+    ? previous.reduce((a, b) => a + b, 0) / previous.length
+    : null
+
+  // Gradient IDs unique per chart
+  const copperGradId = `copper-grad-${chartId}`
+  const avgGradId = `avg-grad-${chartId}`
+
+  return (
+    <svg
+      width="100%"
+      viewBox={`0 0 ${W} ${H}`}
+      preserveAspectRatio="xMidYMid meet"
+      aria-hidden="true"
+      style={{
+        opacity: revealed ? 1 : 0,
+        transition: 'opacity 0.6s ease 0.5s',
+      }}
+    >
+      <defs>
+        {/* Copper line gradient: 25% opacity on left → 100% on right */}
+        <linearGradient id={copperGradId} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor={COPPER} stopOpacity="0.25" />
+          <stop offset="100%" stopColor={COPPER} stopOpacity="1" />
+        </linearGradient>
+        {/* Average line gradient: 25% opacity on left → 70% on right */}
+        <linearGradient id={avgGradId} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.5" />
+        </linearGradient>
+      </defs>
+
+      {/* Y-axis labels — even numbers only */}
+      {[2, 4, 6, 8].map(v => (
+        <text
+          key={v}
+          x={PAD_LEFT - 6}
+          y={yForVal(v)}
+          textAnchor="end"
+          dominantBaseline="middle"
+          fill="rgba(255,255,255,0.35)"
+          fontSize="8"
+          fontFamily="var(--font-inter), sans-serif"
+        >
+          {v}
+        </text>
+      ))}
+
+      {/* Today's value line — full width, copper gradient */}
+      <line
+        x1={PAD_LEFT}
+        y1={yForVal(todayValue)}
+        x2={PAD_LEFT + plotW}
+        y2={yForVal(todayValue)}
+        stroke={`url(#${copperGradId})`}
+        strokeWidth="1.5"
+      />
+
+      {/* Average line — full width, off-white gradient */}
+      {avg !== null && (
+        <line
+          x1={PAD_LEFT}
+          y1={yForVal(avg)}
+          x2={PAD_LEFT + plotW}
+          y2={yForVal(avg)}
+          stroke={`url(#${avgGradId})`}
+          strokeWidth="1"
+          strokeDasharray="4 3"
+        />
+      )}
+
+      {/* Data points */}
+      {values.map((v, i) => {
+        if (v === null) return null
+        const isToday = i === values.length - 1
+        // Opacity: oldest = 0.25, newest (before today) = 0.85, today = 1
+        const opacity = isToday
+          ? 1
+          : pointCount <= 2
+            ? 0.5
+            : 0.25 + (i / (pointCount - 2)) * 0.6
+
+        return (
+          <circle
+            key={i}
+            cx={xForIdx(i)}
+            cy={yForVal(v)}
+            r={isToday ? 5 : 3.5}
+            fill={isToday ? COPPER : '#ffffff'}
+            fillOpacity={opacity}
+            style={{
+              opacity: revealed ? 1 : 0,
+              transition: `opacity 0.3s ease ${0.6 + i * 0.06}s`,
+            }}
+          />
+        )
+      })}
+
+      {/* X-axis label */}
+      <text
+        x={PAD_LEFT + plotW / 2}
+        y={H - 4}
+        textAnchor="middle"
+        fill="rgba(255,255,255,0.3)"
+        fontSize="7"
+        fontFamily="var(--font-inter), sans-serif"
+      >
+        {`Journal (today and ${Math.max(values.length - 1, 0)} journal history)`}
+      </text>
+    </svg>
+  )
+}
+
+// ── Delta indicator ─────────────────────────────────────────────────────────
+
+function DeltaIndicator({ todayValue, avg, previousCount, revealed }: {
+  todayValue: number
+  avg: number | null
+  previousCount: number
+  revealed: boolean
+}) {
+  if (avg === null) return null
+
+  const diff = todayValue - avg
+  const isUp = diff > 0
+  const isEqual = Math.abs(diff) < 0.05
+  const displayDiff = Math.abs(diff).toFixed(1)
+
+  return (
+    <div
+      className="hss-delta"
+      style={{
+        opacity: revealed ? 1 : 0,
+        transform: revealed ? 'translateY(0)' : 'translateY(8px)',
+        transition: 'opacity 0.5s ease 0.8s, transform 0.5s ease 0.8s',
+      }}
+    >
+      {/* Arrow */}
+      {!isEqual && (
+        <svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true" className="hss-delta-arrow">
+          {isUp ? (
+            <polygon points="10,0 20,16 0,16" fill={COPPER} />
+          ) : (
+            <polygon points="0,0 20,0 10,16" fill={COPPER} />
+          )}
+        </svg>
+      )}
+
+      {/* Value */}
+      <span className="hss-delta-value" style={{ color: COPPER }}>
+        {isEqual ? '=' : `${isUp ? '+' : '-'} ${displayDiff}`}
+      </span>
+      <span className="hss-delta-label">Points</span>
+      <span className="hss-delta-sub">
+        Compared to<br />
+        <span className="hss-delta-underline">{previousCount} journal</span> average
+      </span>
+    </div>
+  )
+}
+
+// ── Scale row (replaces old ScaleCol) ───────────────────────────────────────
+
+interface ScaleRowProps {
   title: string
   value: number | null
   labels: string[]
   isStress?: boolean
   revealed: boolean
+  history: (number | null)[]  // oldest first, today last
+  scaleKey: string
 }
 
-function ScaleCol({ title, value, labels, isStress = false, revealed }: ScaleColProps) {
+function ScaleRow({ title, value, labels, isStress = false, revealed, history, scaleKey }: ScaleRowProps) {
   if (value == null) {
     return (
-      <div className="hss-col">
-        <span className="hss-col-title">{title}</span>
-        <span className="hss-col-empty">—</span>
+      <div className="hss-row">
+        <div className="hss-row-ring">
+          <span className="hss-col-title">{title}</span>
+          <span className="hss-col-empty">—</span>
+        </div>
       </div>
     )
   }
+
   const color = getScaleColor(value, isStress)
   const label = labels[value - 1]
+  const hasEnoughData = history.filter(v => v !== null).length >= 3
+
+  // Calculate average of previous entries (everything except today)
+  const previous = history.slice(0, -1).filter((v): v is number => v !== null)
+  const avg = previous.length > 0
+    ? previous.reduce((a, b) => a + b, 0) / previous.length
+    : null
+
   return (
     <div
-      className="hss-col"
+      className="hss-row"
       style={{
         opacity: revealed ? 1 : 0,
         transform: revealed ? 'translateY(0)' : 'translateY(12px)',
         transition: 'opacity 0.5s ease, transform 0.5s ease',
       }}
     >
-      <span className="hss-col-title">{title}</span>
-      <div className="hss-digit-wrap">
-        <SegmentedRing value={value} color={color} revealed={revealed} />
+      {/* Left 25% — Ring + label */}
+      <div className="hss-row-ring">
+        <span className="hss-col-title">{title}</span>
+        <div className="hss-digit-wrap">
+          <SegmentedRing value={value} color={color} revealed={revealed} />
+        </div>
+        <span className="hss-col-word" style={{ color }}>{label}</span>
       </div>
-      <span className="hss-col-word" style={{ color }}>{label}</span>
+
+      {/* Right 75% — Chart + delta below */}
+      <div className="hss-row-chart-area">
+        {hasEnoughData ? (
+          <>
+            <ScaleTrendChart
+              values={history}
+              todayValue={value}
+              revealed={revealed}
+              chartId={scaleKey}
+            />
+            <DeltaIndicator todayValue={value} avg={avg} previousCount={previous.length} revealed={revealed} />
+          </>
+        ) : (
+          <div className="hss-building-data">
+            <span>We&rsquo;re building your data</span>
+            <span className="hss-building-sub">
+              {history.filter(v => v !== null).length} of 3 journals needed
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
 
-// ── Main section ─────────────────────────────────────────────────────────────
+// ── Main section ────────────────────────────────────────────────────────────
 
 interface Props {
   brainScale: number | null
   bodyScale: number | null
   happyScale: number | null
   stressScale: number | null
+  history: ScaleHistoryEntry[]
 }
 
-export default function HumanScoresSection({ brainScale, bodyScale, happyScale, stressScale }: Props) {
+export default function HumanScoresSection({ brainScale, bodyScale, happyScale, stressScale, history }: Props) {
   const sectionRef = useRef<HTMLElement>(null)
   const [revealed, setRevealed] = useState(false)
 
@@ -168,11 +394,19 @@ export default function HumanScoresSection({ brainScale, bodyScale, happyScale, 
     }
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setRevealed(true); observer.disconnect() } },
-      { threshold: 0.3 }
+      { threshold: 0.2 }
     )
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
+
+  // Reverse history so index 0 = oldest, last = today (for chart left-to-right)
+  const chronological = [...history].reverse()
+
+  const brainHistory  = chronological.map(e => e.brainScale)
+  const bodyHistory   = chronological.map(e => e.bodyScale)
+  const happyHistory  = chronological.map(e => e.happyScale)
+  const stressHistory = chronological.map(e => e.stressScale)
 
   return (
     <section ref={sectionRef} id="how-i-showed-up" className="journal-section">
@@ -182,11 +416,11 @@ export default function HumanScoresSection({ brainScale, bodyScale, happyScale, 
         popupBody="Before writing, Matthew rates himself on Brain Activity (Peaceful → Manic), Body Energy (Lethargic → Buzzing), Happiness (Far from happy → Joyful), and Stress (Calm → Overwhelmed). These honest snapshots build into a data picture of how his inner state shapes his intentions over time."
         popupLink={{ href: '/scores', label: 'About the morning scores' }}
       />
-      <div className="hss-grid">
-        <ScaleCol title="Brain"  value={brainScale}  labels={BRAIN_LABELS}  revealed={revealed} />
-        <ScaleCol title="Body"   value={bodyScale}   labels={BODY_LABELS}   revealed={revealed} />
-        <ScaleCol title="Happy"  value={happyScale}  labels={HAPPY_LABELS}  revealed={revealed} />
-        <ScaleCol title="Stress" value={stressScale} labels={STRESS_LABELS} isStress revealed={revealed} />
+      <div className="hss-stacked">
+        <ScaleRow title="Brain"  value={brainScale}  labels={BRAIN_LABELS}  revealed={revealed} history={brainHistory}  scaleKey="brain" />
+        <ScaleRow title="Body"   value={bodyScale}   labels={BODY_LABELS}   revealed={revealed} history={bodyHistory}   scaleKey="body" />
+        <ScaleRow title="Happy"  value={happyScale}  labels={HAPPY_LABELS}  revealed={revealed} history={happyHistory}  scaleKey="happy" />
+        <ScaleRow title="Stress" value={stressScale} labels={STRESS_LABELS} isStress revealed={revealed} history={stressHistory} scaleKey="stress" />
       </div>
     </section>
   )
