@@ -7124,11 +7124,13 @@ html[data-theme="light"] .pf-expand-btn:hover {
 }
 
 .journal-section--text {
-  padding-top: 1.5rem;  /* text section sits flush after journal-section-title */
+  padding-top: 1.5rem;
+  padding-bottom: 0;  /* let post-section margin-bottom handle spacing to next section */
 }
 
-/* WOLF|BOT section — matches other journal-section width */
+/* WOLF|BOT section — tighten spacing to match gaps between journal text sections */
 .journal-section--wolfbot {
+  padding-top: 0;
   padding-bottom: 0;
   margin-top: 0;
 }
@@ -7811,13 +7813,41 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   border-color: #A0622A;
 }
 
-/* ── WOLF|BOT review header (icon + play button) ── */
+/* ── WOLF|BOT review header (icon + equaliser + play button) ── */
 .wb-review-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.25rem;
+  gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+/* Equaliser bars */
+.wb-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 28px;
+}
+
+.wb-eq-bar {
+  display: block;
+  width: 3px;
+  height: 4px;
+  border-radius: 1.5px;
+  background: #A0622A;
+  opacity: 0.25;
+  transition: opacity 0.3s;
+}
+
+.wb-eq--active .wb-eq-bar {
+  opacity: 1;
+  animation: wb-eq-bounce 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes wb-eq-bounce {
+  0%   { height: 4px; }
+  100% { height: 26px; }
 }
 
 .wb-review-header .wb-play-circle {

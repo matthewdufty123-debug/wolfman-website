@@ -76,41 +76,17 @@ function WolfBotInfoOverlay({ open, onClose }: { open: boolean; onClose: () => v
   )
 }
 
-// ── Read aloud button ─────────────────────────────────────────────────────────
+// ── Equaliser bars (CSS-animated, visual-only) ───────────────────────────────
 
-function ReadAloudButton({ text }: { text: string }) {
-  const [speaking, setSpeaking] = useState(false)
-  const utterRef = useRef<SpeechSynthesisUtterance | null>(null)
-
-  function toggle() {
-    if (speaking) {
-      window.speechSynthesis.cancel()
-      setSpeaking(false)
-      return
-    }
-    const utter = new SpeechSynthesisUtterance(text)
-    utter.rate = 1
-    utter.onend = () => setSpeaking(false)
-    utter.onerror = () => setSpeaking(false)
-    utterRef.current = utter
-    window.speechSynthesis.speak(utter)
-    setSpeaking(true)
-  }
-
-  // Cancel on unmount
-  useEffect(() => () => { window.speechSynthesis.cancel() }, [])
-
+function EqualiserBars({ active }: { active: boolean }) {
   return (
-    <button
-      type="button"
-      className={`wb-play-circle${speaking ? ' wb-play-circle--speaking' : ''}`}
-      onClick={toggle}
-      aria-label={speaking ? 'Stop reading' : 'Read review aloud'}
-      title={speaking ? 'Stop' : 'Read aloud'}
-    >
-      <span className="wb-play-circle-icon">{speaking ? '■' : '▶'}</span>
-      <span className="wb-play-circle-label">{speaking ? 'STOP' : 'PLAY'}</span>
-    </button>
+    <div className={`wb-eq${active ? ' wb-eq--active' : ''}`} aria-hidden="true">
+      <span className="wb-eq-bar" style={{ animationDelay: '0s' }} />
+      <span className="wb-eq-bar" style={{ animationDelay: '0.15s' }} />
+      <span className="wb-eq-bar" style={{ animationDelay: '0.3s' }} />
+      <span className="wb-eq-bar" style={{ animationDelay: '0.1s' }} />
+      <span className="wb-eq-bar" style={{ animationDelay: '0.25s' }} />
+    </div>
   )
 }
 
@@ -126,6 +102,25 @@ function ReviewSection({
   pixelPalette?: PixelPalette
 }) {
   const [infoOpen, setInfoOpen] = useState(false)
+  const [speaking, setSpeaking] = useState(false)
+  const utterRef = useRef<SpeechSynthesisUtterance | null>(null)
+
+  function toggleSpeech() {
+    if (speaking) {
+      window.speechSynthesis.cancel()
+      setSpeaking(false)
+      return
+    }
+    const utter = new SpeechSynthesisUtterance(review)
+    utter.rate = 1
+    utter.onend = () => setSpeaking(false)
+    utter.onerror = () => setSpeaking(false)
+    utterRef.current = utter
+    window.speechSynthesis.speak(utter)
+    setSpeaking(true)
+  }
+
+  useEffect(() => () => { window.speechSynthesis.cancel() }, [])
 
   return (
     <div className="post-section">
@@ -143,7 +138,17 @@ function ReviewSection({
       </p>
       <div className="wb-review-header">
         <WolfBotIcon size={56} grid={pixelGrid} palette={pixelPalette} />
-        <ReadAloudButton text={review} />
+        <EqualiserBars active={speaking} />
+        <button
+          type="button"
+          className={`wb-play-circle${speaking ? ' wb-play-circle--speaking' : ''}`}
+          onClick={toggleSpeech}
+          aria-label={speaking ? 'Stop reading' : 'Read review aloud'}
+          title={speaking ? 'Stop' : 'Read aloud'}
+        >
+          <span className="wb-play-circle-icon">{speaking ? '■' : '▶'}</span>
+          <span className="wb-play-circle-label">{speaking ? 'STOP' : 'PLAY'}</span>
+        </button>
       </div>
       <div className="post-body">
         {review.split('\n\n').map((para, i) => (
