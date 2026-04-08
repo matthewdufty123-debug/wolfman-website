@@ -7587,7 +7587,7 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
 /* Word label under the ring in left column */
 .hss-row-word {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.62rem;
+  font-size: 1rem;
   font-weight: 600;
   text-align: center;
   letter-spacing: 0.02em;
