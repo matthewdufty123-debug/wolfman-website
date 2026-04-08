@@ -7576,7 +7576,7 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
 /* Scale title — large and prominent */
 .hss-row-title {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -7584,14 +7584,17 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   opacity: 0.7;
 }
 
-/* Word label at top of right column */
+/* Word label under the ring in left column */
 .hss-row-word {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.62rem;
   font-weight: 600;
+  text-align: center;
   letter-spacing: 0.02em;
-  line-height: 1;
-  padding-left: 1.5rem;
+  line-height: 1.3;
+  word-break: break-word;
+  max-width: 100%;
+  padding: 0 0.25rem;
 }
 
 .hss-digit-wrap {

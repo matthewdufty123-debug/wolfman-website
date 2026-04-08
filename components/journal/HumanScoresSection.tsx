@@ -101,22 +101,21 @@ function SegmentedRing({ value, color, size = 64, revealed }: {
   )
 }
 
-// ── Trend chart (pure SVG) ──────────────────────────────────────────────────
+// ── Trend chart (pure SVG — no gradients, solid strokes) ────────────────────
 
 interface TrendChartProps {
-  values: (number | null)[]  // index 0 = oldest, last = today
+  values: (number | null)[]
   todayValue: number
   revealed: boolean
-  chartId: string
 }
 
-function ScaleTrendChart({ values, todayValue, revealed, chartId }: TrendChartProps) {
-  const W = 280
-  const H = 120
+function ScaleTrendChart({ values, todayValue, revealed }: TrendChartProps) {
+  const W = 300
+  const H = 130
   const PAD_LEFT = 24
-  const PAD_RIGHT = 12
-  const PAD_TOP = 12
-  const PAD_BOTTOM = 24
+  const PAD_RIGHT = 24
+  const PAD_TOP = 14
+  const PAD_BOTTOM = 26
   const plotW = W - PAD_LEFT - PAD_RIGHT
   const plotH = H - PAD_TOP - PAD_BOTTOM
 
@@ -133,9 +132,6 @@ function ScaleTrendChart({ values, todayValue, revealed, chartId }: TrendChartPr
     ? previous.reduce((a, b) => a + b, 0) / previous.length
     : null
 
-  const copperGradId = `copper-grad-${chartId}`
-  const avgGradId = `avg-grad-${chartId}`
-
   return (
     <svg
       width="100%"
@@ -147,16 +143,25 @@ function ScaleTrendChart({ values, todayValue, revealed, chartId }: TrendChartPr
         transition: 'opacity 0.6s ease 0.5s',
       }}
     >
-      <defs>
-        <linearGradient id={copperGradId} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor={COPPER} stopOpacity="0.4" />
-          <stop offset="100%" stopColor={COPPER} stopOpacity="1" />
-        </linearGradient>
-        <linearGradient id={avgGradId} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.2" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.6" />
-        </linearGradient>
-      </defs>
+      {/* Y-axis line */}
+      <line
+        x1={PAD_LEFT}
+        y1={PAD_TOP}
+        x2={PAD_LEFT}
+        y2={PAD_TOP + plotH}
+        stroke="rgba(255,255,255,0.12)"
+        strokeWidth="1"
+      />
+
+      {/* X-axis line */}
+      <line
+        x1={PAD_LEFT}
+        y1={PAD_TOP + plotH}
+        x2={PAD_LEFT + plotW}
+        y2={PAD_TOP + plotH}
+        stroke="rgba(255,255,255,0.12)"
+        strokeWidth="1"
+      />
 
       {/* Y-axis labels — even numbers only */}
       {[2, 4, 6, 8].map(v => (
@@ -174,25 +179,27 @@ function ScaleTrendChart({ values, todayValue, revealed, chartId }: TrendChartPr
         </text>
       ))}
 
-      {/* Today's value line — full width, copper gradient */}
+      {/* Today's value line — solid copper */}
       <line
         x1={PAD_LEFT}
         y1={yForVal(todayValue)}
         x2={PAD_LEFT + plotW}
         y2={yForVal(todayValue)}
-        stroke={`url(#${copperGradId})`}
+        stroke={COPPER}
         strokeWidth="2"
+        strokeOpacity="0.7"
       />
 
-      {/* Average line — full width, off-white gradient, dashed */}
+      {/* Average line — dashed white */}
       {avg !== null && (
         <line
           x1={PAD_LEFT}
           y1={yForVal(avg)}
           x2={PAD_LEFT + plotW}
           y2={yForVal(avg)}
-          stroke={`url(#${avgGradId})`}
+          stroke="#ffffff"
           strokeWidth="1.5"
+          strokeOpacity="0.4"
           strokeDasharray="6 4"
         />
       )}
@@ -212,7 +219,7 @@ function ScaleTrendChart({ values, todayValue, revealed, chartId }: TrendChartPr
             key={i}
             cx={xForIdx(i)}
             cy={yForVal(v)}
-            r={isToday ? 5 : 3.5}
+            r={isToday ? 7.5 : 3.5}
             fill={isToday ? COPPER : '#ffffff'}
             fillOpacity={opacity}
             style={{
@@ -324,24 +331,23 @@ function ScaleRow({ title, value, labels, isStress = false, revealed, history, s
         transition: 'opacity 0.5s ease, transform 0.5s ease',
       }}
     >
-      {/* Left 25% — Title + Ring */}
+      {/* Left 25% — Title + Ring + Word label */}
       <div className="hss-row-left">
         <span className="hss-row-title">{title}</span>
         <div className="hss-digit-wrap">
           <SegmentedRing value={value} color={color} revealed={revealed} />
         </div>
+        <span className="hss-row-word" style={{ color }}>{label}</span>
       </div>
 
-      {/* Right 75% — Word label + Chart + Delta */}
+      {/* Right 75% — Chart + Delta */}
       <div className="hss-row-right">
-        <span className="hss-row-word" style={{ color }}>{label}</span>
         {hasEnoughData ? (
           <>
             <ScaleTrendChart
               values={history}
               todayValue={value}
               revealed={revealed}
-              chartId={scaleKey}
             />
             <DeltaIndicator todayValue={value} avg={avg} previousCount={previous.length} revealed={revealed} />
           </>
