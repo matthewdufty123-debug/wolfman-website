@@ -11,7 +11,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   return (
     <PostContextProvider>
       <UpperNavBar />
-      <ClosedAlphaBanner />
+      <ClosedAlphaBanner status={config.status} />
       {children}
       <LowerNavBar registrationOpen={registrationOpen} />
     </PostContextProvider>

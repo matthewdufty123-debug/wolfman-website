@@ -1,12 +1,12 @@
+'use client'
+
 import Link from 'next/link'
-import { auth } from '@/auth'
-import { getSiteConfig } from '@/lib/site-config'
+import { useSession } from 'next-auth/react'
 
-export default async function ClosedAlphaBanner() {
-  const [config, session] = await Promise.all([getSiteConfig(), auth()])
+export default function ClosedAlphaBanner({ status }: { status: string }) {
+  const { data: session } = useSession()
 
-  // Only render during closed alpha, and never for logged-in users
-  if (config.status !== 'closed_alpha') return null
+  if (status !== 'closed_alpha') return null
   if (session?.user?.id) return null
 
   return (
