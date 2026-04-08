@@ -226,11 +226,10 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
 
     if (intentionText) {
       lines.push(`Today's Intention : ${intentionText}`)
+      lines.push('...')
+      lines.push(`Read more — full journal including 'What I'm Grateful For' and 'Something I'm Great At'`)
       lines.push('')
-      lines.push('...')
-      lines.push('...')
-      lines.push('...')
-      lines.push(`Read more — full journal including What I'm Grateful For and Something I'm Great At at wolfman.app${pathname}`)
+      lines.push(`Journal Link: wolfman.app${pathname}`)
     }
 
     // Scales
@@ -243,13 +242,11 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
 
     if (scales.length > 0) {
       lines.push('')
-      lines.push('')
       lines.push(SEP)
       lines.push('')
       lines.push('◼ HOW DID I SHOW UP TODAY? ◼')
       scales.forEach(({ title, word }) => {
         const meta = SCALE_META[title]
-        lines.push('')
         lines.push(`${meta?.emoji ?? '●'} ${meta?.display ?? title} → ${word}`)
       })
     }
@@ -263,11 +260,9 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
 
     if (ritualLabels.length > 0) {
       lines.push('')
-      lines.push('')
       lines.push(SEP)
       lines.push('')
       lines.push('◼ MORNING RITUALS COMPLETED ◼')
-      lines.push('')
       ritualLabels.forEach(label => {
         const meta = RITUAL_META[label]
         lines.push(`${meta?.emoji ?? '●'} ${label}`)
@@ -276,14 +271,12 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
 
     // Footer
     lines.push('')
-    lines.push('')
     lines.push(SEP)
     lines.push('')
     lines.push('You can start logging your morning information for free at wolfman.app')
     lines.push('')
     lines.push('Built by Matthew Wolfman.')
     lines.push('Journals designed to improve your mornings and create a richer day.')
-    lines.push('Contact me through the DMs.')
 
     // Hashtags
     const hashtags = ['#wolfman', '#morningjournal']
@@ -292,7 +285,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
       if (h) hashtags.push(h)
     })
 
-    lines.push('')
     lines.push('')
     lines.push(SEP)
     lines.push('')

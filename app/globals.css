@@ -4162,21 +4162,22 @@ html[data-theme="dark"] .stats-chart-card {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+.pf-sticky-actions {
+  position: sticky;
+  top: 44px;
+  z-index: 50;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.6rem 0;
+  background: var(--bg, #333F50);
+  margin-bottom: 1rem;
+}
+
 .pf-header {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-bottom: 2rem;
-}
-
-.pf-back {
-  background: none;
-  border: none;
-  color: var(--heading, #E5CBBB);
-  font-size: 1.3rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  line-height: 1;
 }
 
 .pf-prompt {
@@ -4309,6 +4310,44 @@ html[data-theme="light"] .pf-scale-pill {
   opacity: 1;
 }
 
+.pf-scale-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pf-scale-row .pf-scale-pills {
+  flex: 1;
+}
+
+.pf-scale-clear {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.06);
+  color: var(--body-text);
+  opacity: 0.5;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s, background 0.15s;
+  padding: 0;
+}
+.pf-scale-clear:hover { opacity: 1; background: rgba(168,32,32,0.15); color: #E05555; border-color: rgba(168,32,32,0.3); }
+
+html[data-theme="light"] .pf-scale-clear {
+  border-color: rgba(0,0,0,0.15);
+  background: rgba(0,0,0,0.04);
+}
+html[data-theme="light"] .pf-scale-clear:hover {
+  background: rgba(168,32,32,0.1);
+  color: #A82020;
+  border-color: rgba(168,32,32,0.3);
+}
+
 .pf-scale-value {
   margin: 4px 0 0;
   font-size: 0.78rem;
@@ -4364,7 +4403,7 @@ html[data-theme="light"] .pf-scale-pill {
 
 .pf-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
   margin-top: 1.5rem;
 }
 
@@ -4393,14 +4432,46 @@ html[data-theme="light"] .pf-scale-pill {
   color: #fff;
 }
 
-.pf-btn--review {
-  background: #A0622A;
-  color: #fff;
+.pf-btn--back {
+  background: rgba(255,255,255,0.08);
+  color: var(--body-text);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.pf-btn--delete {
+  width: 100%;
+  background: rgba(168, 32, 32, 0.15);
+  color: #E05555;
+  border: 1px solid rgba(168, 32, 32, 0.4);
+}
+
+html[data-theme="light"] .pf-btn--back {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.15);
+}
+
+html[data-theme="light"] .pf-btn--delete {
+  background: #FDE8E8;
+  color: #A82020;
+  border-color: rgba(168, 32, 32, 0.3);
 }
 
 .pf-btn--draft:hover:not(:disabled),
 .pf-btn--publish:hover:not(:disabled),
-.pf-btn--review:hover:not(:disabled) { opacity: 0.8; }
+.pf-btn--back:hover:not(:disabled),
+.pf-btn--delete:hover:not(:disabled) { opacity: 0.8; }
+
+/* ── Field header with label + expand button ── */
+.pf-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.pf-field-header .pf-label {
+  margin-bottom: 0;
+}
 
 /* ── Textarea expand + fullscreen overlay ── */
 .pf-textarea-wrap {
@@ -4408,18 +4479,28 @@ html[data-theme="light"] .pf-scale-pill {
 }
 
 .pf-expand-btn {
-  position: absolute;
-  top: 6px; right: 6px;
-  background: none; border: none; cursor: pointer;
-  color: var(--nav-btn-icon, rgba(255,255,255,0.35));
-  font-size: 0.6rem; font-weight: 700; line-height: 1;
-  letter-spacing: 0.08em;
-  font-family: var(--font-jetbrains), monospace;
-  padding: 4px 6px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--body-text);
+  opacity: 0.6;
+  font-size: 0.62rem; font-weight: 600; line-height: 1;
+  letter-spacing: 0.06em;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  padding: 4px 8px;
   display: flex; align-items: center; gap: 4px;
-  transition: color 0.15s;
+  transition: opacity 0.15s, background 0.15s;
 }
-.pf-expand-btn:hover { color: var(--heading); }
+.pf-expand-btn:hover { opacity: 1; background: rgba(255,255,255,0.12); }
+
+html[data-theme="light"] .pf-expand-btn {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.12);
+}
+html[data-theme="light"] .pf-expand-btn:hover {
+  background: rgba(0,0,0,0.08);
+}
 
 .pf-fullscreen {
   position: fixed; inset: 0;
@@ -4506,51 +4587,25 @@ html[data-theme="light"] .pf-scale-pill {
 }
 
 .pf-delete-wrap {
-  margin-top: 2.5rem;
-  text-align: center;
-}
-
-.pf-delete-trigger {
-  background: none;
-  border: none;
-  color: var(--body-text);
-  opacity: 0.3;
-  font-size: 0.8rem;
-  cursor: pointer;
-  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  text-decoration: underline;
+  margin-top: 2rem;
 }
 
 .pf-delete-confirm {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   gap: 0.75rem;
   font-size: 0.85rem;
   color: var(--body-text);
-  opacity: 0.7;
+  text-align: center;
 }
 
-.pf-delete-yes {
-  background: #A82020;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.35rem 0.85rem;
-  font-size: 0.82rem;
-  cursor: pointer;
-  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+.pf-delete-confirm-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
-.pf-delete-no {
-  background: none;
-  border: none;
-  color: var(--body-text);
-  font-size: 0.82rem;
-  cursor: pointer;
-  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  text-decoration: underline;
-  opacity: 0.6;
+.pf-delete-confirm-actions .pf-btn {
+  flex: 1;
 }
 
 /* ── Journal Onboarding Overlay ──────────────────────────────────────────── */
@@ -7817,43 +7872,110 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
 
 /* WOLF|BOT PostForm section */
 .pf-wolfbot-section {
-  margin-top: 1.25rem;
-  padding: 0.75rem 1rem;
+  margin-top: 1.5rem;
+  padding: 1.25rem;
   border: 1px solid rgba(200, 176, 32, 0.3);
-  border-radius: 6px;
+  border-radius: 12px;
   background: rgba(200, 176, 32, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
 }
 
-.pf-wolfbot-trigger,
+.pf-wolfbot-desc {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.78rem;
+  color: var(--body-text);
+  opacity: 0.6;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.pf-wolfbot-trigger {
+  width: 100%;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: rgba(200, 176, 32, 0.12);
+  color: #C8B020;
+  border: 1px solid rgba(200, 176, 32, 0.4);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pf-wolfbot-trigger:hover {
+  background: rgba(200, 176, 32, 0.2);
+}
+
 .pf-wolfbot-retrigger {
-  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
+  margin-top: 0.25rem;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.7rem;
   background: transparent;
   color: #C8B020;
-  border: 1px solid rgba(200, 176, 32, 0.5);
-  border-radius: 4px;
-  padding: 0.45rem 0.9rem;
+  border: 1px solid rgba(200, 176, 32, 0.3);
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.pf-wolfbot-retrigger:hover { opacity: 1; }
+
+.pf-wolfbot-done-text {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  color: #3AB87A;
+  margin: 0;
+  line-height: 1.5;
 }
 
-.pf-wolfbot-trigger:hover,
-.pf-wolfbot-retrigger:hover {
-  background: rgba(200, 176, 32, 0.12);
+/* Back warning overlay */
+.pf-back-warning-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
 
-.pf-wolfbot-retrigger {
-  margin-top: 0.5rem;
-  font-size: 0.62rem;
-  opacity: 0.7;
+.pf-back-warning {
+  background: var(--bg, #333F50);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 360px;
+  width: 100%;
 }
 
-.pf-wolfbot-done {
-  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
-  font-size: 0.72rem;
-  color: #C8B020;
-  letter-spacing: 0.04em;
+.pf-back-warning-text {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.9rem;
+  color: var(--body-text);
+  margin: 0 0 1rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.pf-back-warning-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pf-back-warning-actions .pf-btn {
+  flex: 1;
+}
+
+html[data-theme="light"] .pf-back-warning {
+  background: #fff;
+  border-color: rgba(0,0,0,0.1);
 }
 
 /* Dark/cool themes — already dark so just lighten the border slightly */

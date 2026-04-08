@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { Maximize2 } from 'lucide-react'
+import { Maximize2, X as XIcon } from 'lucide-react'
 import { ROUTINE_ICON_MAP } from './RoutineIcons'
 import PhotoCropUpload from './PhotoCropUpload'
 import WolfBotLoadingOverlay from './WolfBotLoadingOverlay'
+import WolfBotIcon from './WolfBotIcon'
 
 const RITUAL_KEYS = Object.keys(ROUTINE_ICON_MAP)
 
@@ -137,26 +138,44 @@ function ScaleSelector({ label, value, onChange, color, labels }: {
   return (
     <div className="pf-scale">
       <span className="pf-scale-label">{label}</span>
-      <div
-        ref={pillsRef}
-        className="pf-scale-pills"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        {[1, 2, 3, 4, 5, 6, 7, 8].map(n => {
-          const isFilled = value !== null && n <= value
-          return (
-            <button
-              key={n}
-              type="button"
-              className={`pf-scale-pill${isFilled ? ' pf-scale-pill--filled' : ''}`}
-              style={isFilled ? { background: color, borderColor: color } : {}}
-              onClick={() => onChange(value === n ? null : n)}
-              aria-label={`${label}: ${labels[n - 1]}`}
-            />
-          )
-        })}
+      <div className="pf-scale-row">
+        <div
+          ref={pillsRef}
+          className="pf-scale-pills"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          {[1, 2, 3, 4, 5, 6, 7, 8].map(n => {
+            const isFilled = value !== null && n <= value
+            const isSelected = value === n
+            return (
+              <button
+                key={n}
+                type="button"
+                className={`pf-scale-pill${isFilled ? ' pf-scale-pill--filled' : ''}${isSelected ? ' pf-scale-pill--selected' : ''}`}
+                style={isFilled ? {
+                  background: color,
+                  borderColor: color,
+                  opacity: isSelected ? 1 : 0.5,
+                } : {}}
+                onClick={() => onChange(n)}
+                aria-label={`${label}: ${labels[n - 1]}`}
+              />
+            )
+          })}
+        </div>
+        {value !== null && (
+          <button
+            type="button"
+            className="pf-scale-clear"
+            onClick={() => onChange(null)}
+            aria-label={`Clear ${label}`}
+            title={`Clear ${label}`}
+          >
+            <XIcon size={12} strokeWidth={2.5} />
+          </button>
+        )}
       </div>
       <p className="pf-scale-value" style={{ color }}>{value !== null ? labels[value - 1] : ''}</p>
     </div>
@@ -210,10 +229,12 @@ export default function PostForm({
   const [error, setError] = useState('')
   const [isDirty, setIsDirty] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
+  const [showBackWarning, setShowBackWarning] = useState(false)
   const [fullscreenKey, setFullscreenKey] = useState<'intention' | 'grateful' | 'greatAt' | null>(null)
   const [reviewStatus, setReviewStatus] = useState<'none' | 'loading' | 'done' | 'error'>(
     wolfbotReviewExists ? 'done' : 'none'
   )
+  const [reviewWordCount, setReviewWordCount] = useState<number | null>(null)
 
   const lastSavedRef = useRef<PostFormData | null>(null)
 
@@ -311,9 +332,15 @@ export default function PostForm({
   async function handleWolfBotTrigger() {
     if (!postId) return
     setReviewStatus('loading')
+    setReviewWordCount(null)
     try {
       const res = await fetch(`/api/posts/${postId}/wolfbot-reviews`, { method: 'POST' })
       if (res.ok || res.status === 409) {
+        const data = await res.json().catch(() => null)
+        if (data?.review) {
+          const wc = data.review.split(/\s+/).filter(Boolean).length
+          setReviewWordCount(wc)
+        }
         setReviewStatus('done')
       } else {
         setReviewStatus('error')
@@ -382,6 +409,14 @@ export default function PostForm({
     }
   }
 
+  function handleBack() {
+    if (isDirty) {
+      setShowBackWarning(true)
+    } else {
+      router.back()
+    }
+  }
+
   function toggleRitual(key: string) {
     markDirty()
     setMorning(m => ({ ...m, routineChecklist: { ...m.routineChecklist, [key]: !m.routineChecklist[key] } }))
@@ -395,9 +430,46 @@ export default function PostForm({
 
   return (
     <div className="pf-wrap">
+      {/* Sticky action bar at top */}
+      <div className="pf-sticky-actions">
+        <button
+          className="pf-btn pf-btn--back"
+          onClick={handleBack}
+          disabled={saving || publishing}
+        >
+          Back
+        </button>
+        <button
+          className="pf-btn pf-btn--draft"
+          onClick={handleSaveDraft}
+          disabled={saving || publishing}
+        >
+          {saving ? 'Saving…' : 'Save Draft'}
+        </button>
+        <button
+          className="pf-btn pf-btn--publish"
+          onClick={handlePublish}
+          disabled={saving || publishing}
+        >
+          {publishing ? 'Publishing…' : 'Publish'}
+        </button>
+      </div>
+
+      {/* Back warning modal */}
+      {showBackWarning && (
+        <div className="pf-back-warning-overlay">
+          <div className="pf-back-warning">
+            <p className="pf-back-warning-text">You have unsaved changes. Leave without saving?</p>
+            <div className="pf-back-warning-actions">
+              <button className="pf-btn pf-btn--draft" onClick={() => setShowBackWarning(false)}>Stay</button>
+              <button className="pf-btn pf-btn--delete" onClick={() => router.back()}>Leave</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="pf-header">
-        <button className="pf-back" onClick={() => router.back()} aria-label="Go back">←</button>
         <p className="pf-prompt">What&apos;s on your mind today?</p>
       </div>
 
@@ -433,53 +505,28 @@ export default function PostForm({
             />
           </div>
 
-          {/* Title */}
-          <div className="pf-field">
-            <label className="pf-label">Title</label>
-            <input
-              type="text"
-              className="pf-input pf-input--title"
-              placeholder="Give this day a title…"
-              value={title}
-              onChange={e => { setTitle(e.target.value); markDirty() }}
-              onBlur={() => { if (isDirty && title.trim() && postId) saveDraft(currentData(), false) }}
-            />
-            {suggestionsLeft > 0 ? (
-              <button
-                type="button"
-                className="pf-suggest-btn"
-                onClick={handleSuggestTitle}
-                disabled={suggesting}
-              >
-                {suggesting ? 'Thinking…' : '▶ SUGGEST TITLE'}
-              </button>
-            ) : (
-              <span className="pf-suggest-locked">WOLF|BOT cannot think of any more suggestions for this post</span>
-            )}
-          </div>
-
           {/* Content sections */}
           {sections.map(({ key, label, placeholder, value, set }) => (
             <div key={key} className="pf-field">
-              <label className="pf-label">{label}</label>
-              <div className="pf-textarea-wrap">
-                <textarea
-                  className="pf-textarea"
-                  placeholder={placeholder}
-                  value={value}
-                  rows={9}
-                  onChange={e => { set(e.target.value); markDirty() }}
-                />
+              <div className="pf-field-header">
+                <label className="pf-label">{label}</label>
                 <button
                   type="button"
                   className="pf-expand-btn"
                   aria-label={`Expand ${label}`}
                   onClick={() => setFullscreenKey(key)}
                 >
-                  <Maximize2 size={11} strokeWidth={2} />
-                  <span>EXPAND</span>
+                  <Maximize2 size={12} strokeWidth={2} />
+                  <span>Expand</span>
                 </button>
               </div>
+              <textarea
+                className="pf-textarea"
+                placeholder={placeholder}
+                value={value}
+                rows={9}
+                onChange={e => { set(e.target.value); markDirty() }}
+              />
             </div>
           ))}
 
@@ -511,6 +558,34 @@ export default function PostForm({
                 )
               })}
             </div>
+          </div>
+
+          {/* Title — after rituals */}
+          <div className="pf-field">
+            <label className="pf-label">Title</label>
+            <input
+              type="text"
+              className="pf-input pf-input--title"
+              placeholder="Give this day a title…"
+              value={title}
+              onChange={e => { setTitle(e.target.value); markDirty() }}
+              onBlur={() => { if (isDirty && title.trim() && postId) saveDraft(currentData(), false) }}
+            />
+            {suggestionsLeft > 0 ? (
+              <button
+                type="button"
+                className="pf-suggest-btn"
+                onClick={handleSuggestTitle}
+                disabled={suggesting}
+              >
+                {suggesting ? 'Thinking…' : '▶ SUGGEST TITLE'}
+              </button>
+            ) : (
+              <span className="pf-suggest-locked">WOLF|BOT cannot think of any more suggestions for this post</span>
+            )}
+            <p className="pf-field-hint">
+              Leave this as it is for a default title, type your own, or hit Suggest Title to generate one from what you have written.
+            </p>
           </div>
 
           {/* Journal photo */}
@@ -615,68 +690,59 @@ export default function PostForm({
       {error && <p className="pf-error">{error}</p>}
       {saveMsg && <p className="pf-save-msg">{saveMsg}</p>}
 
-      {/* Actions */}
-      <div className="pf-actions">
-        <button
-          className="pf-btn pf-btn--draft"
-          onClick={handleSaveDraft}
-          disabled={saving || publishing}
-        >
-          {saving ? 'Saving…' : 'Save Draft'}
-        </button>
-        <button
-          className="pf-btn pf-btn--publish"
-          onClick={handlePublish}
-          disabled={saving || publishing}
-        >
-          {publishing ? 'Publishing…' : 'Publish'}
-        </button>
-      </div>
-
-      {/* WOLF|BOT review trigger */}
+      {/* WOLF|BOT review trigger — redesigned */}
       {postId && (
         <div className="pf-wolfbot-section">
+          <WolfBotIcon size={48} />
           {(reviewStatus === 'none' || reviewStatus === 'error') && (
-            <button
-              type="button"
-              className="pf-wolfbot-trigger"
-              onClick={handleWolfBotTrigger}
-            >
-              {reviewStatus === 'error' ? 'WOLF|BOT Review Failed — Retry' : 'Generate WOLF|BOT Review'}
-            </button>
+            <>
+              <p className="pf-wolfbot-desc">
+                WOLF|BOT will read your journal and generate a personalised review based on what you wrote, your morning scores, and your recent history.
+              </p>
+              <button
+                type="button"
+                className="pf-wolfbot-trigger"
+                onClick={handleWolfBotTrigger}
+              >
+                {reviewStatus === 'error' ? 'Review Failed — Try Again' : 'Generate WOLF|BOT Review'}
+              </button>
+            </>
           )}
           {reviewStatus === 'done' && (
-            <p className="pf-wolfbot-done">
-              <span className="wbt-prompt">&gt;&nbsp;</span>
-              WOLF|BOT REVIEW COMPLETE
-            </p>
-          )}
-          {reviewStatus === 'done' && session?.user?.role === 'admin' && (
-            <button
-              type="button"
-              className="pf-wolfbot-retrigger"
-              onClick={handleWolfBotTrigger}
-            >
-              Re-generate (admin)
-            </button>
+            <>
+              <p className="pf-wolfbot-done-text">
+                WOLF|BOT review complete{reviewWordCount ? ` — ${reviewWordCount} words` : ''}. View it on your journal page.
+              </p>
+              {session?.user?.role === 'admin' && (
+                <button
+                  type="button"
+                  className="pf-wolfbot-retrigger"
+                  onClick={handleWolfBotTrigger}
+                >
+                  Re-generate (admin)
+                </button>
+              )}
+            </>
           )}
         </div>
       )}
 
       <WolfBotLoadingOverlay open={reviewStatus === 'loading'} />
 
-      {/* Delete (edit mode only) */}
+      {/* Delete (edit mode only) — full-width red pill */}
       {mode === 'edit' && postId && (
         <div className="pf-delete-wrap">
           {!showDelete ? (
-            <button className="pf-delete-trigger" onClick={() => setShowDelete(true)}>
+            <button className="pf-btn pf-btn--delete" onClick={() => setShowDelete(true)}>
               Delete this journal
             </button>
           ) : (
             <div className="pf-delete-confirm">
-              <span>Are you sure?</span>
-              <button className="pf-delete-yes" onClick={handleDelete}>Yes, delete</button>
-              <button className="pf-delete-no" onClick={() => setShowDelete(false)}>Cancel</button>
+              <span>Are you sure? This cannot be undone.</span>
+              <div className="pf-delete-confirm-actions">
+                <button className="pf-btn pf-btn--delete" onClick={handleDelete}>Yes, delete</button>
+                <button className="pf-btn pf-btn--draft" onClick={() => setShowDelete(false)}>Cancel</button>
+              </div>
             </div>
           )}
         </div>

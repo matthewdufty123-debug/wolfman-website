@@ -12,7 +12,7 @@ type PixelPalette = Record<string, string>
 
 export type WolfBotReviews = {
   review:       string | null
-  reviewRating: number | null  // null=unrated, 1=👎, 2=👍, 3=🔥
+  reviewRating: number | null  // null=unrated, 1=👎, 2=👍
   // Legacy fields — kept for backward compat with old reviews
   reviewHelpful: string | null
   reviewSassy:   string | null
@@ -30,14 +30,6 @@ interface Props {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-function makeBootLines(promptVersion: number): string[] {
-  return [
-    'WOLF|BOT REVIEW INITIATED',
-    `LOADING WOLF BRAIN v${promptVersion}...`,
-    'PROCESSING JOURNAL ENTRY...',
-  ]
-}
-
 const WOLFBOT_QUIPS = [
   'Time for my take',
   'Running analysis...',
@@ -54,37 +46,7 @@ const WOLFBOT_QUIPS = [
 const RATINGS = [
   { value: 1, emoji: '👎', label: 'Not for me' },
   { value: 2, emoji: '👍', label: 'Good review' },
-  { value: 3, emoji: '🔥', label: 'Nailed it' },
 ]
-
-// ── Voice slots (Web Speech API) ──────────────────────────────────────────────
-
-type VoiceSlot = { id: string; label: string; patterns: string[] }
-
-const VOICE_SLOTS: VoiceSlot[] = [
-  { id: 'default',   label: 'DEFAULT',   patterns: [] },
-  { id: 'daniel',    label: 'DANIEL',    patterns: ['daniel'] },
-  { id: 'samantha',  label: 'SAMANTHA',  patterns: ['samantha'] },
-  { id: 'british',   label: 'BRITISH',   patterns: ['google uk english', 'kate', 'serena', 'english (united kingdom)', 'en-gb'] },
-  { id: 'google-us', label: 'GOOGLE US', patterns: ['google us english', 'google american', 'english (united states)', 'en-us'] },
-]
-
-const VOICE_PREF_KEY = 'wb-voice-slot'
-
-function matchVoice(slot: VoiceSlot, voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
-  if (slot.patterns.length === 0) return null
-  const lower = voices.map(v => ({ voice: v, name: v.name.toLowerCase() }))
-  for (const pattern of slot.patterns) {
-    const match = lower.find(v => v.name.includes(pattern))
-    if (match) return match.voice
-  }
-  return null
-}
-
-function buildFallbackSlots(voices: SpeechSynthesisVoice[]): VoiceSlot[] {
-  const english = voices.filter(v => v.lang.startsWith('en')).slice(0, 4)
-  return english.map(v => ({ id: v.voiceURI, label: v.name.toUpperCase().slice(0, 16), patterns: [v.name.toLowerCase()] }))
-}
 
 // ── Rating widget ─────────────────────────────────────────────────────────────
 
@@ -134,7 +96,6 @@ function RatingWidget({ postId, initialRating }: { postId: string; initialRating
 function ReviewTerminal({
   review,
   reviewRating,
-  promptVersion,
   postId,
   isOwnPost,
   pixelGrid,
@@ -142,27 +103,13 @@ function ReviewTerminal({
 }: {
   review:        string
   reviewRating:  number | null
-  promptVersion: number
   postId:        string
   isOwnPost:     boolean
   pixelGrid?:    PixelGrid
   pixelPalette?: PixelPalette
 }) {
-  const sectionRef      = useRef<HTMLDivElement>(null)
-  const timerRef        = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const voiceListRef    = useRef<SpeechSynthesisVoice[]>([])
-  const [revealed,       setRevealed]       = useState(false)
-  const [bootLine,       setBootLine]       = useState(0)
-  const [displayedBoot,  setDisplayedBoot]  = useState('')
-  const [bootDone,       setBootDone]       = useState(false)
-  const [displayedText,  setDisplayedText]  = useState('')
-  const [typingDone,     setTypingDone]     = useState(false)
-  const [cursorVisible,  setCursorVisible]  = useState(true)
-  const [speaking,       setSpeaking]       = useState(false)
-  const [availableSlots, setAvailableSlots] = useState<VoiceSlot[]>([VOICE_SLOTS[0]])
-  const [selectedSlotId, setSelectedSlotId] = useState<string>(() =>
-    typeof window !== 'undefined' ? (localStorage.getItem(VOICE_PREF_KEY) ?? 'default') : 'default'
-  )
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const [revealed, setRevealed] = useState(false)
 
   useEffect(() => {
     const el = sectionRef.current
@@ -176,87 +123,6 @@ function ReviewTerminal({
     return () => observer.disconnect()
   }, [])
 
-  // Voice loading
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return
-    function load() {
-      const all = window.speechSynthesis.getVoices()
-      if (!all.length) return
-      voiceListRef.current = all
-      const curated = VOICE_SLOTS.filter(s => s.patterns.length === 0 || matchVoice(s, all) !== null)
-      setAvailableSlots(curated.length > 1 ? curated : [VOICE_SLOTS[0], ...buildFallbackSlots(all)])
-    }
-    load()
-    window.speechSynthesis.addEventListener('voiceschanged', load)
-    return () => window.speechSynthesis.removeEventListener('voiceschanged', load)
-  }, [])
-
-  // Cancel speech on unmount
-  useEffect(() => {
-    return () => { if (typeof window !== 'undefined') window.speechSynthesis?.cancel() }
-  }, [])
-
-  function handleVoiceChange(slotId: string) {
-    setSelectedSlotId(slotId)
-    localStorage.setItem(VOICE_PREF_KEY, slotId)
-    if (speaking) { window.speechSynthesis.cancel(); setSpeaking(false) }
-  }
-
-  function handleSpeak() {
-    if (!window.speechSynthesis) return
-    if (speaking) { window.speechSynthesis.cancel(); setSpeaking(false); return }
-    const utterance = new SpeechSynthesisUtterance(review)
-    utterance.rate  = 0.88
-    utterance.pitch = 0.75
-    const slot = VOICE_SLOTS.find(s => s.id === selectedSlotId)
-    if (slot) { const voice = matchVoice(slot, voiceListRef.current); if (voice) utterance.voice = voice }
-    utterance.onend  = () => setSpeaking(false)
-    utterance.onerror = () => setSpeaking(false)
-    window.speechSynthesis.cancel()
-    window.speechSynthesis.speak(utterance)
-    setSpeaking(true)
-  }
-
-  const BOOT_LINES = makeBootLines(promptVersion)
-
-  // Boot sequence — auto-starts on scroll into view
-  useEffect(() => {
-    if (!revealed) return
-    const line = BOOT_LINES[bootLine] ?? null
-    if (!line) { setTimeout(() => { setBootDone(true); setCursorVisible(true) }, 300); return }
-    setDisplayedBoot('')
-    let i = 0
-    const interval = setInterval(() => {
-      if (i >= line.length) { clearInterval(interval); setTimeout(() => { setBootLine(p => p + 1); setDisplayedBoot('') }, 250); return }
-      setDisplayedBoot(line.slice(0, i + 1)); i++
-    }, 22)
-    return () => clearInterval(interval)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revealed, bootLine])
-
-  // Typewriter — punctuation-aware, auto-starts after boot
-  useEffect(() => {
-    if (!bootDone) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setDisplayedText(review); setCursorVisible(false); setTypingDone(true); return
-    }
-    setDisplayedText(''); setCursorVisible(true)
-    let i = 0
-    function typeNext() {
-      if (i >= review.length) { setCursorVisible(false); setTypingDone(true); return }
-      setDisplayedText(review.slice(0, i + 1))
-      const ch = review[i]
-      let delay = 3 + Math.random() * 3
-      if ('.!?'.includes(ch))  delay = 180
-      else if (',;:'.includes(ch)) delay = 70
-      i++
-      timerRef.current = setTimeout(typeNext, delay)
-    }
-    typeNext()
-    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bootDone])
-
   return (
     <div
       ref={sectionRef}
@@ -267,76 +133,13 @@ function ReviewTerminal({
         transition: 'opacity 0.5s ease, transform 0.5s ease',
       }}
     >
-      <div className="wolfbot-integrated-header">
-        <WolfBotIcon size={72} grid={pixelGrid} palette={pixelPalette} />
-        <div className="wolfbot-integrated-title">
-          <span className="wolfbot-integrated-name">WOLF|BOT</span>
-          <span className="wolfbot-integrated-sub">REVIEW MODE</span>
-        </div>
-        {bootDone && typeof window !== 'undefined' && !!window.speechSynthesis && (
-          <button
-            type="button"
-            className={`wb-play-circle${speaking ? ' wb-play-circle--speaking' : ''}`}
-            onClick={handleSpeak}
-            title={speaking ? 'Stop reading' : 'Read aloud'}
-          >
-            <span className="wb-play-circle-icon">{speaking ? '■' : '▶'}</span>
-            <span className="wb-play-circle-label">{speaking ? 'stop' : 'play'}</span>
-          </button>
-        )}
-      </div>
-
       <div className="wolfbot-bubble-inner">
-        {/* Boot lines */}
-        {BOOT_LINES.slice(0, bootLine).map((line, idx) => (
-          <p key={idx} className="wolfbot-terminal-line">
-            <span className="wbt-prompt">&#62;&nbsp;</span>
-            <span className="wbt-boot">{line}</span>
-          </p>
-        ))}
-        {!bootDone && (
-          <p className="wolfbot-terminal-line">
-            <span className="wbt-prompt">&#62;&nbsp;</span>
-            <span className="wbt-boot">{displayedBoot}</span>
-            <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
-          </p>
-        )}
+        <p className="wolfbot-terminal-line wolfbot-terminal-review">
+          <span className="wbt-body">{review}</span>
+        </p>
 
-        {/* Voice selector */}
-        {bootDone && typeof window !== 'undefined' && !!window.speechSynthesis && (
-          <div className="wb-voice-row">
-            <span className="wbt-prompt">&#62;&nbsp;</span>
-            <span className="wb-voice-label">VOICE</span>
-            <div className="wb-voice-select-wrap">
-              <select
-                className="wb-voice-select"
-                value={selectedSlotId}
-                onChange={e => handleVoiceChange(e.target.value)}
-                aria-label="Select WOLF|BOT voice"
-              >
-                {availableSlots.map(slot => (
-                  <option key={slot.id} value={slot.id}>{slot.label}</option>
-                ))}
-              </select>
-              <span className="wb-voice-chevron" aria-hidden="true">▾</span>
-            </div>
-          </div>
-        )}
-
-        {/* Review text */}
-        {bootDone && (
-          <>
-            <p className="wolfbot-terminal-line wolfbot-terminal-review">
-              <span className="wbt-prompt">&#62;&nbsp;</span>
-              <span className="wbt-body">{displayedText}</span>
-              {cursorVisible && <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>}
-            </p>
-
-            {/* Rating — shown after typing completes, own post only */}
-            {typingDone && isOwnPost && (
-              <RatingWidget postId={postId} initialRating={reviewRating} />
-            )}
-          </>
+        {isOwnPost && (
+          <RatingWidget postId={postId} initialRating={reviewRating} />
         )}
       </div>
     </div>
@@ -373,10 +176,6 @@ function TriggerTerminal({ postId, pixelGrid, pixelPalette }: { postId: string; 
       <div className="wolfbot-integrated">
         <div className="wolfbot-integrated-header">
           <WolfBotIcon size={72} grid={pixelGrid} palette={pixelPalette} />
-          <div className="wolfbot-integrated-title">
-            <span className="wolfbot-integrated-name">WOLF|BOT</span>
-            <span className="wolfbot-integrated-sub">REVIEW MODE</span>
-          </div>
         </div>
         <div className="wolfbot-bubble-inner">
           <div className="wb-personality-select">
@@ -402,16 +201,11 @@ function TriggerTerminal({ postId, pixelGrid, pixelPalette }: { postId: string; 
 
 // ── Legacy terminal — old synthesis-only reviews ──────────────────────────────
 
-function LegacyTerminal({ text, promptVersion, pixelGrid, pixelPalette }: {
-  text: string; promptVersion: number; pixelGrid?: PixelGrid; pixelPalette?: PixelPalette
+function LegacyTerminal({ text, pixelGrid, pixelPalette }: {
+  text: string; pixelGrid?: PixelGrid; pixelPalette?: PixelPalette
 }) {
-  const sectionRef  = useRef<HTMLDivElement>(null)
-  const [revealed,  setRevealed]  = useState(false)
-  const [phase,     setPhase]     = useState<'idle' | 'booting' | 'typing' | 'done'>('idle')
-  const [bootLine,  setBootLine]  = useState(0)
-  const [displayedBoot,   setDisplayedBoot]   = useState('')
-  const [displayedReview, setDisplayedReview] = useState('')
-  const [cursorVisible,   setCursorVisible]   = useState(true)
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const [revealed, setRevealed] = useState(false)
 
   useEffect(() => {
     const el = sectionRef.current
@@ -425,42 +219,6 @@ function LegacyTerminal({ text, promptVersion, pixelGrid, pixelPalette }: {
     return () => observer.disconnect()
   }, [])
 
-  const BOOT_LINES = makeBootLines(promptVersion)
-
-  // Auto-start when scrolled into view
-  useEffect(() => {
-    if (!revealed || phase !== 'idle') return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setPhase('done'); setDisplayedReview(text); setCursorVisible(false); return
-    }
-    setPhase('booting'); setCursorVisible(true); setDisplayedBoot(''); setBootLine(0)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revealed])
-
-  useEffect(() => {
-    if (phase !== 'booting') return
-    const line = BOOT_LINES[bootLine] ?? null
-    if (!line) { setTimeout(() => setPhase('typing'), 300); return }
-    setDisplayedBoot(''); let i = 0
-    const interval = setInterval(() => {
-      if (i >= line.length) { clearInterval(interval); setTimeout(() => { setBootLine(p => p + 1); setDisplayedBoot('') }, 250); return }
-      setDisplayedBoot(line.slice(0, i + 1)); i++
-    }, 22)
-    return () => clearInterval(interval)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, bootLine])
-
-  useEffect(() => {
-    if (phase !== 'typing') return
-    setDisplayedReview(''); setCursorVisible(true); let i = 0
-    const interval = setInterval(() => {
-      if (i >= text.length) { clearInterval(interval); setCursorVisible(false); setPhase('done'); return }
-      setDisplayedReview(text.slice(0, i + 1)); i++
-    }, 3)
-    return () => clearInterval(interval)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, text])
-
   return (
     <div
       ref={sectionRef}
@@ -471,38 +229,10 @@ function LegacyTerminal({ text, promptVersion, pixelGrid, pixelPalette }: {
         transition: 'opacity 0.5s ease, transform 0.5s ease',
       }}
     >
-      <div className="wolfbot-integrated-header">
-        <WolfBotIcon size={72} grid={pixelGrid} palette={pixelPalette} />
-        <div className="wolfbot-integrated-title">
-          <span className="wolfbot-integrated-name">WOLF|BOT</span>
-          <span className="wolfbot-integrated-sub">REVIEW MODE</span>
-        </div>
-      </div>
       <div className="wolfbot-bubble-inner">
-        {(phase === 'booting' || phase === 'typing' || phase === 'done') && (
-          <>
-            {BOOT_LINES.slice(0, bootLine).map((line, idx) => (
-              <p key={idx} className="wolfbot-terminal-line">
-                <span className="wbt-prompt">&#62;&nbsp;</span>
-                <span className="wbt-boot">{line}</span>
-              </p>
-            ))}
-            {phase === 'booting' && (
-              <p className="wolfbot-terminal-line">
-                <span className="wbt-prompt">&#62;&nbsp;</span>
-                <span className="wbt-boot">{displayedBoot}</span>
-                <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>
-              </p>
-            )}
-            {(phase === 'typing' || phase === 'done') && (
-              <p className="wolfbot-terminal-line wolfbot-terminal-review">
-                <span className="wbt-prompt">&#62;&nbsp;</span>
-                <span className="wbt-body">{displayedReview}</span>
-                {cursorVisible && <span className="wolfbot-type-cursor" aria-hidden="true">▌</span>}
-              </p>
-            )}
-          </>
-        )}
+        <p className="wolfbot-terminal-line wolfbot-terminal-review">
+          <span className="wbt-body">{text}</span>
+        </p>
       </div>
     </div>
   )
@@ -526,7 +256,6 @@ export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, p
         <ReviewTerminal
           review={wolfbotReviews!.review!}
           reviewRating={wolfbotReviews!.reviewRating}
-          promptVersion={promptVersion}
           postId={postId}
           isOwnPost={isOwnPost}
           pixelGrid={pixelGrid}
@@ -535,12 +264,11 @@ export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, p
       ) : hasLegacy ? (
         <LegacyTerminal
           text={wolfbotReviews!.reviewHelpful || wolfbotReviews!.reviewSassy || ''}
-          promptVersion={promptVersion}
           pixelGrid={pixelGrid}
           pixelPalette={pixelPalette}
         />
       ) : hasSynthesis ? (
-        <LegacyTerminal text={synthesis!} promptVersion={promptVersion} pixelGrid={pixelGrid} pixelPalette={pixelPalette} />
+        <LegacyTerminal text={synthesis!} pixelGrid={pixelGrid} pixelPalette={pixelPalette} />
       ) : (
         <TriggerTerminal postId={postId} pixelGrid={pixelGrid} pixelPalette={pixelPalette} />
       )}

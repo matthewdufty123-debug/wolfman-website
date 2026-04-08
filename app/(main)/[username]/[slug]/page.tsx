@@ -93,6 +93,7 @@ export default async function PostPage({
         db.select().from(morningState).where(eq(morningState.postId, post.id)).then(r => r[0] ?? null),
         db.select().from(dayScores).where(eq(dayScores.postId, post.id)).then(r => r[0] ?? null),
         db.select({
+          date: postsTable.date,
           createdAt: postsTable.createdAt,
           updatedAt: postsTable.updatedAt,
           eveningReflection: postsTable.eveningReflection,
@@ -141,21 +142,21 @@ export default async function PostPage({
       )
     : and(eq(postsTable.status, 'published'), eq(postsTable.isPublic, true))
 
-  const currentCreatedAt = postRow?.createdAt ?? new Date()
+  const currentDate = postRow?.date ?? new Date().toISOString().slice(0, 10)
 
   const [prevRow, nextRow] = await Promise.all([
     db.select({ slug: postsTable.slug, username: usersTable.username })
       .from(postsTable)
       .innerJoin(usersTable, eq(postsTable.authorId, usersTable.id))
-      .where(and(visibilityFilter, gt(postsTable.createdAt, currentCreatedAt)))
-      .orderBy(asc(postsTable.createdAt))
+      .where(and(visibilityFilter, gt(postsTable.date, currentDate)))
+      .orderBy(asc(postsTable.date))
       .limit(1)
       .then(r => r[0] ?? null),
     db.select({ slug: postsTable.slug, username: usersTable.username })
       .from(postsTable)
       .innerJoin(usersTable, eq(postsTable.authorId, usersTable.id))
-      .where(and(visibilityFilter, lt(postsTable.createdAt, currentCreatedAt)))
-      .orderBy(desc(postsTable.createdAt))
+      .where(and(visibilityFilter, lt(postsTable.date, currentDate)))
+      .orderBy(desc(postsTable.date))
       .limit(1)
       .then(r => r[0] ?? null),
   ])
