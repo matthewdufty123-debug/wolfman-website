@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { morningState, posts as postsTable } from '@/lib/db/schema'
-import { eq, and, lte, desc } from 'drizzle-orm'
+import { eq, and, lte, desc, sql } from 'drizzle-orm'
 import HumanScoresSection from '@/components/journal/HumanScoresSection'
 
 interface Props {
@@ -18,30 +18,56 @@ export interface ScaleHistoryEntry {
 }
 
 export default async function HowIShowedUpSection({ postId, authorId, postDate }: Props) {
-  // Fetch the last 10 morningState entries for this author (up to and including this post's date)
-  const history = await db
-    .select({
-      brainScale: morningState.brainScale,
-      bodyScale: morningState.bodyScale,
-      happyScale: morningState.happyScale,
-      stressScale: morningState.stressScale,
-      date: postsTable.date,
-    })
+  // Always fetch today's morningState first (guaranteed to work — same as old code)
+  const ms = await db
+    .select()
     .from(morningState)
-    .innerJoin(postsTable, eq(morningState.postId, postsTable.id))
-    .where(
-      and(
-        eq(postsTable.authorId, authorId),
-        lte(postsTable.date, postDate),
-        eq(postsTable.status, 'published'),
-      )
-    )
-    .orderBy(desc(postsTable.date))
-    .limit(10)
+    .where(eq(morningState.postId, postId))
+    .then(r => r[0] ?? null)
 
-  if (history.length === 0) return null
+  if (!ms) return null
 
-  // Most recent entry is today's scores (index 0)
+  // Fetch history for trend charts — wrapped in try-catch to avoid breaking the page
+  let history: ScaleHistoryEntry[] = []
+  try {
+    if (authorId) {
+      const rows = await db
+        .select({
+          brainScale: morningState.brainScale,
+          bodyScale: morningState.bodyScale,
+          happyScale: morningState.happyScale,
+          stressScale: morningState.stressScale,
+          date: sql<string>`${postsTable.date}::text`,
+        })
+        .from(morningState)
+        .innerJoin(postsTable, eq(morningState.postId, postsTable.id))
+        .where(
+          and(
+            eq(postsTable.authorId, authorId),
+            lte(postsTable.date, sql`${postDate}::date`),
+            eq(postsTable.status, 'published'),
+          )
+        )
+        .orderBy(desc(postsTable.date))
+        .limit(10)
+
+      history = rows as ScaleHistoryEntry[]
+    }
+  } catch (err) {
+    console.error('[HowIShowedUp] History query failed:', err)
+  }
+
+  // If history fetch failed or is empty, build a single-entry array from today's data
+  if (history.length === 0) {
+    history = [{
+      brainScale: ms.brainScale,
+      bodyScale: ms.bodyScale,
+      happyScale: ms.happyScale,
+      stressScale: ms.stressScale,
+      date: postDate,
+    }]
+  }
+
   const today = history[0]
 
   return (
@@ -50,7 +76,7 @@ export default async function HowIShowedUpSection({ postId, authorId, postDate }
       bodyScale={today.bodyScale}
       happyScale={today.happyScale ?? null}
       stressScale={today.stressScale ?? null}
-      history={history as ScaleHistoryEntry[]}
+      history={history}
     />
   )
 }
