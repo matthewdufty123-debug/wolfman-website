@@ -51,6 +51,8 @@ export interface JournalPageProps {
 
 export default function JournalPage({
   post,
+  username,
+  author,
   morningState,
   dayScores,
   postDates,
@@ -65,6 +67,8 @@ export default function JournalPage({
   const isOwner = session?.user?.id != null && session.user.id === authorId
 
   const nextHref = nextPost ? `/${nextPost.username}/${nextPost.slug}` : null
+  const profileHref = `/${username}`
+  const editHref = post.id ? `/edit/${post.id}` : null
 
   const synthesis = dayScores?.synthesis ?? post.review ?? null
 
@@ -73,7 +77,7 @@ export default function JournalPage({
       <div className="journal-scroll-page">
         <div className="journal-scroll-content">
 
-          {/* Section order: Journal → WOLF|BOT Review → How I Showed Up → Morning Rituals → Post Info → Next */}
+          {/* Section order: Journal → WOLF|BOT Review → How I Showed Up → Morning Rituals → Post Info → Nav */}
 
           <JournalTextSection post={post} />
 
@@ -102,14 +106,25 @@ export default function JournalPage({
 
           <PostInfoSection post={post} />
 
-          {/* Next Journal button */}
-          {nextHref && (
-            <div className="journal-next-post-wrap">
-              <a href={nextHref} className="journal-next-post-btn">
-                NEXT JOURNAL →
+          {/* Bottom navigation */}
+          <div className="journal-bottom-nav">
+            <a href={profileHref} className="journal-nav-btn journal-nav-btn--default">
+              View Profile
+            </a>
+            {nextHref && (
+              <a href={nextHref} className="journal-nav-btn journal-nav-btn--default">
+                Next Journal →
               </a>
-            </div>
-          )}
+            )}
+            <a href="/write" className="journal-nav-btn journal-nav-btn--default">
+              Write a New Journal
+            </a>
+            {isOwner && editHref && (
+              <a href={editHref} className="journal-nav-btn journal-nav-btn--primary">
+                Edit This Journal
+              </a>
+            )}
+          </div>
 
         </div>
       </div>

@@ -44,11 +44,6 @@ const WOLFBOT_QUIPS = [
   "Alright. Let's do this",
 ]
 
-const RATINGS = [
-  { value: 1, emoji: '👎', label: 'Not for me' },
-  { value: 2, emoji: '👍', label: 'Good review' },
-]
-
 // ── Info overlay ──────────────────────────────────────────────────────────────
 
 function WolfBotInfoOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -81,61 +76,12 @@ function WolfBotInfoOverlay({ open, onClose }: { open: boolean; onClose: () => v
   )
 }
 
-// ── Rating widget ─────────────────────────────────────────────────────────────
-
-function RatingWidget({ postId, initialRating }: { postId: string; initialRating: number | null }) {
-  const [rating, setRating] = useState<number | null>(initialRating)
-  const [saving, setSaving] = useState(false)
-
-  async function handleRate(value: number) {
-    const newRating = rating === value ? null : value
-    setSaving(true)
-    try {
-      await fetch(`/api/posts/${postId}/wolfbot-rating`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rating: newRating }),
-      })
-      setRating(newRating)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div className="wb-rating">
-      <span className="wb-rating-label">Rate this review</span>
-      <div className="wb-rating-btns">
-        {RATINGS.map(r => (
-          <button
-            key={r.value}
-            type="button"
-            className={`wb-rating-btn${rating === r.value ? ' wb-rating-btn--active' : ''}`}
-            onClick={() => !saving && handleRate(r.value)}
-            aria-label={r.label}
-            title={r.label}
-            disabled={saving}
-          >
-            {r.emoji}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 // ── Review section — integrated as a journal section ──────────────────────────
 
 function ReviewSection({
   review,
-  reviewRating,
-  postId,
-  isOwnPost,
 }: {
   review:        string
-  reviewRating:  number | null
-  postId:        string
-  isOwnPost:     boolean
 }) {
   const [infoOpen, setInfoOpen] = useState(false)
 
@@ -158,10 +104,6 @@ function ReviewSection({
           <p key={i}>{para}</p>
         ))}
       </div>
-
-      {isOwnPost && (
-        <RatingWidget postId={postId} initialRating={reviewRating} />
-      )}
 
       <WolfBotInfoOverlay open={infoOpen} onClose={() => setInfoOpen(false)} />
     </div>
@@ -265,9 +207,6 @@ export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, p
       {hasReview ? (
         <ReviewSection
           review={wolfbotReviews!.review!}
-          reviewRating={wolfbotReviews!.reviewRating}
-          postId={postId}
-          isOwnPost={isOwnPost}
         />
       ) : hasLegacy ? (
         <LegacySection

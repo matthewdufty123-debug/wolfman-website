@@ -7129,8 +7129,8 @@ html[data-theme="light"] .pf-expand-btn:hover {
 
 /* WOLF|BOT section — matches other journal-section width */
 .journal-section--wolfbot {
-  padding-bottom: 200px;
-  margin-top: 3rem;
+  padding-bottom: 0;
+  margin-top: 0;
 }
 
 /* De-terminalize: replace black terminal shell with page-themed styling */
@@ -7877,6 +7877,49 @@ html[data-theme="light"] .wb-info-card {
   font-weight: 600;
 }
 .wb-info-link:hover { text-decoration: underline; }
+
+/* ── Journal bottom navigation ─────────────────────────────────────────── */
+.journal-bottom-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 2.5rem 1rem 3rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.journal-nav-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.journal-nav-btn:hover { opacity: 0.85; }
+
+.journal-nav-btn--default {
+  background: var(--bg, #333F50);
+  color: var(--body-text, #E5CBBB);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+html[data-theme="light"] .journal-nav-btn--default {
+  background: #f5f5f5;
+  color: #4A4A4A;
+  border-color: rgba(0,0,0,0.1);
+}
+
+.journal-nav-btn--primary {
+  background: #214459;
+  color: #fff;
+  border: none;
+}
 
 /* ── WOLF|BOT personality tab switcher ───────────────────────────────────── */
 .wb-tabs {
