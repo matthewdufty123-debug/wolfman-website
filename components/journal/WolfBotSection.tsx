@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Info } from 'lucide-react'
 import WolfBotIcon from '@/components/WolfBotIcon'
 import WolfBotLoadingOverlay from '@/components/WolfBotLoadingOverlay'
 
@@ -48,6 +49,38 @@ const RATINGS = [
   { value: 2, emoji: '👍', label: 'Good review' },
 ]
 
+// ── Info overlay ──────────────────────────────────────────────────────────────
+
+function WolfBotInfoOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+  useEffect(() => {
+    if (!open) return
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
+  if (!open) return null
+
+  return (
+    <div className="wb-info-overlay" onClick={onClose}>
+      <div className="wb-info-card" onClick={e => e.stopPropagation()}>
+        <button className="wb-info-close" onClick={onClose} aria-label="Close">&times;</button>
+        <p className="wb-info-title">About WOLF|BOT Reviews</p>
+        <p className="wb-info-body">
+          WOLF|BOT is an AI journalling assistant that reads your entry and generates a personalised review.
+          It considers what you wrote, your morning scores, rituals, and your recent journal history to give
+          you an observation you could not have seen yourself.
+        </p>
+        <p className="wb-info-body">
+          Reviews are tailored to your profession and humour style. The more you journal, the richer the
+          context WOLF|BOT has to work with.
+        </p>
+        <a href="/wolfbot" className="wb-info-link">Learn more about WOLF|BOT →</a>
+      </div>
+    </div>
+  )
+}
+
 // ── Rating widget ─────────────────────────────────────────────────────────────
 
 function RatingWidget({ postId, initialRating }: { postId: string; initialRating: number | null }) {
@@ -91,64 +124,83 @@ function RatingWidget({ postId, initialRating }: { postId: string; initialRating
   )
 }
 
-// ── Review terminal — review exists ───────────────────────────────────────────
+// ── Review section — integrated as a journal section ──────────────────────────
 
-function ReviewTerminal({
+function ReviewSection({
   review,
   reviewRating,
   postId,
   isOwnPost,
-  pixelGrid,
-  pixelPalette,
 }: {
   review:        string
   reviewRating:  number | null
   postId:        string
   isOwnPost:     boolean
-  pixelGrid?:    PixelGrid
-  pixelPalette?: PixelPalette
 }) {
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const [revealed, setRevealed] = useState(false)
-
-  useEffect(() => {
-    const el = sectionRef.current
-    if (!el) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setRevealed(true); return }
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setRevealed(true); observer.disconnect() } },
-      { threshold: 0.1 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
+  const [infoOpen, setInfoOpen] = useState(false)
 
   return (
-    <div
-      ref={sectionRef}
-      className="wolfbot-integrated"
-      style={{
-        opacity: revealed ? 1 : 0,
-        transform: revealed ? 'translateY(0)' : 'translateY(10px)',
-        transition: 'opacity 0.5s ease, transform 0.5s ease',
-      }}
-    >
-      <div className="wolfbot-bubble-inner">
-        <p className="wolfbot-terminal-line wolfbot-terminal-review">
-          <span className="wbt-body">{review}</span>
-        </p>
-
-        {isOwnPost && (
-          <RatingWidget postId={postId} initialRating={reviewRating} />
-        )}
+    <div className="post-section">
+      <p className="post-section-label">
+        WOLF|BOT&apos;s Review
+        <button
+          type="button"
+          className="wb-info-btn"
+          onClick={() => setInfoOpen(true)}
+          aria-label="What is WOLF|BOT?"
+          title="What is WOLF|BOT?"
+        >
+          <Info size={14} strokeWidth={2} />
+        </button>
+      </p>
+      <div className="post-body">
+        {review.split('\n\n').map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
       </div>
+
+      {isOwnPost && (
+        <RatingWidget postId={postId} initialRating={reviewRating} />
+      )}
+
+      <WolfBotInfoOverlay open={infoOpen} onClose={() => setInfoOpen(false)} />
     </div>
   )
 }
 
-// ── Trigger terminal — no review yet, own post ────────────────────────────────
+// ── Legacy review section ─────────────────────────────────────────────────────
 
-function TriggerTerminal({ postId, pixelGrid, pixelPalette }: { postId: string; pixelGrid?: PixelGrid; pixelPalette?: PixelPalette }) {
+function LegacySection({ text }: { text: string }) {
+  const [infoOpen, setInfoOpen] = useState(false)
+
+  return (
+    <div className="post-section">
+      <p className="post-section-label">
+        WOLF|BOT&apos;s Review
+        <button
+          type="button"
+          className="wb-info-btn"
+          onClick={() => setInfoOpen(true)}
+          aria-label="What is WOLF|BOT?"
+          title="What is WOLF|BOT?"
+        >
+          <Info size={14} strokeWidth={2} />
+        </button>
+      </p>
+      <div className="post-body">
+        {text.split('\n\n').map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
+      </div>
+
+      <WolfBotInfoOverlay open={infoOpen} onClose={() => setInfoOpen(false)} />
+    </div>
+  )
+}
+
+// ── Trigger section — no review yet, own post ─────────────────────────────────
+
+function TriggerSection({ postId, pixelGrid, pixelPalette }: { postId: string; pixelGrid?: PixelGrid; pixelPalette?: PixelPalette }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState(false)
@@ -199,53 +251,11 @@ function TriggerTerminal({ postId, pixelGrid, pixelPalette }: { postId: string; 
   )
 }
 
-// ── Legacy terminal — old synthesis-only reviews ──────────────────────────────
-
-function LegacyTerminal({ text, pixelGrid, pixelPalette }: {
-  text: string; pixelGrid?: PixelGrid; pixelPalette?: PixelPalette
-}) {
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const [revealed, setRevealed] = useState(false)
-
-  useEffect(() => {
-    const el = sectionRef.current
-    if (!el) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setRevealed(true); return }
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setRevealed(true); observer.disconnect() } },
-      { threshold: 0.1 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
-  return (
-    <div
-      ref={sectionRef}
-      className="wolfbot-integrated"
-      style={{
-        opacity: revealed ? 1 : 0,
-        transform: revealed ? 'translateY(0)' : 'translateY(10px)',
-        transition: 'opacity 0.5s ease, transform 0.5s ease',
-      }}
-    >
-      <div className="wolfbot-bubble-inner">
-        <p className="wolfbot-terminal-line wolfbot-terminal-review">
-          <span className="wbt-body">{text}</span>
-        </p>
-      </div>
-    </div>
-  )
-}
-
 // ── Main export ───────────────────────────────────────────────────────────────
 
 export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, postId, promptVersion, pixelGrid, pixelPalette }: Props) {
-  // New review takes priority
   const hasReview = !!wolfbotReviews?.review
-  // Legacy: old multi-personality reviews
   const hasLegacy = wolfbotReviews?.reviewHelpful || wolfbotReviews?.reviewSassy
-  // Old synthesis-only reviews
   const hasSynthesis = !!synthesis
 
   if (!hasReview && !hasLegacy && !hasSynthesis && !isOwnPost) return null
@@ -253,24 +263,20 @@ export default function WolfBotSection({ synthesis, wolfbotReviews, isOwnPost, p
   return (
     <section id="wolfbot-review" className="journal-section journal-section--wolfbot">
       {hasReview ? (
-        <ReviewTerminal
+        <ReviewSection
           review={wolfbotReviews!.review!}
           reviewRating={wolfbotReviews!.reviewRating}
           postId={postId}
           isOwnPost={isOwnPost}
-          pixelGrid={pixelGrid}
-          pixelPalette={pixelPalette}
         />
       ) : hasLegacy ? (
-        <LegacyTerminal
+        <LegacySection
           text={wolfbotReviews!.reviewHelpful || wolfbotReviews!.reviewSassy || ''}
-          pixelGrid={pixelGrid}
-          pixelPalette={pixelPalette}
         />
       ) : hasSynthesis ? (
-        <LegacyTerminal text={synthesis!} pixelGrid={pixelGrid} pixelPalette={pixelPalette} />
+        <LegacySection text={synthesis!} />
       ) : (
-        <TriggerTerminal postId={postId} pixelGrid={pixelGrid} pixelPalette={pixelPalette} />
+        <TriggerSection postId={postId} pixelGrid={pixelGrid} pixelPalette={pixelPalette} />
       )}
     </section>
   )

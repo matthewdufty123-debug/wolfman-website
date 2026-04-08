@@ -7787,6 +7787,97 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   cursor: default;
 }
 
+/* ── WOLF|BOT info button (circle with i) ── */
+.wb-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(160, 98, 42, 0.4);
+  background: none;
+  color: #A0622A;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  padding: 0;
+  transition: background 0.15s, border-color 0.15s;
+  position: relative;
+  top: -1px;
+}
+.wb-info-btn:hover {
+  background: rgba(160, 98, 42, 0.1);
+  border-color: #A0622A;
+}
+
+/* ── WOLF|BOT info overlay ── */
+.wb-info-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.wb-info-card {
+  background: var(--bg, #333F50);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 1.75rem;
+  max-width: 420px;
+  width: 100%;
+  position: relative;
+}
+
+html[data-theme="light"] .wb-info-card {
+  background: #fff;
+  border-color: rgba(0,0,0,0.1);
+}
+
+.wb-info-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--body-text);
+  font-size: 1.4rem;
+  cursor: pointer;
+  opacity: 0.5;
+  line-height: 1;
+}
+.wb-info-close:hover { opacity: 1; }
+
+.wb-info-title {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--heading, #E5CBBB);
+  margin: 0 0 0.75rem;
+}
+
+.wb-info-body {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.85rem;
+  color: var(--body-text);
+  line-height: 1.6;
+  margin: 0 0 0.75rem;
+  opacity: 0.8;
+}
+
+.wb-info-link {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.82rem;
+  color: #4A7FA5;
+  text-decoration: none;
+  font-weight: 600;
+}
+.wb-info-link:hover { text-decoration: underline; }
+
 /* ── WOLF|BOT personality tab switcher ───────────────────────────────────── */
 .wb-tabs {
   display: flex;

@@ -73,9 +73,19 @@ export default function JournalPage({
       <div className="journal-scroll-page">
         <div className="journal-scroll-content">
 
-          {/* Section order: Journal → How I Showed Up → Morning Rituals → Post Info → Next → WOLF|BOT */}
+          {/* Section order: Journal → WOLF|BOT Review → How I Showed Up → Morning Rituals → Post Info → Next */}
 
           <JournalTextSection post={post} />
+
+          <WolfBotSection
+            synthesis={synthesis}
+            wolfbotReviews={wolfbotReviews}
+            isOwnPost={isOwner}
+            postId={post.id ?? ''}
+            promptVersion={promptVersion}
+            pixelGrid={pixelGrid}
+            pixelPalette={pixelPalette}
+          />
 
           {morningState && (
             <HumanScoresSection
@@ -100,16 +110,6 @@ export default function JournalPage({
               </a>
             </div>
           )}
-
-          <WolfBotSection
-            synthesis={synthesis}
-            wolfbotReviews={wolfbotReviews}
-            isOwnPost={isOwner}
-            postId={post.id ?? ''}
-            promptVersion={promptVersion}
-            pixelGrid={pixelGrid}
-            pixelPalette={pixelPalette}
-          />
 
         </div>
       </div>
