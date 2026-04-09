@@ -329,13 +329,20 @@ export default function PostForm({
     }
   }
 
-  async function handleWolfBotTrigger() {
-    if (!postId) return
+  async function handleWolfBotTrigger(regenerate = false) {
+    // Force save so morning scales are in the DB before WOLF|BOT reads them
+    const savedId = postId ?? (await saveDraft(currentData(), false))
+    if (!savedId) { setReviewStatus('error'); return }
+
     setReviewStatus('loading')
     setReviewWordCount(null)
     try {
-      const res = await fetch(`/api/posts/${postId}/wolfbot-reviews`, { method: 'POST' })
-      if (res.ok || res.status === 409) {
+      const res = await fetch(`/api/posts/${savedId}/wolfbot-reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ regenerate }),
+      })
+      if (res.ok) {
         const data = await res.json().catch(() => null)
         if (data?.review) {
           const wc = data.review.split(/\s+/).filter(Boolean).length
@@ -702,7 +709,7 @@ export default function PostForm({
               <button
                 type="button"
                 className="pf-wolfbot-trigger"
-                onClick={handleWolfBotTrigger}
+                onClick={() => handleWolfBotTrigger(false)}
               >
                 {reviewStatus === 'error' ? 'Review Failed — Try Again' : 'Generate WOLF|BOT Review'}
               </button>
@@ -713,15 +720,13 @@ export default function PostForm({
               <p className="pf-wolfbot-done-text">
                 WOLF|BOT review complete{reviewWordCount ? ` — ${reviewWordCount} words` : ''}. View it on your journal page.
               </p>
-              {session?.user?.role === 'admin' && (
-                <button
-                  type="button"
-                  className="pf-wolfbot-retrigger"
-                  onClick={handleWolfBotTrigger}
-                >
-                  Re-generate (admin)
-                </button>
-              )}
+              <button
+                type="button"
+                className="pf-wolfbot-retrigger"
+                onClick={() => handleWolfBotTrigger(true)}
+              >
+                Re-generate Review
+              </button>
             </>
           )}
         </div>

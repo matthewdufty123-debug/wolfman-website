@@ -163,7 +163,7 @@ async function loadConfig() {
 // ── POST — generate review ─────────────────────────────────────────────────────
 
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
@@ -177,6 +177,13 @@ export async function POST(
   if (!isPremium(session.user.id) && !isAdmin) {
     return NextResponse.json({ error: 'Premium required' }, { status: 403 })
   }
+
+  // Parse optional regenerate flag from request body
+  let regenerate = false
+  try {
+    const body = await req.json()
+    regenerate = body?.regenerate === true
+  } catch { /* empty body is fine */ }
 
   // ── Step 1: Parallel fetch — post, morning state, author, existing review ───
 
@@ -193,7 +200,8 @@ export async function POST(
   if (post.authorId !== session.user.id && !isAdmin) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
-  if (existing && !isAdmin) {
+  // Allow regeneration for the post owner (with flag) or admin
+  if (existing && !isAdmin && !regenerate) {
     return NextResponse.json({ error: 'Already exists' }, { status: 409 })
   }
 
@@ -326,7 +334,9 @@ export async function POST(
     `Today's Intention:\n${intention}`,
     grateful  ? `\nI'm Grateful For:\n${grateful}` : '',
     greatAt   ? `\nSomething I'm Great At:\n${greatAt}` : '',
-    ms        ? `\nMorning scores — Brain: ${ms.brainScale}/8, Body: ${ms.bodyScale}/8, Happy: ${ms.happyScale ?? '—'}/8, Stress State: ${ms.stressScale ?? '—'}/8` : '',
+    ms && (ms.brainScale != null || ms.bodyScale != null || ms.happyScale != null || ms.stressScale != null)
+      ? `\nMorning scores — Brain: ${ms.brainScale ?? 'not recorded'}/8, Body: ${ms.bodyScale ?? 'not recorded'}/8, Happy: ${ms.happyScale ?? 'not recorded'}/8, Stress State: ${ms.stressScale ?? 'not recorded'}/8`
+      : '',
     routineLines ? `Rituals completed: ${routineLines}` : '',
     post.eveningReflection ? `\nEvening reflection:\n${post.eveningReflection}` : '',
     post.feelAboutToday    ? `Feel about today: ${post.feelAboutToday}/6` : '',
@@ -421,5 +431,5 @@ export async function POST(
     await db.insert(wolfbotReviews).values(reviewData)
   }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, review: parsed.review ?? null })
 }
