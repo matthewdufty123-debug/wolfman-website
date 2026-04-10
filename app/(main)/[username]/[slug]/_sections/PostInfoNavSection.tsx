@@ -3,6 +3,7 @@ import { posts as postsTable, users as usersTable } from '@/lib/db/schema'
 import { eq, gt, lt, and, or, desc, asc } from 'drizzle-orm'
 import type { ProcessedPost } from '@/lib/posts'
 import PostInfoSection from '@/components/journal/PostInfoSection'
+import JournalPhotoSection from '@/components/journal/JournalPhotoSection'
 import BottomNav from '@/components/journal/BottomNav'
 
 interface Props {
@@ -17,6 +18,7 @@ export default async function PostInfoNavSection({ post, username, isOwner, user
     return (
       <>
         <PostInfoSection post={post} />
+        <JournalPhotoSection imageUrl={post.image} title={post.title} caption={post.imageCaption} />
         <BottomNav username={username} nextPost={null} isOwner={false} editHref={null} />
       </>
     )
@@ -54,6 +56,7 @@ export default async function PostInfoNavSection({ post, username, isOwner, user
   return (
     <>
       <PostInfoSection post={post} />
+      <JournalPhotoSection imageUrl={post.image} title={post.title} caption={post.imageCaption} />
       <BottomNav username={username} nextPost={nextPost} isOwner={isOwner} editHref={editHref} />
     </>
   )
