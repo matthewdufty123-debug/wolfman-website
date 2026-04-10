@@ -7687,6 +7687,61 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   opacity: 0.7;
 }
 
+/* ── Writing Stats Section ────────────────────────────────────────────────── */
+
+.wss-wrap          { display: flex; flex-direction: column; gap: 1.75rem; width: 100%; }
+.wss-chart-block   { display: flex; flex-direction: column; }
+.wss-chart-title   {
+  font: 700 0.6rem/1 var(--font-inter), sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--chart-label);
+  margin: 0 0 0.6rem;
+}
+.wss-bar-legend    { display: flex; gap: 1.25rem; justify-content: center; flex-wrap: wrap; margin-top: 0.5rem; }
+.wss-legend-item   {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font: 600 0.55rem/1 var(--font-inter), sans-serif;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--chart-sub);
+}
+.wss-legend-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.wss-freq-block    { border-top: 1px solid var(--chart-row-border); padding-top: 1.25rem; }
+.wss-freq-row      { display: flex; flex-direction: row; align-items: center; gap: 1.5rem; }
+.wss-freq-stat     { font: 700 1.1rem/1 var(--font-inter), sans-serif; color: var(--body-text); }
+.wss-freq-sub      {
+  font: 400 0.6rem/1 var(--font-inter), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--chart-sub);
+  margin-top: 0.25rem;
+}
+.wss-delta         { display: flex; align-items: center; gap: 0.4rem; }
+.wss-delta-value   { font: 700 0.85rem/1 var(--font-inter), sans-serif; color: #A0622A; }
+.wss-delta-label   {
+  font: 600 0.5rem/1.2 var(--font-inter), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--chart-label);
+}
+.wss-monthly-block { border-top: 1px solid var(--chart-row-border); padding-top: 1.25rem; }
+.wss-building-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+  font: italic 0.7rem/1 var(--font-inter), sans-serif;
+  color: var(--chart-sub);
+}
+
+/* Skeleton bars */
+.skel-bars { display: flex; align-items: flex-end; gap: 5px; height: 80px; padding: 0 4px; }
+.skel-bar  { flex: 1; border-radius: 2px 2px 0 0; }
+
 /* ── WOLF|BOT Review section ────────────────────────────────────────────── */
 
 .wolfbot-layout {

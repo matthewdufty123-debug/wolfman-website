@@ -69,3 +69,21 @@ export function Section4Skeleton() {
     </div>
   )
 }
+
+// ── Section 5: Writing Stats (bar chart skeleton) ─────────────────────────────
+
+const BAR_HEIGHTS = ['55%', '75%', '40%', '90%', '65%', '85%', '70%', '100%', '60%', '80%']
+
+export function Section5Skeleton() {
+  return (
+    <div className="journal-section skel-section">
+      <div className="skel-pulse skel-label" />
+      <div className="skel-bars">
+        {BAR_HEIGHTS.map((h, i) => (
+          <div key={i} className="skel-pulse skel-bar" style={{ height: h }} />
+        ))}
+      </div>
+      <div className="skel-spacer" />
+    </div>
+  )
+}
