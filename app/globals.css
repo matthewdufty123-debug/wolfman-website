@@ -7468,8 +7468,8 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   padding: 0;
 }
 .ritual-row-icon {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -7488,15 +7488,32 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
 .ritual-row-track {
   flex: 0 0 50%;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 4px;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.3rem;
   padding: 0 0.5rem;
 }
+.ritual-track-label {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.42rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--chart-sub);
+  text-align: center;
+}
+.ritual-track-pills {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: nowrap;
+}
 .ritual-segment {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
   flex-shrink: 0;
 }
 .ritual-row-streak {
@@ -7524,14 +7541,18 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
 }
 
 /* Streak tiers */
-.ritual-streak--low  { font-size: 0.75rem; color: var(--chart-sub); }
-.ritual-streak--mid  { font-size: 0.85rem; color: #A0622A; }
-.ritual-streak--high { font-size: 0.9rem;  color: #A0622A; animation: streak-glow 1.8s ease-in-out infinite; }
-.ritual-streak--epic { font-size: 1rem;    color: #A0622A; animation: streak-glow 1.4s ease-in-out infinite; }
+.ritual-streak--low  { font-size: 1rem;   color: var(--chart-sub); }
+.ritual-streak--mid  { font-size: 1.1rem; color: #A0622A; }
+.ritual-streak--high { font-size: 1.25rem; color: #A0622A; animation: streak-glow 1.8s ease-in-out infinite; }
+.ritual-streak--epic { font-size: 1.4rem;  color: #A0622A; animation: streak-glow 1.4s ease-in-out infinite, streak-pulse 1.4s ease-in-out infinite; }
 
 @keyframes streak-glow {
-  0%, 100% { text-shadow: 0 0 4px rgba(160,98,42,0.3); }
-  50%       { text-shadow: 0 0 10px rgba(160,98,42,0.75), 0 0 20px rgba(160,98,42,0.35); }
+  0%, 100% { text-shadow: 0 0 6px rgba(160,98,42,0.5); }
+  50%       { text-shadow: 0 0 14px #A0622A, 0 0 28px rgba(160,98,42,0.7), 0 0 42px rgba(160,98,42,0.35); }
+}
+@keyframes streak-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.18); }
 }
 
 /* Skeleton — ritual stack */

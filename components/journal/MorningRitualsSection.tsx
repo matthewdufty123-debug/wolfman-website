@@ -46,21 +46,40 @@ interface RitualRowProps {
 function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }: RitualRowProps) {
   const rowRef = useRef<HTMLDivElement>(null)
   const [revealed, setRevealed] = useState(false)
+  const [streakVisible, setStreakVisible] = useState(false)
+
+  // Timing constants
+  const SEGMENT_START = 0.2
+  const SEGMENT_STEP  = 0.055
+  const streakDelay   = SEGMENT_START + 9 * SEGMENT_STEP + 0.2  // ~1.0s
 
   useEffect(() => {
     const el = rowRef.current
     if (!el) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setRevealed(true)
+      setStreakVisible(true)
       return
     }
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setRevealed(true); observer.disconnect() } },
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setRevealed(true)
+          observer.disconnect()
+        }
+      },
       { threshold: 0.4 }
     )
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
+
+  // Mount sparks only after the streak number has appeared — avoids animation-on-mount bug
+  useEffect(() => {
+    if (!revealed) return
+    const t = setTimeout(() => setStreakVisible(true), (streakDelay + 0.2) * 1000)
+    return () => clearTimeout(t)
+  }, [revealed, streakDelay])
 
   const tier = getStreakTier(streak)
 
@@ -69,11 +88,6 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }
     ...Array(Math.max(0, 10 - segments.length)).fill(null),
     ...segments,
   ]
-
-  // Timing constants
-  const SEGMENT_START = 0.2      // seconds after reveal
-  const SEGMENT_STEP  = 0.055    // seconds per segment
-  const streakDelay   = SEGMENT_START + 9 * SEGMENT_STEP + 0.2  // ~1.0s
 
   return (
     <div
@@ -92,27 +106,30 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }
         aria-label={label}
       >
         <div className="ritual-row-icon" style={{ background: `${color}22`, border: `1.5px solid ${color}` }}>
-          <Icon size={22} color={color} />
+          <Icon size={26} color={color} />
         </div>
         <span className="ritual-row-label" style={{ color }}>{label}</span>
       </button>
 
       {/* 50% — segment track */}
       <div className="ritual-row-track">
-        {paddedSegments.map((filled, i) => (
-          <div
-            key={i}
-            className="ritual-segment"
-            style={{
-              background: filled ? color : 'transparent',
-              border: `1.5px solid ${filled ? color : `${color}40`}`,
-              opacity: revealed ? (filled === null ? 0.15 : 1) : 0,
-              transform: revealed ? 'scale(1)' : 'scale(0.4)',
-              transition: 'opacity 0.25s ease, transform 0.25s ease',
-              transitionDelay: revealed ? `${SEGMENT_START + i * SEGMENT_STEP}s` : '0s',
-            }}
-          />
-        ))}
+        <span className="ritual-track-label">last 10</span>
+        <div className="ritual-track-pills">
+          {paddedSegments.map((filled, i) => (
+            <div
+              key={i}
+              className="ritual-segment"
+              style={{
+                background: filled ? color : 'transparent',
+                border: `1.5px solid ${filled ? color : `${color}40`}`,
+                opacity: revealed ? (filled === null ? 0.15 : 1) : 0,
+                transform: revealed ? 'scaleY(1)' : 'scaleY(0.2)',
+                transition: 'opacity 0.25s ease, transform 0.25s ease',
+                transitionDelay: revealed ? `${SEGMENT_START + i * SEGMENT_STEP}s` : '0s',
+              }}
+            />
+          ))}
+        </div>
       </div>
 
       {/* 30% — streak */}
@@ -129,23 +146,21 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }
               transition: `opacity 0.3s ease ${streakDelay}s, transform 0.3s ease ${streakDelay}s`,
             }}
           >
-            {/* Firework sparks — epic tier only */}
-            {tier === 'epic' && SPARKS.map((s, i) => (
+            {/* Firework sparks — mount only after streak is visible to guarantee animation fires */}
+            {tier === 'epic' && streakVisible && SPARKS.map((s, i) => (
               <div
                 key={i}
                 style={{
                   position: 'absolute',
-                  width: 4,
-                  height: 4,
+                  width: 5,
+                  height: 5,
                   borderRadius: '50%',
                   background: COPPER,
                   top: '50%',
                   left: '50%',
                   marginTop: -2,
                   marginLeft: -2,
-                  animation: revealed
-                    ? `ritual-spark 0.55s ease-out ${streakDelay + 0.15 + i * 0.04}s forwards`
-                    : 'none',
+                  animation: `ritual-spark 0.6s ease-out ${i * 0.05}s forwards`,
                   ['--spark-x' as string]: `${s.x}px`,
                   ['--spark-y' as string]: `${s.y}px`,
                 } as React.CSSProperties}
