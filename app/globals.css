@@ -7512,8 +7512,8 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
 }
 .ritual-segment {
   flex: 1;
-  height: 8px;
-  border-radius: 4px;
+  height: 20px;
+  border-radius: 6px;
   flex-shrink: 0;
 }
 .ritual-row-streak {
@@ -7542,17 +7542,17 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
 
 /* Streak tiers */
 .ritual-streak--low  { font-size: 1rem;   color: var(--chart-sub); }
-.ritual-streak--mid  { font-size: 1.1rem; color: #A0622A; }
-.ritual-streak--high { font-size: 1.25rem; color: #A0622A; animation: streak-glow 1.8s ease-in-out infinite; }
-.ritual-streak--epic { font-size: 1.4rem;  color: #A0622A; animation: streak-glow 1.4s ease-in-out infinite, streak-pulse 1.4s ease-in-out infinite; }
+.ritual-streak--mid  { font-size: 1.1rem; }
+.ritual-streak--high { font-size: 1.25rem; animation: streak-glow 1.8s ease-in-out infinite; }
+.ritual-streak--epic { font-size: 1.4rem;  animation: streak-glow 1.2s ease-in-out infinite, streak-pulse 1.2s ease-in-out infinite; }
 
 @keyframes streak-glow {
-  0%, 100% { text-shadow: 0 0 6px rgba(160,98,42,0.5); }
-  50%       { text-shadow: 0 0 14px #A0622A, 0 0 28px rgba(160,98,42,0.7), 0 0 42px rgba(160,98,42,0.35); }
+  0%, 100% { text-shadow: 0 0 4px currentColor; }
+  50%       { text-shadow: 0 0 10px currentColor, 0 0 22px currentColor, 0 0 40px currentColor, 0 0 60px currentColor; }
 }
 @keyframes streak-pulse {
   0%, 100% { transform: scale(1); }
-  50%       { transform: scale(1.18); }
+  50%       { transform: scale(1.22); }
 }
 
 /* Skeleton — ritual stack */

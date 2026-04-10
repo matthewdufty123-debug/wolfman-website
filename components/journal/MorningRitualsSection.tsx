@@ -8,12 +8,14 @@ import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
 const COPPER = '#A0622A'
 
 const SPARKS = [
-  { x: 0,   y: -22 },
-  { x: 19,  y: -11 },
-  { x: 19,  y:  11 },
-  { x: 0,   y:  22 },
-  { x: -19, y:  11 },
-  { x: -19, y: -11 },
+  { x: 0,   y: -38 },
+  { x: 27,  y: -27 },
+  { x: 38,  y:   0 },
+  { x: 27,  y:  27 },
+  { x: 0,   y:  38 },
+  { x: -27, y:  27 },
+  { x: -38, y:   0 },
+  { x: -27, y: -27 },
 ]
 
 type StreakTier = 'none' | 'low' | 'mid' | 'high' | 'epic'
@@ -147,27 +149,49 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }
             }}
           >
             {/* Firework sparks — mount only after streak is visible to guarantee animation fires */}
-            {tier === 'epic' && streakVisible && SPARKS.map((s, i) => (
-              <div
-                key={i}
-                style={{
-                  position: 'absolute',
-                  width: 5,
-                  height: 5,
-                  borderRadius: '50%',
-                  background: COPPER,
-                  top: '50%',
-                  left: '50%',
-                  marginTop: -2,
-                  marginLeft: -2,
-                  animation: `ritual-spark 0.6s ease-out ${i * 0.05}s forwards`,
-                  ['--spark-x' as string]: `${s.x}px`,
-                  ['--spark-y' as string]: `${s.y}px`,
-                } as React.CSSProperties}
-              />
-            ))}
+            {tier === 'epic' && streakVisible && (
+              <>
+                {/* Expanding burst ring */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    border: `2px solid ${color}`,
+                    top: '50%',
+                    left: '50%',
+                    marginTop: -6,
+                    marginLeft: -6,
+                    animation: 'ritual-burst-ring 0.7s ease-out forwards',
+                  }}
+                />
+                {SPARKS.map((s, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      position: 'absolute',
+                      width: 7,
+                      height: 7,
+                      borderRadius: '50%',
+                      background: color,
+                      top: '50%',
+                      left: '50%',
+                      marginTop: -3,
+                      marginLeft: -3,
+                      animation: `ritual-spark 0.75s ease-out ${i * 0.04}s forwards`,
+                      ['--spark-x' as string]: `${s.x}px`,
+                      ['--spark-y' as string]: `${s.y}px`,
+                    } as React.CSSProperties}
+                  />
+                ))}
+              </>
+            )}
 
-            <span className={`ritual-streak-number ritual-streak--${tier}`}>
+            <span
+              className={`ritual-streak-number ritual-streak--${tier}`}
+              style={tier !== 'low' ? { color } : undefined}
+            >
               {streak}
             </span>
             <span className="ritual-streak-label">journal streak</span>
@@ -285,9 +309,10 @@ export default function MorningRitualsSection({ checklist, ritualStats }: Props)
           )}
 
           <style>{`
-            @keyframes ritual-fade-in { from { opacity: 0 } to { opacity: 1 } }
-            @keyframes ritual-pop-in  { from { opacity: 0; transform: translate(-50%,-50%) scale(0.92) } to { opacity: 1; transform: translate(-50%,-50%) scale(1) } }
-            @keyframes ritual-spark   { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--spark-x),var(--spark-y)) scale(0); opacity: 0; } }
+            @keyframes ritual-fade-in   { from { opacity: 0 } to { opacity: 1 } }
+            @keyframes ritual-pop-in    { from { opacity: 0; transform: translate(-50%,-50%) scale(0.92) } to { opacity: 1; transform: translate(-50%,-50%) scale(1) } }
+            @keyframes ritual-spark     { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--spark-x),var(--spark-y)) scale(0); opacity: 0; } }
+            @keyframes ritual-burst-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(5); opacity: 0; } }
           `}</style>
         </>
       )}
