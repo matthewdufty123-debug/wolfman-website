@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { noindexMetadata } from '@/lib/metadata'
 import {
   ASSUMPTIONS,
@@ -19,6 +20,8 @@ function fmtGBP(v: number) {
 }
 
 export default function InvestmentPage() {
+  notFound()
+
   const snapshotConservative = getThreeYearSnapshot('conservative')
   const snapshotBase         = getThreeYearSnapshot('base')
   const snapshotOptimistic   = getThreeYearSnapshot('optimistic')

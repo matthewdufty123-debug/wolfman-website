@@ -24,6 +24,16 @@ function getUserLocalHHMM(timezone: string): string {
   }).format(new Date())
 }
 
+function isInCurrentWindow(localHHMM: string, reminderTime: string): boolean {
+  // Cron runs every 15 minutes. Match any reminder time that falls within the current window.
+  const [lh, lm] = localHHMM.split(':').map(Number)
+  const [rh, rm] = reminderTime.split(':').map(Number)
+  const localMins = lh * 60 + lm
+  const reminderMins = rh * 60 + rm
+  const windowStart = Math.floor(localMins / 15) * 15
+  return reminderMins >= windowStart && reminderMins < windowStart + 15
+}
+
 function getUserLocalDateString(timezone: string): string {
   // Returns 'YYYY-MM-DD' in the user's timezone
   const [day, month, year] = new Intl.DateTimeFormat('en-GB', {
@@ -66,7 +76,7 @@ export async function GET(request: Request) {
 
     // Check if it's the right time (within this 15-min window)
     const localTime = getUserLocalHHMM(user.morningReminderTimezone)
-    if (localTime !== user.morningReminderTime) {
+    if (!isInCurrentWindow(localTime, user.morningReminderTime)) {
       skipped++
       continue
     }

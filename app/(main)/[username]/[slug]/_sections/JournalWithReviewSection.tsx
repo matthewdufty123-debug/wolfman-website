@@ -3,6 +3,7 @@ import { dayScores, wolfbotReviews as wolfbotReviewsTable, wolfbotConfig } from 
 import { eq } from 'drizzle-orm'
 import type { ProcessedPost } from '@/lib/posts'
 import JournalTextSection from '@/components/journal/JournalTextSection'
+import JournalPhotoSection from '@/components/journal/JournalPhotoSection'
 import WolfBotSection, { type WolfBotReviews } from '@/components/journal/WolfBotSection'
 
 interface Props {
@@ -47,6 +48,8 @@ export default async function JournalWithReviewSection({ post, postId, isOwner }
   return (
     <>
       <JournalTextSection post={post} />
+
+      <JournalPhotoSection imageUrl={post.image} title={post.title} caption={post.imageCaption} />
 
       <WolfBotSection
         synthesis={synthesis}

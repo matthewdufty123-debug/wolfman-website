@@ -30,6 +30,7 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
     grateful,
     greatAt,
     image: post.image ?? null,
+    imageCaption: post.imageCaption ?? null,
     videoId: post.videoId ?? null,
     eveningReflection: post.eveningReflection ?? '',
     feelAboutToday: post.feelAboutToday ?? null,

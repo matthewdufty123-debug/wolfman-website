@@ -11,7 +11,8 @@ export interface PostMeta {
   date: string                           // "YYYY-MM-DD"
   category: 'morning-intention' | 'morning-walk'
   excerpt: string
-  image?: string                         // og:image only — never rendered on page
+  image?: string                         // journal photo URL
+  imageCaption?: string                  // optional caption shown below the photo
   videoId?: string                       // morning-walk only
   review?: string                        // Claude's review — shown at bottom of post
   status?: string                        // 'draft' | 'published'
@@ -173,8 +174,9 @@ function rowToMeta(row: typeof postsTable.$inferSelect): PostMeta {
     date:     row.date,
     category: row.category as 'morning-intention' | 'morning-walk',
     excerpt:  row.excerpt || deriveExcerpt(row.content),
-    image:    row.image    ?? undefined,
-    videoId:  row.videoId  ?? undefined,
+    image:         row.image         ?? undefined,
+    imageCaption:  row.imageCaption  ?? undefined,
+    videoId:       row.videoId       ?? undefined,
     review:   row.review   ?? undefined,
     status:   row.status,
     authorId: row.authorId ?? null,

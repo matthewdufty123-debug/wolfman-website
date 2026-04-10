@@ -149,7 +149,7 @@ function ScaleTrendChart({ values, todayValue, revealed }: TrendChartProps) {
         y1={PAD_TOP}
         x2={PAD_LEFT}
         y2={PAD_TOP + plotH}
-        stroke="rgba(255,255,255,0.12)"
+        style={{ stroke: 'var(--chart-axis, rgba(255,255,255,0.12))' }}
         strokeWidth="1"
       />
 
@@ -159,7 +159,7 @@ function ScaleTrendChart({ values, todayValue, revealed }: TrendChartProps) {
         y1={PAD_TOP + plotH}
         x2={PAD_LEFT + plotW}
         y2={PAD_TOP + plotH}
-        stroke="rgba(255,255,255,0.12)"
+        style={{ stroke: 'var(--chart-axis, rgba(255,255,255,0.12))' }}
         strokeWidth="1"
       />
 
@@ -171,7 +171,7 @@ function ScaleTrendChart({ values, todayValue, revealed }: TrendChartProps) {
           y={yForVal(v)}
           textAnchor="end"
           dominantBaseline="middle"
-          fill="rgba(255,255,255,0.35)"
+          style={{ fill: 'var(--chart-text, rgba(255,255,255,0.35))' }}
           fontSize="8"
           fontFamily="var(--font-inter), sans-serif"
         >
@@ -190,16 +190,15 @@ function ScaleTrendChart({ values, todayValue, revealed }: TrendChartProps) {
         strokeOpacity="0.7"
       />
 
-      {/* Average line — dashed white */}
+      {/* Average line — dashed */}
       {avg !== null && (
         <line
           x1={PAD_LEFT}
           y1={yForVal(avg)}
           x2={PAD_LEFT + plotW}
           y2={yForVal(avg)}
-          stroke="#ffffff"
+          style={{ stroke: 'var(--chart-avg, rgba(255,255,255,0.4))' }}
           strokeWidth="1.5"
-          strokeOpacity="0.4"
           strokeDasharray="6 4"
         />
       )}
@@ -220,9 +219,10 @@ function ScaleTrendChart({ values, todayValue, revealed }: TrendChartProps) {
             cx={xForIdx(i)}
             cy={yForVal(v)}
             r={isToday ? 7.5 : 3.5}
-            fill={isToday ? COPPER : '#ffffff'}
+            fill={isToday ? COPPER : undefined}
             fillOpacity={opacity}
             style={{
+              ...(isToday ? {} : { fill: 'var(--chart-dot-hist, #ffffff)' }),
               opacity: revealed ? 1 : 0,
               transition: `opacity 0.3s ease ${0.6 + i * 0.06}s`,
             }}
@@ -235,7 +235,7 @@ function ScaleTrendChart({ values, todayValue, revealed }: TrendChartProps) {
         x={PAD_LEFT + plotW / 2}
         y={H - 4}
         textAnchor="middle"
-        fill="rgba(255,255,255,0.3)"
+        style={{ fill: 'var(--chart-text, rgba(255,255,255,0.3))' }}
         fontSize="7"
         fontFamily="var(--font-inter), sans-serif"
       >

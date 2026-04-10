@@ -83,6 +83,7 @@ export const posts = pgTable('posts', {
   content: text('content').notNull(),
   excerpt: text('excerpt'),
   image: text('image'),
+  imageCaption: text('image_caption'),
   videoId: text('video_id'),
   review: text('review'),
   authorId: uuid('author_id').references(() => users.id),

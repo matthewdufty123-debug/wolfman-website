@@ -50,6 +50,7 @@ type PostFormData = {
   greatAt: string
   morning: MorningState
   image: string | null
+  imageCaption: string | null
   videoId: string | null
   eveningReflection: string
   feelAboutToday: number | null
@@ -213,6 +214,7 @@ export default function PostForm({
     routineChecklist: initialData?.morning?.routineChecklist ?? defaultChecklist(),
   })
   const [image, setImage] = useState<string | null>(initialData?.image ?? null)
+  const [imageCaption, setImageCaption] = useState<string | null>(initialData?.imageCaption ?? null)
   const [showCropUpload, setShowCropUpload] = useState(false)
   const [youtubeUrl, setYoutubeUrl] = useState(
     initialData?.videoId ? `https://youtu.be/${initialData.videoId}` : ''
@@ -241,10 +243,10 @@ export default function PostForm({
   function markDirty() { setIsDirty(true); setSaveMsg('') }
 
   const currentData = useCallback((): PostFormData => ({
-    title, date, intention, grateful, greatAt, morning, image,
+    title, date, intention, grateful, greatAt, morning, image, imageCaption,
     videoId: extractYouTubeId(youtubeUrl),
     eveningReflection, feelAboutToday,
-  }), [title, date, intention, grateful, greatAt, morning, image, youtubeUrl, eveningReflection, feelAboutToday])
+  }), [title, date, intention, grateful, greatAt, morning, image, imageCaption, youtubeUrl, eveningReflection, feelAboutToday])
 
   // Auto-save every 30s
   useEffect(() => {
@@ -265,6 +267,7 @@ export default function PostForm({
       status: 'draft',
       morning: data.morning,
       image: data.image,
+      imageCaption: data.imageCaption,
       videoId: data.videoId,
       eveningReflection: data.eveningReflection || null,
       feelAboutToday: data.feelAboutToday,
@@ -372,6 +375,7 @@ export default function PostForm({
       morning: data.morning,
       isPublic,
       image: data.image,
+      imageCaption: data.imageCaption,
       videoId: data.videoId,
       eveningReflection: data.eveningReflection || null,
       feelAboutToday: data.feelAboutToday,
@@ -604,7 +608,7 @@ export default function PostForm({
                 <img src={image} alt="Journal photo" className="pf-photo-img" />
                 <div className="pf-photo-actions">
                   <button type="button" className="pf-photo-change" onClick={() => setShowCropUpload(true)}>Change photo</button>
-                  <button type="button" className="pf-photo-remove" onClick={() => { setImage(null); markDirty() }}>Remove</button>
+                  <button type="button" className="pf-photo-remove" onClick={() => { setImage(null); setImageCaption(null); markDirty() }}>Remove</button>
                 </div>
               </div>
             ) : (
@@ -618,6 +622,16 @@ export default function PostForm({
               >
                 + Add a journal photo
               </button>
+            )}
+            {image && (
+              <input
+                type="text"
+                className="pf-photo-caption"
+                placeholder="Add a caption… (optional)"
+                value={imageCaption ?? ''}
+                maxLength={200}
+                onChange={e => { setImageCaption(e.target.value || null); markDirty() }}
+              />
             )}
           </div>
 
