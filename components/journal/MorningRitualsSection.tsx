@@ -5,11 +5,33 @@ import Link from 'next/link'
 import { ROUTINE_ICON_MAP } from '@/components/RoutineIcons'
 import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
 
-interface Props {
-  checklist: Record<string, boolean>
+const COPPER = '#A0622A'
+
+const SPARKS = [
+  { x: 0,   y: -22 },
+  { x: 19,  y: -11 },
+  { x: 19,  y:  11 },
+  { x: 0,   y:  22 },
+  { x: -19, y:  11 },
+  { x: -19, y: -11 },
+]
+
+type StreakTier = 'none' | 'low' | 'mid' | 'high' | 'epic'
+
+function getStreakTier(n: number): StreakTier {
+  if (n === 0) return 'none'
+  if (n <= 5)  return 'low'
+  if (n <= 7)  return 'mid'
+  if (n <= 9)  return 'high'
+  return 'epic'
 }
 
-// ── Per-row component with its own IntersectionObserver ──────────────────────
+interface Props {
+  checklist: Record<string, boolean>
+  ritualStats: Record<string, { segments: boolean[], streak: number }>
+}
+
+// ── Per-row component ─────────────────────────────────────────────────────────
 
 interface RitualRowProps {
   ritualKey: string
@@ -17,9 +39,11 @@ interface RitualRowProps {
   Icon: React.FC<{ size?: number; color?: string }>
   color: string
   onSelect: (key: string) => void
+  segments: boolean[]
+  streak: number
 }
 
-function RitualRow({ ritualKey, label, Icon, color, onSelect }: RitualRowProps) {
+function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }: RitualRowProps) {
   const rowRef = useRef<HTMLDivElement>(null)
   const [revealed, setRevealed] = useState(false)
 
@@ -38,6 +62,19 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect }: RitualRowProps) 
     return () => observer.disconnect()
   }, [])
 
+  const tier = getStreakTier(streak)
+
+  // Pad segments on the left so today is always slot 10 (rightmost)
+  const paddedSegments: (boolean | null)[] = [
+    ...Array(Math.max(0, 10 - segments.length)).fill(null),
+    ...segments,
+  ]
+
+  // Timing constants
+  const SEGMENT_START = 0.2      // seconds after reveal
+  const SEGMENT_STEP  = 0.055    // seconds per segment
+  const streakDelay   = SEGMENT_START + 9 * SEGMENT_STEP + 0.2  // ~1.0s
+
   return (
     <div
       ref={rowRef}
@@ -48,6 +85,7 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect }: RitualRowProps) 
         transition: 'opacity 0.45s ease, transform 0.45s ease',
       }}
     >
+      {/* 20% — icon + label */}
       <button
         className="ritual-row-left"
         onClick={() => onSelect(ritualKey)}
@@ -58,14 +96,76 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect }: RitualRowProps) 
         </div>
         <span className="ritual-row-label" style={{ color }}>{label}</span>
       </button>
-      <div className="ritual-row-right" />
+
+      {/* 50% — segment track */}
+      <div className="ritual-row-track">
+        {paddedSegments.map((filled, i) => (
+          <div
+            key={i}
+            className="ritual-segment"
+            style={{
+              background: filled ? color : 'transparent',
+              border: `1.5px solid ${filled ? color : `${color}40`}`,
+              opacity: revealed ? (filled === null ? 0.15 : 1) : 0,
+              transform: revealed ? 'scale(1)' : 'scale(0.4)',
+              transition: 'opacity 0.25s ease, transform 0.25s ease',
+              transitionDelay: revealed ? `${SEGMENT_START + i * SEGMENT_STEP}s` : '0s',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* 30% — streak */}
+      {tier !== 'none' && (
+        <div className="ritual-row-streak">
+          <div
+            style={{
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              opacity: revealed ? 1 : 0,
+              transform: revealed ? 'translateY(0)' : 'translateY(6px)',
+              transition: `opacity 0.3s ease ${streakDelay}s, transform 0.3s ease ${streakDelay}s`,
+            }}
+          >
+            {/* Firework sparks — epic tier only */}
+            {tier === 'epic' && SPARKS.map((s, i) => (
+              <div
+                key={i}
+                style={{
+                  position: 'absolute',
+                  width: 4,
+                  height: 4,
+                  borderRadius: '50%',
+                  background: COPPER,
+                  top: '50%',
+                  left: '50%',
+                  marginTop: -2,
+                  marginLeft: -2,
+                  animation: revealed
+                    ? `ritual-spark 0.55s ease-out ${streakDelay + 0.15 + i * 0.04}s forwards`
+                    : 'none',
+                  ['--spark-x' as string]: `${s.x}px`,
+                  ['--spark-y' as string]: `${s.y}px`,
+                } as React.CSSProperties}
+              />
+            ))}
+
+            <span className={`ritual-streak-number ritual-streak--${tier}`}>
+              {streak}
+            </span>
+            <span className="ritual-streak-label">journal streak</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-// ── Main section ─────────────────────────────────────────────────────────────
+// ── Main section ──────────────────────────────────────────────────────────────
 
-export default function MorningRitualsSection({ checklist }: Props) {
+export default function MorningRitualsSection({ checklist, ritualStats }: Props) {
   const [activeKey, setActiveKey] = useState<string | null>(null)
   const active = activeKey ? ROUTINE_ICON_MAP[activeKey] : null
 
@@ -85,16 +185,21 @@ export default function MorningRitualsSection({ checklist }: Props) {
       ) : (
         <>
           <div className="morning-rituals-stack">
-            {items.map(([key, { label, Icon, color }]) => (
-              <RitualRow
-                key={key}
-                ritualKey={key}
-                label={label}
-                Icon={Icon}
-                color={color}
-                onSelect={setActiveKey}
-              />
-            ))}
+            {items.map(([key, { label, Icon, color }]) => {
+              const stats = ritualStats[key] ?? { segments: [], streak: 0 }
+              return (
+                <RitualRow
+                  key={key}
+                  ritualKey={key}
+                  label={label}
+                  Icon={Icon}
+                  color={color}
+                  onSelect={setActiveKey}
+                  segments={stats.segments}
+                  streak={stats.streak}
+                />
+              )
+            })}
           </div>
 
           {/* Popup */}
@@ -167,6 +272,7 @@ export default function MorningRitualsSection({ checklist }: Props) {
           <style>{`
             @keyframes ritual-fade-in { from { opacity: 0 } to { opacity: 1 } }
             @keyframes ritual-pop-in  { from { opacity: 0; transform: translate(-50%,-50%) scale(0.92) } to { opacity: 1; transform: translate(-50%,-50%) scale(1) } }
+            @keyframes ritual-spark   { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--spark-x),var(--spark-y)) scale(0); opacity: 0; } }
           `}</style>
         </>
       )}

@@ -116,7 +116,7 @@ export default async function PostPage({
 
           {/* Section 3: Morning Rituals (+ future analysis) */}
           <Suspense fallback={<Section3Skeleton />}>
-            <MorningRitualsServerSection postId={postId} />
+            <MorningRitualsServerSection postId={postId} authorId={post.authorId ?? ''} postDate={post.date ?? ''} />
           </Suspense>
 
           {/* Section 5: Writing Stats */}
