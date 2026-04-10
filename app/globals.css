@@ -7468,8 +7468,8 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   padding: 0;
 }
 .ritual-row-icon {
-  width: 44px;
-  height: 44px;
+  width: 53px;
+  height: 53px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -7477,31 +7477,38 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
 }
 .ritual-row-label {
   font-family: var(--font-inter), sans-serif;
-  font-size: 0.5rem;
-  font-weight: 600;
+  font-size: 0.68rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   line-height: 1.2;
-  text-align: center;
-  max-width: 48px;
+  text-align: left;
 }
 .ritual-row-track {
   flex: 0 0 50%;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
   justify-content: center;
-  gap: 0.3rem;
+  gap: 0.25rem;
   padding: 0 0.5rem;
 }
-.ritual-track-label {
+.ritual-track-today {
   font-family: var(--font-inter), sans-serif;
-  font-size: 0.42rem;
+  font-size: 0.38rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: var(--chart-sub);
-  text-align: center;
+  white-space: nowrap;
+  padding-left: 5px;
+  flex-shrink: 0;
+}
+.ritual-context-note {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.72rem;
+  color: var(--chart-sub);
+  margin: 0 0 1rem;
+  line-height: 1.5;
 }
 .ritual-track-pills {
   display: flex;
@@ -7540,11 +7547,11 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   text-align: center;
 }
 
-/* Streak tiers */
-.ritual-streak--low  { font-size: 1rem;   color: var(--chart-sub); }
-.ritual-streak--mid  { font-size: 1.1rem; }
-.ritual-streak--high { font-size: 1.25rem; animation: streak-glow 1.8s ease-in-out infinite; }
-.ritual-streak--epic { font-size: 1.4rem;  animation: streak-glow 1.2s ease-in-out infinite, streak-pulse 1.2s ease-in-out infinite; }
+/* Streak tiers — all same size, weight signals intensity */
+.ritual-streak--low  { font-size: 1.4rem; font-weight: 500; color: var(--chart-sub); }
+.ritual-streak--mid  { font-size: 1.4rem; font-weight: 600; }
+.ritual-streak--high { font-size: 1.4rem; font-weight: 700; animation: streak-glow 1.8s ease-in-out 3; }
+.ritual-streak--epic { font-size: 1.4rem; font-weight: 800; animation: streak-glow 1.2s ease-in-out 3, streak-pulse 1.2s ease-in-out 3; }
 
 @keyframes streak-glow {
   0%, 100% { text-shadow: 0 0 4px currentColor; }

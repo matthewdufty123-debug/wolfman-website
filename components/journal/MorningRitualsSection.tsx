@@ -101,21 +101,20 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }
         transition: 'opacity 0.45s ease, transform 0.45s ease',
       }}
     >
-      {/* 20% — icon + label */}
+      {/* 20% — icon only */}
       <button
         className="ritual-row-left"
         onClick={() => onSelect(ritualKey)}
         aria-label={label}
       >
         <div className="ritual-row-icon" style={{ background: `${color}22`, border: `1.5px solid ${color}` }}>
-          <Icon size={26} color={color} />
+          <Icon size={32} color={color} />
         </div>
-        <span className="ritual-row-label" style={{ color }}>{label}</span>
       </button>
 
-      {/* 50% — segment track */}
+      {/* 50% — label + segment track */}
       <div className="ritual-row-track">
-        <span className="ritual-track-label">last 10</span>
+        <span className="ritual-row-label" style={{ color }}>{label}</span>
         <div className="ritual-track-pills">
           {paddedSegments.map((filled, i) => (
             <div
@@ -131,6 +130,7 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }
               }}
             />
           ))}
+          <span className="ritual-track-today">current day</span>
         </div>
       </div>
 
@@ -223,6 +223,7 @@ export default function MorningRitualsSection({ checklist, ritualStats }: Props)
         <p className="journal-section-empty">No morning rituals recorded.</p>
       ) : (
         <>
+          <p className="ritual-context-note">Each bar shows whether the ritual was completed on that day&apos;s journal. The rightmost bar is the current day.</p>
           <div className="morning-rituals-stack">
             {items.map(([key, { label, Icon, color }]) => {
               const stats = ritualStats[key] ?? { segments: [], streak: 0 }
