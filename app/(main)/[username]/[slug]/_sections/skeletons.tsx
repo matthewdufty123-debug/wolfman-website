@@ -41,15 +41,18 @@ export function Section2Skeleton() {
   )
 }
 
-// ── Section 3: Morning Rituals (icon grid) ───────────────────────────────────
+// ── Section 3: Morning Rituals (vertical stack) ──────────────────────────────
 
 export function Section3Skeleton() {
   return (
     <div className="journal-section skel-section">
-      <Pulse className="skel-label" />
-      <div className="skel-icons">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Pulse key={i} className="skel-icon" />
+      <div className="skel-pulse skel-label" />
+      <div className="skel-ritual-stack">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="skel-ritual-row">
+            <div className="skel-pulse skel-ritual-icon" />
+            <div className="skel-ritual-spacer" />
+          </div>
         ))}
       </div>
     </div>

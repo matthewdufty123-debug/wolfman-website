@@ -9,31 +9,67 @@ interface Props {
   checklist: Record<string, boolean>
 }
 
-export default function MorningRitualsSection({ checklist }: Props) {
-  const [activeKey, setActiveKey] = useState<string | null>(null)
-  const wrapRef = useRef<HTMLDivElement>(null)
-  const [visible, setVisible] = useState(false)
+// ── Per-row component with its own IntersectionObserver ──────────────────────
+
+interface RitualRowProps {
+  ritualKey: string
+  label: string
+  Icon: React.FC<{ size?: number; color?: string }>
+  color: string
+  onSelect: (key: string) => void
+}
+
+function RitualRow({ ritualKey, label, Icon, color, onSelect }: RitualRowProps) {
+  const rowRef = useRef<HTMLDivElement>(null)
+  const [revealed, setRevealed] = useState(false)
 
   useEffect(() => {
-    const el = wrapRef.current
+    const el = rowRef.current
     if (!el) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setVisible(true)
+      setRevealed(true)
       return
     }
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect() } },
-      { threshold: 0.2 }
+      ([entry]) => { if (entry.isIntersecting) { setRevealed(true); observer.disconnect() } },
+      { threshold: 0.4 }
     )
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
 
-  const items = Object.entries(ROUTINE_ICON_MAP).filter(([key]) => Boolean(checklist[key]))
+  return (
+    <div
+      ref={rowRef}
+      className="ritual-row"
+      style={{
+        opacity: revealed ? 1 : 0,
+        transform: revealed ? 'translateY(0)' : 'translateY(10px)',
+        transition: 'opacity 0.45s ease, transform 0.45s ease',
+      }}
+    >
+      <button
+        className="ritual-row-left"
+        onClick={() => onSelect(ritualKey)}
+        aria-label={label}
+      >
+        <div className="ritual-row-icon" style={{ background: `${color}22`, border: `1.5px solid ${color}` }}>
+          <Icon size={22} color={color} />
+        </div>
+        <span className="ritual-row-label" style={{ color }}>{label}</span>
+      </button>
+      <div className="ritual-row-right" />
+    </div>
+  )
+}
+
+// ── Main section ─────────────────────────────────────────────────────────────
+
+export default function MorningRitualsSection({ checklist }: Props) {
+  const [activeKey, setActiveKey] = useState<string | null>(null)
   const active = activeKey ? ROUTINE_ICON_MAP[activeKey] : null
 
-  const ICON_SIZE = 24
-  const CIRCLE = ICON_SIZE + 10
+  const items = Object.entries(ROUTINE_ICON_MAP).filter(([key]) => Boolean(checklist[key]))
 
   return (
     <section id="morning-rituals" className="journal-section">
@@ -48,51 +84,16 @@ export default function MorningRitualsSection({ checklist }: Props) {
         <p className="journal-section-empty">No morning rituals recorded.</p>
       ) : (
         <>
-          <div ref={wrapRef} className="morning-rituals-grid">
-            {items.map(([key, { label, Icon, color }], i) => (
-              <button
+          <div className="morning-rituals-stack">
+            {items.map(([key, { label, Icon, color }]) => (
+              <RitualRow
                 key={key}
-                onClick={() => setActiveKey(key)}
-                aria-label={label}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 5,
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: 0,
-                  opacity: visible ? 1 : 0,
-                  transform: visible ? 'none' : 'translateX(40px)',
-                  transition: 'opacity 1.6s ease, transform 1.6s ease',
-                  transitionDelay: `${i * 55}ms`,
-                }}
-              >
-                <div style={{
-                  width: CIRCLE,
-                  height: CIRCLE,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: `${color}22`,
-                  border: `1.5px solid ${color}`,
-                }}>
-                  <Icon size={ICON_SIZE} color={color} />
-                </div>
-                <span style={{
-                  fontFamily: 'var(--font-inter)',
-                  fontSize: '0.5rem',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  color,
-                  lineHeight: 1.2,
-                  textAlign: 'center',
-                  maxWidth: CIRCLE + 8,
-                }}>{label}</span>
-              </button>
+                ritualKey={key}
+                label={label}
+                Icon={Icon}
+                color={color}
+                onSelect={setActiveKey}
+              />
             ))}
           </div>
 

@@ -7439,13 +7439,64 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-/* ── Morning rituals 6-col grid ── */
-.morning-rituals-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  row-gap: 0.75rem;
+/* ── Morning rituals vertical stack ── */
+.morning-rituals-stack {
+  display: flex;
+  flex-direction: column;
   width: 100%;
 }
+
+.ritual-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--chart-row-border, rgba(255,255,255,0.08));
+}
+.ritual-row:last-child { border-bottom: none; }
+
+.ritual-row-left {
+  flex: 0 0 20%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.ritual-row-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ritual-row-label {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  text-align: center;
+  max-width: 48px;
+}
+.ritual-row-right {
+  flex: 0 0 80%;
+  min-height: 36px;
+}
+
+/* Skeleton — ritual stack */
+.skel-ritual-stack          { display: flex; flex-direction: column; width: 100%; }
+.skel-ritual-row            { display: flex; align-items: center; padding: 0.9rem 0;
+                              border-bottom: 1px solid var(--chart-row-border); }
+.skel-ritual-row:last-child { border-bottom: none; }
+.skel-ritual-icon           { flex: 0 0 20%; height: 36px; border-radius: 18px; }
+.skel-ritual-spacer         { flex: 0 0 80%; }
 
 /* ── WOLF|BOT 2×2 personality selector ── */
 .wb-personality-select {

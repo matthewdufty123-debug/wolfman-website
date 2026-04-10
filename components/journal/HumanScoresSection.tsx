@@ -289,22 +289,39 @@ function DeltaIndicator({ todayValue, avg, previousCount, revealed }: {
   )
 }
 
-// ── Scale row ───────────────────────────────────────────────────────────────
+// ── Scale row — self-contained IntersectionObserver ──────────────────────────
 
 interface ScaleRowProps {
   title: string
   value: number | null
   labels: string[]
   isStress?: boolean
-  revealed: boolean
   history: (number | null)[]
   scaleKey: string
 }
 
-function ScaleRow({ title, value, labels, isStress = false, revealed, history, scaleKey }: ScaleRowProps) {
+function ScaleRow({ title, value, labels, isStress = false, history, scaleKey }: ScaleRowProps) {
+  const rowRef = useRef<HTMLDivElement>(null)
+  const [revealed, setRevealed] = useState(false)
+
+  useEffect(() => {
+    const el = rowRef.current
+    if (!el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setRevealed(true)
+      return
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setRevealed(true); observer.disconnect() } },
+      { threshold: 0.3 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   if (value == null) {
     return (
-      <div className="hss-row">
+      <div ref={rowRef} className="hss-row">
         <div className="hss-row-left">
           <span className="hss-row-title">{title}</span>
           <span className="hss-col-empty">—</span>
@@ -324,6 +341,7 @@ function ScaleRow({ title, value, labels, isStress = false, revealed, history, s
 
   return (
     <div
+      ref={rowRef}
       className="hss-row"
       style={{
         opacity: revealed ? 1 : 0,
@@ -375,24 +393,6 @@ interface Props {
 }
 
 export default function HumanScoresSection({ brainScale, bodyScale, happyScale, stressScale, history }: Props) {
-  const sectionRef = useRef<HTMLElement>(null)
-  const [revealed, setRevealed] = useState(false)
-
-  useEffect(() => {
-    const el = sectionRef.current
-    if (!el) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setRevealed(true)
-      return
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setRevealed(true); observer.disconnect() } },
-      { threshold: 0.2 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
   const chronological = [...history].reverse()
 
   const brainHistory  = chronological.map(e => e.brainScale)
@@ -401,7 +401,7 @@ export default function HumanScoresSection({ brainScale, bodyScale, happyScale, 
   const stressHistory = chronological.map(e => e.stressScale)
 
   return (
-    <section ref={sectionRef} id="how-i-showed-up" className="journal-section">
+    <section id="how-i-showed-up" className="journal-section">
       <SectionInfoHeader
         title="How I Showed Up"
         description="Four scales recorded each morning — how sharp the mind was, how alive the body felt, how happy and how stressed."
@@ -409,10 +409,10 @@ export default function HumanScoresSection({ brainScale, bodyScale, happyScale, 
         popupLink={{ href: '/scores', label: 'About the morning scores' }}
       />
       <div className="hss-stacked">
-        <ScaleRow title="Brain"  value={brainScale}  labels={BRAIN_LABELS}  revealed={revealed} history={brainHistory}  scaleKey="brain" />
-        <ScaleRow title="Body"   value={bodyScale}   labels={BODY_LABELS}   revealed={revealed} history={bodyHistory}   scaleKey="body" />
-        <ScaleRow title="Happy"  value={happyScale}  labels={HAPPY_LABELS}  revealed={revealed} history={happyHistory}  scaleKey="happy" />
-        <ScaleRow title="Stress" value={stressScale} labels={STRESS_LABELS} isStress revealed={revealed} history={stressHistory} scaleKey="stress" />
+        <ScaleRow title="Brain"  value={brainScale}  labels={BRAIN_LABELS}  history={brainHistory}  scaleKey="brain" />
+        <ScaleRow title="Body"   value={bodyScale}   labels={BODY_LABELS}   history={bodyHistory}   scaleKey="body" />
+        <ScaleRow title="Happy"  value={happyScale}  labels={HAPPY_LABELS}  history={happyHistory}  scaleKey="happy" />
+        <ScaleRow title="Stress" value={stressScale} labels={STRESS_LABELS} isStress history={stressHistory} scaleKey="stress" />
       </div>
     </section>
   )
