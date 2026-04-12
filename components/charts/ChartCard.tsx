@@ -4,12 +4,14 @@ interface ChartCardProps {
   title: string
   subtitle?: string
   rightLabel?: string
+  /** Section theme colour — renders as a left accent border */
+  accentColor?: string
   children: React.ReactNode
 }
 
-export default function ChartCard({ title, subtitle, rightLabel, children }: ChartCardProps) {
+export default function ChartCard({ title, subtitle, rightLabel, accentColor, children }: ChartCardProps) {
   return (
-    <div className="chart-card">
+    <div className="chart-card" style={accentColor ? { borderLeft: `3px solid ${accentColor}` } : undefined}>
       <div className="chart-card-header">
         <div>
           <p className="chart-card-title">{title}</p>

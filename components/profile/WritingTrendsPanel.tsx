@@ -37,7 +37,7 @@ export default function WritingTrendsPanel({ data }: Props) {
   ] : []
 
   return (
-    <ChartCard title="Words Written">
+    <ChartCard title="Words Written" accentColor="#A0622A">
       <StatRow
         label="Total Words"
         value={fmtNumber(totalWords)}

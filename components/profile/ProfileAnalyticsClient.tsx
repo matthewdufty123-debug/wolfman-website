@@ -2,10 +2,18 @@
 
 import { useState, useMemo } from 'react'
 import TimePeriodToggle from '@/components/charts/TimePeriodToggle'
+import ChartCard from '@/components/charts/ChartCard'
+import CumulativeChart from '@/components/charts/CumulativeChart'
+import type { CumulativeChartData } from '@/components/charts/CumulativeChart'
 import ScaleTrendsPanel from './ScaleTrendsPanel'
 import RitualTrendsPanel from './RitualTrendsPanel'
 import WritingTrendsPanel from './WritingTrendsPanel'
-import SentimentTrendsPanel from './SentimentTrendsPanel'
+
+// ── Section theme colours ─────────────────────────────────────────────────────
+
+const THEME_JOURNALS = '#4A7FA5'  // Steel Blue
+const THEME_RITUALS  = '#70C0C8'  // Teal
+const THEME_WORDS    = '#A0622A'  // Copper
 
 // ── Shared data types ───────────────────────────────────────────────────────
 
@@ -27,16 +35,13 @@ export interface WordCountDataRow {
   wordCountTotal: number
 }
 
-export interface SentimentDataRow {
-  date: string
-  feelAboutToday: number
-}
-
 interface Props {
   scaleData: ScaleDataRow[]
   wordCountData: WordCountDataRow[]
-  sentimentData: SentimentDataRow[]
   username: string
+  journalsCumulative?: CumulativeChartData
+  ritualsCumulative?: CumulativeChartData
+  wordsCumulative?: CumulativeChartData
 }
 
 function threeMonthsAgo(): string {
@@ -48,8 +53,10 @@ function threeMonthsAgo(): string {
 export default function ProfileAnalyticsClient({
   scaleData,
   wordCountData,
-  sentimentData,
   username,
+  journalsCumulative,
+  ritualsCumulative,
+  wordsCumulative,
 }: Props) {
   const [period, setPeriod] = useState<'3m' | 'ytd'>('3m')
 
@@ -65,29 +72,39 @@ export default function ProfileAnalyticsClient({
     [wordCountData, period, cutoff]
   )
 
-  const filteredSentimentData = useMemo(
-    () => period === 'ytd' ? sentimentData : sentimentData.filter(r => r.date >= cutoff),
-    [sentimentData, period, cutoff]
-  )
-
   return (
     <>
       <TimePeriodToggle period={period} onChange={setPeriod} />
 
+      {/* Cumulative month-vs-last charts */}
+      {journalsCumulative && (
+        <ChartCard title="Journals This Month" accentColor={THEME_JOURNALS}>
+          <CumulativeChart data={journalsCumulative} color={THEME_JOURNALS} />
+        </ChartCard>
+      )}
+
       {filteredScaleData.length > 0 && (
         <ScaleTrendsPanel data={filteredScaleData} username={username} />
+      )}
+
+      {ritualsCumulative && (
+        <ChartCard title="Rituals This Month" accentColor={THEME_RITUALS}>
+          <CumulativeChart data={ritualsCumulative} color={THEME_RITUALS} />
+        </ChartCard>
       )}
 
       {filteredScaleData.length > 0 && (
         <RitualTrendsPanel data={filteredScaleData} />
       )}
 
-      {filteredWordData.length > 0 && (
-        <WritingTrendsPanel data={filteredWordData} />
+      {wordsCumulative && (
+        <ChartCard title="Words This Month" accentColor={THEME_WORDS}>
+          <CumulativeChart data={wordsCumulative} color={THEME_WORDS} formatLarge />
+        </ChartCard>
       )}
 
-      {filteredSentimentData.length > 0 && (
-        <SentimentTrendsPanel data={filteredSentimentData} />
+      {filteredWordData.length > 0 && (
+        <WritingTrendsPanel data={filteredWordData} />
       )}
 
       {filteredScaleData.length === 0 && filteredWordData.length === 0 && (

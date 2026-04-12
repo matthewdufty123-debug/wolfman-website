@@ -7740,12 +7740,13 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   gap: 0.15rem;
 }
 
-/* Title line — title + avg side by side */
-.hss-row-title-line {
+.hss-chart-footer {
   display: flex;
+  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
-  align-items: baseline;
   width: 100%;
+  padding: 0.2rem 0 0;
 }
 .hss-row-avg {
   font-family: var(--font-inter), sans-serif;
@@ -7754,6 +7755,7 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   color: var(--body-text);
   opacity: 0.4;
   letter-spacing: 0.02em;
+  flex-shrink: 0;
 }
 
 /* Scale title — large and prominent */
@@ -7791,15 +7793,12 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-/* Delta indicator — full width, horizontal layout */
+/* Delta indicator — horizontal layout */
 .hss-delta {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
-  padding: 0.35rem 0 0;
-  width: 100%;
 }
 
 .hss-delta-arrow {
@@ -7895,6 +7894,42 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   color: var(--chart-label);
 }
 .wss-monthly-block { border-top: 1px solid var(--chart-row-border); padding-top: 1.25rem; }
+/* 10-day posting calendar */
+.wss-calendar {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--chart-stat-border, rgba(74,127,165,0.1));
+}
+.wss-calendar-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.25rem;
+}
+.wss-calendar-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+}
+.wss-calendar-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.wss-calendar-label {
+  font: 500 0.5rem/1 var(--font-inter), sans-serif;
+  color: var(--chart-text, rgba(255,255,255,0.35));
+}
+.wss-calendar-count {
+  font: 500 0.6rem/1 var(--font-inter), sans-serif;
+  color: var(--chart-sub, rgba(255,255,255,0.35));
+  text-align: center;
+  margin: 0.5rem 0 0;
+}
+
 .wss-building-data {
   display: flex;
   flex-direction: column;

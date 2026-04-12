@@ -59,7 +59,7 @@ export default function RitualTrendsPanel({ data }: Props) {
     }))
 
   return (
-    <ChartCard title="Morning Rituals">
+    <ChartCard title="Morning Rituals" accentColor="#70C0C8">
       <div className="chart-stat-summary">
         <div className="chart-stat-summary-item">
           <div className="chart-stat-summary-value">{avgPerDay}</div>

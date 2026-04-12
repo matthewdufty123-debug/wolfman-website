@@ -75,6 +75,7 @@ export default function ScaleTrendsPanel({ data, username }: Props) {
             key={key}
             title={TITLES[key]}
             rightLabel={avg !== null ? `avg ${avg.toFixed(1)}` : undefined}
+            accentColor={color}
           >
             <AreaChart
               values={values}

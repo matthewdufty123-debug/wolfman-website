@@ -3,9 +3,9 @@ import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { posts, morningState, users, wolfbotReviews } from '@/lib/db/schema'
-import { and, eq, gte, desc, sql, isNotNull } from 'drizzle-orm'
+import { and, eq, gte, sql, isNotNull } from 'drizzle-orm'
 import ProfileAnalyticsClient from '@/components/profile/ProfileAnalyticsClient'
-import type { ScaleDataRow, WordCountDataRow, SentimentDataRow } from '@/components/profile/ProfileAnalyticsClient'
+import type { ScaleDataRow, WordCountDataRow } from '@/components/profile/ProfileAnalyticsClient'
 import StatRow from '@/components/charts/StatRow'
 
 export const dynamic = 'force-dynamic'
@@ -138,7 +138,7 @@ export default async function ProfilePage(
   const now = new Date()
   const firstOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
 
-  const [scaleRows, allPostDates, [{ total }], wordCountRows, sentimentRows, [{ wolfbotContextCount }]] = await Promise.all([
+  const [scaleRows, allPostDates, [{ total }], wordCountRows, [{ wolfbotContextCount }]] = await Promise.all([
     // Scale + ritual data YTD
     db
       .select({
@@ -181,16 +181,6 @@ export default async function ProfilePage(
       .where(and(eq(posts.authorId, userId), eq(posts.status, 'published'), isNotNull(posts.wordCountTotal), gte(posts.date, ytdCutoff)))
       .orderBy(posts.date),
 
-    // Sentiment data YTD
-    db
-      .select({
-        date: posts.date,
-        feelAboutToday: posts.feelAboutToday,
-      })
-      .from(posts)
-      .where(and(eq(posts.authorId, userId), eq(posts.status, 'published'), isNotNull(posts.feelAboutToday), gte(posts.date, ytdCutoff)))
-      .orderBy(posts.date),
-
     // WOLF|BOT context count
     db
       .select({ wolfbotContextCount: sql<number>`COUNT(*)` })
@@ -220,13 +210,6 @@ export default async function ProfilePage(
       wordCountTotal: r.wordCountTotal!,
     }))
 
-  const sentimentData: SentimentDataRow[] = sentimentRows
-    .filter(r => r.feelAboutToday != null)
-    .map(r => ({
-      date: r.date,
-      feelAboutToday: r.feelAboutToday!,
-    }))
-
   const allDates = allPostDates.map(r => r.date)
   const { current: currentStreak, longest: longestStreak } = computeStreaks(allDates)
   const thisMonth = new Set(allDates.filter(d => d >= firstOfMonth)).size
@@ -241,6 +224,60 @@ export default async function ProfilePage(
     const monthPrefix = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     monthlyCounts.push(allDates.filter(dt => dt.startsWith(monthPrefix)).length)
   }
+
+  // Cumulative month-vs-last data for profile charts
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December']
+  const curMonthIdx = now.getMonth()
+  const curYear = now.getFullYear()
+  const prevD = new Date(curYear, curMonthIdx - 1, 1)
+  const prevMonthIdx = prevD.getMonth()
+  const prevYear = prevD.getFullYear()
+  const curPrefix = `${curYear}-${String(curMonthIdx + 1).padStart(2, '0')}`
+  const prevPrefix = `${prevYear}-${String(prevMonthIdx + 1).padStart(2, '0')}`
+
+  const cumulativeBase = {
+    currentMonthLabel: monthNames[curMonthIdx],
+    previousMonthLabel: monthNames[prevMonthIdx],
+    currentMonthIndex: curMonthIdx,
+    previousMonthIndex: prevMonthIdx,
+    currentYear: curYear,
+    previousYear: prevYear,
+  }
+
+  // Journals cumulative
+  const journalsCumulative = {
+    ...cumulativeBase,
+    currentMonth: allDates.filter(d => d.startsWith(curPrefix)).map(d => ({ date: d })),
+    previousMonth: allDates.filter(d => d.startsWith(prevPrefix)).map(d => ({ date: d })),
+  }
+
+  // Rituals cumulative — count of completed rituals per post date (as daily values)
+  const ritualsByDay: Record<string, number> = {}
+  for (const r of scaleRows) {
+    if (r.routineChecklist && (r.date.startsWith(curPrefix) || r.date.startsWith(prevPrefix))) {
+      const count = Object.values(r.routineChecklist as Record<string, boolean>).filter(Boolean).length
+      ritualsByDay[r.date] = (ritualsByDay[r.date] ?? 0) + count
+    }
+  }
+  const curRituals: Record<string, number> = {}
+  const prevRituals: Record<string, number> = {}
+  for (const [date, val] of Object.entries(ritualsByDay)) {
+    if (date.startsWith(curPrefix)) curRituals[date] = val
+    else prevRituals[date] = val
+  }
+  const ritualsCumulative = { ...cumulativeBase, currentMonth: curRituals, previousMonth: prevRituals }
+
+  // Words cumulative — word count total per day (as daily values)
+  const curWords: Record<string, number> = {}
+  const prevWords: Record<string, number> = {}
+  for (const r of wordCountRows) {
+    if (r.wordCountTotal && r.wordCountTotal > 0) {
+      if (r.date.startsWith(curPrefix)) curWords[r.date] = (curWords[r.date] ?? 0) + r.wordCountTotal
+      else if (r.date.startsWith(prevPrefix)) prevWords[r.date] = (prevWords[r.date] ?? 0) + r.wordCountTotal
+    }
+  }
+  const wordsCumulative = { ...cumulativeBase, currentMonth: curWords, previousMonth: prevWords }
 
   return (
     <main className="journal-page">
@@ -360,8 +397,10 @@ export default async function ProfilePage(
           <ProfileAnalyticsClient
             scaleData={scaleData}
             wordCountData={wordCountData}
-            sentimentData={sentimentData}
             username={username}
+            journalsCumulative={journalsCumulative}
+            ritualsCumulative={ritualsCumulative}
+            wordsCumulative={wordsCumulative}
           />
         </>
       )}

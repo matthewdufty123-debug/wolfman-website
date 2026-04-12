@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { ROUTINE_ICON_MAP } from '@/components/RoutineIcons'
 import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
-import Sparkline from '@/components/charts/Sparkline'
+import { mean } from '@/components/charts/chartUtils'
 
 const COPPER = '#A0622A'
 
@@ -224,11 +224,9 @@ export default function MorningRitualsSection({ checklist, ritualStats }: Props)
         <p className="journal-section-empty">No morning rituals recorded.</p>
       ) : (
         <>
-          {/* Summary stats */}
+          {/* Summary + 10-day bar chart */}
           {(() => {
             const todayCount = items.length
-            const totalRitualKeys = Object.keys(ROUTINE_ICON_MAP).length
-            // Compute daily completion counts for sparkline
             const allSegments = Object.values(ritualStats)
             const dayCount = allSegments[0]?.segments.length ?? 0
             const dailyCounts: number[] = []
@@ -239,31 +237,77 @@ export default function MorningRitualsSection({ checklist, ritualStats }: Props)
               }
               dailyCounts.push(count)
             }
-            const totalPossible = dayCount * totalRitualKeys
-            const totalDone = dailyCounts.reduce((a, b) => a + b, 0)
-            const completionRate = totalPossible > 0 ? Math.round((totalDone / totalPossible) * 100) : 0
-            const bestStreak = Math.max(0, ...Object.values(ritualStats).map(s => s.streak))
+            const avg = mean(dailyCounts)
+
+            // Bar chart dimensions
+            const W = 280
+            const H = 80
+            const PL = 20
+            const PR = 8
+            const PT = 14
+            const PB = 4
+            const plotW = W - PL - PR
+            const plotH = H - PT - PB
+            const barMax = Math.max(10, ...dailyCounts)
+            const gap = 3
+            const barW = dailyCounts.length > 0 ? (plotW - (dailyCounts.length - 1) * gap) / dailyCounts.length : 0
 
             return (
-              <div className="chart-stat-summary" style={{ marginTop: '0.5rem' }}>
-                <div className="chart-stat-summary-item">
-                  <div className="chart-stat-summary-value">{todayCount}/{totalRitualKeys}</div>
-                  <div className="chart-stat-summary-label">Rituals Today</div>
+              <>
+                <div className="chart-stat-summary" style={{ marginTop: '0.5rem' }}>
+                  <div className="chart-stat-summary-item">
+                    <div className="chart-stat-summary-value">{todayCount}</div>
+                    <div className="chart-stat-summary-label">Rituals Today</div>
+                  </div>
                 </div>
-                <div className="chart-stat-summary-item">
-                  <div className="chart-stat-summary-value">{completionRate}%</div>
-                  <div className="chart-stat-summary-label">Completion</div>
-                  {dailyCounts.length >= 2 && (
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.25rem' }}>
-                      <Sparkline data={dailyCounts} color={COPPER} />
-                    </div>
-                  )}
-                </div>
-                <div className="chart-stat-summary-item">
-                  <div className="chart-stat-summary-value">{bestStreak}</div>
-                  <div className="chart-stat-summary-label">Best Streak</div>
-                </div>
-              </div>
+
+                {dailyCounts.length >= 2 && (
+                  <svg
+                    width="100%"
+                    viewBox={`0 0 ${W} ${H}`}
+                    preserveAspectRatio="xMidYMid meet"
+                    aria-hidden="true"
+                    style={{ display: 'block', margin: '0.5rem 0' }}
+                  >
+                    {/* Y-axis */}
+                    <line x1={PL} y1={PT} x2={PL} y2={PT + plotH} style={{ stroke: 'var(--chart-axis, rgba(255,255,255,0.12))' }} strokeWidth="1" />
+                    {/* Bars */}
+                    {dailyCounts.map((count, i) => {
+                      const x = PL + i * (barW + gap)
+                      const h = (count / barMax) * plotH
+                      const y = PT + plotH - h
+                      const isToday = i === dailyCounts.length - 1
+                      return (
+                        <rect
+                          key={i}
+                          x={x}
+                          y={y}
+                          width={barW}
+                          height={h}
+                          rx={2}
+                          fill={isToday ? COPPER : '#70C0C8'}
+                          fillOpacity={isToday ? 0.9 : 0.5}
+                        />
+                      )
+                    })}
+                    {/* Average dashed line */}
+                    {avg !== null && (
+                      <line
+                        x1={PL}
+                        y1={PT + plotH - (avg / barMax) * plotH}
+                        x2={PL + plotW}
+                        y2={PT + plotH - (avg / barMax) * plotH}
+                        style={{ stroke: 'var(--chart-avg, rgba(255,255,255,0.4))' }}
+                        strokeWidth="1.5"
+                        strokeDasharray="6 4"
+                      />
+                    )}
+                    {/* Y-axis label */}
+                    <text x={PL - 4} y={PT + 3} textAnchor="end" style={{ fill: 'var(--chart-text, rgba(255,255,255,0.35))' }} fontSize="7" fontFamily="var(--font-inter), sans-serif">{barMax}</text>
+                    <text x={PL - 4} y={PT + plotH} textAnchor="end" dominantBaseline="auto" style={{ fill: 'var(--chart-text, rgba(255,255,255,0.35))' }} fontSize="7" fontFamily="var(--font-inter), sans-serif">0</text>
+                  </svg>
+                )}
+              </>
             )
           })()}
 

@@ -91,14 +91,9 @@ function ScaleRow({ title, value, labels, isStress = false, history, scaleKey }:
         transition: 'opacity 0.5s ease, transform 0.5s ease',
       }}
     >
-      {/* Left 25% — Title + avg + Ring + Word label */}
+      {/* Left 25% — Title + Ring + Word label */}
       <div className="hss-row-left">
-        <div className="hss-row-title-line">
-          <span className="hss-row-title">{title}</span>
-          {avg !== null && (
-            <span className="hss-row-avg">avg {avg.toFixed(1)}</span>
-          )}
-        </div>
+        <span className="hss-row-title">{title}</span>
         <div className="hss-digit-wrap">
           <SegmentedRing value={value} color={ringColor} revealed={revealed} />
         </div>
@@ -118,7 +113,12 @@ function ScaleRow({ title, value, labels, isStress = false, history, scaleKey }:
               revealed={revealed}
               centered
             />
-            <DeltaIndicator todayValue={value} avg={avg} previousCount={previous.length} revealed={revealed} />
+            <div className="hss-chart-footer">
+              {avg !== null && (
+                <span className="hss-row-avg">avg {avg.toFixed(1)}</span>
+              )}
+              <DeltaIndicator todayValue={value} avg={avg} previousCount={previous.length} revealed={revealed} />
+            </div>
           </>
         ) : (
           <div className="hss-building-data">

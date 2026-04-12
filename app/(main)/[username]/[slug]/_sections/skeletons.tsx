@@ -73,19 +73,6 @@ export function Section4Skeleton() {
   )
 }
 
-// ── Section 6: Day Sentiment ──────────────────────────────────────────────────
-
-export function Section6Skeleton() {
-  return (
-    <div className="journal-section skel-section">
-      <Pulse className="skel-label" />
-      <div className="skel-spacer" />
-      <Pulse className="skel-line skel-line--full" />
-      <Pulse className="skel-line skel-line--3q" />
-    </div>
-  )
-}
-
 // ── Section 5: Writing Stats (bar chart skeleton) ─────────────────────────────
 
 const BAR_HEIGHTS = ['55%', '75%', '40%', '90%', '65%', '85%', '70%', '100%', '60%', '80%']
