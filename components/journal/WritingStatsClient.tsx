@@ -13,14 +13,8 @@ export interface WordCountEntry {
   wordCountTotal:     number | null
 }
 
-export interface CalendarDay {
-  date: string
-  hasPost: boolean
-}
-
 export interface WritingStatsProps {
   wordCountHistory: WordCountEntry[]
-  calendarDays?: CalendarDay[]
 }
 
 // ── Brand colours ────────────────────────────────────────────────────────────
@@ -151,7 +145,6 @@ function WordCountBarChart({ data, revealed }: { data: WordCountEntry[]; reveale
 
 export default function WritingStatsClient({
   wordCountHistory,
-  calendarDays,
 }: WritingStatsProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const [revealed, setRevealed] = useState(false)
@@ -237,46 +230,6 @@ export default function WritingStatsClient({
             </span>
           </div>
         </div>
-
-        {/* 10-day posting calendar */}
-        {calendarDays && calendarDays.length > 0 && (
-          <div
-            className="wss-calendar"
-            style={{
-              opacity: revealed ? 1 : 0,
-              transform: revealed ? 'translateY(0)' : 'translateY(8px)',
-              transition: 'opacity 0.5s ease 0.7s, transform 0.5s ease 0.7s',
-            }}
-          >
-            <p className="wss-chart-title">Last 10 Days</p>
-            <div className="wss-calendar-row">
-              {calendarDays.map((day, i) => {
-                const d = new Date(day.date + 'T12:00:00Z')
-                const label = d.getUTCDate().toString()
-                const isToday = i === calendarDays.length - 1
-                return (
-                  <div key={day.date} className="wss-calendar-day">
-                    <div
-                      className={`wss-calendar-dot${day.hasPost ? ' wss-calendar-dot--filled' : ''}`}
-                      style={{
-                        background: day.hasPost
-                          ? (isToday ? COPPER : STEEL_BLUE)
-                          : 'transparent',
-                        borderColor: day.hasPost
-                          ? (isToday ? COPPER : STEEL_BLUE)
-                          : 'var(--chart-zone-track, rgba(74,127,165,0.15))',
-                      }}
-                    />
-                    <span className="wss-calendar-label">{label}</span>
-                  </div>
-                )
-              })}
-            </div>
-            <p className="wss-calendar-count">
-              {calendarDays.filter(d => d.hasPost).length} of 10 days
-            </p>
-          </div>
-        )}
 
       </div>
     </section>
