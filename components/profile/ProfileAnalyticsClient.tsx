@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import TimePeriodToggle from '@/components/charts/TimePeriodToggle'
+import { useMemo } from 'react'
 import ChartCard from '@/components/charts/ChartCard'
 import CumulativeChart from '@/components/charts/CumulativeChart'
 import type { CumulativeChartData } from '@/components/charts/CumulativeChart'
@@ -58,54 +57,63 @@ export default function ProfileAnalyticsClient({
   ritualsCumulative,
   wordsCumulative,
 }: Props) {
-  const [period, setPeriod] = useState<'3m' | 'ytd'>('3m')
-
   const cutoff = useMemo(() => threeMonthsAgo(), [])
 
   const filteredScaleData = useMemo(
-    () => period === 'ytd' ? scaleData : scaleData.filter(r => r.date >= cutoff),
-    [scaleData, period, cutoff]
+    () => scaleData.filter(r => r.date >= cutoff),
+    [scaleData, cutoff]
   )
 
   const filteredWordData = useMemo(
-    () => period === 'ytd' ? wordCountData : wordCountData.filter(r => r.date >= cutoff),
-    [wordCountData, period, cutoff]
+    () => wordCountData.filter(r => r.date >= cutoff),
+    [wordCountData, cutoff]
   )
 
   return (
     <>
-      <TimePeriodToggle period={period} onChange={setPeriod} />
+      {/* Journal Postings section */}
+      <section className="journal-section" style={{ paddingTop: 0 }}>
+        <h2 className="journal-section-title">Journal Postings</h2>
+        {journalsCumulative && (
+          <ChartCard title="This Month" accentColor={THEME_JOURNALS}>
+            <CumulativeChart data={journalsCumulative} color={THEME_JOURNALS} />
+          </ChartCard>
+        )}
+      </section>
 
-      {/* Cumulative month-vs-last charts */}
-      {journalsCumulative && (
-        <ChartCard title="Journals This Month" accentColor={THEME_JOURNALS}>
-          <CumulativeChart data={journalsCumulative} color={THEME_JOURNALS} />
-        </ChartCard>
-      )}
-
+      {/* How I Showed Up section */}
       {filteredScaleData.length > 0 && (
-        <ScaleTrendsPanel data={filteredScaleData} username={username} />
+        <section className="journal-section" style={{ paddingTop: 0 }}>
+          <h2 className="journal-section-title">How I Showed Up</h2>
+          <ScaleTrendsPanel data={filteredScaleData} username={username} />
+        </section>
       )}
 
-      {ritualsCumulative && (
-        <ChartCard title="Rituals This Month" accentColor={THEME_RITUALS}>
-          <CumulativeChart data={ritualsCumulative} color={THEME_RITUALS} />
-        </ChartCard>
-      )}
+      {/* Morning Rituals section */}
+      <section className="journal-section" style={{ paddingTop: 0 }}>
+        <h2 className="journal-section-title">Morning Rituals</h2>
+        {ritualsCumulative && (
+          <ChartCard title="This Month" accentColor={THEME_RITUALS}>
+            <CumulativeChart data={ritualsCumulative} color={THEME_RITUALS} />
+          </ChartCard>
+        )}
+        {filteredScaleData.length > 0 && (
+          <RitualTrendsPanel data={filteredScaleData} />
+        )}
+      </section>
 
-      {filteredScaleData.length > 0 && (
-        <RitualTrendsPanel data={filteredScaleData} />
-      )}
-
-      {wordsCumulative && (
-        <ChartCard title="Words This Month" accentColor={THEME_WORDS}>
-          <CumulativeChart data={wordsCumulative} color={THEME_WORDS} formatLarge />
-        </ChartCard>
-      )}
-
-      {filteredWordData.length > 0 && (
-        <WritingTrendsPanel data={filteredWordData} />
-      )}
+      {/* Words Written section */}
+      <section className="journal-section" style={{ paddingTop: 0 }}>
+        <h2 className="journal-section-title">Words Written</h2>
+        {wordsCumulative && (
+          <ChartCard title="This Month" accentColor={THEME_WORDS}>
+            <CumulativeChart data={wordsCumulative} color={THEME_WORDS} formatLarge />
+          </ChartCard>
+        )}
+        {filteredWordData.length > 0 && (
+          <WritingTrendsPanel data={filteredWordData} />
+        )}
+      </section>
 
       {filteredScaleData.length === 0 && filteredWordData.length === 0 && (
         <p className="journal-no-chart">
