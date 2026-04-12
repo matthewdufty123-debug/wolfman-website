@@ -7730,6 +7730,16 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   gap: 0.5rem;
   padding-top: 0.25rem;
 }
+.hss-row-left--btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+}
+.hss-kpi-block {
+  margin-bottom: 0.5rem;
+  grid-template-columns: repeat(3, 1fr);
+}
 
 /* Right column — word label + chart + delta */
 .hss-row-right {
