@@ -1,5 +1,5 @@
 import { cache } from 'react'
-import { db } from '@/lib/db'
+import { db, withRetry } from '@/lib/db'
 import { siteConfig } from '@/lib/db/schema'
 import { eq, count } from 'drizzle-orm'
 import { users } from '@/lib/db/schema'
@@ -17,7 +17,9 @@ export type SiteConfig = {
 // Cached per request — deduplicates multiple calls within a single render cycle.
 // getSiteConfig() auto-bootstraps the singleton row on first call if it doesn't exist.
 export const getSiteConfig = cache(async (): Promise<SiteConfig> => {
-  const [row] = await db.select().from(siteConfig).where(eq(siteConfig.id, 1)).limit(1)
+  const [row] = await withRetry(() =>
+    db.select().from(siteConfig).where(eq(siteConfig.id, 1)).limit(1)
+  )
 
   if (!row) {
     await db.insert(siteConfig).values({
@@ -59,7 +61,7 @@ export async function getRegistrationState(): Promise<{
 }> {
   const [config, [{ total }]] = await Promise.all([
     getSiteConfig(),
-    db.select({ total: count() }).from(users),
+    withRetry(() => db.select({ total: count() }).from(users)),
   ])
   const userCount = Number(total)
   const registrationOpen = isRegistrationOpen(config.status)
