@@ -16,6 +16,10 @@ interface AreaChartProps {
   revealed?: boolean
   /** Centered / bipolar mode: area fills from midpoint outward (upper & lower) */
   centered?: boolean
+  /** Smooth the line with a cardinal spline instead of straight segments */
+  smooth?: boolean
+  /** Custom formatter for y-axis tick labels */
+  yLabelFormatter?: (v: number) => string
 }
 
 export default function AreaChart({
@@ -30,6 +34,8 @@ export default function AreaChart({
   todayHighlight = true,
   revealed = true,
   centered = false,
+  smooth = false,
+  yLabelFormatter,
 }: AreaChartProps) {
   const uid = useId()
   const PAD_LEFT = 24
@@ -50,7 +56,28 @@ export default function AreaChart({
 
   if (points.length === 0) return null
 
-  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ')
+  // Cardinal spline → cubic bezier (tension 0.2 for subtle smoothing)
+  function smoothPath(pts: { x: number; y: number }[]): string {
+    if (pts.length < 2) return pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ')
+    const t = 0.2
+    let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`
+    for (let i = 0; i < pts.length - 1; i++) {
+      const prev = pts[Math.max(0, i - 1)]
+      const curr = pts[i]
+      const next = pts[i + 1]
+      const after = pts[Math.min(pts.length - 1, i + 2)]
+      const cp1x = curr.x + (next.x - prev.x) * t
+      const cp1y = curr.y + (next.y - prev.y) * t
+      const cp2x = next.x - (after.x - curr.x) * t
+      const cp2y = next.y - (after.y - curr.y) * t
+      d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${next.x.toFixed(1)} ${next.y.toFixed(1)}`
+    }
+    return d
+  }
+
+  const linePath = smooth
+    ? smoothPath(points)
+    : points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ')
 
   const avg = showAverage ? mean(values) : null
 
@@ -141,7 +168,7 @@ export default function AreaChart({
           fontSize="7"
           fontFamily="var(--font-inter), sans-serif"
         >
-          {v}
+          {yLabelFormatter ? yLabelFormatter(v) : v}
         </text>
       ))}
 

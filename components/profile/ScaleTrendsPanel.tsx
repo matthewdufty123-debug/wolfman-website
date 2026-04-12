@@ -8,6 +8,8 @@ import {
   SCALE_LABELS,
   mean,
   fmtDate,
+  formatBipolar,
+  bipolarAvg,
 } from '@/components/charts/chartUtils'
 import type { ScaleDataRow } from './ProfileAnalyticsClient'
 
@@ -74,7 +76,7 @@ export default function ScaleTrendsPanel({ data, username }: Props) {
           <ChartCard
             key={key}
             title={TITLES[key]}
-            rightLabel={avg !== null ? `avg ${avg.toFixed(1)}` : undefined}
+            rightLabel={avg !== null ? `avg ${bipolarAvg(avg)}` : undefined}
             accentColor={color}
           >
             <AreaChart
@@ -86,6 +88,8 @@ export default function ScaleTrendsPanel({ data, username }: Props) {
               xLabels={xLabels}
               todayHighlight={false}
               centered
+              smooth
+              yLabelFormatter={formatBipolar}
             />
             {zones.length > 0 && (
               <div style={{ marginTop: '0.75rem' }}>
