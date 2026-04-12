@@ -6,10 +6,8 @@ import ZoneDistribution from '@/components/charts/ZoneDistribution'
 import {
   SCALE_COLORS,
   SCALE_LABELS,
-  mean,
   fmtDate,
   formatBipolar,
-  bipolarAvg,
 } from '@/components/charts/chartUtils'
 import type { ScaleDataRow } from './ProfileAnalyticsClient'
 
@@ -67,7 +65,6 @@ export default function ScaleTrendsPanel({ data, username }: Props) {
         const valid = values.filter((v): v is number => v !== null)
         if (valid.length === 0) return null
 
-        const avg = mean(values)
         const color = SCALE_COLORS[key]
         const labels = SCALE_LABELS[key]
         const zones = buildZones(values, labels)
@@ -76,8 +73,8 @@ export default function ScaleTrendsPanel({ data, username }: Props) {
           <ChartCard
             key={key}
             title={TITLES[key]}
-            rightLabel={avg !== null ? `avg ${bipolarAvg(avg)}` : undefined}
             accentColor={color}
+            titleLarge
           >
             <AreaChart
               values={values}

@@ -11,8 +11,6 @@ import WritingTrendsPanel from './WritingTrendsPanel'
 // ── Section theme colours ─────────────────────────────────────────────────────
 
 const THEME_JOURNALS = '#4A7FA5'  // Steel Blue
-const THEME_RITUALS  = '#70C0C8'  // Teal
-const THEME_WORDS    = '#A0622A'  // Copper
 
 // ── Shared data types ───────────────────────────────────────────────────────
 
@@ -92,26 +90,16 @@ export default function ProfileAnalyticsClient({
       {/* Morning Rituals section */}
       <section className="journal-section" style={{ paddingTop: 0 }}>
         <h2 className="journal-section-title">Morning Rituals</h2>
-        {ritualsCumulative && (
-          <ChartCard title="This Month" accentColor={THEME_RITUALS}>
-            <CumulativeChart data={ritualsCumulative} color={THEME_RITUALS} />
-          </ChartCard>
-        )}
         {filteredScaleData.length > 0 && (
-          <RitualTrendsPanel data={filteredScaleData} />
+          <RitualTrendsPanel data={filteredScaleData} ritualsCumulative={ritualsCumulative} />
         )}
       </section>
 
       {/* Words Written section */}
       <section className="journal-section" style={{ paddingTop: 0 }}>
         <h2 className="journal-section-title">Words Written</h2>
-        {wordsCumulative && (
-          <ChartCard title="This Month" accentColor={THEME_WORDS}>
-            <CumulativeChart data={wordsCumulative} color={THEME_WORDS} formatLarge />
-          </ChartCard>
-        )}
         {filteredWordData.length > 0 && (
-          <WritingTrendsPanel data={filteredWordData} />
+          <WritingTrendsPanel data={filteredWordData} wordsCumulative={wordsCumulative} />
         )}
       </section>
 

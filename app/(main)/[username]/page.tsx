@@ -135,13 +135,13 @@ export default async function ProfilePage(
   const displayName = profileUser.displayName ?? profileUser.name ?? username
   const avatarSrc = profileUser.avatar ?? profileUser.image ?? null
 
-  // Fetch YTD data (superset — client filters to 3M or YTD)
-  const ytdCutoff = `${new Date().getFullYear()}-01-01`
+  // Fetch data
   const now = new Date()
   const firstOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+  const ytdCutoff = `${now.getFullYear()}-01-01`
 
   const [scaleRows, allPostDates, [{ total }], wordCountRows, [{ wolfbotContextCount }], [allTimeWords]] = await Promise.all([
-    // Scale + ritual data YTD
+    // Scale + ritual data — all time (client filters to 3M for analytics)
     db
       .select({
         date: posts.date,
@@ -154,7 +154,7 @@ export default async function ProfilePage(
       })
       .from(morningState)
       .innerJoin(posts, eq(morningState.postId, posts.id))
-      .where(and(eq(posts.authorId, userId), gte(posts.date, ytdCutoff), eq(posts.status, 'published')))
+      .where(and(eq(posts.authorId, userId), eq(posts.status, 'published')))
       .orderBy(posts.date),
 
     // All post dates for streak + this-month calc
@@ -223,35 +223,16 @@ export default async function ProfilePage(
 
   // All-time headline stats
   const allTimeTotalWords = Number(allTimeWords?.totalWords ?? 0)
-  const firstPostDate = allTimeWords?.firstDate ?? null
-  const allTimeAvgWords = Number(total) > 0 ? Math.round(allTimeTotalWords / Number(total)) : 0
-  const postingFrequency = (() => {
-    if (!firstPostDate || Number(total) <= 1) return null
-    const daysSinceFirst = Math.max(1, Math.round((Date.now() - new Date(firstPostDate + 'T00:00:00').getTime()) / 86400000))
-    return (Number(total) / (daysSinceFirst / 7)).toFixed(1)
-  })()
-  // Avg rituals per journal (from YTD scaleRows — close enough for headline)
-  const avgRitualsPerJournal = (() => {
-    const rows = scaleRows.filter(r => r.routineChecklist)
-    if (rows.length === 0) return null
-    const total = rows.reduce((sum, r) => sum + Object.values(r.routineChecklist as Record<string, boolean>).filter(Boolean).length, 0)
-    return (total / rows.length).toFixed(1)
-  })()
+  const allTimeRitualCount = scaleRows.reduce((sum, r) => {
+    if (!r.routineChecklist) return sum
+    return sum + Object.values(r.routineChecklist as Record<string, boolean>).filter(Boolean).length
+  }, 0)
 
   const allDates = allPostDates.map(r => r.date)
   const { current: currentStreak, longest: longestStreak } = computeStreaks(allDates)
   const thisMonth = new Set(allDates.filter(d => d >= firstOfMonth)).size
   const totalJournals = Number(total)
   const isEmpty = totalJournals === 0
-
-  // Monthly journal counts for sparkline (last 6 months)
-  const monthlyCounts: number[] = []
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date()
-    d.setMonth(d.getMonth() - i)
-    const monthPrefix = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    monthlyCounts.push(allDates.filter(dt => dt.startsWith(monthPrefix)).length)
-  }
 
   // Cumulative month-vs-last data for profile charts
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -416,44 +397,50 @@ export default async function ProfilePage(
       ) : (
         <>
           {/* Headline stats — Strava-style stat rows */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <StatRow
-              label="Journals"
-              value={totalJournals}
-              sparklineData={monthlyCounts.some(c => c > 0) ? monthlyCounts : undefined}
-            />
-            <StatRow label="Current Streak" value={`${currentStreak} days`} />
-            <StatRow label="Longest Streak" value={`${longestStreak} days`} />
-            <StatRow label="This Month" value={thisMonth} noBorder />
-          </div>
+          {/* Top-section wrapper — matches journal-section side padding for consistent margins */}
+          <div style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <StatRow label="Journals" value={totalJournals} />
+              <StatRow label="Current Streak" value={`${currentStreak} days`} />
+              <StatRow label="Longest Streak" value={`${longestStreak} days`} />
+              <StatRow label="This Month" value={thisMonth} noBorder />
+            </div>
 
-          {/* All-time KPI summary */}
-          <div className="chart-stat-summary" style={{ marginBottom: '1.5rem' }}>
-            <div className="chart-stat-summary-item">
-              <div className="chart-stat-summary-value">{allTimeTotalWords >= 1000 ? `${(allTimeTotalWords / 1000).toFixed(1)}k` : allTimeTotalWords}</div>
-              <div className="chart-stat-summary-label">Total Words</div>
-            </div>
-            <div className="chart-stat-summary-item">
-              <div className="chart-stat-summary-value">{allTimeAvgWords >= 1000 ? `${(allTimeAvgWords / 1000).toFixed(1)}k` : allTimeAvgWords}</div>
-              <div className="chart-stat-summary-label">Avg Words</div>
-            </div>
-            <div className="chart-stat-summary-item">
-              <div className="chart-stat-summary-value">{avgRitualsPerJournal ?? '—'}</div>
-              <div className="chart-stat-summary-label">Avg Rituals</div>
-            </div>
-            {postingFrequency && (
+            {/* All Time Journal Stats */}
+            <p style={{
+              fontFamily: 'var(--font-inter), sans-serif',
+              fontSize: '0.62rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              color: 'var(--body-text)',
+              opacity: 0.4,
+              margin: '0 0 0.5rem',
+            }}>
+              All Time Journal Stats
+            </p>
+            <div className="chart-stat-summary" style={{ marginBottom: '1.5rem' }}>
               <div className="chart-stat-summary-item">
-                <div className="chart-stat-summary-value">{postingFrequency}</div>
-                <div className="chart-stat-summary-label">Per Week</div>
+                <div className="chart-stat-summary-value">{totalJournals}</div>
+                <div className="chart-stat-summary-label">Journals Posted</div>
               </div>
-            )}
-          </div>
+              <div className="chart-stat-summary-item">
+                <div className="chart-stat-summary-value">{allTimeTotalWords >= 1000 ? `${(allTimeTotalWords / 1000).toFixed(1)}k` : allTimeTotalWords}</div>
+                <div className="chart-stat-summary-label">Words Written</div>
+              </div>
+              <div className="chart-stat-summary-item">
+                <div className="chart-stat-summary-value">{allTimeRitualCount}</div>
+                <div className="chart-stat-summary-label">Rituals Done</div>
+              </div>
+            </div>
 
-          {/* 5-week calendar grid */}
-          <JournalCalendarGrid weeks={calendarWeeks} />
+            {/* 5-week calendar grid */}
+            <JournalCalendarGrid weeks={calendarWeeks} />
+          </div>
 
           {/* WOLF|BOT context progress — owner only, hidden at full capability */}
           {isOwner && Number(wolfbotContextCount) < 14 && (
+            <div style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
             <div style={{
               padding: '0.75rem 1rem',
               borderRadius: 8,
@@ -483,6 +470,7 @@ export default async function ProfilePage(
                   ? 'More journal entries unlock WOLF|BOT trend analysis'
                   : 'WOLF|BOT understanding is developing — nearly at full capability'}
               </p>
+            </div>
             </div>
           )}
 
