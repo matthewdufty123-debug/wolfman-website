@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { ROUTINE_ICON_MAP } from '@/components/RoutineIcons'
 import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
+import DeltaIndicator from '@/components/charts/DeltaIndicator'
 import { mean } from '@/components/charts/chartUtils'
 
 const COPPER = '#A0622A'
@@ -241,7 +242,7 @@ export default function MorningRitualsSection({ checklist, ritualStats }: Props)
 
             // Bar chart dimensions
             const W = 280
-            const H = 80
+            const H = 130
             const PL = 20
             const PR = 8
             const PT = 14
@@ -254,11 +255,18 @@ export default function MorningRitualsSection({ checklist, ritualStats }: Props)
 
             return (
               <>
-                <div className="chart-stat-summary" style={{ marginTop: '0.5rem' }}>
-                  <div className="chart-stat-summary-item">
-                    <div className="chart-stat-summary-value">{todayCount}</div>
-                    <div className="chart-stat-summary-label">Rituals Today</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', margin: '0.5rem 0' }}>
+                  <div>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 700, fontFamily: 'var(--font-lora), Georgia, serif', color: 'var(--body-text)', lineHeight: 1 }}>
+                      {todayCount}
+                    </span>
+                    <span style={{ fontSize: '0.62rem', fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.06em', opacity: 0.5, marginLeft: '0.4rem', fontFamily: 'var(--font-inter), sans-serif', color: 'var(--body-text)' }}>
+                      Rituals Today
+                    </span>
                   </div>
+                  {avg !== null && (
+                    <span className="hss-row-avg">avg {avg.toFixed(1)}</span>
+                  )}
                 </div>
 
                 {dailyCounts.length >= 2 && (
@@ -306,6 +314,18 @@ export default function MorningRitualsSection({ checklist, ritualStats }: Props)
                     <text x={PL - 4} y={PT + 3} textAnchor="end" style={{ fill: 'var(--chart-text, rgba(255,255,255,0.35))' }} fontSize="7" fontFamily="var(--font-inter), sans-serif">{barMax}</text>
                     <text x={PL - 4} y={PT + plotH} textAnchor="end" dominantBaseline="auto" style={{ fill: 'var(--chart-text, rgba(255,255,255,0.35))' }} fontSize="7" fontFamily="var(--font-inter), sans-serif">0</text>
                   </svg>
+                )}
+
+                {avg !== null && dailyCounts.length >= 2 && (
+                  <div className="hss-chart-footer" style={{ marginTop: '0.25rem' }}>
+                    <DeltaIndicator
+                      todayValue={todayCount}
+                      avg={avg}
+                      previousCount={dailyCounts.length - 1}
+                      revealed={true}
+                      label="Rituals"
+                    />
+                  </div>
                 )}
               </>
             )

@@ -7,9 +7,10 @@ interface DeltaIndicatorProps {
   avg: number | null
   previousCount: number
   revealed: boolean
+  label?: string
 }
 
-export default function DeltaIndicator({ todayValue, avg, previousCount, revealed }: DeltaIndicatorProps) {
+export default function DeltaIndicator({ todayValue, avg, previousCount, revealed, label = 'Points' }: DeltaIndicatorProps) {
   if (avg === null) return null
 
   const diff = todayValue - avg
@@ -38,7 +39,7 @@ export default function DeltaIndicator({ todayValue, avg, previousCount, reveale
       <span className="hss-delta-value" style={{ color: COPPER }}>
         {isEqual ? '=' : `${isUp ? '+' : '-'} ${displayDiff}`}
       </span>
-      <span className="hss-delta-label">Points</span>
+      <span className="hss-delta-label">{label}</span>
       <span className="hss-delta-sub">
         Compared to <span className="hss-delta-underline">{previousCount} journal</span> average
       </span>
