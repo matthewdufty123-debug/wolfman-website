@@ -224,7 +224,7 @@ export default async function ProfilePage(
   // All-time headline stats
   const allTimeTotalWords = Number(allTimeWords?.totalWords ?? 0)
   const firstPostDate = allTimeWords?.firstDate ?? null
-  const allTimeAvgWords = totalJournals > 0 ? Math.round(allTimeTotalWords / Number(total)) : 0
+  const allTimeAvgWords = Number(total) > 0 ? Math.round(allTimeTotalWords / Number(total)) : 0
   const postingFrequency = (() => {
     if (!firstPostDate || Number(total) <= 1) return null
     const daysSinceFirst = Math.max(1, Math.round((Date.now() - new Date(firstPostDate + 'T00:00:00').getTime()) / 86400000))
