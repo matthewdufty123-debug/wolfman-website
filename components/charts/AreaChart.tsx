@@ -1,5 +1,6 @@
 'use client'
 
+import { useId } from 'react'
 import { yForVal, xForIdx, mean } from './chartUtils'
 
 interface AreaChartProps {
@@ -13,6 +14,8 @@ interface AreaChartProps {
   width?: number
   todayHighlight?: boolean
   revealed?: boolean
+  /** Centered / bipolar mode: area fills from midpoint outward (upper & lower) */
+  centered?: boolean
 }
 
 export default function AreaChart({
@@ -26,7 +29,9 @@ export default function AreaChart({
   width = 300,
   todayHighlight = true,
   revealed = true,
+  centered = false,
 }: AreaChartProps) {
+  const uid = useId()
   const PAD_LEFT = 24
   const PAD_RIGHT = 12
   const PAD_TOP = 10
@@ -37,7 +42,7 @@ export default function AreaChart({
   const yFor = (v: number) => yForVal(v, min, max, PAD_TOP, plotH)
   const xFor = (i: number) => xForIdx(i, values.length, PAD_LEFT, plotW)
 
-  // Build area path from non-null values
+  // Build points from non-null values
   const points: { x: number; y: number; idx: number }[] = []
   values.forEach((v, i) => {
     if (v !== null) points.push({ x: xFor(i), y: yFor(v), idx: i })
@@ -45,17 +50,32 @@ export default function AreaChart({
 
   if (points.length === 0) return null
 
-  // Area path: line across top, close to bottom
   const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ')
-  const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${PAD_TOP + plotH} L ${points[0].x.toFixed(1)} ${PAD_TOP + plotH} Z`
 
   const avg = showAverage ? mean(values) : null
 
-  // Y-axis tick values
-  const range = max - min
-  const tickStep = range <= 8 ? 2 : Math.ceil(range / 4)
-  const ticks: number[] = []
-  for (let v = min + tickStep; v <= max; v += tickStep) ticks.push(v)
+  // ── Centered (bipolar) mode ──────────────────────────────────────────────
+  const mid = (min + max) / 2 // e.g. 4.5 for 1–8
+  const midY = yFor(mid)
+
+  // Area path: close to midline (centered) or bottom (standard)
+  const baselineY = centered ? midY : PAD_TOP + plotH
+  const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${baselineY.toFixed(1)} L ${points[0].x.toFixed(1)} ${baselineY.toFixed(1)} Z`
+
+  // Clip IDs for two-tone centered fill
+  const clipUpper = `${uid}-upper`
+  const clipLower = `${uid}-lower`
+
+  // Y-axis ticks
+  const ticks: number[] = centered
+    ? [2, 4, 6]  // symmetric landmarks around 4.5
+    : (() => {
+        const range = max - min
+        const tickStep = range <= 8 ? 2 : Math.ceil(range / 4)
+        const t: number[] = []
+        for (let v = min + tickStep; v <= max; v += tickStep) t.push(v)
+        return t
+      })()
 
   return (
     <svg
@@ -69,6 +89,18 @@ export default function AreaChart({
         transition: 'opacity 0.6s ease 0.3s',
       }}
     >
+      {/* Clip paths for two-tone centered fill */}
+      {centered && (
+        <defs>
+          <clipPath id={clipUpper}>
+            <rect x={0} y={0} width={width} height={midY} />
+          </clipPath>
+          <clipPath id={clipLower}>
+            <rect x={0} y={midY} width={width} height={height} />
+          </clipPath>
+        </defs>
+      )}
+
       {/* Y-axis */}
       <line
         x1={PAD_LEFT} y1={PAD_TOP}
@@ -77,13 +109,25 @@ export default function AreaChart({
         strokeWidth="1"
       />
 
-      {/* X-axis */}
+      {/* Bottom axis (non-centered) or subtle bottom edge (centered) */}
       <line
         x1={PAD_LEFT} y1={PAD_TOP + plotH}
         x2={PAD_LEFT + plotW} y2={PAD_TOP + plotH}
         style={{ stroke: 'var(--chart-axis, rgba(255,255,255,0.12))' }}
         strokeWidth="1"
       />
+
+      {/* Center baseline — prominent in centered mode */}
+      {centered && (
+        <line
+          x1={PAD_LEFT}
+          y1={midY}
+          x2={PAD_LEFT + plotW}
+          y2={midY}
+          style={{ stroke: 'var(--chart-axis, rgba(255,255,255,0.25))' }}
+          strokeWidth="1.5"
+        />
+      )}
 
       {/* Y-axis labels */}
       {ticks.map(v => (
@@ -116,12 +160,15 @@ export default function AreaChart({
         </text>
       ))}
 
-      {/* Filled area */}
-      <path
-        d={areaPath}
-        fill={color}
-        fillOpacity={0.12}
-      />
+      {/* Filled area — two-tone in centered mode, single fill otherwise */}
+      {centered ? (
+        <>
+          <path d={areaPath} fill={color} fillOpacity={0.18} clipPath={`url(#${clipUpper})`} />
+          <path d={areaPath} fill={color} fillOpacity={0.10} clipPath={`url(#${clipLower})`} />
+        </>
+      ) : (
+        <path d={areaPath} fill={color} fillOpacity={0.12} />
+      )}
 
       {/* Stroke line */}
       <path

@@ -84,6 +84,7 @@ export default function ScaleTrendsPanel({ data, username }: Props) {
               showAverage
               xLabels={xLabels}
               todayHighlight={false}
+              centered
             />
             {zones.length > 0 && (
               <div style={{ marginTop: '0.75rem' }}>

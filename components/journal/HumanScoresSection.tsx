@@ -116,6 +116,7 @@ function ScaleRow({ title, value, labels, isStress = false, history, scaleKey }:
               color={scaleColor}
               showAverage
               revealed={revealed}
+              centered
             />
             <DeltaIndicator todayValue={value} avg={avg} previousCount={previous.length} revealed={revealed} />
           </>
