@@ -6,6 +6,8 @@ import { posts, morningState, users, wolfbotReviews } from '@/lib/db/schema'
 import { and, eq, gte, sql, isNotNull } from 'drizzle-orm'
 import ProfileAnalyticsClient from '@/components/profile/ProfileAnalyticsClient'
 import type { ScaleDataRow, WordCountDataRow } from '@/components/profile/ProfileAnalyticsClient'
+import JournalCalendarGrid from '@/components/profile/JournalCalendarGrid'
+import type { CalendarWeek } from '@/components/profile/JournalCalendarGrid'
 import StatRow from '@/components/charts/StatRow'
 
 export const dynamic = 'force-dynamic'
@@ -138,7 +140,7 @@ export default async function ProfilePage(
   const now = new Date()
   const firstOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
 
-  const [scaleRows, allPostDates, [{ total }], wordCountRows, [{ wolfbotContextCount }]] = await Promise.all([
+  const [scaleRows, allPostDates, [{ total }], wordCountRows, [{ wolfbotContextCount }], [allTimeWords]] = await Promise.all([
     // Scale + ritual data YTD
     db
       .select({
@@ -187,6 +189,15 @@ export default async function ProfilePage(
       .from(wolfbotReviews)
       .innerJoin(posts, eq(wolfbotReviews.postId, posts.id))
       .where(and(eq(posts.authorId, userId), isNotNull(wolfbotReviews.journalContext))),
+
+    // All-time word totals + first post date
+    db
+      .select({
+        totalWords: sql<number>`COALESCE(SUM(word_count_total), 0)`,
+        firstDate: sql<string>`MIN(date)::text`,
+      })
+      .from(posts)
+      .where(and(eq(posts.authorId, userId), eq(posts.status, 'published'))),
   ])
 
   // Transform data for client
@@ -209,6 +220,23 @@ export default async function ProfilePage(
       wordCountGreatAt: r.wordCountGreatAt ?? 0,
       wordCountTotal: r.wordCountTotal!,
     }))
+
+  // All-time headline stats
+  const allTimeTotalWords = Number(allTimeWords?.totalWords ?? 0)
+  const firstPostDate = allTimeWords?.firstDate ?? null
+  const allTimeAvgWords = totalJournals > 0 ? Math.round(allTimeTotalWords / Number(total)) : 0
+  const postingFrequency = (() => {
+    if (!firstPostDate || Number(total) <= 1) return null
+    const daysSinceFirst = Math.max(1, Math.round((Date.now() - new Date(firstPostDate + 'T00:00:00').getTime()) / 86400000))
+    return (Number(total) / (daysSinceFirst / 7)).toFixed(1)
+  })()
+  // Avg rituals per journal (from YTD scaleRows — close enough for headline)
+  const avgRitualsPerJournal = (() => {
+    const rows = scaleRows.filter(r => r.routineChecklist)
+    if (rows.length === 0) return null
+    const total = rows.reduce((sum, r) => sum + Object.values(r.routineChecklist as Record<string, boolean>).filter(Boolean).length, 0)
+    return (total / rows.length).toFixed(1)
+  })()
 
   const allDates = allPostDates.map(r => r.date)
   const { current: currentStreak, longest: longestStreak } = computeStreaks(allDates)
@@ -278,6 +306,46 @@ export default async function ProfilePage(
     }
   }
   const wordsCumulative = { ...cumulativeBase, currentMonth: curWords, previousMonth: prevWords }
+
+  // Calendar grid — last 5 weeks (35 days), Mon–Sun, most recent week last
+  const calendarWeeks: CalendarWeek[] = (() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    // Find the most recent Monday (start of current week)
+    const dayOfWeek = (today.getDay() + 6) % 7 // 0=Mon, 6=Sun
+    const weekStart = new Date(today)
+    weekStart.setDate(today.getDate() - dayOfWeek)
+
+    // Go back 4 more weeks to get 5 weeks total
+    const gridStart = new Date(weekStart)
+    gridStart.setDate(weekStart.getDate() - 28)
+
+    // Build lookup: date → ritual count from scaleRows
+    const ritualByDate: Record<string, number> = {}
+    const postDateSet = new Set(allDates)
+    for (const r of scaleRows) {
+      if (r.routineChecklist) {
+        ritualByDate[r.date] = Object.values(r.routineChecklist as Record<string, boolean>).filter(Boolean).length
+      }
+    }
+
+    const weeks: CalendarWeek[] = []
+    for (let w = 0; w < 5; w++) {
+      const days = []
+      let weeklyRitualTotal = 0
+      for (let d = 0; d < 7; d++) {
+        const date = new Date(gridStart)
+        date.setDate(gridStart.getDate() + w * 7 + d)
+        const iso = date.toISOString().slice(0, 10)
+        const hasJournal = postDateSet.has(iso)
+        const ritualCount = hasJournal ? (ritualByDate[iso] ?? 0) : null
+        if (ritualCount !== null) weeklyRitualTotal += ritualCount
+        days.push({ date: iso, ritualCount })
+      }
+      weeks.push({ days, weeklyRitualTotal })
+    }
+    return weeks
+  })()
 
   return (
     <main className="journal-page">
@@ -358,6 +426,31 @@ export default async function ProfilePage(
             <StatRow label="Longest Streak" value={`${longestStreak} days`} />
             <StatRow label="This Month" value={thisMonth} noBorder />
           </div>
+
+          {/* All-time KPI summary */}
+          <div className="chart-stat-summary" style={{ marginBottom: '1.5rem' }}>
+            <div className="chart-stat-summary-item">
+              <div className="chart-stat-summary-value">{allTimeTotalWords >= 1000 ? `${(allTimeTotalWords / 1000).toFixed(1)}k` : allTimeTotalWords}</div>
+              <div className="chart-stat-summary-label">Total Words</div>
+            </div>
+            <div className="chart-stat-summary-item">
+              <div className="chart-stat-summary-value">{allTimeAvgWords >= 1000 ? `${(allTimeAvgWords / 1000).toFixed(1)}k` : allTimeAvgWords}</div>
+              <div className="chart-stat-summary-label">Avg Words</div>
+            </div>
+            <div className="chart-stat-summary-item">
+              <div className="chart-stat-summary-value">{avgRitualsPerJournal ?? '—'}</div>
+              <div className="chart-stat-summary-label">Avg Rituals</div>
+            </div>
+            {postingFrequency && (
+              <div className="chart-stat-summary-item">
+                <div className="chart-stat-summary-value">{postingFrequency}</div>
+                <div className="chart-stat-summary-label">Per Week</div>
+              </div>
+            )}
+          </div>
+
+          {/* 5-week calendar grid */}
+          <JournalCalendarGrid weeks={calendarWeeks} />
 
           {/* WOLF|BOT context progress — owner only, hidden at full capability */}
           {isOwner && Number(wolfbotContextCount) < 14 && (
