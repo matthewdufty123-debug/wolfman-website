@@ -2,7 +2,6 @@
 
 import { useRef, useEffect, useState } from 'react'
 import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
-import ZoneDistribution from '@/components/charts/ZoneDistribution'
 
 // ── Data interfaces ──────────────────────────────────────────────────────────
 
@@ -193,20 +192,6 @@ export default function WritingStatsClient({
           : null
         const delta = avg !== null ? todayTotal - avg : null
 
-        // Word count zones
-        const validTotals = totals.filter(v => v > 0)
-        const zones = [
-          { label: '0–199', min: 0, max: 199 },
-          { label: '200–399', min: 200, max: 399 },
-          { label: '400–599', min: 400, max: 599 },
-          { label: '600–799', min: 600, max: 799 },
-          { label: '800–999', min: 800, max: 999 },
-          { label: '1000+', min: 1000, max: Infinity },
-        ].map(z => {
-          const count = validTotals.filter(v => v >= z.min && v <= z.max).length
-          return { label: z.label, count, percentage: validTotals.length > 0 ? (count / validTotals.length) * 100 : 0 }
-        }).filter(z => z.count > 0)
-
         return (
           <div style={{
             opacity: revealed ? 1 : 0,
@@ -229,13 +214,6 @@ export default function WritingStatsClient({
                 <div className="chart-stat-summary-label">vs Average</div>
               </div>
             </div>
-
-            {zones.length > 0 && (
-              <div style={{ marginBottom: '1rem' }}>
-                <p className="chart-card-title" style={{ marginBottom: '0.5rem' }}>Where your word counts land</p>
-                <ZoneDistribution zones={zones} color={STEEL_BLUE} sortByValue />
-              </div>
-            )}
           </div>
         )
       })()}
