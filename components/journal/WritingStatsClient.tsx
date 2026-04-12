@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react'
 import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
+import ZoneDistribution from '@/components/charts/ZoneDistribution'
 
 // ── Data interfaces ──────────────────────────────────────────────────────────
 
@@ -431,6 +432,63 @@ export default function WritingStatsClient({
         description="Word counts across the last 10 journals, broken down by section."
         popupBody="Each journal is written in three sections: Today's Intention, Gratitude, and Something I'm Great At. The bars show the word count for each section stacked together, with the dashed line showing the average across recent journals."
       />
+
+      {/* Summary stats */}
+      {(() => {
+        const totals = chronological.map(e => e.wordCountTotal ?? 0)
+        const todayTotal = totals[totals.length - 1] ?? 0
+        const prevTotals = totals.slice(0, -1).filter(v => v > 0)
+        const avg = prevTotals.length > 0
+          ? Math.round(prevTotals.reduce((a, b) => a + b, 0) / prevTotals.length)
+          : null
+        const delta = avg !== null ? todayTotal - avg : null
+
+        // Word count zones
+        const validTotals = totals.filter(v => v > 0)
+        const zones = [
+          { label: '0–199', min: 0, max: 199 },
+          { label: '200–399', min: 200, max: 399 },
+          { label: '400–599', min: 400, max: 599 },
+          { label: '600–799', min: 600, max: 799 },
+          { label: '800–999', min: 800, max: 999 },
+          { label: '1000+', min: 1000, max: Infinity },
+        ].map(z => {
+          const count = validTotals.filter(v => v >= z.min && v <= z.max).length
+          return { label: z.label, count, percentage: validTotals.length > 0 ? (count / validTotals.length) * 100 : 0 }
+        }).filter(z => z.count > 0)
+
+        return (
+          <div style={{
+            opacity: revealed ? 1 : 0,
+            transform: revealed ? 'translateY(0)' : 'translateY(8px)',
+            transition: 'opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s',
+          }}>
+            <div className="chart-stat-summary">
+              <div className="chart-stat-summary-item">
+                <div className="chart-stat-summary-value">{todayTotal.toLocaleString()}</div>
+                <div className="chart-stat-summary-label">Today</div>
+              </div>
+              <div className="chart-stat-summary-item">
+                <div className="chart-stat-summary-value">{avg !== null ? avg.toLocaleString() : '—'}</div>
+                <div className="chart-stat-summary-label">10-Day Avg</div>
+              </div>
+              <div className="chart-stat-summary-item">
+                <div className="chart-stat-summary-value">
+                  {delta !== null ? `${delta >= 0 ? '+' : ''}${delta}` : '—'}
+                </div>
+                <div className="chart-stat-summary-label">vs Average</div>
+              </div>
+            </div>
+
+            {zones.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <p className="chart-card-title" style={{ marginBottom: '0.5rem' }}>Where your word counts land</p>
+                <ZoneDistribution zones={zones} color={STEEL_BLUE} sortByValue />
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       <div className="wss-wrap">
         {/* Chart 1 — Stacked bars (everyone) */}

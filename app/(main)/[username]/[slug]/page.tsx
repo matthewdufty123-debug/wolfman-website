@@ -13,12 +13,14 @@ import HowIShowedUpSection from './_sections/HowIShowedUpSection'
 import MorningRitualsServerSection from './_sections/MorningRitualsServerSection'
 import PostInfoNavSection from './_sections/PostInfoNavSection'
 import WritingStatsSection from './_sections/WritingStatsSection'
+import DaySentimentSection from './_sections/DaySentimentSection'
 import {
   Section1Skeleton,
   Section2Skeleton,
   Section3Skeleton,
   Section4Skeleton,
   Section5Skeleton,
+  Section6Skeleton,
 } from './_sections/skeletons'
 
 // Allow slugs not in generateStaticParams to be dynamically rendered (posts published after a build)
@@ -125,6 +127,14 @@ export default async function PostPage({
               authorId={post.authorId ?? ''}
               postDate={post.date ?? ''}
               isOwner={isOwner}
+            />
+          </Suspense>
+
+          {/* Section 6: How The Day Felt */}
+          <Suspense fallback={<Section6Skeleton />}>
+            <DaySentimentSection
+              authorId={post.authorId ?? ''}
+              postDate={post.date ?? ''}
             />
           </Suspense>
 

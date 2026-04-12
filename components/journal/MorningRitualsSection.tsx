@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { ROUTINE_ICON_MAP } from '@/components/RoutineIcons'
 import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
+import Sparkline from '@/components/charts/Sparkline'
 
 const COPPER = '#A0622A'
 
@@ -223,6 +224,49 @@ export default function MorningRitualsSection({ checklist, ritualStats }: Props)
         <p className="journal-section-empty">No morning rituals recorded.</p>
       ) : (
         <>
+          {/* Summary stats */}
+          {(() => {
+            const todayCount = items.length
+            const totalRitualKeys = Object.keys(ROUTINE_ICON_MAP).length
+            // Compute daily completion counts for sparkline
+            const allSegments = Object.values(ritualStats)
+            const dayCount = allSegments[0]?.segments.length ?? 0
+            const dailyCounts: number[] = []
+            for (let d = 0; d < dayCount; d++) {
+              let count = 0
+              for (const s of allSegments) {
+                if (s.segments[d]) count++
+              }
+              dailyCounts.push(count)
+            }
+            const totalPossible = dayCount * totalRitualKeys
+            const totalDone = dailyCounts.reduce((a, b) => a + b, 0)
+            const completionRate = totalPossible > 0 ? Math.round((totalDone / totalPossible) * 100) : 0
+            const bestStreak = Math.max(0, ...Object.values(ritualStats).map(s => s.streak))
+
+            return (
+              <div className="chart-stat-summary" style={{ marginTop: '0.5rem' }}>
+                <div className="chart-stat-summary-item">
+                  <div className="chart-stat-summary-value">{todayCount}/{totalRitualKeys}</div>
+                  <div className="chart-stat-summary-label">Rituals Today</div>
+                </div>
+                <div className="chart-stat-summary-item">
+                  <div className="chart-stat-summary-value">{completionRate}%</div>
+                  <div className="chart-stat-summary-label">Completion</div>
+                  {dailyCounts.length >= 2 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.25rem' }}>
+                      <Sparkline data={dailyCounts} color={COPPER} />
+                    </div>
+                  )}
+                </div>
+                <div className="chart-stat-summary-item">
+                  <div className="chart-stat-summary-value">{bestStreak}</div>
+                  <div className="chart-stat-summary-label">Best Streak</div>
+                </div>
+              </div>
+            )
+          })()}
+
           <p className="ritual-context-note">Each bar shows whether the ritual was completed on that day&apos;s journal. The rightmost bar is the current day.</p>
           <div className="morning-rituals-stack">
             {items.map(([key, { label, Icon, color }]) => {

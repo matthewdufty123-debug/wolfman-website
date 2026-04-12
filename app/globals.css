@@ -27,6 +27,10 @@ html[data-theme="dark"] {
   --chart-row-border: rgba(255,255,255,0.08);
   --chart-label: rgba(255,255,255,0.5);
   --chart-sub: rgba(255,255,255,0.35);
+  --chart-area-fill: rgba(255,255,255,0.08);
+  --chart-zone-track: rgba(255,255,255,0.08);
+  --chart-stat-border: rgba(255,255,255,0.08);
+  --chart-sparkline: #A0622A;
 }
 
 html[data-theme="light"] {
@@ -57,6 +61,10 @@ html[data-theme="light"] {
   --chart-row-border: rgba(74,74,74,0.1);
   --chart-label: rgba(74,74,74,0.5);
   --chart-sub: rgba(74,74,74,0.35);
+  --chart-area-fill: rgba(74,127,165,0.08);
+  --chart-zone-track: rgba(74,127,165,0.08);
+  --chart-stat-border: rgba(74,127,165,0.1);
+  --chart-sparkline: #A0622A;
 }
 
 *, *::before, *::after {
@@ -7732,6 +7740,22 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   gap: 0.15rem;
 }
 
+/* Title line — title + avg side by side */
+.hss-row-title-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+}
+.hss-row-avg {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--body-text);
+  opacity: 0.4;
+  letter-spacing: 0.02em;
+}
+
 /* Scale title — large and prominent */
 .hss-row-title {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -10851,4 +10875,238 @@ html[data-theme="dark"] .subs-cta--free {
     aspect-ratio: 16/9;
     max-height: 200px;
   }
+}
+
+/* ── Shared Chart Primitives ──────────────────────────────────────────────── */
+
+/* StatRow */
+.chart-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--chart-stat-border, rgba(74,127,165,0.1));
+}
+.chart-stat-row-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.chart-stat-row-label {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--body-text);
+}
+.chart-stat-row-sub {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.68rem;
+  color: var(--body-text);
+  opacity: 0.5;
+}
+.chart-stat-row-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+.chart-stat-row-value {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--body-text);
+  line-height: 1;
+}
+
+/* ZoneDistribution */
+.chart-zone-dist {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.chart-zone-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 26px;
+}
+.chart-zone-label {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.68rem;
+  color: var(--body-text);
+  opacity: 0.7;
+  width: 120px;
+  flex-shrink: 0;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chart-zone-track {
+  flex: 1;
+  height: 18px;
+  background: var(--chart-zone-track, rgba(74,127,165,0.08));
+  border-radius: 4px;
+  overflow: hidden;
+}
+.chart-zone-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 0;
+}
+.chart-zone-pct {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--body-text);
+  opacity: 0.7;
+  width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* RelativeEffort */
+.chart-relative-effort {
+  margin: 0.5rem 0;
+}
+.chart-re-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.4rem;
+}
+.chart-re-label {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.82rem;
+  color: var(--body-text);
+}
+.chart-re-value {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.chart-re-track {
+  position: relative;
+  height: 12px;
+  background: var(--chart-zone-track, rgba(74,127,165,0.08));
+  border-radius: 6px;
+  overflow: visible;
+}
+.chart-re-fill {
+  height: 100%;
+  border-radius: 6px;
+  opacity: 0.6;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.chart-re-avg-marker {
+  position: absolute;
+  top: -2px;
+  width: 2px;
+  height: 16px;
+  background: var(--body-text);
+  opacity: 0.5;
+  border-radius: 1px;
+  transform: translateX(-1px);
+}
+.chart-re-range {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-top: 0.25rem;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.62rem;
+  color: var(--body-text);
+  opacity: 0.4;
+}
+
+/* ChartCard */
+.chart-card {
+  padding: 1rem 0;
+  border-top: 1px solid var(--chart-stat-border, rgba(74,127,165,0.1));
+}
+.chart-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+}
+.chart-card-title {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--body-text);
+  opacity: 0.55;
+  margin: 0;
+}
+.chart-card-subtitle {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.6rem;
+  color: var(--body-text);
+  opacity: 0.4;
+  margin: 0.15rem 0 0;
+}
+.chart-card-right {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--body-text);
+  opacity: 0.5;
+}
+
+/* TimePeriodToggle */
+.chart-period-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+}
+.chart-period-pill {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  height: 32px;
+  padding: 0 1rem;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  background: var(--chart-zone-track, rgba(74,127,165,0.08));
+  color: var(--body-text);
+  transition: background 0.15s, color 0.15s;
+}
+.chart-period-pill--active {
+  background: #214459;
+  color: #fff;
+}
+
+/* Summary stat grid (3 across) */
+.chart-stat-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.chart-stat-summary-item {
+  text-align: center;
+}
+.chart-stat-summary-value {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--body-text);
+  line-height: 1.2;
+}
+.chart-stat-summary-label {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--body-text);
+  opacity: 0.5;
+  margin-top: 0.2rem;
 }

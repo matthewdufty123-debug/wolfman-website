@@ -4,10 +4,9 @@ import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { posts, morningState, users, wolfbotReviews } from '@/lib/db/schema'
 import { and, eq, gte, desc, sql, isNotNull } from 'drizzle-orm'
-import StatsCharts, { StatRow } from '@/components/StatsCharts'
-import MorningZoneScatter, { type ZonePoint } from '@/components/MorningZoneScatter'
-import WordCountChart, { type WordCountRow } from '@/components/WordCountChart'
-import type { ZonePoint as ZP } from '@/components/MorningZoneScatter'
+import ProfileAnalyticsClient from '@/components/profile/ProfileAnalyticsClient'
+import type { ScaleDataRow, WordCountDataRow, SentimentDataRow } from '@/components/profile/ProfileAnalyticsClient'
+import StatRow from '@/components/charts/StatRow'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,17 +76,6 @@ function computeStreaks(dates: string[]): { current: number; longest: number } {
   return { current, longest }
 }
 
-// ── Stat card ─────────────────────────────────────────────────────────────────
-
-function StatCard({ value, label }: { value: number | string; label: string }) {
-  return (
-    <div className="journal-stat-card">
-      <p className="journal-stat-value">{value}</p>
-      <p className="journal-stat-label">{label}</p>
-    </div>
-  )
-}
-
 // ── Avatar ────────────────────────────────────────────────────────────────────
 
 function Avatar({ src, name, size = 72 }: { src: string | null; name: string; size?: number }) {
@@ -124,7 +112,6 @@ export default async function ProfilePage(
   const { username } = await params
   const session = await auth()
 
-  // Look up the profile user
   const [profileUser] = await db
     .select({
       id: users.id,
@@ -146,14 +133,13 @@ export default async function ProfilePage(
   const displayName = profileUser.displayName ?? profileUser.name ?? username
   const avatarSrc = profileUser.avatar ?? profileUser.image ?? null
 
-  const threeMonthsAgo = new Date()
-  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3)
-  const cutoff = threeMonthsAgo.toISOString().slice(0, 10)
+  // Fetch YTD data (superset — client filters to 3M or YTD)
+  const ytdCutoff = `${new Date().getFullYear()}-01-01`
   const now = new Date()
   const firstOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
 
-  const [chartRows, allPostDates, [{ total }], scatterRows, wordCountRows, [{ wolfbotContextCount }]] = await Promise.all([
-    // Chart data: last 3 months with morning state
+  const [scaleRows, allPostDates, [{ total }], wordCountRows, sentimentRows, [{ wolfbotContextCount }]] = await Promise.all([
+    // Scale + ritual data YTD
     db
       .select({
         date: posts.date,
@@ -161,11 +147,12 @@ export default async function ProfilePage(
         brainScale: morningState.brainScale,
         bodyScale: morningState.bodyScale,
         happyScale: morningState.happyScale,
+        stressScale: morningState.stressScale,
         routineChecklist: morningState.routineChecklist,
       })
       .from(morningState)
       .innerJoin(posts, eq(morningState.postId, posts.id))
-      .where(and(eq(posts.authorId, userId), gte(posts.date, cutoff)))
+      .where(and(eq(posts.authorId, userId), gte(posts.date, ytdCutoff), eq(posts.status, 'published')))
       .orderBy(posts.date),
 
     // All post dates for streak + this-month calc
@@ -181,23 +168,7 @@ export default async function ProfilePage(
       .from(posts)
       .where(and(eq(posts.authorId, userId), eq(posts.status, 'published'))),
 
-    // Last 30 posts for Morning Zone scatter
-    db
-      .select({
-        postId: morningState.postId,
-        date: posts.date,
-        slug: posts.slug,
-        brainScale: morningState.brainScale,
-        bodyScale: morningState.bodyScale,
-        happyScale: morningState.happyScale,
-      })
-      .from(morningState)
-      .innerJoin(posts, eq(morningState.postId, posts.id))
-      .where(eq(posts.authorId, userId))
-      .orderBy(desc(posts.date))
-      .limit(30),
-
-    // Word count breakdown for stacked bar chart
+    // Word count data YTD
     db
       .select({
         date: posts.date,
@@ -207,10 +178,20 @@ export default async function ProfilePage(
         wordCountTotal: posts.wordCountTotal,
       })
       .from(posts)
-      .where(and(eq(posts.authorId, userId), eq(posts.status, 'published'), isNotNull(posts.wordCountTotal)))
+      .where(and(eq(posts.authorId, userId), eq(posts.status, 'published'), isNotNull(posts.wordCountTotal), gte(posts.date, ytdCutoff)))
       .orderBy(posts.date),
 
-    // WOLF|BOT context count — entries with journalContext
+    // Sentiment data YTD
+    db
+      .select({
+        date: posts.date,
+        feelAboutToday: posts.feelAboutToday,
+      })
+      .from(posts)
+      .where(and(eq(posts.authorId, userId), eq(posts.status, 'published'), isNotNull(posts.feelAboutToday), gte(posts.date, ytdCutoff)))
+      .orderBy(posts.date),
+
+    // WOLF|BOT context count
     db
       .select({ wolfbotContextCount: sql<number>`COUNT(*)` })
       .from(wolfbotReviews)
@@ -218,31 +199,18 @@ export default async function ProfilePage(
       .where(and(eq(posts.authorId, userId), isNotNull(wolfbotReviews.journalContext))),
   ])
 
-  const chartData: StatRow[] = chartRows.map(r => ({
+  // Transform data for client
+  const scaleData: ScaleDataRow[] = scaleRows.map(r => ({
     date: r.date,
     slug: r.slug,
     brainScale: r.brainScale,
     bodyScale: r.bodyScale,
-    happyScale: r.happyScale ?? null,
-    ritualCount: r.routineChecklist ? Object.values(r.routineChecklist as Record<string, boolean>).filter(Boolean).length : 0,
+    happyScale: r.happyScale,
+    stressScale: r.stressScale,
+    routineChecklist: r.routineChecklist as Record<string, boolean> | null,
   }))
 
-  const dateToSlug: Record<string, string> = {}
-  chartRows.forEach(r => { dateToSlug[r.date] = r.slug })
-
-  const scatterData: ZonePoint[] = scatterRows
-    .filter(r => r.happyScale != null)
-    .reverse()
-    .map(r => ({
-      postId: r.postId,
-      date: r.date,
-      slug: r.slug,
-      brainScale: r.brainScale,
-      bodyScale: r.bodyScale,
-      happyScale: r.happyScale!,
-    }))
-
-  const wordCountData: WordCountRow[] = wordCountRows
+  const wordCountData: WordCountDataRow[] = wordCountRows
     .filter(r => r.wordCountTotal && r.wordCountTotal > 0)
     .map(r => ({
       date: r.date,
@@ -252,11 +220,27 @@ export default async function ProfilePage(
       wordCountTotal: r.wordCountTotal!,
     }))
 
+  const sentimentData: SentimentDataRow[] = sentimentRows
+    .filter(r => r.feelAboutToday != null)
+    .map(r => ({
+      date: r.date,
+      feelAboutToday: r.feelAboutToday!,
+    }))
+
   const allDates = allPostDates.map(r => r.date)
   const { current: currentStreak, longest: longestStreak } = computeStreaks(allDates)
   const thisMonth = new Set(allDates.filter(d => d >= firstOfMonth)).size
   const totalJournals = Number(total)
   const isEmpty = totalJournals === 0
+
+  // Monthly journal counts for sparkline (last 6 months)
+  const monthlyCounts: number[] = []
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date()
+    d.setMonth(d.getMonth() - i)
+    const monthPrefix = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    monthlyCounts.push(allDates.filter(dt => dt.startsWith(monthPrefix)).length)
+  }
 
   return (
     <main className="journal-page">
@@ -303,7 +287,7 @@ export default async function ProfilePage(
         </div>
       </header>
 
-      {/* Settings button — owner only, full-width below profile header */}
+      {/* Settings button — owner only */}
       {isOwner && (
         <a href="/account" className="profile-settings-btn">
           Settings
@@ -326,12 +310,16 @@ export default async function ProfilePage(
         </div>
       ) : (
         <>
-          {/* Headline stats */}
-          <div className="journal-stats-row">
-            <StatCard value={totalJournals} label="Journals" />
-            <StatCard value={currentStreak} label="Day streak" />
-            <StatCard value={longestStreak} label="Longest streak" />
-            <StatCard value={thisMonth} label="This month" />
+          {/* Headline stats — Strava-style stat rows */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <StatRow
+              label="Journals"
+              value={totalJournals}
+              sparklineData={monthlyCounts.some(c => c > 0) ? monthlyCounts : undefined}
+            />
+            <StatRow label="Current Streak" value={`${currentStreak} days`} />
+            <StatRow label="Longest Streak" value={`${longestStreak} days`} />
+            <StatRow label="This Month" value={thisMonth} noBorder />
           </div>
 
           {/* WOLF|BOT context progress — owner only, hidden at full capability */}
@@ -368,31 +356,13 @@ export default async function ProfilePage(
             </div>
           )}
 
-          {/* Morning Zone scatter */}
-          {scatterData.length > 0 && (
-            <div className="stats-chart-card">
-              <p className="stats-chart-title">Morning Zone</p>
-              <MorningZoneScatter data={scatterData} username={username} />
-            </div>
-          )}
-
-          {/* Trend charts */}
-          {chartData.length > 0
-            ? <StatsCharts data={chartData} dateToSlug={dateToSlug} username={username} />
-            : (
-              <p className="journal-no-chart">
-                No mood or ritual data yet — it will appear here once morning state is added to journals.
-              </p>
-            )
-          }
-
-          {/* Word count breakdown */}
-          {wordCountData.length > 0 && (
-            <div className="stats-chart-card">
-              <p className="stats-chart-title">Journal Word Count</p>
-              <WordCountChart data={wordCountData} />
-            </div>
-          )}
+          {/* Analytics with time period toggle */}
+          <ProfileAnalyticsClient
+            scaleData={scaleData}
+            wordCountData={wordCountData}
+            sentimentData={sentimentData}
+            username={username}
+          />
         </>
       )}
     </main>
