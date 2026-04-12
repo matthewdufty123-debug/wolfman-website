@@ -13,7 +13,7 @@
 
 export type SlotType =
   | { kind: 'empty' }
-  | { kind: 'link';         href: string; label: string; icon: NavIcon; hideLabel?: boolean }
+  | { kind: 'link';         href: string; label: string; icon: NavIcon; hideLabel?: boolean; authOnly?: boolean }
   | { kind: 'action';       action: NavAction; label: string; icon: NavIcon; hideLabel?: boolean }
   | { kind: 'text-link';    href: string; text: string }   // text only, no icon (e.g. SEND FEEDBACK)
   | { kind: 'wolfbot' }           // renders WolfBotIcon, links to /wolfbot
@@ -87,7 +87,7 @@ const ABOUT: SlotType     = { kind: 'link', href: '/about',          label: 'abo
 const DISCOVER: SlotType  = { kind: 'link', href: '/discover',       label: 'discover', icon: 'BadgeInfo', hideLabel: true }
 const ADMIN: SlotType     = { kind: 'link', href: '/admin',          label: 'admin',   icon: 'LayoutDashboard' }
 const BETA_LINK: SlotType = { kind: 'link', href: '/beta',           label: 'beta',    icon: 'Building2',  hideLabel: true }
-const SETTINGS: SlotType  = { kind: 'action', action: 'open-settings', label: 'settings', icon: 'Settings', hideLabel: true }
+const SETTINGS: SlotType  = { kind: 'link', href: '/settings', label: 'settings', icon: 'Settings', hideLabel: true, authOnly: true }
 const FEEDBACK_TEXT: SlotType = { kind: 'text-link', href: '/feedback', text: 'SEND FEEDBACK' }
 const SHARE: SlotType     = { kind: 'action', action: 'share',      label: 'share',   icon: 'Share2', hideLabel: true }
 const EXPORT: SlotType    = { kind: 'action', action: 'export-txt', label: 'export',  icon: 'Download' }

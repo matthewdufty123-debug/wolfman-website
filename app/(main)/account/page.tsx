@@ -5,23 +5,22 @@ import { db } from '@/lib/db'
 import { orders, users } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { noindexMetadata } from '@/lib/metadata'
-
-export const metadata: Metadata = noindexMetadata('My account')
+import SectionHeader from '@/components/SectionHeader'
 import AccountNameForm from '@/components/AccountNameForm'
 import AccountPasswordForm from '@/components/AccountPasswordForm'
 import AccountUsernameForm from '@/components/AccountUsernameForm'
-import AccountCommunityForm from '@/components/AccountCommunityForm'
-import AccountWolfBotProfileForm from '@/components/AccountWolfBotProfileForm'
 import SignOutButton from '@/components/SignOutButton'
 import AvatarUpload from '@/components/AvatarUpload'
 import { generateUniqueUsername } from '@/lib/username'
+
+export const metadata: Metadata = noindexMetadata('My account')
 
 export default async function AccountPage() {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
   const [user, userOrders] = await Promise.all([
-    db.select({ avatar: users.avatar, username: users.username, communityEnabled: users.communityEnabled, defaultPublic: users.defaultPublic, profession: users.profession, humourSource: users.humourSource }).from(users).where(eq(users.id, session.user.id)).then(r => r[0]),
+    db.select({ avatar: users.avatar, username: users.username }).from(users).where(eq(users.id, session.user.id)).then(r => r[0]),
     db.select().from(orders).where(eq(orders.userId, session.user.id)).orderBy(desc(orders.createdAt)),
   ])
 
@@ -35,89 +34,98 @@ export default async function AccountPage() {
   }
 
   return (
-    <main className="account-main">
-      <div className="account-wrap">
+    <main className="personal-page">
+      <SectionHeader section="personal" current="/account" username={username ?? ''} />
+      <div className="personal-page-wrap">
 
-        {/* Avatar */}
-        <AvatarUpload currentAvatar={avatar} name={session.user.name ?? null} />
+        {/* Your photo */}
+        <div className="setting-card">
+          <div className="setting-card-head">
+            <p className="setting-card-label">Profile</p>
+            <p className="setting-card-title">Your photo</p>
+            <p className="setting-card-desc">Shown on your profile and next to your journals.</p>
+          </div>
+          <div className="setting-card-divider" />
+          <div className="setting-card-body">
+            <AvatarUpload currentAvatar={avatar} name={session.user.name ?? null} />
+          </div>
+        </div>
 
-        <h1 className="account-title">
-          {session.user.name ? `Hello, ${session.user.name.split(' ')[0]}.` : 'Your account.'}
-        </h1>
-
-        <p className="account-email">{session.user.email}</p>
-
-        {/* Order history */}
-        <section className="account-section">
-          <h2 className="account-section-title">Orders</h2>
-          {userOrders.length === 0 ? (
-            <p className="account-empty">No orders yet.</p>
-          ) : (
-            <ul className="account-orders">
-              {userOrders.map((order) => (
-                <li key={order.id} className="account-order">
-                  <div className="account-order-meta">
-                    <span className="account-order-date">
-                      {new Date(order.createdAt).toLocaleDateString('en-GB', {
-                        day: 'numeric', month: 'long', year: 'numeric'
-                      })}
-                    </span>
-                    <span className={`account-order-status account-order-status--${order.status}`}>
-                      {order.status}
-                    </span>
-                  </div>
-                  <span className="account-order-total">
-                    £{(order.totalAmount / 100).toFixed(2)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        {/* Your name */}
+        <div className="setting-card">
+          <div className="setting-card-head">
+            <p className="setting-card-label">Identity</p>
+            <p className="setting-card-title">Your name</p>
+            <p className="setting-card-desc">The name shown on your profile and in your journals.</p>
+          </div>
+          <div className="setting-card-divider" />
+          <div className="setting-card-body">
+            <AccountNameForm currentName={session.user.name ?? ''} />
+          </div>
+        </div>
 
         {/* Username */}
-        <section className="account-section">
-          <h2 className="account-section-title">Your username</h2>
-          <p className="account-section-hint">This is your public handle — it appears in your profile URL.</p>
-          <AccountUsernameForm currentUsername={username ?? ''} />
-        </section>
+        <div className="setting-card">
+          <div className="setting-card-head">
+            <p className="setting-card-label">Identity</p>
+            <p className="setting-card-title">Username</p>
+            <p className="setting-card-desc">Your public handle — it appears in your profile URL.</p>
+          </div>
+          <div className="setting-card-divider" />
+          <div className="setting-card-body">
+            <AccountUsernameForm currentUsername={username ?? ''} />
+          </div>
+        </div>
 
-        {/* Update name */}
-        <section className="account-section">
-          <h2 className="account-section-title">Your name</h2>
-          <AccountNameForm currentName={session.user.name ?? ''} />
-        </section>
+        {/* Password */}
+        <div className="setting-card">
+          <div className="setting-card-head">
+            <p className="setting-card-label">Security</p>
+            <p className="setting-card-title">Password</p>
+          </div>
+          <div className="setting-card-divider" />
+          <div className="setting-card-body">
+            <AccountPasswordForm />
+          </div>
+        </div>
 
-        {/* Community settings */}
-        <section className="account-section">
-          <h2 className="account-section-title">Community</h2>
-          <p className="account-section-hint">Control whether your journals appear in the community feed.</p>
-          <AccountCommunityForm
-            communityEnabled={user?.communityEnabled ?? false}
-            defaultPublic={user?.defaultPublic ?? false}
-          />
-        </section>
-
-        {/* WOLF|BOT profile */}
-        <section className="account-section">
-          <h2 className="account-section-title">WOLF|BOT profile</h2>
-          <p className="account-section-hint">These details personalise your WOLF|BOT journal reviews.</p>
-          <AccountWolfBotProfileForm
-            profession={user?.profession ?? ''}
-            humourSource={user?.humourSource ?? ''}
-          />
-        </section>
-
-        {/* Change password */}
-        <section className="account-section">
-          <h2 className="account-section-title">Change password</h2>
-          <AccountPasswordForm />
-        </section>
+        {/* Orders — only shown when the user has orders */}
+        {userOrders.length > 0 && (
+          <div className="setting-card">
+            <div className="setting-card-head">
+              <p className="setting-card-label">Shop</p>
+              <p className="setting-card-title">Order history</p>
+            </div>
+            <div className="setting-card-divider" />
+            <div className="setting-card-body">
+              <ul className="account-orders">
+                {userOrders.map((order) => (
+                  <li key={order.id} className="account-order">
+                    <div className="account-order-meta">
+                      <span className="account-order-date">
+                        {new Date(order.createdAt).toLocaleDateString('en-GB', {
+                          day: 'numeric', month: 'long', year: 'numeric'
+                        })}
+                      </span>
+                      <span className={`account-order-status account-order-status--${order.status}`}>
+                        {order.status}
+                      </span>
+                    </div>
+                    <span className="account-order-total">
+                      £{(order.totalAmount / 100).toFixed(2)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
 
         {/* Sign out */}
-        <section className="account-section">
+        <div className="personal-signout">
           <SignOutButton />
-        </section>
+        </div>
+
       </div>
     </main>
   )

@@ -1073,62 +1073,6 @@ html[data-theme="light"] .more-pages-signout-btn:hover {
 
 
 /* ── Settings overlay (slides up like the menu) ── */
-.settings-overlay {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 75vh;
-  background: var(--menu-bg, #3D4E63);
-  display: flex;
-  align-items: flex-start;
-  transform: translateY(100%);
-  transition: transform 0.55s cubic-bezier(0.32, 0.72, 0, 1);
-  z-index: 100;
-  pointer-events: none;
-}
-
-.settings-overlay.is-open {
-  transform: translateY(0);
-  pointer-events: all;
-}
-
-.settings-close {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  background: none;
-  border: none;
-  font-size: 2rem;
-  color: var(--menu-links, #D4C5BA);
-  cursor: pointer;
-  line-height: 1;
-  padding: 0.5rem;
-  opacity: 0.5;
-  transition: opacity 0.2s ease;
-}
-
-.settings-close:hover {
-  opacity: 1;
-}
-
-.settings-inner {
-  text-align: left;
-  padding: 2rem 2rem 2rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  overflow-y: auto;
-}
-
-.settings-overlay-title {
-  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: clamp(1.8rem, 6vw, 3rem);
-  font-weight: 400;
-  color: var(--menu-prompt, rgba(212, 197, 186, 0.45));
-  margin: 0 0 2.5rem 0;
-}
-
 /* ── Dev overlay — full-height slide-up ── */
 .dev-overlay {
   position: fixed;
@@ -5812,6 +5756,82 @@ html[data-theme="light"] .pf-expand-btn:hover {
   line-height: 1.6;
   margin: 0.25rem 0 1rem;
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* ── Personal pages (settings & account) card layout ── */
+
+.personal-page {
+  min-height: 100vh;
+  padding: 0 1.25rem 9rem;
+}
+
+.personal-page-wrap {
+  max-width: 520px;
+  margin: 0 auto;
+  padding-top: 1.5rem;
+}
+
+.setting-card {
+  border: 1px solid rgba(160, 98, 42, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.setting-card-head {
+  padding: 1.1rem 1.25rem 0.9rem;
+}
+
+.setting-card-label {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #A0622A;
+  margin: 0 0 0.2rem;
+}
+
+.setting-card-title {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--body-text);
+  margin: 0 0 0.2rem;
+}
+
+.setting-card-desc {
+  font-size: 0.78rem;
+  color: var(--body-text);
+  opacity: 0.5;
+  margin: 0;
+  line-height: 1.5;
+  font-family: var(--font-inter), sans-serif;
+}
+
+.setting-card-divider {
+  height: 1px;
+  background: rgba(160, 98, 42, 0.12);
+}
+
+.setting-card-body {
+  padding: 1.1rem 1.25rem;
+}
+
+.personal-sync-note {
+  font-size: 0.72rem;
+  color: var(--body-text);
+  opacity: 0.4;
+  text-align: center;
+  margin: 1.25rem 0 0;
+  font-family: var(--font-inter), sans-serif;
+}
+
+.personal-signout {
+  margin-top: 1rem;
+  padding: 1rem 0;
+  display: flex;
+  justify-content: flex-start;
 }
 
 /* ── Onboarding page ── */

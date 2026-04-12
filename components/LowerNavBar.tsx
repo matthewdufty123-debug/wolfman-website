@@ -17,7 +17,6 @@ import { getNavConfigKey, NAV_CONFIGS, type NavIcon, type SlotType } from '@/lib
 import { usePostContext } from '@/lib/post-context'
 import WolfBotIcon from './WolfBotIcon'
 import WolfLogo from './WolfLogo'
-import SettingsOverlay from './SettingsOverlay'
 import ThemeLogo from './ThemeLogo'
 
 // ─── Icon renderer ────────────────────────────────────────────────────────────
@@ -128,7 +127,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
   const config = NAV_CONFIGS[configKey]
 
   const [faded, setFaded] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
   const [morePagesOpen, setMorePagesOpen] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -359,12 +357,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
 
       case 'action':
         switch (slot.action) {
-          case 'open-settings':
-            return (
-              <button key={key} className="nav-slot nav-slot--btn" aria-label="Settings" onClick={() => setSettingsOpen(true)}>
-                <NavIconEl icon={slot.icon} />
-              </button>
-            )
           case 'share':
             return (
               <button key={key} className="nav-slot nav-slot--btn" aria-label="Share" onClick={handleShare}>
@@ -411,9 +403,9 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
           )
         }
         return (
-          <button key={key} className="nav-slot nav-slot--btn" aria-label="Sign in" onClick={() => setLoginOpen(true)}>
+          <Link key={key} href="/login" className="nav-slot nav-slot--link" aria-label="Sign in">
             <User size={20} strokeWidth={1.5} />
-          </button>
+          </Link>
         )
 
       default:
@@ -537,9 +529,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
 
         </div>
       </div>
-
-      {/* ── Settings overlay ── */}
-      <SettingsOverlay open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
       {/* ── Login modal ── */}
       <div

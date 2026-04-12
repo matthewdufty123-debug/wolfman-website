@@ -12,7 +12,6 @@ import {
 import { useSession } from 'next-auth/react'
 import { getNavConfigKey, NAV_CONFIGS, type NavIcon, type SlotType } from '@/lib/nav-config'
 import { usePostContext } from '@/lib/post-context'
-import SettingsOverlay from './SettingsOverlay'
 
 function NavIconEl({ icon, size = 18 }: { icon: NavIcon; size?: number }) {
   const p = { size, strokeWidth: 1.5 }
@@ -52,7 +51,6 @@ export default function UpperNavBar() {
   const config = NAV_CONFIGS[configKey]
 
   const [faded, setFaded] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
 
   if (config.hideBars) return null
 
@@ -149,6 +147,9 @@ export default function UpperNavBar() {
         )
 
       case 'link': {
+        if (slot.authOnly && status !== 'authenticated') {
+          return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
+        }
         let href = slot.href
         // Dynamic edit link for journal-reading (post owner, upper bar)
         if (configKey === 'journal-reading' && slot.label === 'edit') {
@@ -164,14 +165,6 @@ export default function UpperNavBar() {
       }
 
       case 'action':
-        if (slot.action === 'open-settings') {
-          return (
-            <button key={key} className="nav-slot nav-slot--btn" aria-label="Settings" onClick={() => setSettingsOpen(true)}>
-              <NavIconEl icon={slot.icon} />
-              {!slot.hideLabel && <span className="nav-slot-label">{slot.label}</span>}
-            </button>
-          )
-        }
         if (slot.action === 'share') {
           return (
             <button key={key} className="nav-slot nav-slot--btn" aria-label="Share" onClick={handleShare}>
@@ -192,7 +185,6 @@ export default function UpperNavBar() {
       <nav className={`upper-nav${faded ? ' nav--faded' : ''}`} aria-label="Upper navigation">
         {config.upper.map((slot, idx) => renderSlot(slot, idx))}
       </nav>
-      <SettingsOverlay open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </>
   )
 }

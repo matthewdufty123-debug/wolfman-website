@@ -22,17 +22,32 @@ const BETA_PAGES = [
   { href: '/dev',      label: 'Dev Log' },
 ]
 
+function personalPages(username: string) {
+  return [
+    { href: username ? `/${username}` : '/account', label: 'Profile' },
+    { href: '/settings', label: 'Settings' },
+    { href: '/account',  label: 'Account' },
+  ]
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 interface SectionHeaderProps {
-  section: 'discover' | 'beta'
+  section: 'discover' | 'beta' | 'personal'
   current: string
+  username?: string
 }
 
-export default function SectionHeader({ section, current }: SectionHeaderProps) {
+export default function SectionHeader({ section, current, username = '' }: SectionHeaderProps) {
   const router = useRouter()
-  const pages = section === 'discover' ? DISCOVER_PAGES : BETA_PAGES
-  const title = section === 'discover' ? 'WHAT WOULD YOU LIKE TO LEARN ABOUT?' : 'ABOUT THE BETA'
+  const pages =
+    section === 'discover' ? DISCOVER_PAGES :
+    section === 'beta'     ? BETA_PAGES :
+                             personalPages(username)
+  const title =
+    section === 'discover' ? 'WHAT WOULD YOU LIKE TO LEARN ABOUT?' :
+    section === 'beta'     ? 'ABOUT THE BETA' :
+                             'YOUR SPACE'
 
   return (
     <div className="section-hdr">
