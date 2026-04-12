@@ -82,7 +82,10 @@ export default function RitualTrendsPanel({ data }: Props) {
 
       {zones.length > 0 && (
         <div style={{ marginTop: '0.75rem' }}>
-          <p className="chart-card-title" style={{ marginBottom: '0.5rem' }}>Which rituals stick</p>
+          <p className="chart-card-title" style={{ marginBottom: '0.25rem' }}>Which rituals stick</p>
+          <p style={{ fontFamily: 'var(--font-lora), serif', fontSize: '0.78rem', color: 'var(--body-text)', opacity: 0.55, marginBottom: '0.6rem', lineHeight: 1.5 }}>
+            How often each ritual appeared across your journals in this period — 100% means it was logged every day.
+          </p>
           <div className="chart-zone-dist">
             {zones.map((z, i) => (
               <div key={i} className="chart-zone-row">
