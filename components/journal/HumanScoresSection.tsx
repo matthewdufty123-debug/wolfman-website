@@ -14,20 +14,17 @@ import {
 } from '@/components/charts/chartUtils'
 import type { ScaleHistoryEntry } from '@/app/(main)/[username]/[slug]/_sections/HowIShowedUpSection'
 
-// ── Colour interpolation — 1 = pale blue, 8 = intense ──────────────────────
+// ── Colour interpolation — centre values off-white, extremes copper ──────────
 
-function getScaleColor(value: number, isStress = false): string {
-  const t = (value - 1) / 7
-  if (isStress) {
-    const rVal = Math.round(0xa8 + (0xc8 - 0xa8) * t)
-    const gVal = Math.round(0xd0 + (0x78 - 0xd0) * t)
-    const bVal = Math.round(0xe0 + (0x40 - 0xe0) * t)
-    return `rgb(${rVal},${gVal},${bVal})`
-  }
-  const rVal = Math.round(0xa8 + (0x2a - 0xa8) * t)
-  const gVal = Math.round(0xd0 + (0x6a - 0xd0) * t)
-  const bVal = Math.round(0xe0 + (0xb0 - 0xe0) * t)
-  return `rgb(${rVal},${gVal},${bVal})`
+function getScaleColor(value: number): string {
+  // Distance from midpoint 4.5: 0.5 (centre) → 3.5 (extreme)
+  const dist = Math.abs(value - 4.5)
+  const t = Math.max(0, (dist - 0.5) / 3) // 0 at centre, 1 at extreme
+  // Lerp off-white #E8E8E8 → copper #A0622A
+  const r = Math.round(0xe8 + (0xa0 - 0xe8) * t)
+  const g = Math.round(0xe8 + (0x62 - 0xe8) * t)
+  const b = Math.round(0xe8 + (0x2a - 0xe8) * t)
+  return `rgb(${r},${g},${b})`
 }
 
 // ── Scale row — self-contained IntersectionObserver ──────────────────────────
@@ -71,7 +68,7 @@ function ScaleRow({ title, value, labels, isStress = false, history, scaleKey }:
     )
   }
 
-  const ringColor = getScaleColor(value, isStress)
+  const ringColor = getScaleColor(value)
   const scaleColor = SCALE_COLORS[scaleKey]
   const label = labels[value - 1]
   const hasEnoughData = history.filter(v => v !== null).length >= 3
