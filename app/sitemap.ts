@@ -3,6 +3,8 @@ import { db } from '@/lib/db'
 import { posts, users } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 
+export const dynamic = 'force-dynamic'
+
 const SITE_URL = 'https://wolfman.app'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
