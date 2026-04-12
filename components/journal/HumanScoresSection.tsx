@@ -11,6 +11,9 @@ import {
   BODY_LABELS,
   HAPPY_LABELS,
   STRESS_LABELS,
+  formatBipolar,
+  bipolarAvg,
+  toBipolar,
 } from '@/components/charts/chartUtils'
 import type { ScaleHistoryEntry } from '@/app/(main)/[username]/[slug]/_sections/HowIShowedUpSection'
 
@@ -74,9 +77,10 @@ function ScaleRow({ title, value, labels, isStress = false, history, scaleKey }:
   const hasEnoughData = history.filter(v => v !== null).length >= 3
 
   const previous = history.slice(0, -1).filter((v): v is number => v !== null)
-  const avg = previous.length > 0
+  const rawAvg = previous.length > 0
     ? previous.reduce((a, b) => a + b, 0) / previous.length
     : null
+  const avg = rawAvg !== null ? toBipolar(Math.round(rawAvg)) : null
 
   return (
     <div
@@ -92,7 +96,7 @@ function ScaleRow({ title, value, labels, isStress = false, history, scaleKey }:
       <div className="hss-row-left">
         <span className="hss-row-title">{title}</span>
         <div className="hss-digit-wrap">
-          <SegmentedRing value={value} color={ringColor} revealed={revealed} />
+          <SegmentedRing value={value} color={ringColor} revealed={revealed} displayValue={formatBipolar(value)} />
         </div>
         <span className="hss-row-word" style={{ color: ringColor }}>{label}</span>
       </div>
@@ -111,10 +115,10 @@ function ScaleRow({ title, value, labels, isStress = false, history, scaleKey }:
               centered
             />
             <div className="hss-chart-footer">
-              {avg !== null && (
-                <span className="hss-row-avg">avg {avg.toFixed(1)}</span>
+              {rawAvg !== null && (
+                <span className="hss-row-avg">avg {bipolarAvg(rawAvg)}</span>
               )}
-              <DeltaIndicator todayValue={value} avg={avg} previousCount={previous.length} revealed={revealed} />
+              <DeltaIndicator todayValue={toBipolar(value)} avg={avg} previousCount={previous.length} revealed={revealed} />
             </div>
           </>
         ) : (

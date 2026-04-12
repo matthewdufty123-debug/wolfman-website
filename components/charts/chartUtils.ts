@@ -1,5 +1,31 @@
 // ── Shared chart utilities ───────────────────────────────────────────────────
 
+/**
+ * Convert a raw 1–8 scale value to bipolar ±4 display.
+ * Mapping: 1→-4, 2→-3, 3→-2, 4→-1, 5→+1, 6→+2, 7→+3, 8→+4
+ */
+export function toBipolar(v: number): number {
+  return v <= 4 ? v - 5 : v - 4
+}
+
+/** Format a raw 1–8 value as a bipolar string e.g. "+3" or "-2" */
+export function formatBipolar(v: number): string {
+  const b = toBipolar(v)
+  return b > 0 ? `+${b}` : `${b}`
+}
+
+/**
+ * Convert a fractional raw average (e.g. 4.4) to a continuous bipolar average.
+ * Uses a linear shift centred at 4.5 with a +0.5 offset to skip zero.
+ * Result range: -4 (at raw 1) to +4 (at raw 8).
+ */
+export function bipolarAvg(rawAvg: number): string {
+  // Linear: map 1→-4, 8→+4 skipping 0: shift = rawAvg - 4.5, then ×(8/7) ≈ scale
+  // Simpler continuous: rawAvg - 4.5 gives -3.5..+3.5; scale to -4..+4
+  const b = ((rawAvg - 4.5) / 3.5) * 4
+  return (b >= 0 ? '+' : '') + b.toFixed(1)
+}
+
 /** Format ISO date string as "DD MMM" (e.g. "12 Apr") */
 export function fmtDate(iso: string): string {
   const d = new Date(iso + 'T00:00:00')

@@ -5,9 +5,10 @@ interface SegmentedRingProps {
   color: string
   size?: number
   revealed: boolean
+  displayValue?: string
 }
 
-export default function SegmentedRing({ value, color, size = 64, revealed }: SegmentedRingProps) {
+export default function SegmentedRing({ value, color, size = 64, revealed, displayValue }: SegmentedRingProps) {
   const cx = size / 2
   const cy = size / 2
   const r  = size / 2 - 5
@@ -58,13 +59,13 @@ export default function SegmentedRing({ value, color, size = 64, revealed }: Seg
       </svg>
       <span style={{
         fontFamily: 'var(--font-lora), Georgia, serif',
-        fontSize: '1.5rem',
+        fontSize: displayValue !== undefined ? '1.1rem' : '1.5rem',
         fontWeight: 700,
         color,
         lineHeight: 1,
         position: 'relative',
       }}>
-        {value}
+        {displayValue !== undefined ? displayValue : value}
       </span>
     </div>
   )
