@@ -84,7 +84,7 @@ function WordCountBarChart({
       {yTicks.map(v => (
         <text key={v} x={PAD_LEFT - 4} y={yForWords(v)}
           textAnchor="end" dominantBaseline="middle"
-          style={{ fill: 'var(--chart-text, rgba(255,255,255,0.35))' }}
+          style={{ fill: 'var(--chart-text, rgba(255,255,255,0.52))' }}
           fontSize="7" fontFamily="var(--font-inter), sans-serif"
         >
           {v >= 1000 ? `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k` : v}
@@ -126,7 +126,7 @@ function WordCountBarChart({
             {topLabelY >= PAD_TOP + 5 && total > 0 && (
               <text x={x + barW / 2} y={topLabelY}
                 textAnchor="middle" dominantBaseline="auto"
-                style={{ fill: 'var(--chart-text, rgba(255,255,255,0.35))' }}
+                style={{ fill: 'var(--chart-text, rgba(255,255,255,0.52))' }}
                 fontSize="7" fontFamily="var(--font-inter), sans-serif"
               >
                 {total >= 1000 ? `${(total / 1000).toFixed(1)}k` : total}
@@ -144,7 +144,7 @@ function WordCountBarChart({
         return (
           <text key={i} x={x} textAnchor="middle" fontSize="6.5"
             fontFamily="var(--font-inter), sans-serif"
-            fill={isLast ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.35)'}
+            fill={isLast ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.52)'}
             fontWeight={isLast ? 700 : 400}
           >
             <tspan x={x} y={H - PAD_BOTTOM + 10}>{line1}</tspan>

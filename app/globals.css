@@ -7346,6 +7346,8 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   text-align: left;
 }
 
+html[data-theme="dark"] .journal-section-title { color: rgba(255,255,255,0.9); }
+
 /* ── Section info header (with ? popup) ── */
 .sih-wrap {
   margin-bottom: 1.25rem;
@@ -7369,6 +7371,8 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   text-align: left;
   line-height: 1.1;
 }
+
+html[data-theme="dark"] .sih-title { color: rgba(255,255,255,0.9); }
 
 .sih-q-btn {
   width: 20px;
@@ -7401,6 +7405,8 @@ html[data-theme="cool"] .journal-section--wolfbot .wolfbot-bubble-inner {
   margin: 0;
   line-height: 1.5;
 }
+
+html[data-theme="dark"] .sih-desc { color: rgba(255,255,255,0.9); opacity: 0.72; }
 
 .sih-backdrop {
   position: fixed;

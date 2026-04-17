@@ -16,10 +16,10 @@ import type { ScaleHistoryEntry } from '@/app/(main)/[username]/[slug]/_sections
 // ── Fixed pastel colours — one per scale, consistent throughout ───────────────
 
 const SCALE_PASTELS = {
-  brain:  '#6090C0',  // Cornflower Blue
-  body:   '#C8B020',  // Mustard Gold
-  happy:  '#3AB87A',  // Emerald
-  stress: '#70C0C8',  // Teal
+  brain:  'rgba(255,255,255,0.82)',
+  body:   'rgba(255,255,255,0.82)',
+  happy:  'rgba(255,255,255,0.82)',
+  stress: 'rgba(255,255,255,0.82)',
 } as const
 
 type ScaleKey = keyof typeof SCALE_PASTELS
@@ -42,7 +42,7 @@ function SectionTopDivider() {
 }
 
 function RowDivider() {
-  return <div style={{ height: 2, background: '#A0622A', margin: '1.25rem 0' }} />
+  return <div style={{ height: 1, background: 'rgba(255,255,255,0.12)', margin: '1.25rem 0' }} />
 }
 
 // ── X-axis label helper ───────────────────────────────────────────────────────
@@ -154,7 +154,7 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
             >{bipStr}</text>
             <text x={27} y={y} textAnchor="start" dominantBaseline="middle"
               fontSize="7" fontFamily="var(--font-inter), sans-serif"
-              fill="rgba(255,255,255,0.38)"
+              fill="rgba(255,255,255,0.52)"
             >{labelText}</text>
           </g>
         )
@@ -184,12 +184,13 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
       {/* Data dots */}
       {nonNullPts.map((p, seqIdx) => {
         const isLast = p.idx === N - 1
+        const dotOpacity = isLast ? 1 : 0.15 + (seqIdx / Math.max(nonNullPts.length - 1, 1)) * 0.65
         return (
           <circle key={p.idx}
             cx={xFor(p.idx)} cy={yFor(p.rawV)}
             r={isLast ? 5.5 : 2.5}
             fill={isLast ? '#A0622A' : color}
-            fillOpacity={isLast ? 1 : 0.65}
+            fillOpacity={dotOpacity}
             style={{ opacity: revealed ? 1 : 0, transition: `opacity 0.3s ease ${0.4 + seqIdx * 0.04}s` }}
           />
         )
@@ -203,7 +204,7 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
         return (
           <text key={i} x={x} textAnchor="middle" fontSize="7"
             fontFamily="var(--font-inter), sans-serif"
-            fill={isLast ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.38)'}
+            fill={isLast ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.52)'}
             fontWeight={isLast ? 700 : 400}
           >
             <tspan x={x} y={VH - PAD_BOTTOM + 10}>{line1}</tspan>

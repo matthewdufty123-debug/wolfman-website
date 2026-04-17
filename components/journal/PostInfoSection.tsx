@@ -38,7 +38,8 @@ export default function PostInfoSection({ post, calendarDays }: Props) {
   const postedCount = calendarDays?.filter(d => d.hasPost).length ?? 0
 
   return (
-    <section id="post-information" className="journal-section">
+    <section id="post-information" className="journal-section" style={{ paddingTop: '2.5rem' }}>
+      <div style={{ height: 3, background: '#A0622A', marginBottom: '1.5rem' }} />
       <h2 className="journal-section-title">Post Information</h2>
 
       {calendarDays && calendarDays.length > 0 && (
