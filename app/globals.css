@@ -21,11 +21,16 @@ html[data-theme="dark"] {
   --wolf-panel-fill: #214459;
   /* chart tokens */
   --chart-axis: rgba(255,255,255,0.12);
-  --chart-text: rgba(255,255,255,0.35);
+  --chart-text: rgba(255,255,255,0.52);
+  --chart-text-bright: rgba(255,255,255,0.9);
+  --chart-line: rgba(255,255,255,0.82);
+  --chart-mid: rgba(255,255,255,0.22);
+  --chart-trend: rgba(255,255,255,0.32);
+  --sub-divider: rgba(255,255,255,0.12);
   --chart-avg: rgba(255,255,255,0.4);
   --chart-dot-hist: rgba(255,255,255,1);
   --chart-row-border: rgba(255,255,255,0.08);
-  --chart-label: rgba(255,255,255,0.5);
+  --chart-label: rgba(255,255,255,0.55);
   --chart-sub: rgba(255,255,255,0.35);
   --chart-area-fill: rgba(255,255,255,0.08);
   --chart-zone-track: rgba(255,255,255,0.08);
@@ -55,11 +60,16 @@ html[data-theme="light"] {
   --wolf-panel-fill: #4A7FA5;
   /* chart tokens */
   --chart-axis: rgba(74,74,74,0.15);
-  --chart-text: rgba(74,74,74,0.45);
+  --chart-text: rgba(74,74,74,0.58);
+  --chart-text-bright: rgba(0,0,0,0.85);
+  --chart-line: rgba(50,63,80,0.78);
+  --chart-mid: rgba(0,0,0,0.15);
+  --chart-trend: rgba(0,0,0,0.22);
+  --sub-divider: rgba(0,0,0,0.1);
   --chart-avg: rgba(74,74,74,0.35);
   --chart-dot-hist: rgba(74,74,74,0.55);
   --chart-row-border: rgba(74,74,74,0.1);
-  --chart-label: rgba(74,74,74,0.5);
+  --chart-label: rgba(74,74,74,0.65);
   --chart-sub: rgba(74,74,74,0.35);
   --chart-area-fill: rgba(74,127,165,0.08);
   --chart-zone-track: rgba(74,127,165,0.08);

@@ -16,10 +16,10 @@ import type { ScaleHistoryEntry } from '@/app/(main)/[username]/[slug]/_sections
 // ── Fixed pastel colours — one per scale, consistent throughout ───────────────
 
 const SCALE_PASTELS = {
-  brain:  'rgba(255,255,255,0.82)',
-  body:   'rgba(255,255,255,0.82)',
-  happy:  'rgba(255,255,255,0.82)',
-  stress: 'rgba(255,255,255,0.82)',
+  brain:  'var(--chart-line)',
+  body:   'var(--chart-line)',
+  happy:  'var(--chart-line)',
+  stress: 'var(--chart-line)',
 } as const
 
 type ScaleKey = keyof typeof SCALE_PASTELS
@@ -42,7 +42,7 @@ function SectionTopDivider() {
 }
 
 function RowDivider() {
-  return <div style={{ height: 1, background: 'rgba(255,255,255,0.12)', margin: '1.25rem 0' }} />
+  return <div style={{ height: 1, background: 'var(--sub-divider)', margin: '1.25rem 0' }} />
 }
 
 // ── X-axis label helper ───────────────────────────────────────────────────────
@@ -145,16 +145,17 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
         return (
           <g key={rawV}>
             <line x1={PLOT_LEFT} y1={y} x2={PLOT_RIGHT} y2={y}
-              stroke={isMid ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.05)'}
+              style={{ stroke: 'var(--chart-axis)' }}
               strokeWidth={isMid ? 1.5 : 1}
+              strokeOpacity={isMid ? 1 : 0.5}
             />
             <text x={22} y={y} textAnchor="end" dominantBaseline="middle"
               fontSize="7.5" fontFamily="var(--font-inter), sans-serif"
-              fill="rgba(255,255,255,0.55)" fontWeight="600"
+              style={{ fill: 'var(--chart-label)' }} fontWeight="600"
             >{bipStr}</text>
             <text x={27} y={y} textAnchor="start" dominantBaseline="middle"
               fontSize="7" fontFamily="var(--font-inter), sans-serif"
-              fill="rgba(255,255,255,0.52)"
+              style={{ fill: 'var(--chart-text)' }}
             >{labelText}</text>
           </g>
         )
@@ -162,13 +163,13 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
 
       {/* Mid baseline */}
       <line x1={PLOT_LEFT} y1={midY} x2={PLOT_RIGHT} y2={midY}
-        stroke="rgba(255,255,255,0.22)" strokeWidth={1.5} strokeDasharray="4 3"
+        style={{ stroke: 'var(--chart-mid)' }} strokeWidth={1.5} strokeDasharray="4 3"
       />
 
       {/* Log trend line */}
       {trendPath && (
         <path d={trendPath} fill="none"
-          stroke="rgba(255,255,255,0.32)" strokeWidth={1.5}
+          style={{ stroke: 'var(--chart-trend)' }} strokeWidth={1.5}
           strokeDasharray="6 4" strokeLinecap="round"
         />
       )}
@@ -204,7 +205,7 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
         return (
           <text key={i} x={x} textAnchor="middle" fontSize="7"
             fontFamily="var(--font-inter), sans-serif"
-            fill={isLast ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.52)'}
+            style={{ fill: isLast ? 'var(--chart-text-bright)' : 'var(--chart-text)' }}
             fontWeight={isLast ? 700 : 400}
           >
             <tspan x={x} y={VH - PAD_BOTTOM + 10}>{line1}</tspan>

@@ -21,7 +21,7 @@ function SectionTopDivider() {
 }
 
 function CopperDivider() {
-  return <div style={{ height: 1, background: 'rgba(255,255,255,0.12)', margin: '1rem 0' }} />
+  return <div style={{ height: 1, background: 'var(--sub-divider)', margin: '1rem 0' }} />
 }
 
 function GreyDivider() {
@@ -62,7 +62,7 @@ function RitualBarChart({ dailyCounts, todayCount, slotDates }: BarChartProps) {
       style={{ display: 'block' }}
     >
       {/* Y-axis */}
-      <line x1={PL} y1={PT} x2={PL} y2={PT + plotH} stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+      <line x1={PL} y1={PT} x2={PL} y2={PT + plotH} style={{ stroke: 'var(--chart-axis)' }} strokeWidth="1" />
 
       {/* Bars */}
       {dailyCounts.map((count, i) => {
@@ -84,8 +84,8 @@ function RitualBarChart({ dailyCounts, todayCount, slotDates }: BarChartProps) {
       })}
 
       {/* Y-axis labels */}
-      <text x={PL - 4} y={PT + 3} textAnchor="end" fontSize="7" fontFamily="var(--font-inter), sans-serif" fill="rgba(255,255,255,0.52)">{yMax}</text>
-      <text x={PL - 4} y={PT + plotH} textAnchor="end" dominantBaseline="auto" fontSize="7" fontFamily="var(--font-inter), sans-serif" fill="rgba(255,255,255,0.52)">0</text>
+      <text x={PL - 4} y={PT + 3} textAnchor="end" fontSize="7" fontFamily="var(--font-inter), sans-serif" style={{ fill: 'var(--chart-text)' }}>{yMax}</text>
+      <text x={PL - 4} y={PT + plotH} textAnchor="end" dominantBaseline="auto" fontSize="7" fontFamily="var(--font-inter), sans-serif" style={{ fill: 'var(--chart-text)' }}>0</text>
 
       {/* X-axis labels (2-line) */}
       {slotDates.map((date, i) => {
@@ -99,7 +99,7 @@ function RitualBarChart({ dailyCounts, todayCount, slotDates }: BarChartProps) {
             textAnchor="middle"
             fontSize="7"
             fontFamily="var(--font-inter), sans-serif"
-            fill={isLast ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.52)'}
+            style={{ fill: isLast ? 'var(--chart-text-bright)' : 'var(--chart-text)' }}
             fontWeight={isLast ? 700 : 400}
           >
             <tspan x={x} y={VH - PB + 10}>{line1}</tspan>

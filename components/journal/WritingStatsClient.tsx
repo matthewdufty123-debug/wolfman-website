@@ -144,7 +144,7 @@ function WordCountBarChart({
         return (
           <text key={i} x={x} textAnchor="middle" fontSize="6.5"
             fontFamily="var(--font-inter), sans-serif"
-            fill={isLast ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.52)'}
+            style={{ fill: isLast ? 'var(--chart-text-bright)' : 'var(--chart-text)' }}
             fontWeight={isLast ? 700 : 400}
           >
             <tspan x={x} y={H - PAD_BOTTOM + 10}>{line1}</tspan>
