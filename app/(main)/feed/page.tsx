@@ -16,7 +16,6 @@ import { db } from '@/lib/db'
 import { posts, morningState, users } from '@/lib/db/schema'
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import AnimatedRoutineIcons from '@/components/AnimatedRoutineIcons'
-import { ROUTINE_ICON_MAP } from '@/components/RoutineIcons'
 import { deriveExcerpt } from '@/lib/posts'
 
 function formatDate(iso: string) {
@@ -52,10 +51,10 @@ function Avatar({ src, name, size = 40 }: { src: string | null; name: string; si
 }
 
 const SCALE_WORDS: Record<'happy' | 'body' | 'brain' | 'stress', string[]> = {
-  happy:  ['Lost',    'Lost',    'Steady',  'Steady',  'Good',    'Good',    'Joyful',  'Joyful'],
-  body:   ['Drained', 'Drained', 'Moving',  'Moving',  'Charged', 'Charged', 'Buzzing', 'Buzzing'],
-  brain:  ['Silent',  'Silent',  'Waking',  'Waking',  'Sharp',   'Sharp',   'Manic',   'Manic'],
-  stress: ['Crushed', 'Crushed', 'Tense',   'Tense',   'Alert',   'Alert',   'Hunting', 'Hunting'],
+  happy:  ['Completely Lost', 'Struggling',           'Bit Low',    'Flat',       'Okay',     'Happy',      'Bike Smiles',    'Absolutely Joyful'],
+  body:   ['Nothing to Give', 'Running Empty',        'Sluggish',   'Slow',       'Steady',   'Energised',  'Firing Hard',    'Absolutely Buzzing'],
+  brain:  ['Completely Silent','Very Peaceful',        'Quite Quiet','Chill',      'Active',   'Busy',       'Hyper Focused',  'Totally Manic'],
+  stress: ['Completely Overwhelmed','Anxious',         'Stressed',   'Unsettled',  'Peaceful', 'Focused',    'Primed',         'Hunt Mode'],
 }
 
 function scaleWord(val: number | null, type: keyof typeof SCALE_WORDS): string | null {
@@ -83,7 +82,6 @@ type FeedPost = {
   bodyScale: number | null
   brainScale: number | null
   stressScale: number | null
-  topRitual: string | null
 }
 
 function FeedCard({ post, showAuthor }: { post: FeedPost; showAuthor: boolean }) {
@@ -103,8 +101,6 @@ function FeedCard({ post, showAuthor }: { post: FeedPost; showAuthor: boolean })
     ? Object.values(post.checklist).filter(Boolean).length
     : 0
   const hasRituals = !!post.checklist && completedRituals > 0
-
-  const topRitualMeta = post.topRitual ? ROUTINE_ICON_MAP[post.topRitual] : null
 
   return (
     <article className="feed-card">
@@ -133,31 +129,19 @@ function FeedCard({ post, showAuthor }: { post: FeedPost; showAuthor: boolean })
         <p className="feed-card-title">{post.title || 'Untitled'}</p>
       </Link>
 
-      {/* Row 3+4: Word count (L) + Rituals / top ritual (R) */}
-      {(post.wordCountTotal || hasRituals) && (
-        <div className="feed-card-stats-row">
-          {post.wordCountTotal ? (
-            <div className="feed-card-wordcount">
-              <span className="feed-card-wordcount-number">{post.wordCountTotal}</span>
-              <span className="feed-card-wordcount-label">words</span>
-            </div>
-          ) : <div />}
+      {/* Row 3: Word count */}
+      {post.wordCountTotal ? (
+        <div className="feed-card-wordcount">
+          <span className="feed-card-wordcount-number">{post.wordCountTotal}</span>
+          <span className="feed-card-wordcount-label">words</span>
+        </div>
+      ) : null}
 
-          {hasRituals && (
-            <div className="feed-card-rituals-block">
-              <div className="feed-card-rituals-row">
-                <AnimatedRoutineIcons checklist={post.checklist!} size={18} />
-                <span className="feed-card-ritual-count">{completedRituals}</span>
-              </div>
-              {topRitualMeta && (
-                <div className="feed-card-top-ritual">
-                  <span className="feed-card-top-ritual-star">★</span>
-                  <topRitualMeta.Icon size={12} color={topRitualMeta.color} />
-                  <span className="feed-card-top-ritual-label">{topRitualMeta.label}</span>
-                </div>
-              )}
-            </div>
-          )}
+      {/* Row 4: Ritual icons + count */}
+      {hasRituals && (
+        <div className="feed-card-rituals">
+          <AnimatedRoutineIcons checklist={post.checklist!} size={18} />
+          <span className="feed-card-ritual-count">{completedRituals}</span>
         </div>
       )}
 
@@ -205,32 +189,6 @@ function FeedCard({ post, showAuthor }: { post: FeedPost; showAuthor: boolean })
   )
 }
 
-// ── Top ritual computation ─────────────────────────────────────────────────────
-// Returns the most-completed ritual key per authorId across the given posts + stateMap.
-function computeTopRituals(
-  rows: Array<{ id: string; authorId: string | null }>,
-  stateMap: Map<string, { routineChecklist: unknown }>
-): Record<string, string | null> {
-  const counts: Record<string, Record<string, number>> = {}
-  for (const row of rows) {
-    const aid = row.authorId
-    if (!aid) continue
-    const ms = stateMap.get(row.id)
-    if (!ms) continue
-    const cl = ms.routineChecklist as Record<string, boolean> | null
-    if (!cl) continue
-    if (!counts[aid]) counts[aid] = {}
-    for (const [key, done] of Object.entries(cl)) {
-      if (done) counts[aid][key] = (counts[aid][key] || 0) + 1
-    }
-  }
-  const result: Record<string, string | null> = {}
-  for (const [aid, ritualCounts] of Object.entries(counts)) {
-    const sorted = Object.entries(ritualCounts).sort((a, b) => b[1] - a[1])
-    result[aid] = sorted[0]?.[0] ?? null
-  }
-  return result
-}
 
 export default async function FeedPage({
   searchParams,
@@ -275,7 +233,6 @@ export default async function FeedPage({
       : []
 
     const stateMap = new Map(states.map(s => [s.postId, s]))
-    const topRitualByAuthor = computeTopRituals(rows, stateMap as Map<string, { routineChecklist: unknown }>)
 
     feedPosts = rows.map(({ content, ...r }) => ({
       ...r,
@@ -285,7 +242,6 @@ export default async function FeedPage({
       bodyScale:   stateMap.get(r.id)?.bodyScale   ?? null,
       brainScale:  stateMap.get(r.id)?.brainScale  ?? null,
       stressScale: stateMap.get(r.id)?.stressScale ?? null,
-      topRitual:   r.authorId ? (topRitualByAuthor[r.authorId] ?? null) : null,
     }))
   } else {
     const rows = await db
@@ -321,7 +277,6 @@ export default async function FeedPage({
       : []
 
     const stateMap = new Map(states.map(s => [s.postId, s]))
-    const topRitualByAuthor = computeTopRituals(rows, stateMap as Map<string, { routineChecklist: unknown }>)
 
     feedPosts = rows.map(({ content, ...r }) => ({
       ...r,
@@ -331,7 +286,6 @@ export default async function FeedPage({
       bodyScale:   stateMap.get(r.id)?.bodyScale   ?? null,
       brainScale:  stateMap.get(r.id)?.brainScale  ?? null,
       stressScale: stateMap.get(r.id)?.stressScale ?? null,
-      topRitual:   r.authorId ? (topRitualByAuthor[r.authorId] ?? null) : null,
     }))
   }
 

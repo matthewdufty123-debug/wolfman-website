@@ -5677,20 +5677,12 @@ html[data-theme="light"] .pf-expand-btn:hover {
   color: #A0622A;
 }
 
-/* ── Stats row: word count (L) + rituals block (R) ── */
-.feed-card-stats-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.85rem;
-}
-
 /* ── Word count ── */
 .feed-card-wordcount {
   display: flex;
   align-items: baseline;
   gap: 0.35rem;
+  margin-bottom: 0.6rem;
 }
 
 .feed-card-wordcount-number {
@@ -5709,18 +5701,13 @@ html[data-theme="light"] .pf-expand-btn:hover {
   letter-spacing: 0.08em;
 }
 
-/* ── Rituals block (right side of stats row) ── */
-.feed-card-rituals-block {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.35rem;
-}
-
-.feed-card-rituals-row {
+/* ── Rituals row ── */
+.feed-card-rituals {
   display: flex;
   align-items: center;
   gap: 0.45rem;
+  margin-bottom: 0.85rem;
+  opacity: 0.85;
 }
 
 .feed-card-ritual-count {
@@ -5729,25 +5716,6 @@ html[data-theme="light"] .pf-expand-btn:hover {
   font-weight: 600;
   color: var(--body-text, #4A4A4A);
   opacity: 0.55;
-}
-
-/* ── Top ritual highlight ── */
-.feed-card-top-ritual {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.feed-card-top-ritual-star {
-  font-size: 0.62rem;
-  color: #A0622A;
-  line-height: 1;
-}
-
-.feed-card-top-ritual-label {
-  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.68rem;
-  color: #909090;
 }
 
 /* ── Scales strip — 4 columns ── */
@@ -5776,10 +5744,11 @@ html[data-theme="light"] .pf-expand-btn:hover {
 
 .feed-card-scale-word {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.92rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #A0622A;
-  line-height: 1;
+  line-height: 1.25;
+  word-break: break-word;
 }
 
 /* ── Photo — acts as visual separator ── */
