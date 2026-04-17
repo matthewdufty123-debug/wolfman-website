@@ -193,24 +193,25 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak, 
           </div>
         </button>
 
-        {/* 14 pill indicators — slightly condensed */}
-        <div style={{ display: 'flex', gap: '2px', flex: 1, height: 44 }}>
+        {/* 14 pill indicators */}
+        <div style={{ display: 'flex', gap: '2px', flex: 1, height: 44, alignItems: 'center' }}>
           {segments.map((slot, i) => {
             const filled = slot === true
             const inStreak = inStreakSet.has(i)
             const pillBg = filled
-              ? (inStreak ? color : `${color}80`)
+              ? (inStreak ? color : `${color}28`)
               : 'transparent'
             const pillBorder = slot === null
               ? `1.5px solid ${color}18`
               : filled
                 ? `1.5px solid ${color}`
-                : `1.5px solid ${color}35`
+                : `1.5px solid ${color}28`
             return (
               <div
                 key={i}
                 style={{
                   flex: 1,
+                  height: 40,
                   borderRadius: 5,
                   background: pillBg,
                   border: pillBorder,

@@ -175,7 +175,7 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
       {/* Log trend line */}
       {trendPath && (
         <path d={trendPath} fill="none"
-          style={{ stroke: 'var(--chart-trend)' }} strokeWidth={1.5}
+          stroke="#A0622A" strokeWidth={2}
           strokeDasharray="6 4" strokeLinecap="round"
         />
       )}
