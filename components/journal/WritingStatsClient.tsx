@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState } from 'react'
 import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
 
-// ── Data interfaces ──────────────────────────────────────────────────────────
+// ── Data interfaces ───────────────────────────────────────────────────────────
 
 export interface WordCountEntry {
   date: string
@@ -14,41 +14,56 @@ export interface WordCountEntry {
 }
 
 export interface WritingStatsProps {
-  wordCountHistory: WordCountEntry[]
+  wordCountHistory: (WordCountEntry | null)[]
+  slotDates: string[]
 }
 
-// ── Brand colours ────────────────────────────────────────────────────────────
+// ── Brand colours ─────────────────────────────────────────────────────────────
 
 const COPPER     = '#A0622A'
 const STEEL_BLUE = '#4A7FA5'
 const EMERALD    = '#3AB87A'
 
-// ── Chart 1: Stacked Word Count Bars ────────────────────────────────────────
+// ── X-axis label helper ───────────────────────────────────────────────────────
 
-function WordCountBarChart({ data, revealed }: { data: WordCountEntry[]; revealed: boolean }) {
+function getXLabel(dateStr: string, isLast: boolean): { line1: string; line2: string } {
+  if (isLast) return { line1: 'POST', line2: 'DATE' }
+  const d = new Date(dateStr + 'T00:00:00')
+  const DAY_NAMES = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+  return { line1: DAY_NAMES[d.getDay()], line2: `${d.getDate()}/${d.getMonth() + 1}` }
+}
+
+// ── Stacked bar chart — 14-day calendar ──────────────────────────────────────
+
+function WordCountBarChart({
+  data,
+  slotDates,
+  revealed,
+}: {
+  data: (WordCountEntry | null)[]
+  slotDates: string[]
+  revealed: boolean
+}) {
   const W = 300, H = 160
-  const PAD_LEFT = 28, PAD_RIGHT = 16, PAD_TOP = 22, PAD_BOTTOM = 26
+  const PAD_LEFT = 28, PAD_RIGHT = 8, PAD_TOP = 22, PAD_BOTTOM = 28
   const plotW = W - PAD_LEFT - PAD_RIGHT
   const plotH = H - PAD_TOP - PAD_BOTTOM
 
-  const barCount = data.length
-  if (barCount === 0) return null
+  const N = data.length
+  if (N === 0) return null
 
-  const totals = data.map(e => e.wordCountTotal ?? 0)
+  const totals = data.map(e => e?.wordCountTotal ?? 0)
   const rawMax = Math.max(...totals, 1)
   const yMax   = Math.ceil(rawMax * 1.15 / 100) * 100
 
   function yForWords(n: number) { return PAD_TOP + plotH - (n / yMax) * plotH }
   function barHeight(n: number) { return (n / yMax) * plotH }
 
-  const slotW = plotW / barCount
+  const slotW = plotW / N
   const barW  = slotW * 0.72
   function barX(i: number) { return PAD_LEFT + i * slotW + slotW * 0.14 }
+  function labelX(i: number) { return PAD_LEFT + i * slotW + slotW / 2 }
 
-  const avg = totals.reduce((a, b) => a + b, 0) / barCount
-  const avgY = yForWords(avg)
-
-  // Y-axis tick values
   const yTicks = [0, Math.round(yMax / 2), yMax]
 
   return (
@@ -65,10 +80,9 @@ function WordCountBarChart({ data, revealed }: { data: WordCountEntry[]; reveale
       <line x1={PAD_LEFT} y1={PAD_TOP + plotH} x2={PAD_LEFT + plotW} y2={PAD_TOP + plotH}
         style={{ stroke: 'var(--chart-axis, rgba(255,255,255,0.12))' }} strokeWidth="1" />
 
-      {/* Y-axis tick labels */}
+      {/* Y-axis ticks */}
       {yTicks.map(v => (
-        <text key={v}
-          x={PAD_LEFT - 4} y={yForWords(v)}
+        <text key={v} x={PAD_LEFT - 4} y={yForWords(v)}
           textAnchor="end" dominantBaseline="middle"
           style={{ fill: 'var(--chart-text, rgba(255,255,255,0.35))' }}
           fontSize="7" fontFamily="var(--font-inter), sans-serif"
@@ -77,15 +91,11 @@ function WordCountBarChart({ data, revealed }: { data: WordCountEntry[]; reveale
         </text>
       ))}
 
-      {/* Average dashed line */}
-      <line x1={PAD_LEFT} y1={avgY} x2={PAD_LEFT + plotW} y2={avgY}
-        style={{ stroke: 'var(--chart-avg, rgba(255,255,255,0.4))' }}
-        strokeWidth="1.5" strokeDasharray="6 4" />
-
-      {/* Stacked bars */}
+      {/* Stacked bars — skip null (no-post) slots */}
       {data.map((e, i) => {
-        const isToday = i === barCount - 1
-        const opacity = isToday ? 1.0 : 0.55
+        if (!e) return null
+        const isLast = i === N - 1
+        const opacity = isLast ? 1.0 : 0.55
         const total = e.wordCountTotal ?? 0
 
         const intentionH = barHeight(e.wordCountIntention ?? 0)
@@ -97,13 +107,13 @@ function WordCountBarChart({ data, revealed }: { data: WordCountEntry[]; reveale
         const greatAtY   = gratitudeY - greatAtH
 
         const x = barX(i)
-        const labelY = greatAtY - 3
+        const topLabelY = greatAtY - 3
 
         return (
           <g key={i}>
             {intentionH > 0 && (
               <rect x={x} y={intentionY} width={barW} height={intentionH}
-                fill={STEEL_BLUE} fillOpacity={opacity} />
+                fill={isLast ? COPPER : STEEL_BLUE} fillOpacity={opacity} />
             )}
             {gratitudeH > 0 && (
               <rect x={x} y={gratitudeY} width={barW} height={gratitudeH}
@@ -111,12 +121,10 @@ function WordCountBarChart({ data, revealed }: { data: WordCountEntry[]; reveale
             )}
             {greatAtH > 0 && (
               <rect x={x} y={greatAtY} width={barW} height={greatAtH}
-                fill={COPPER} fillOpacity={opacity} />
+                fill={isLast ? STEEL_BLUE : COPPER} fillOpacity={opacity} />
             )}
-            {/* Total label above bar — hide if too close to top edge */}
-            {labelY >= PAD_TOP + 5 && total > 0 && (
-              <text
-                x={x + barW / 2} y={labelY}
+            {topLabelY >= PAD_TOP + 5 && total > 0 && (
+              <text x={x + barW / 2} y={topLabelY}
                 textAnchor="middle" dominantBaseline="auto"
                 style={{ fill: 'var(--chart-text, rgba(255,255,255,0.35))' }}
                 fontSize="7" fontFamily="var(--font-inter), sans-serif"
@@ -128,24 +136,29 @@ function WordCountBarChart({ data, revealed }: { data: WordCountEntry[]; reveale
         )
       })}
 
-      {/* X-axis label */}
-      <text
-        x={PAD_LEFT + plotW / 2} y={H - 4}
-        textAnchor="middle"
-        style={{ fill: 'var(--chart-text, rgba(255,255,255,0.3))' }}
-        fontSize="7" fontFamily="var(--font-inter), sans-serif"
-      >
-        {`Today and ${Math.max(barCount - 1, 0)} journal history`}
-      </text>
+      {/* X-axis labels (2 lines) */}
+      {slotDates.map((dateStr, i) => {
+        const { line1, line2 } = getXLabel(dateStr, i === N - 1)
+        const x = labelX(i)
+        const isLast = i === N - 1
+        return (
+          <text key={i} x={x} textAnchor="middle" fontSize="6.5"
+            fontFamily="var(--font-inter), sans-serif"
+            fill={isLast ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.35)'}
+            fontWeight={isLast ? 700 : 400}
+          >
+            <tspan x={x} y={H - PAD_BOTTOM + 10}>{line1}</tspan>
+            <tspan x={x} dy="8">{line2}</tspan>
+          </text>
+        )
+      })}
     </svg>
   )
 }
 
-// ── Main export ──────────────────────────────────────────────────────────────
+// ── Main export ───────────────────────────────────────────────────────────────
 
-export default function WritingStatsClient({
-  wordCountHistory,
-}: WritingStatsProps) {
+export default function WritingStatsClient({ wordCountHistory, slotDates }: WritingStatsProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const [revealed, setRevealed] = useState(false)
 
@@ -164,57 +177,20 @@ export default function WritingStatsClient({
     return () => observer.disconnect()
   }, [])
 
-  // Reverse to chronological (oldest left, newest right)
-  const chronological = [...wordCountHistory].reverse()
-
   return (
-    <section ref={sectionRef} id="writing-stats" className="journal-section">
+    <section ref={sectionRef} id="writing-stats" className="journal-section" style={{ paddingTop: '2.5rem' }}>
+      {/* Top-of-section copper divider */}
+      <div style={{ height: 3, background: COPPER, marginBottom: '1.5rem' }} />
+
       <SectionInfoHeader
         title="Words Written"
-        description="Word counts across the last 10 journals, broken down by section."
-        popupBody="Each journal is written in three sections: Today's Intention, Gratitude, and Something I'm Great At. The bars show the word count for each section stacked together, with the dashed line showing the average across recent journals."
+        description="Word counts across the last 14 days, broken down by section."
+        popupBody="Each journal is written in three sections: Today's Intention, Gratitude, and Something I'm Great At. The bars show the word count for each section stacked together. Days with no post are shown as empty columns."
       />
 
-      {/* Summary stats */}
-      {(() => {
-        const totals = chronological.map(e => e.wordCountTotal ?? 0)
-        const todayTotal = totals[totals.length - 1] ?? 0
-        const prevTotals = totals.slice(0, -1).filter(v => v > 0)
-        const avg = prevTotals.length > 0
-          ? Math.round(prevTotals.reduce((a, b) => a + b, 0) / prevTotals.length)
-          : null
-        const delta = avg !== null ? todayTotal - avg : null
-
-        return (
-          <div style={{
-            opacity: revealed ? 1 : 0,
-            transform: revealed ? 'translateY(0)' : 'translateY(8px)',
-            transition: 'opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s',
-          }}>
-            <div className="chart-stat-summary">
-              <div className="chart-stat-summary-item">
-                <div className="chart-stat-summary-value">{todayTotal.toLocaleString()}</div>
-                <div className="chart-stat-summary-label">Today</div>
-              </div>
-              <div className="chart-stat-summary-item">
-                <div className="chart-stat-summary-value">{avg !== null ? avg.toLocaleString() : '—'}</div>
-                <div className="chart-stat-summary-label">10-Day Avg</div>
-              </div>
-              <div className="chart-stat-summary-item">
-                <div className="chart-stat-summary-value">
-                  {delta !== null ? `${delta >= 0 ? '+' : ''}${delta}` : '—'}
-                </div>
-                <div className="chart-stat-summary-label">vs Average</div>
-              </div>
-            </div>
-          </div>
-        )
-      })()}
-
       <div className="wss-wrap">
-        {/* Chart 1 — Stacked bars (everyone) */}
         <div className="wss-chart-block">
-          <WordCountBarChart data={chronological} revealed={revealed} />
+          <WordCountBarChart data={wordCountHistory} slotDates={slotDates} revealed={revealed} />
           <div className="wss-bar-legend">
             <span className="wss-legend-item">
               <span className="wss-legend-swatch" style={{ background: STEEL_BLUE }} />
@@ -230,7 +206,6 @@ export default function WritingStatsClient({
             </span>
           </div>
         </div>
-
       </div>
     </section>
   )

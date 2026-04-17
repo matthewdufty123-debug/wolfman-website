@@ -16,6 +16,10 @@ function getXLabel(dateStr: string, isLast: boolean): { line1: string; line2: st
   return { line1: DAY_NAMES[d.getDay()], line2: `${d.getDate()}/${d.getMonth() + 1}` }
 }
 
+function SectionTopDivider() {
+  return <div style={{ height: 3, background: COPPER, marginBottom: '1.5rem' }} />
+}
+
 function CopperDivider() {
   return <div style={{ height: 2, background: COPPER, margin: '1rem 0' }} />
 }
@@ -171,24 +175,24 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }
       </span>
 
       {/* Icon | 14 pills | streak number — all same height */}
-      <div style={{ display: 'flex', alignItems: 'stretch', gap: '6px' }}>
-        {/* Icon circle — tappable for popup */}
+      <div style={{ display: 'flex', alignItems: 'stretch', gap: '12px' }}>
+        {/* Icon circle — tappable for popup, small left breathing room */}
         <button
           onClick={() => onSelect(ritualKey)}
           aria-label={label}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0, paddingLeft: '0.25rem' }}
         >
           <div style={{
-            width: 48, height: 48, borderRadius: '50%',
+            width: 44, height: 44, borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: `${color}22`, border: `1.5px solid ${color}`,
           }}>
-            <Icon size={28} color={color} />
+            <Icon size={26} color={color} />
           </div>
         </button>
 
-        {/* 14 pill indicators */}
-        <div style={{ display: 'flex', gap: '3px', flex: 1, height: 48 }}>
+        {/* 14 pill indicators — slightly condensed */}
+        <div style={{ display: 'flex', gap: '2px', flex: 1, height: 44 }}>
           {segments.map((slot, i) => {
             const filled = slot === true
             const inStreak = inStreakSet.has(i)
@@ -205,7 +209,7 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }
                 key={i}
                 style={{
                   flex: 1,
-                  borderRadius: 6,
+                  borderRadius: 5,
                   background: pillBg,
                   border: pillBorder,
                   opacity: revealed ? 1 : 0,
@@ -218,10 +222,11 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }
           })}
         </div>
 
-        {/* Streak number — same height as icon */}
+        {/* Streak number — same height as icon, small right breathing room */}
         <div style={{
-          width: 44, height: 48, flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+          width: 40, height: 44, flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          paddingRight: '0.35rem',
         }}>
           {streak > 0 && (
             <span style={{
@@ -269,7 +274,10 @@ export default function MorningRitualsSection({ checklist, ritualStats, slotDate
   const todayCount = items.length
 
   return (
-    <section id="morning-rituals" className="journal-section">
+    <section id="morning-rituals" className="journal-section" style={{ paddingTop: '2.5rem' }}>
+      {/* Top-of-section copper divider */}
+      <SectionTopDivider />
+
       <SectionInfoHeader
         title="Morning Rituals"
         description="The daily rituals completed"
@@ -283,10 +291,10 @@ export default function MorningRitualsSection({ checklist, ritualStats, slotDate
         <p className="journal-section-empty">No morning rituals recorded.</p>
       ) : (
         <>
-          {/* Bar chart: left 25% count | right 75% chart */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {/* Bar chart: left count column | right chart */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <div style={{
-              width: '25%', flexShrink: 0,
+              width: '18%', flexShrink: 0, paddingLeft: '0.5rem',
               display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center',
             }}>
               <span style={{
@@ -297,13 +305,14 @@ export default function MorningRitualsSection({ checklist, ritualStats, slotDate
                 {todayCount}
               </span>
               <span style={{
-                fontSize: '0.62rem', fontWeight: 600,
-                textTransform: 'uppercase', letterSpacing: '0.06em',
-                opacity: 0.5, marginTop: '0.2rem',
+                fontSize: '0.6rem', fontWeight: 600,
+                textTransform: 'uppercase', letterSpacing: '0.04em',
+                opacity: 0.55, marginTop: '0.15rem',
                 fontFamily: 'var(--font-inter), sans-serif',
                 color: 'var(--body-text)',
+                lineHeight: 1.3,
               }}>
-                Rituals
+                Rituals<br />completed<br />in this post
               </span>
             </div>
 
@@ -338,8 +347,8 @@ export default function MorningRitualsSection({ checklist, ritualStats, slotDate
 
             {/* Column header row — aligns with ritual pill rows */}
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', marginBottom: '0.4rem' }}>
-              {/* Spacer: icon width */}
-              <div style={{ width: 48, flexShrink: 0 }} />
+              {/* Spacer: icon width + left padding + gap */}
+              <div style={{ width: 56, flexShrink: 0 }} />
               {/* Day labels */}
               <div style={{ display: 'flex', gap: '3px', flex: 1 }}>
                 {slotDates.map((_, i) => {
@@ -361,8 +370,8 @@ export default function MorningRitualsSection({ checklist, ritualStats, slotDate
                   )
                 })}
               </div>
-              {/* Day streak label */}
-              <div style={{ width: 44, flexShrink: 0, textAlign: 'right' }}>
+              {/* Day streak label — matches streak column width + padding */}
+              <div style={{ width: 48, flexShrink: 0, textAlign: 'right', paddingRight: '0.35rem' }}>
                 <span style={{
                   fontSize: '0.48rem', fontWeight: 600,
                   textTransform: 'uppercase', letterSpacing: '0.04em',

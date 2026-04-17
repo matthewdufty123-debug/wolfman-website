@@ -4,7 +4,6 @@ import { useRef, useEffect, useState } from 'react'
 import SectionInfoHeader from '@/components/journal/SectionInfoHeader'
 import SegmentedRing from '@/components/charts/SegmentedRing'
 import {
-  SCALE_COLORS,
   BRAIN_LABELS,
   BODY_LABELS,
   HAPPY_LABELS,
@@ -14,7 +13,18 @@ import {
 } from '@/components/charts/chartUtils'
 import type { ScaleHistoryEntry } from '@/app/(main)/[username]/[slug]/_sections/HowIShowedUpSection'
 
-// ── Colour interpolation — centre values off-white, extremes copper ───────────
+// ── Fixed pastel colours — one per scale, consistent throughout ───────────────
+
+const SCALE_PASTELS = {
+  brain:  '#6090C0',  // Cornflower Blue
+  body:   '#C8B020',  // Mustard Gold
+  happy:  '#3AB87A',  // Emerald
+  stress: '#70C0C8',  // Teal
+} as const
+
+type ScaleKey = keyof typeof SCALE_PASTELS
+
+// ── Dynamic colour — used only in the legend modal ────────────────────────────
 
 function getScaleColor(value: number): string {
   const dist = Math.abs(value - 4.5)
@@ -23,6 +33,16 @@ function getScaleColor(value: number): string {
   const g = Math.round(0xe8 + (0x62 - 0xe8) * t)
   const b = Math.round(0xe8 + (0x2a - 0xe8) * t)
   return `rgb(${r},${g},${b})`
+}
+
+// ── Dividers ──────────────────────────────────────────────────────────────────
+
+function SectionTopDivider() {
+  return <div style={{ height: 3, background: '#A0622A', marginBottom: '1.5rem' }} />
+}
+
+function RowDivider() {
+  return <div style={{ height: 2, background: '#A0622A', margin: '1.25rem 0' }} />
 }
 
 // ── X-axis label helper ───────────────────────────────────────────────────────
@@ -79,7 +99,7 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
   const midY = yFor(4.5)
   const Y_ROWS = [8, 7, 6, 5, 4, 3, 2, 1]
 
-  // Data line path — skip over null gaps
+  // Data line — skip null gaps
   let linePath = ''
   let inSeg = false
   const nonNullPts: { idx: number; rawV: number }[] = []
@@ -92,7 +112,7 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
     inSeg = true
   })
 
-  // Log trend line (requires ≥3 non-null points)
+  // Log trend line (≥3 non-null points)
   let trendPath: string | null = null
   if (nonNullPts.length >= 3) {
     const reg = logRegression(nonNullPts.map(p => ({ x: p.idx, y: p.rawV })))
@@ -115,7 +135,7 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
       aria-hidden="true"
       style={{ display: 'block', opacity: revealed ? 1 : 0, transition: 'opacity 0.6s ease 0.3s' }}
     >
-      {/* Y-axis rows: grid lines + bipolar prefix + label text */}
+      {/* Y-axis rows */}
       {Y_ROWS.map(rawV => {
         const y = yFor(rawV)
         const bip = toBipolar(rawV)
@@ -124,65 +144,40 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
         const isMid = rawV === 5 || rawV === 4
         return (
           <g key={rawV}>
-            <line
-              x1={PLOT_LEFT} y1={y} x2={PLOT_RIGHT} y2={y}
+            <line x1={PLOT_LEFT} y1={y} x2={PLOT_RIGHT} y2={y}
               stroke={isMid ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.05)'}
               strokeWidth={isMid ? 1.5 : 1}
             />
-            <text
-              x={22} y={y}
-              textAnchor="end"
-              dominantBaseline="middle"
-              fontSize="7.5"
-              fontFamily="var(--font-inter), sans-serif"
-              fill="rgba(255,255,255,0.55)"
-              fontWeight="600"
-            >
-              {bipStr}
-            </text>
-            <text
-              x={27} y={y}
-              textAnchor="start"
-              dominantBaseline="middle"
-              fontSize="7"
-              fontFamily="var(--font-inter), sans-serif"
+            <text x={22} y={y} textAnchor="end" dominantBaseline="middle"
+              fontSize="7.5" fontFamily="var(--font-inter), sans-serif"
+              fill="rgba(255,255,255,0.55)" fontWeight="600"
+            >{bipStr}</text>
+            <text x={27} y={y} textAnchor="start" dominantBaseline="middle"
+              fontSize="7" fontFamily="var(--font-inter), sans-serif"
               fill="rgba(255,255,255,0.38)"
-            >
-              {labelText}
-            </text>
+            >{labelText}</text>
           </g>
         )
       })}
 
-      {/* Mid baseline (between +1 and -1) */}
-      <line
-        x1={PLOT_LEFT} y1={midY} x2={PLOT_RIGHT} y2={midY}
-        stroke="rgba(255,255,255,0.22)"
-        strokeWidth={1.5}
-        strokeDasharray="4 3"
+      {/* Mid baseline */}
+      <line x1={PLOT_LEFT} y1={midY} x2={PLOT_RIGHT} y2={midY}
+        stroke="rgba(255,255,255,0.22)" strokeWidth={1.5} strokeDasharray="4 3"
       />
 
       {/* Log trend line */}
       {trendPath && (
-        <path
-          d={trendPath}
-          fill="none"
-          stroke="rgba(255,255,255,0.32)"
-          strokeWidth={1.5}
-          strokeDasharray="6 4"
-          strokeLinecap="round"
+        <path d={trendPath} fill="none"
+          stroke="rgba(255,255,255,0.32)" strokeWidth={1.5}
+          strokeDasharray="6 4" strokeLinecap="round"
         />
       )}
 
       {/* Data line */}
       {linePath && (
-        <path
-          d={linePath}
-          fill="none"
-          stroke={color}
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
+        <path d={linePath} fill="none"
+          stroke={color} strokeWidth={2}
+          strokeLinecap="round" strokeLinejoin="round"
         />
       )}
 
@@ -190,10 +185,8 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
       {nonNullPts.map((p, seqIdx) => {
         const isLast = p.idx === N - 1
         return (
-          <circle
-            key={p.idx}
-            cx={xFor(p.idx)}
-            cy={yFor(p.rawV)}
+          <circle key={p.idx}
+            cx={xFor(p.idx)} cy={yFor(p.rawV)}
             r={isLast ? 5.5 : 2.5}
             fill={isLast ? '#A0622A' : color}
             fillOpacity={isLast ? 1 : 0.65}
@@ -202,17 +195,13 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
         )
       })}
 
-      {/* X-axis labels (2 lines each) */}
+      {/* X-axis labels (2 lines) */}
       {dates.map((dateStr, i) => {
         const { line1, line2 } = getXLabel(dateStr, i === N - 1)
         const x = xFor(i)
         const isLast = i === N - 1
         return (
-          <text
-            key={i}
-            x={x}
-            textAnchor="middle"
-            fontSize="7"
+          <text key={i} x={x} textAnchor="middle" fontSize="7"
             fontFamily="var(--font-inter), sans-serif"
             fill={isLast ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.38)'}
             fontWeight={isLast ? 700 : 400}
@@ -234,7 +223,7 @@ interface ScaleRowProps {
   value: number | null
   labels: string[]
   scaleValues: (number | null)[]
-  scaleKey: keyof typeof SCALE_COLORS
+  scaleKey: ScaleKey
   dates: string[]
   onOpenLegend: (key: string) => void
 }
@@ -260,8 +249,8 @@ function ScaleRow({ title, description, value, labels, scaleValues, scaleKey, da
 
   const nonNullCount = scaleValues.filter(v => v !== null).length
   const hasEnoughData = nonNullCount >= 3
-  const scaleColor = SCALE_COLORS[scaleKey]
-  const ringColor = value !== null ? getScaleColor(value) : 'rgba(255,255,255,0.3)'
+  // Fixed pastel colour — consistent for this scale throughout
+  const color = SCALE_PASTELS[scaleKey]
   const label = value !== null ? labels[value - 1] : null
 
   return (
@@ -271,21 +260,25 @@ function ScaleRow({ title, description, value, labels, scaleValues, scaleKey, da
         opacity: revealed ? 1 : 0,
         transform: revealed ? 'translateY(0)' : 'translateY(12px)',
         transition: 'opacity 0.5s ease, transform 0.5s ease',
-        marginBottom: '1.5rem',
       }}
     >
-      {/* Header: scale name + description */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem', marginBottom: '0.6rem', flexWrap: 'wrap' }}>
+      {/* Title — same font size as the word label */}
+      <div style={{ marginBottom: '0.3rem' }}>
         <span style={{
-          fontSize: '0.9rem', fontWeight: 700,
-          textTransform: 'uppercase', letterSpacing: '0.12em',
-          color: scaleColor, fontFamily: 'var(--font-inter), sans-serif', flexShrink: 0,
+          fontSize: '2rem', fontWeight: 700,
+          textTransform: 'uppercase', letterSpacing: '0.08em',
+          color, fontFamily: 'var(--font-inter), sans-serif',
+          lineHeight: 1,
         }}>
           {title}
         </span>
+      </div>
+
+      {/* Description — own row below title */}
+      <div style={{ marginBottom: '0.75rem' }}>
         <span style={{
           fontSize: '0.78rem', fontFamily: 'var(--font-inter), sans-serif',
-          color: 'var(--body-text)', opacity: 0.55,
+          color, opacity: 0.65,
         }}>
           {description}
         </span>
@@ -293,7 +286,7 @@ function ScaleRow({ title, description, value, labels, scaleValues, scaleKey, da
 
       {value !== null ? (
         <>
-          {/* Score row: ring → arrow → large word label */}
+          {/* Score row: ring → copper arrow → large word */}
           <button
             onClick={() => onOpenLegend(scaleKey)}
             aria-label={`View ${title} scoring legend`}
@@ -304,27 +297,29 @@ function ScaleRow({ title, description, value, labels, scaleValues, scaleKey, da
             }}
           >
             <div style={{ flexShrink: 0 }}>
-              <SegmentedRing value={value} color={ringColor} revealed={revealed} displayValue={formatBipolar(value)} />
+              <SegmentedRing value={value} color={color} revealed={revealed} displayValue={formatBipolar(value)} />
             </div>
+            {/* Copper arrow */}
             <svg width="44" height="32" viewBox="0 0 44 32" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
-              <path d="M 0 10 L 28 10 L 28 2 L 44 16 L 28 30 L 28 22 L 0 22 Z" fill="#A0622A" fillOpacity={0.6} />
+              <path d="M 0 10 L 28 10 L 28 2 L 44 16 L 28 30 L 28 22 L 0 22 Z" fill="#A0622A" fillOpacity={0.75} />
             </svg>
+            {/* Word label — same colour and size as title */}
             <span style={{
               fontSize: '2rem', fontWeight: 700,
               fontFamily: 'var(--font-lora), Georgia, serif',
-              color: ringColor, lineHeight: 1.1,
+              color, lineHeight: 1.1,
               textAlign: 'left', flex: 1, minWidth: 0,
             }}>
               {label}
             </span>
           </button>
 
-          {/* Chart or building-data placeholder */}
+          {/* Chart */}
           {hasEnoughData ? (
             <ScaleTrendChart
               values={scaleValues}
               labels={labels}
-              color={scaleColor}
+              color={color}
               dates={dates}
               revealed={revealed}
             />
@@ -352,27 +347,38 @@ interface Props {
   history: ScaleHistoryEntry[]
 }
 
-const SCALE_META: Record<string, { title: string; description: string; labels: string[] }> = {
+const SCALE_META: Record<ScaleKey, { title: string; description: string; labels: string[] }> = {
   brain:  { title: 'Brain',  description: 'How sharp and active the mind felt',     labels: BRAIN_LABELS  },
   body:   { title: 'Body',   description: 'How alive and energised the body felt',  labels: BODY_LABELS   },
   happy:  { title: 'Happy',  description: 'How happy and content the mood was',     labels: HAPPY_LABELS  },
   stress: { title: 'Stress', description: 'How calm or pressured the morning felt', labels: STRESS_LABELS },
 }
 
+const SCALE_KEYS: ScaleKey[] = ['brain', 'body', 'happy', 'stress']
+
 export default function HumanScoresSection({ brainScale, bodyScale, happyScale, stressScale, history }: Props) {
   const [legendKey, setLegendKey] = useState<string | null>(null)
 
-  // history is oldest→newest (14 slots, nulls for days with no post)
   const dates        = history.map(e => e.date)
   const brainValues  = history.map(e => e.brainScale)
   const bodyValues   = history.map(e => e.bodyScale)
   const happyValues  = history.map(e => e.happyScale)
   const stressValues = history.map(e => e.stressScale)
 
-  const legend = legendKey ? SCALE_META[legendKey] : null
+  const legend = legendKey ? SCALE_META[legendKey as ScaleKey] : null
+
+  const scaleValues: Record<ScaleKey, (number | null)[]> = {
+    brain: brainValues, body: bodyValues, happy: happyValues, stress: stressValues,
+  }
+  const scaleCurrentValue: Record<ScaleKey, number | null> = {
+    brain: brainScale, body: bodyScale, happy: happyScale, stress: stressScale,
+  }
 
   return (
-    <section id="how-i-showed-up" className="journal-section">
+    <section id="how-i-showed-up" className="journal-section" style={{ paddingTop: '2.5rem' }}>
+      {/* Top-of-section copper divider */}
+      <SectionTopDivider />
+
       <SectionInfoHeader
         title="How I Showed Up"
         description="Four morning scales — mind sharpness, body energy, happiness, and stress."
@@ -381,30 +387,22 @@ export default function HumanScoresSection({ brainScale, bodyScale, happyScale, 
       />
 
       <div className="hss-stacked">
-        {(['brain', 'body', 'happy', 'stress'] as const).map(key => {
-          const meta = SCALE_META[key]
-          const value =
-            key === 'brain'  ? brainScale  :
-            key === 'body'   ? bodyScale   :
-            key === 'happy'  ? happyScale  : stressScale
-          const scaleValues =
-            key === 'brain'  ? brainValues  :
-            key === 'body'   ? bodyValues   :
-            key === 'happy'  ? happyValues  : stressValues
-          return (
+        {SCALE_KEYS.map((key, idx) => (
+          <div key={key}>
             <ScaleRow
-              key={key}
-              title={meta.title}
-              description={meta.description}
-              value={value}
-              labels={meta.labels}
-              scaleValues={scaleValues}
+              title={SCALE_META[key].title}
+              description={SCALE_META[key].description}
+              value={scaleCurrentValue[key]}
+              labels={SCALE_META[key].labels}
+              scaleValues={scaleValues[key]}
               scaleKey={key}
               dates={dates}
               onOpenLegend={setLegendKey}
             />
-          )
-        })}
+            {/* Copper divider between scale rows — not after the last */}
+            {idx < SCALE_KEYS.length - 1 && <RowDivider />}
+          </div>
+        ))}
       </div>
 
       {/* Scoring legend modal */}
@@ -415,8 +413,7 @@ export default function HumanScoresSection({ brainScale, bodyScale, happyScale, 
             style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.4)', animation: 'ritual-fade-in 0.15s ease' }}
           />
           <div
-            role="dialog"
-            aria-modal="true"
+            role="dialog" aria-modal="true"
             aria-label={`${legend.title} scoring guide`}
             style={{
               position: 'fixed', top: '50%', left: '50%',

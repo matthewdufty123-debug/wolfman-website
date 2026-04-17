@@ -17,6 +17,7 @@ export default async function PostInfoNavSection({ post, username, isOwner, user
   if (!post.id) {
     return (
       <>
+        <div style={{ height: 3, background: '#A0622A', marginTop: '2.5rem', marginBottom: '1.5rem' }} />
         <PostInfoSection post={post} />
         <JournalPhotoSection imageUrl={post.image} title={post.title} caption={post.imageCaption} />
         <BottomNav username={username} nextPost={null} isOwner={false} editHref={null} />
@@ -78,6 +79,7 @@ export default async function PostInfoNavSection({ post, username, isOwner, user
 
   return (
     <>
+      <div style={{ height: 3, background: '#A0622A', marginTop: '2.5rem', marginBottom: '1.5rem' }} />
       <PostInfoSection post={post} calendarDays={calendarDays} />
       <JournalPhotoSection imageUrl={post.image} title={post.title} caption={post.imageCaption} />
       <BottomNav username={username} nextPost={nextPost} isOwner={isOwner} editHref={editHref} />
