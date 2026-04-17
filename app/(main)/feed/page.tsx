@@ -13,9 +13,10 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { db } from '@/lib/db'
-import { posts, morningState, users, wolfbotReviews } from '@/lib/db/schema'
+import { posts, morningState, users } from '@/lib/db/schema'
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import AnimatedRoutineIcons from '@/components/AnimatedRoutineIcons'
+import { ROUTINE_ICON_MAP } from '@/components/RoutineIcons'
 import { deriveExcerpt } from '@/lib/posts'
 
 function formatDate(iso: string) {
@@ -50,24 +51,16 @@ function Avatar({ src, name, size = 40 }: { src: string | null; name: string; si
   )
 }
 
-// 1–8 → two-word band per scale type
-const SCALE_WORDS: Record<'happy' | 'body' | 'brain', string[]> = {
-  happy: ['Lost',    'Lost',    'Steady',  'Steady',  'Good',    'Good',    'Joyful',  'Joyful'],
-  body:  ['Drained', 'Drained', 'Moving',  'Moving',  'Charged', 'Charged', 'Buzzing', 'Buzzing'],
-  brain: ['Silent',  'Silent',  'Waking',  'Waking',  'Sharp',   'Sharp',   'Manic',   'Manic'],
+const SCALE_WORDS: Record<'happy' | 'body' | 'brain' | 'stress', string[]> = {
+  happy:  ['Lost',    'Lost',    'Steady',  'Steady',  'Good',    'Good',    'Joyful',  'Joyful'],
+  body:   ['Drained', 'Drained', 'Moving',  'Moving',  'Charged', 'Charged', 'Buzzing', 'Buzzing'],
+  brain:  ['Silent',  'Silent',  'Waking',  'Waking',  'Sharp',   'Sharp',   'Manic',   'Manic'],
+  stress: ['Crushed', 'Crushed', 'Tense',   'Tense',   'Alert',   'Alert',   'Hunting', 'Hunting'],
 }
 
 function scaleWord(val: number | null, type: keyof typeof SCALE_WORDS): string | null {
   if (!val || val < 1 || val > 8) return null
   return SCALE_WORDS[type][val - 1]
-}
-
-function scaleColour(val: number | null): string {
-  if (!val) return '#909090'
-  if (val <= 2) return '#909090'
-  if (val <= 4) return '#4A7FA5'
-  if (val <= 6) return '#A0622A'
-  return '#3AB87A'
 }
 
 type FeedPost = {
@@ -78,7 +71,6 @@ type FeedPost = {
   excerpt: string | null
   image: string | null
   wordCountTotal: number | null
-  wolfbotReviewed: boolean
   status: string
   authorId: string | null
   authorUsername: string | null
@@ -90,6 +82,8 @@ type FeedPost = {
   happyScale: number | null
   bodyScale: number | null
   brainScale: number | null
+  stressScale: number | null
+  topRitual: string | null
 }
 
 function FeedCard({ post, showAuthor }: { post: FeedPost; showAuthor: boolean }) {
@@ -99,20 +93,23 @@ function FeedCard({ post, showAuthor }: { post: FeedPost; showAuthor: boolean })
   const isDraft = post.status === 'draft'
   const cardUrl = isDraft ? `/edit/${post.id}` : url
 
-  const moodWord  = scaleWord(post.happyScale, 'happy')
-  const bodyWord  = scaleWord(post.bodyScale,  'body')
-  const brainWord = scaleWord(post.brainScale, 'brain')
-  const hasScales = !!(moodWord || bodyWord || brainWord)
+  const moodWord   = scaleWord(post.happyScale,  'happy')
+  const bodyWord   = scaleWord(post.bodyScale,   'body')
+  const brainWord  = scaleWord(post.brainScale,  'brain')
+  const stressWord = scaleWord(post.stressScale, 'stress')
+  const hasScales  = !!(moodWord || bodyWord || brainWord || stressWord)
 
   const completedRituals = post.checklist
     ? Object.values(post.checklist).filter(Boolean).length
     : 0
   const hasRituals = !!post.checklist && completedRituals > 0
 
+  const topRitualMeta = post.topRitual ? ROUTINE_ICON_MAP[post.topRitual] : null
+
   return (
     <article className="feed-card">
 
-      {/* ── Header: avatar + name + date ── */}
+      {/* Row 1: Profile */}
       {showAuthor && post.authorUsername ? (
         <Link href={`/${post.authorUsername}`} className="feed-card-author-link">
           <Avatar src={avatarSrc} name={authorName} size={40} />
@@ -131,36 +128,70 @@ function FeedCard({ post, showAuthor }: { post: FeedPost; showAuthor: boolean })
         </div>
       )}
 
-      {/* ── Title ── */}
+      {/* Row 2: Title */}
       <Link href={cardUrl} className="feed-card-title-link">
         <p className="feed-card-title">{post.title || 'Untitled'}</p>
       </Link>
 
-      {/* ── Scales strip ── */}
-      {hasScales && (
-        <div className="feed-card-scales">
-          {moodWord && (
-            <div className="feed-card-scale-pill">
-              <span className="feed-card-scale-label">MOOD</span>
-              <span className="feed-card-scale-word" style={{ color: scaleColour(post.happyScale) }}>{moodWord}</span>
+      {/* Row 3+4: Word count (L) + Rituals / top ritual (R) */}
+      {(post.wordCountTotal || hasRituals) && (
+        <div className="feed-card-stats-row">
+          {post.wordCountTotal ? (
+            <div className="feed-card-wordcount">
+              <span className="feed-card-wordcount-number">{post.wordCountTotal}</span>
+              <span className="feed-card-wordcount-label">words</span>
             </div>
-          )}
-          {bodyWord && (
-            <div className="feed-card-scale-pill">
-              <span className="feed-card-scale-label">BODY</span>
-              <span className="feed-card-scale-word" style={{ color: scaleColour(post.bodyScale) }}>{bodyWord}</span>
-            </div>
-          )}
-          {brainWord && (
-            <div className="feed-card-scale-pill">
-              <span className="feed-card-scale-label">BRAIN</span>
-              <span className="feed-card-scale-word" style={{ color: scaleColour(post.brainScale) }}>{brainWord}</span>
+          ) : <div />}
+
+          {hasRituals && (
+            <div className="feed-card-rituals-block">
+              <div className="feed-card-rituals-row">
+                <AnimatedRoutineIcons checklist={post.checklist!} size={18} />
+                <span className="feed-card-ritual-count">{completedRituals}</span>
+              </div>
+              {topRitualMeta && (
+                <div className="feed-card-top-ritual">
+                  <span className="feed-card-top-ritual-star">★</span>
+                  <topRitualMeta.Icon size={12} color={topRitualMeta.color} />
+                  <span className="feed-card-top-ritual-label">{topRitualMeta.label}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
       )}
 
-      {/* ── Photo / fallback ── */}
+      {/* Row 5: How I Showed Up — 4 scales */}
+      {hasScales && (
+        <div className="feed-card-scales">
+          {moodWord && (
+            <div className="feed-card-scale-pill">
+              <span className="feed-card-scale-label">MOOD</span>
+              <span className="feed-card-scale-word">{moodWord}</span>
+            </div>
+          )}
+          {bodyWord && (
+            <div className="feed-card-scale-pill">
+              <span className="feed-card-scale-label">BODY</span>
+              <span className="feed-card-scale-word">{bodyWord}</span>
+            </div>
+          )}
+          {brainWord && (
+            <div className="feed-card-scale-pill">
+              <span className="feed-card-scale-label">BRAIN</span>
+              <span className="feed-card-scale-word">{brainWord}</span>
+            </div>
+          )}
+          {stressWord && (
+            <div className="feed-card-scale-pill">
+              <span className="feed-card-scale-label">STRESS</span>
+              <span className="feed-card-scale-word">{stressWord}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Row 6: Photo / fallback — acts as visual separator between cards */}
       <Link href={cardUrl} className="feed-card-media-link">
         <div className="feed-card-media">
           {post.image
@@ -170,30 +201,35 @@ function FeedCard({ post, showAuthor }: { post: FeedPost; showAuthor: boolean })
         </div>
       </Link>
 
-      {/* ── Word count ── */}
-      {post.wordCountTotal ? (
-        <div className="feed-card-wordcount">
-          <span className="feed-card-wordcount-number">{post.wordCountTotal}</span>
-          <span className="feed-card-wordcount-label">words</span>
-        </div>
-      ) : null}
-
-      {/* ── Footer: rituals + WOLF|BOT badge ── */}
-      {(hasRituals || post.wolfbotReviewed) && (
-        <div className="feed-card-footer">
-          {hasRituals && (
-            <div className="feed-card-rituals">
-              <AnimatedRoutineIcons checklist={post.checklist!} size={14} />
-              <span className="feed-card-ritual-count">{completedRituals}/10</span>
-            </div>
-          )}
-          {post.wolfbotReviewed && (
-            <span className="feed-card-wolfbot-badge">WOLF|BOT ✓</span>
-          )}
-        </div>
-      )}
     </article>
   )
+}
+
+// ── Top ritual computation ─────────────────────────────────────────────────────
+// Returns the most-completed ritual key per authorId across the given posts + stateMap.
+function computeTopRituals(
+  rows: Array<{ id: string; authorId: string | null }>,
+  stateMap: Map<string, { routineChecklist: unknown }>
+): Record<string, string | null> {
+  const counts: Record<string, Record<string, number>> = {}
+  for (const row of rows) {
+    const aid = row.authorId
+    if (!aid) continue
+    const ms = stateMap.get(row.id)
+    if (!ms) continue
+    const cl = ms.routineChecklist as Record<string, boolean> | null
+    if (!cl) continue
+    if (!counts[aid]) counts[aid] = {}
+    for (const [key, done] of Object.entries(cl)) {
+      if (done) counts[aid][key] = (counts[aid][key] || 0) + 1
+    }
+  }
+  const result: Record<string, string | null> = {}
+  for (const [aid, ritualCounts] of Object.entries(counts)) {
+    const sorted = Object.entries(ritualCounts).sort((a, b) => b[1] - a[1])
+    result[aid] = sorted[0]?.[0] ?? null
+  }
+  return result
 }
 
 export default async function FeedPage({
@@ -234,24 +270,22 @@ export default async function FeedPage({
       .orderBy(desc(posts.date))
 
     const ids = rows.map(r => r.id)
-    const [states, reviews] = ids.length > 0
-      ? await Promise.all([
-          db.select().from(morningState).where(inArray(morningState.postId, ids)),
-          db.select({ postId: wolfbotReviews.postId }).from(wolfbotReviews).where(inArray(wolfbotReviews.postId, ids)),
-        ])
-      : [[], []]
+    const states = ids.length > 0
+      ? await db.select().from(morningState).where(inArray(morningState.postId, ids))
+      : []
 
-    const stateMap   = new Map(states.map(s => [s.postId, s]))
-    const reviewedIds = new Set(reviews.map(r => r.postId))
+    const stateMap = new Map(states.map(s => [s.postId, s]))
+    const topRitualByAuthor = computeTopRituals(rows, stateMap as Map<string, { routineChecklist: unknown }>)
 
     feedPosts = rows.map(({ content, ...r }) => ({
       ...r,
       excerpt: r.excerpt || deriveExcerpt(content) || null,
-      checklist: stateMap.get(r.id)?.routineChecklist as Record<string, boolean> | undefined,
-      happyScale: stateMap.get(r.id)?.happyScale ?? null,
-      bodyScale:  stateMap.get(r.id)?.bodyScale  ?? null,
-      brainScale: stateMap.get(r.id)?.brainScale ?? null,
-      wolfbotReviewed: reviewedIds.has(r.id),
+      checklist:   stateMap.get(r.id)?.routineChecklist as Record<string, boolean> | undefined,
+      happyScale:  stateMap.get(r.id)?.happyScale  ?? null,
+      bodyScale:   stateMap.get(r.id)?.bodyScale   ?? null,
+      brainScale:  stateMap.get(r.id)?.brainScale  ?? null,
+      stressScale: stateMap.get(r.id)?.stressScale ?? null,
+      topRitual:   r.authorId ? (topRitualByAuthor[r.authorId] ?? null) : null,
     }))
   } else {
     const rows = await db
@@ -282,24 +316,22 @@ export default async function FeedPage({
       .orderBy(desc(posts.date))
 
     const ids = rows.map(r => r.id)
-    const [states, reviews] = ids.length > 0
-      ? await Promise.all([
-          db.select().from(morningState).where(inArray(morningState.postId, ids)),
-          db.select({ postId: wolfbotReviews.postId }).from(wolfbotReviews).where(inArray(wolfbotReviews.postId, ids)),
-        ])
-      : [[], []]
+    const states = ids.length > 0
+      ? await db.select().from(morningState).where(inArray(morningState.postId, ids))
+      : []
 
-    const stateMap    = new Map(states.map(s => [s.postId, s]))
-    const reviewedIds = new Set(reviews.map(r => r.postId))
+    const stateMap = new Map(states.map(s => [s.postId, s]))
+    const topRitualByAuthor = computeTopRituals(rows, stateMap as Map<string, { routineChecklist: unknown }>)
 
     feedPosts = rows.map(({ content, ...r }) => ({
       ...r,
       excerpt: r.excerpt || deriveExcerpt(content) || null,
-      checklist: stateMap.get(r.id)?.routineChecklist as Record<string, boolean> | undefined,
-      happyScale: stateMap.get(r.id)?.happyScale ?? null,
-      bodyScale:  stateMap.get(r.id)?.bodyScale  ?? null,
-      brainScale: stateMap.get(r.id)?.brainScale ?? null,
-      wolfbotReviewed: reviewedIds.has(r.id),
+      checklist:   stateMap.get(r.id)?.routineChecklist as Record<string, boolean> | undefined,
+      happyScale:  stateMap.get(r.id)?.happyScale  ?? null,
+      bodyScale:   stateMap.get(r.id)?.bodyScale   ?? null,
+      brainScale:  stateMap.get(r.id)?.brainScale  ?? null,
+      stressScale: stateMap.get(r.id)?.stressScale ?? null,
+      topRitual:   r.authorId ? (topRitualByAuthor[r.authorId] ?? null) : null,
     }))
   }
 

@@ -5596,11 +5596,7 @@ html[data-theme="light"] .pf-expand-btn:hover {
 }
 
 .feed-card {
-  padding: 1.6rem 0;
-  border-bottom: 1px solid rgba(74,127,165,0.1);
-}
-
-.feed-card:last-child {
+  padding: 1.6rem 0 0;
   border-bottom: none;
 }
 
@@ -5610,7 +5606,7 @@ html[data-theme="light"] .pf-expand-btn:hover {
   align-items: center;
   gap: 0.65rem;
   text-decoration: none;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.75rem;
 }
 
 .feed-card-author-info {
@@ -5666,14 +5662,14 @@ html[data-theme="light"] .pf-expand-btn:hover {
   display: block;
   text-decoration: none;
   color: var(--body-text, #4A4A4A);
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.85rem;
 }
 
 .feed-card-title {
-  font-size: clamp(1.05rem, 3vw, 1.25rem);
-  font-weight: 600;
+  font-size: 1.6rem;
+  font-weight: 700;
   margin: 0;
-  line-height: 1.35;
+  line-height: 1.25;
   transition: color 0.15s ease;
 }
 
@@ -5681,62 +5677,13 @@ html[data-theme="light"] .pf-expand-btn:hover {
   color: #A0622A;
 }
 
-/* ── Scales strip ── */
-.feed-card-scales {
+/* ── Stats row: word count (L) + rituals block (R) ── */
+.feed-card-stats-row {
   display: flex;
-  gap: 0;
-  margin-bottom: 0.9rem;
-}
-
-.feed-card-scale-pill {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  padding-right: 0.5rem;
-}
-
-.feed-card-scale-label {
-  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: #909090;
-  text-transform: uppercase;
-}
-
-.feed-card-scale-word {
-  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-/* ── Photo / fallback ── */
-.feed-card-media-link {
-  display: block;
-  text-decoration: none;
-  margin-bottom: 0.9rem;
-}
-
-.feed-card-media {
-  width: 100%;
-  height: 190px;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.feed-card-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.feed-card-photo-fallback {
-  width: 100%;
-  height: 100%;
-  background: rgba(74,127,165,0.07);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
 }
 
 /* ── Word count ── */
@@ -5744,7 +5691,6 @@ html[data-theme="light"] .pf-expand-btn:hover {
   display: flex;
   align-items: baseline;
   gap: 0.35rem;
-  margin-bottom: 0.75rem;
 }
 
 .feed-card-wordcount-number {
@@ -5763,39 +5709,104 @@ html[data-theme="light"] .pf-expand-btn:hover {
   letter-spacing: 0.08em;
 }
 
-/* ── Footer: rituals + wolfbot ── */
-.feed-card-footer {
+/* ── Rituals block (right side of stats row) ── */
+.feed-card-rituals-block {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
 }
 
-.feed-card-rituals {
+.feed-card-rituals-row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  opacity: 0.75;
+  gap: 0.45rem;
 }
 
 .feed-card-ritual-count {
   font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 0.72rem;
-  color: #909090;
-  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.55;
 }
 
-.feed-card-wolfbot-badge {
-  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+/* ── Top ritual highlight ── */
+.feed-card-top-ritual {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.feed-card-top-ritual-star {
   font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
   color: #A0622A;
-  background: rgba(160,98,42,0.1);
-  border: 1px solid rgba(160,98,42,0.2);
-  padding: 0.2rem 0.5rem;
-  border-radius: 3px;
-  white-space: nowrap;
+  line-height: 1;
+}
+
+.feed-card-top-ritual-label {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.68rem;
+  color: #909090;
+}
+
+/* ── Scales strip — 4 columns ── */
+.feed-card-scales {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0.85rem;
+}
+
+.feed-card-scale-pill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-right: 0.4rem;
+}
+
+.feed-card-scale-label {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #909090;
+  text-transform: uppercase;
+}
+
+.feed-card-scale-word {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #A0622A;
+  line-height: 1;
+}
+
+/* ── Photo — acts as visual separator ── */
+.feed-card-media-link {
+  display: block;
+  text-decoration: none;
+}
+
+.feed-card-media {
+  width: 100%;
+  height: 190px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  margin-bottom: 0;
+}
+
+.feed-card-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.feed-card-photo-fallback {
+  width: 100%;
+  height: 100%;
+  background: rgba(74,127,165,0.06);
 }
 
 /* legacy — kept for compat */
