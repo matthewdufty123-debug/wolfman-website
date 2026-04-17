@@ -96,20 +96,31 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
     return PLOT_LEFT + (i / Math.max(N - 1, 1)) * plotW
   }
 
-  const midY = yFor(4.5)
   const Y_ROWS = [8, 7, 6, 5, 4, 3, 2, 1]
 
-  // Data line — skip null gaps
-  let linePath = ''
-  let inSeg = false
+  // Data line — smooth cubic bezier curves, skip null gaps
   const nonNullPts: { idx: number; rawV: number }[] = []
+  const segments: { x: number; y: number }[][] = []
+  let currentSeg: { x: number; y: number }[] = []
   values.forEach((v, i) => {
-    if (v === null) { inSeg = false; return }
+    if (v === null) {
+      if (currentSeg.length > 0) { segments.push(currentSeg); currentSeg = [] }
+      return
+    }
     nonNullPts.push({ idx: i, rawV: v })
-    const x = xFor(i).toFixed(1)
-    const y = yFor(v).toFixed(1)
-    linePath += inSeg ? `L ${x} ${y} ` : `M ${x} ${y} `
-    inSeg = true
+    currentSeg.push({ x: xFor(i), y: yFor(v) })
+  })
+  if (currentSeg.length > 0) segments.push(currentSeg)
+
+  let linePath = ''
+  segments.forEach(pts => {
+    if (pts.length === 0) return
+    linePath += `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)} `
+    for (let i = 1; i < pts.length; i++) {
+      const p0 = pts[i - 1], p1 = pts[i]
+      const cpx = ((p0.x + p1.x) / 2).toFixed(1)
+      linePath += `C ${cpx} ${p0.y.toFixed(1)}, ${cpx} ${p1.y.toFixed(1)}, ${p1.x.toFixed(1)} ${p1.y.toFixed(1)} `
+    }
   })
 
   // Log trend line (≥3 non-null points)
@@ -140,7 +151,7 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
         const y = yFor(rawV)
         const bip = toBipolar(rawV)
         const bipStr = bip > 0 ? `+ ${bip}` : `\u2212 ${Math.abs(bip)}`
-        const labelText = `${rawV}  ${labels[rawV - 1]}`
+        const labelText = labels[rawV - 1]
         const isMid = rawV === 5 || rawV === 4
         return (
           <g key={rawV}>
@@ -160,11 +171,6 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
           </g>
         )
       })}
-
-      {/* Mid baseline */}
-      <line x1={PLOT_LEFT} y1={midY} x2={PLOT_RIGHT} y2={midY}
-        style={{ stroke: 'var(--chart-mid)' }} strokeWidth={1.5} strokeDasharray="4 3"
-      />
 
       {/* Log trend line */}
       {trendPath && (
