@@ -13,7 +13,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { db } from '@/lib/db'
-import { posts, morningState, users } from '@/lib/db/schema'
+import { posts, morningState, users, wolfbotReviews } from '@/lib/db/schema'
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import AnimatedRoutineIcons from '@/components/AnimatedRoutineIcons'
 import { deriveExcerpt } from '@/lib/posts'
@@ -24,7 +24,7 @@ function formatDate(iso: string) {
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
 }
 
-function Avatar({ src, name, size = 28 }: { src: string | null; name: string; size?: number }) {
+function Avatar({ src, name, size = 40 }: { src: string | null; name: string; size?: number }) {
   const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
   if (src) {
     return (
@@ -50,12 +50,35 @@ function Avatar({ src, name, size = 28 }: { src: string | null; name: string; si
   )
 }
 
+// 1–8 → two-word band per scale type
+const SCALE_WORDS: Record<'happy' | 'body' | 'brain', string[]> = {
+  happy: ['Lost',    'Lost',    'Steady',  'Steady',  'Good',    'Good',    'Joyful',  'Joyful'],
+  body:  ['Drained', 'Drained', 'Moving',  'Moving',  'Charged', 'Charged', 'Buzzing', 'Buzzing'],
+  brain: ['Silent',  'Silent',  'Waking',  'Waking',  'Sharp',   'Sharp',   'Manic',   'Manic'],
+}
+
+function scaleWord(val: number | null, type: keyof typeof SCALE_WORDS): string | null {
+  if (!val || val < 1 || val > 8) return null
+  return SCALE_WORDS[type][val - 1]
+}
+
+function scaleColour(val: number | null): string {
+  if (!val) return '#909090'
+  if (val <= 2) return '#909090'
+  if (val <= 4) return '#4A7FA5'
+  if (val <= 6) return '#A0622A'
+  return '#3AB87A'
+}
+
 type FeedPost = {
   id: string
   slug: string
   title: string
   date: string
   excerpt: string | null
+  image: string | null
+  wordCountTotal: number | null
+  wolfbotReviewed: boolean
   status: string
   authorId: string | null
   authorUsername: string | null
@@ -64,6 +87,9 @@ type FeedPost = {
   authorAvatar: string | null
   authorImage: string | null
   checklist?: Record<string, boolean>
+  happyScale: number | null
+  bodyScale: number | null
+  brainScale: number | null
 }
 
 function FeedCard({ post, showAuthor }: { post: FeedPost; showAuthor: boolean }) {
@@ -71,28 +97,99 @@ function FeedCard({ post, showAuthor }: { post: FeedPost; showAuthor: boolean })
   const avatarSrc = post.authorAvatar ?? post.authorImage ?? null
   const url = post.authorUsername ? `/${post.authorUsername}/${post.slug}` : `/posts/${post.slug}`
   const isDraft = post.status === 'draft'
+  const cardUrl = isDraft ? `/edit/${post.id}` : url
+
+  const moodWord  = scaleWord(post.happyScale, 'happy')
+  const bodyWord  = scaleWord(post.bodyScale,  'body')
+  const brainWord = scaleWord(post.brainScale, 'brain')
+  const hasScales = !!(moodWord || bodyWord || brainWord)
+
+  const completedRituals = post.checklist
+    ? Object.values(post.checklist).filter(Boolean).length
+    : 0
+  const hasRituals = !!post.checklist && completedRituals > 0
 
   return (
     <article className="feed-card">
-      {showAuthor && post.authorUsername && (
-        <Link href={`/${post.authorUsername}`} className="feed-card-author">
-          <Avatar src={avatarSrc} name={authorName} size={24} />
-          <span className="feed-card-author-name">{authorName}</span>
+
+      {/* ── Header: avatar + name + date ── */}
+      {showAuthor && post.authorUsername ? (
+        <Link href={`/${post.authorUsername}`} className="feed-card-author-link">
+          <Avatar src={avatarSrc} name={authorName} size={40} />
+          <div className="feed-card-author-info">
+            <span className="feed-card-author-name">{authorName}</span>
+            <span className="feed-card-meta-date">
+              {formatDate(post.date)}
+              {isDraft && <span className="feed-card-draft-badge">draft</span>}
+            </span>
+          </div>
         </Link>
-      )}
-      <Link href={isDraft ? `/edit/${post.id}` : url} className="feed-card-link">
-        <span className="feed-card-date">
+      ) : (
+        <div className="feed-card-date-solo">
           {formatDate(post.date)}
           {isDraft && <span className="feed-card-draft-badge">draft</span>}
-        </span>
+        </div>
+      )}
+
+      {/* ── Title ── */}
+      <Link href={cardUrl} className="feed-card-title-link">
         <p className="feed-card-title">{post.title || 'Untitled'}</p>
-        {post.excerpt && (
-          <p className="feed-card-excerpt">{post.excerpt.slice(0, 160)}</p>
-        )}
       </Link>
-      {post.checklist && (
-        <div className="feed-card-rituals">
-          <AnimatedRoutineIcons checklist={post.checklist} size={16} />
+
+      {/* ── Scales strip ── */}
+      {hasScales && (
+        <div className="feed-card-scales">
+          {moodWord && (
+            <div className="feed-card-scale-pill">
+              <span className="feed-card-scale-label">MOOD</span>
+              <span className="feed-card-scale-word" style={{ color: scaleColour(post.happyScale) }}>{moodWord}</span>
+            </div>
+          )}
+          {bodyWord && (
+            <div className="feed-card-scale-pill">
+              <span className="feed-card-scale-label">BODY</span>
+              <span className="feed-card-scale-word" style={{ color: scaleColour(post.bodyScale) }}>{bodyWord}</span>
+            </div>
+          )}
+          {brainWord && (
+            <div className="feed-card-scale-pill">
+              <span className="feed-card-scale-label">BRAIN</span>
+              <span className="feed-card-scale-word" style={{ color: scaleColour(post.brainScale) }}>{brainWord}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Photo / fallback ── */}
+      <Link href={cardUrl} className="feed-card-media-link">
+        <div className="feed-card-media">
+          {post.image
+            ? <img src={post.image} alt={post.title} className="feed-card-photo" />
+            : <div className="feed-card-photo-fallback" />
+          }
+        </div>
+      </Link>
+
+      {/* ── Word count ── */}
+      {post.wordCountTotal ? (
+        <div className="feed-card-wordcount">
+          <span className="feed-card-wordcount-number">{post.wordCountTotal}</span>
+          <span className="feed-card-wordcount-label">words</span>
+        </div>
+      ) : null}
+
+      {/* ── Footer: rituals + WOLF|BOT badge ── */}
+      {(hasRituals || post.wolfbotReviewed) && (
+        <div className="feed-card-footer">
+          {hasRituals && (
+            <div className="feed-card-rituals">
+              <AnimatedRoutineIcons checklist={post.checklist!} size={14} />
+              <span className="feed-card-ritual-count">{completedRituals}/10</span>
+            </div>
+          )}
+          {post.wolfbotReviewed && (
+            <span className="feed-card-wolfbot-badge">WOLF|BOT ✓</span>
+          )}
         </div>
       )}
     </article>
@@ -121,6 +218,8 @@ export default async function FeedPage({
         date: posts.date,
         excerpt: posts.excerpt,
         content: posts.content,
+        image: posts.image,
+        wordCountTotal: posts.wordCountTotal,
         status: posts.status,
         authorId: posts.authorId,
         authorUsername: users.username,
@@ -135,15 +234,24 @@ export default async function FeedPage({
       .orderBy(desc(posts.date))
 
     const ids = rows.map(r => r.id)
-    const states = ids.length > 0
-      ? await db.select().from(morningState).where(inArray(morningState.postId, ids))
-      : []
-    const stateMap = new Map(states.map(s => [s.postId, s]))
+    const [states, reviews] = ids.length > 0
+      ? await Promise.all([
+          db.select().from(morningState).where(inArray(morningState.postId, ids)),
+          db.select({ postId: wolfbotReviews.postId }).from(wolfbotReviews).where(inArray(wolfbotReviews.postId, ids)),
+        ])
+      : [[], []]
+
+    const stateMap   = new Map(states.map(s => [s.postId, s]))
+    const reviewedIds = new Set(reviews.map(r => r.postId))
 
     feedPosts = rows.map(({ content, ...r }) => ({
       ...r,
       excerpt: r.excerpt || deriveExcerpt(content) || null,
       checklist: stateMap.get(r.id)?.routineChecklist as Record<string, boolean> | undefined,
+      happyScale: stateMap.get(r.id)?.happyScale ?? null,
+      bodyScale:  stateMap.get(r.id)?.bodyScale  ?? null,
+      brainScale: stateMap.get(r.id)?.brainScale ?? null,
+      wolfbotReviewed: reviewedIds.has(r.id),
     }))
   } else {
     const rows = await db
@@ -154,6 +262,8 @@ export default async function FeedPage({
         date: posts.date,
         excerpt: posts.excerpt,
         content: posts.content,
+        image: posts.image,
+        wordCountTotal: posts.wordCountTotal,
         status: posts.status,
         authorId: posts.authorId,
         authorUsername: users.username,
@@ -172,15 +282,24 @@ export default async function FeedPage({
       .orderBy(desc(posts.date))
 
     const ids = rows.map(r => r.id)
-    const states = ids.length > 0
-      ? await db.select().from(morningState).where(inArray(morningState.postId, ids))
-      : []
-    const stateMap = new Map(states.map(s => [s.postId, s]))
+    const [states, reviews] = ids.length > 0
+      ? await Promise.all([
+          db.select().from(morningState).where(inArray(morningState.postId, ids)),
+          db.select({ postId: wolfbotReviews.postId }).from(wolfbotReviews).where(inArray(wolfbotReviews.postId, ids)),
+        ])
+      : [[], []]
+
+    const stateMap    = new Map(states.map(s => [s.postId, s]))
+    const reviewedIds = new Set(reviews.map(r => r.postId))
 
     feedPosts = rows.map(({ content, ...r }) => ({
       ...r,
       excerpt: r.excerpt || deriveExcerpt(content) || null,
       checklist: stateMap.get(r.id)?.routineChecklist as Record<string, boolean> | undefined,
+      happyScale: stateMap.get(r.id)?.happyScale ?? null,
+      bodyScale:  stateMap.get(r.id)?.bodyScale  ?? null,
+      brainScale: stateMap.get(r.id)?.brainScale ?? null,
+      wolfbotReviewed: reviewedIds.has(r.id),
     }))
   }
 
