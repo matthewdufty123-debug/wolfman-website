@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { morningState, posts as postsTable } from '@/lib/db/schema'
-import { eq, and, lte, desc, sql } from 'drizzle-orm'
+import { eq, and, lte, gte, asc, sql } from 'drizzle-orm'
 import HumanScoresSection from '@/components/journal/HumanScoresSection'
 
 interface Props {
@@ -17,8 +17,18 @@ export interface ScaleHistoryEntry {
   date: string
 }
 
+// Build the ordered 14-slot date array: oldest (slot 0) → postDate (slot 13)
+function buildSlotDates(postDate: string): string[] {
+  const slots: string[] = []
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(postDate + 'T00:00:00')
+    d.setDate(d.getDate() - i)
+    slots.push(d.toISOString().split('T')[0])
+  }
+  return slots
+}
+
 export default async function HowIShowedUpSection({ postId, authorId, postDate }: Props) {
-  // Always fetch today's morningState first (guaranteed to work — same as old code)
   const ms = await db
     .select()
     .from(morningState)
@@ -27,7 +37,9 @@ export default async function HowIShowedUpSection({ postId, authorId, postDate }
 
   if (!ms) return null
 
-  // Fetch history for trend charts — wrapped in try-catch to avoid breaking the page
+  const slotDates = buildSlotDates(postDate)
+  const windowStart = slotDates[0]
+
   let history: ScaleHistoryEntry[] = []
   try {
     if (authorId) {
@@ -44,38 +56,44 @@ export default async function HowIShowedUpSection({ postId, authorId, postDate }
         .where(
           and(
             eq(postsTable.authorId, authorId),
+            gte(postsTable.date, sql`${windowStart}::date`),
             lte(postsTable.date, sql`${postDate}::date`),
             eq(postsTable.status, 'published'),
           )
         )
-        .orderBy(desc(postsTable.date))
-        .limit(10)
+        .orderBy(asc(postsTable.date))
 
-      history = rows as ScaleHistoryEntry[]
+      // Map fetched rows by date, then fill all 14 slots (null where no post exists)
+      const byDate = new Map(rows.map(r => [r.date, r]))
+      history = slotDates.map(date => {
+        const row = byDate.get(date)
+        return row
+          ? { brainScale: row.brainScale, bodyScale: row.bodyScale, happyScale: row.happyScale, stressScale: row.stressScale, date }
+          : { brainScale: null, bodyScale: null, happyScale: null, stressScale: null, date }
+      })
     }
   } catch (err) {
     console.error('[HowIShowedUp] History query failed:', err)
   }
 
-  // If history fetch failed or is empty, build a single-entry array from today's data
   if (history.length === 0) {
-    history = [{
-      brainScale: ms.brainScale,
-      bodyScale: ms.bodyScale,
-      happyScale: ms.happyScale,
-      stressScale: ms.stressScale,
-      date: postDate,
-    }]
+    history = slotDates.map(date => ({
+      brainScale: date === postDate ? ms.brainScale : null,
+      bodyScale: date === postDate ? ms.bodyScale : null,
+      happyScale: date === postDate ? ms.happyScale : null,
+      stressScale: date === postDate ? ms.stressScale : null,
+      date,
+    }))
   }
 
-  const today = history[0]
+  const postEntry = history[history.length - 1]
 
   return (
     <HumanScoresSection
-      brainScale={today.brainScale}
-      bodyScale={today.bodyScale}
-      happyScale={today.happyScale ?? null}
-      stressScale={today.stressScale ?? null}
+      brainScale={postEntry.brainScale}
+      bodyScale={postEntry.bodyScale}
+      happyScale={postEntry.happyScale ?? null}
+      stressScale={postEntry.stressScale ?? null}
       history={history}
     />
   )
