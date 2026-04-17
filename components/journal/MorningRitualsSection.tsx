@@ -121,9 +121,10 @@ interface RitualRowProps {
   onSelect: (key: string) => void
   segments: (boolean | null)[]
   streak: number
+  isActive: boolean
 }
 
-function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }: RitualRowProps) {
+function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak, isActive }: RitualRowProps) {
   const rowRef = useRef<HTMLDivElement>(null)
   const [revealed, setRevealed] = useState(false)
 
@@ -170,6 +171,7 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }
         color,
         fontFamily: 'var(--font-inter), sans-serif',
         marginBottom: '0.35rem',
+        opacity: isActive ? 1 : 0.4,
       }}>
         {label}
       </span>
@@ -180,7 +182,7 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }
         <button
           onClick={() => onSelect(ritualKey)}
           aria-label={label}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0, paddingLeft: '0.25rem' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0, paddingLeft: '0.25rem', opacity: isActive ? 1 : 0.4 }}
         >
           <div style={{
             width: 44, height: 44, borderRadius: '50%',
@@ -228,7 +230,7 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           paddingRight: '0.35rem',
         }}>
-          {streak > 0 && (
+          {streak > 0 ? (
             <span style={{
               fontSize: '2rem', fontWeight: 700,
               fontFamily: 'var(--font-lora), Georgia, serif',
@@ -239,6 +241,17 @@ function RitualRow({ ritualKey, label, Icon, color, onSelect, segments, streak }
               display: 'inline-block',
             }}>
               {streak}
+            </span>
+          ) : (
+            <span style={{
+              fontSize: '1.25rem', fontWeight: 400,
+              fontFamily: 'var(--font-lora), Georgia, serif',
+              color: 'var(--chart-text)', lineHeight: 1,
+              opacity: revealed ? 1 : 0,
+              transition: `opacity 0.3s ease ${streakDelay}s`,
+              display: 'inline-block',
+            }}>
+              0
             </span>
           )}
         </div>
@@ -259,19 +272,22 @@ export default function MorningRitualsSection({ checklist, ritualStats, slotDate
   const [activeKey, setActiveKey] = useState<string | null>(null)
   const active = activeKey ? ROUTINE_ICON_MAP[activeKey] : null
 
-  // Only show rituals completed in this post
-  const items = Object.entries(ROUTINE_ICON_MAP).filter(([key]) => Boolean(checklist[key]))
+  // Show all rituals with any completion in the 14-day window, sorted by streak descending
+  const items = Object.entries(ROUTINE_ICON_MAP)
+    .filter(([key]) => ritualStats[key]?.segments.some(s => s === true))
+    .sort(([keyA], [keyB]) => (ritualStats[keyB]?.streak ?? 0) - (ritualStats[keyA]?.streak ?? 0))
 
-  // Bar chart: daily total ritual counts across the 14-day window
+  // Bar chart: daily totals scoped to the visible rituals
   const N = slotDates.length
-  const allStats = Object.values(ritualStats)
+  const visibleStats = items.map(([key]) => ritualStats[key]).filter(Boolean)
   const dailyCounts: (number | null)[] = slotDates.map((_, dayIdx) => {
-    // If all segments for this day are null, it's a no-post day
-    const allNull = allStats.every(s => s.segments[dayIdx] === null)
+    const allNull = visibleStats.every(s => s.segments[dayIdx] === null)
     if (allNull) return null
-    return allStats.reduce((sum, s) => sum + (s.segments[dayIdx] === true ? 1 : 0), 0)
+    return visibleStats.reduce((sum, s) => sum + (s.segments[dayIdx] === true ? 1 : 0), 0)
   })
-  const todayCount = items.length
+
+  // Rituals completed in this post = those with an active streak
+  const todayCount = items.filter(([key]) => (ritualStats[key]?.streak ?? 0) > 0).length
 
   return (
     <section id="morning-rituals" className="journal-section" style={{ paddingTop: '2.5rem' }}>
@@ -280,7 +296,7 @@ export default function MorningRitualsSection({ checklist, ritualStats, slotDate
 
       <SectionInfoHeader
         title="Morning Rituals"
-        description="The daily rituals completed"
+        description="14-day ritual history, sorted by current streak"
         popupBody="Morning rituals are small, consistent practices — breathwork, sunlight, movement, stillness — that set the conditions for a good day. Each ritual Matthew completes is logged here. Tap any icon to learn more about it and see other journals where it featured."
         popupLink={{ href: '/rituals', label: 'Explore all rituals' }}
       />
@@ -335,14 +351,14 @@ export default function MorningRitualsSection({ checklist, ritualStats, slotDate
               textTransform: 'uppercase', letterSpacing: '0.08em',
               color: 'var(--body-text)',
             }}>
-              Rituals Completed in this Post
+              14-Day Ritual Activity
             </p>
             <p style={{
               margin: '0 0 0.75rem',
               fontSize: '0.78rem', fontFamily: 'var(--font-inter), sans-serif',
               color: 'var(--body-text)', opacity: 0.55, lineHeight: 1.5,
             }}>
-              Each bar shows whether the ritual was completed that day over the last 14 days. Bright bars are your current streak.
+              Sorted by current streak. Faded rituals were not completed in this post.
             </p>
 
             {/* Column header row — aligns with ritual pill rows */}
@@ -399,6 +415,7 @@ export default function MorningRitualsSection({ checklist, ritualStats, slotDate
                       onSelect={setActiveKey}
                       segments={stats.segments}
                       streak={stats.streak}
+                      isActive={stats.streak > 0}
                     />
                     {idx < items.length - 1 && <GreyDivider />}
                   </div>
