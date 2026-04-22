@@ -207,7 +207,7 @@ export const wolfbotVersionLog = pgTable('wolfbot_version_log', {
 // ── WOLF|BOT personality reviews ──────────────────────────────────────────
 // One row per post — single review generated in a user-triggered action.
 // Admin can re-trigger to regenerate. Unique on postId.
-// Legacy columns (reviewHelpful, reviewSassy, etc.) retained for backward compat.
+// Legacy columns (reviewHelpful, reviewSassy) retained for backward compat — still displayed by LegacyTerminal.
 export const wolfbotReviews = pgTable('wolfbot_reviews', {
   id:                 uuid('id').primaryKey().defaultRandom(),
   postId:             uuid('post_id').notNull().unique().references(() => posts.id, { onDelete: 'cascade' }),
@@ -220,8 +220,6 @@ export const wolfbotReviews = pgTable('wolfbot_reviews', {
   journalContext:     jsonb('journal_context'),    // structured summary for trend context (JSONB)
   // Legacy (pre-refactor): kept for backward compat, no longer written
   reviewHelpful:      text('review_helpful'),
-  reviewIntellectual: text('review_intellectual'),
-  reviewLovely:       text('review_lovely'),
   reviewSassy:        text('review_sassy'),
   generatedAt:        timestamp('generated_at').notNull().defaultNow(),
   triggeredBy:        uuid('triggered_by').references(() => users.id),
