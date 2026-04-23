@@ -127,6 +127,27 @@ export const morningState = pgTable('morning_state', {
 // Consolidated into the posts table (eveningReflection, feelAboutToday columns) in the
 // journal page redesign (March 2026). Run `npm run db:push` to drop the old table.
 
+// ── Rituals ──────────────────────────────────────────────────────────────────
+// Admin-managed morning ritual definitions. Each ritual has a unique camelCase
+// key that matches the JSONB keys stored in morningState.routineChecklist.
+// Keys are immutable after creation — archived rituals keep their key so
+// historical journal data still renders correctly.
+export const rituals = pgTable('rituals', {
+  id:          uuid('id').primaryKey().defaultRandom(),
+  key:         text('key').notNull().unique(),              // camelCase, immutable after creation
+  label:       text('label').notNull(),                     // Display name e.g. "Sunlight"
+  description: text('description').notNull(),               // Longer description shown in popups
+  category:    text('category').notNull().default(''),      // e.g. "Mindfulness", "Physical", "Nourishment", "Connection"
+  color:       text('color').notNull().default('#4A7FA5'),  // Hex colour for icon + UI accents
+  svgContent:  text('svg_content'),                         // Inner SVG markup (paths, circles — no wrapping <svg> tag)
+  emoji:       text('emoji'),                               // For social share e.g. "🌅"
+  hashtag:     text('hashtag'),                             // For social share e.g. "#sunlight"
+  sortOrder:   smallint('sort_order').notNull().default(0),
+  isActive:    boolean('is_active').notNull().default(true), // false = archived (not selectable, data preserved)
+  createdAt:   timestamp('created_at').notNull().defaultNow(),
+  updatedAt:   timestamp('updated_at').notNull().defaultNow(),
+})
+
 // ── Site configuration ─────────────────────────────────────────────────────
 // Singleton row (id always 1). Controls registration, messaging and UI mode.
 // status: closed_alpha | closed_beta | open_beta | live

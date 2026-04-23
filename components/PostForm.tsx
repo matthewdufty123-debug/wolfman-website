@@ -4,12 +4,21 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Maximize2, X as XIcon } from 'lucide-react'
-import { ROUTINE_ICON_MAP } from './RoutineIcons'
+import RitualIcon from './RitualIcon'
 import PhotoCropUpload from './PhotoCropUpload'
 import WolfBotLoadingOverlay from './WolfBotLoadingOverlay'
 import WolfBotIcon from './WolfBotIcon'
 
-const RITUAL_KEYS = Object.keys(ROUTINE_ICON_MAP)
+/** Serialisable ritual definition passed from server components */
+export type RitualDef = {
+  key: string
+  label: string
+  description: string
+  category: string
+  color: string
+  svgContent: string | null
+  sortOrder: number
+}
 
 const BRAIN_LABELS  = ['Completely Silent', 'Very Peaceful', 'Quite Quiet', 'Chill', 'Active', 'Busy', 'Hyper Focused', 'Totally Manic']
 const BODY_LABELS   = ['Nothing to Give', 'Running Empty', 'Sluggish', 'Slow', 'Steady', 'Energised', 'Firing Hard', 'Absolutely Buzzing']
@@ -67,14 +76,113 @@ interface PostFormProps {
   initialIsPublic?: boolean
   username?: string | null
   wolfbotReviewExists?: boolean
+  rituals?: RitualDef[]
 }
 
-function defaultChecklist(): Record<string, boolean> {
-  return Object.fromEntries(RITUAL_KEYS.map(k => [k, false]))
+function defaultChecklist(ritualKeys?: string[]): Record<string, boolean> {
+  const keys = ritualKeys ?? []
+  return Object.fromEntries(keys.map(k => [k, false]))
 }
 
 function today(): string {
   return new Date().toISOString().slice(0, 10)
+}
+
+// ── Ritual accordion (categorised selection) ─────────────────────────────────
+
+function RitualAccordion({
+  rituals,
+  checklist,
+  onToggle,
+}: {
+  rituals: RitualDef[]
+  checklist: Record<string, boolean>
+  onToggle: (key: string) => void
+}) {
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
+
+  // Group rituals by category
+  const groups = new Map<string, RitualDef[]>()
+  for (const r of rituals) {
+    const cat = r.category || 'Other'
+    const list = groups.get(cat) ?? []
+    list.push(r)
+    groups.set(cat, list)
+  }
+
+  if (rituals.length === 0) return null
+
+  const selectedCount = Object.values(checklist).filter(Boolean).length
+
+  return (
+    <div className="pf-ritual-accordion">
+      <div className="pf-ritual-accordion-header">
+        <span>Morning Rituals</span>
+        {selectedCount > 0 && (
+          <span className="pf-ritual-count">{selectedCount}</span>
+        )}
+      </div>
+      {[...groups.entries()].map(([category, items]) => {
+        const isCollapsed = collapsed[category] ?? false
+        const catCount = items.filter(r => checklist[r.key]).length
+        return (
+          <div key={category} className="pf-ritual-category">
+            <button
+              type="button"
+              className="pf-ritual-category-header"
+              onClick={() => setCollapsed(c => ({ ...c, [category]: !isCollapsed }))}
+            >
+              <span className="pf-ritual-category-name">{category}</span>
+              {catCount > 0 && <span className="pf-ritual-category-count">{catCount}</span>}
+              <span className="pf-ritual-chevron">{isCollapsed ? '▸' : '▾'}</span>
+            </button>
+            <div
+              className="pf-ritual-category-items"
+              style={{
+                maxHeight: isCollapsed ? 0 : items.length * 52,
+                overflow: 'hidden',
+                transition: 'max-height 0.25s ease',
+              }}
+            >
+              {items.map(r => {
+                const done = checklist[r.key] ?? false
+                return (
+                  <button
+                    key={r.key}
+                    type="button"
+                    className={`pf-ritual-row${done ? ' pf-ritual-row--done' : ''}`}
+                    onClick={() => onToggle(r.key)}
+                  >
+                    <div
+                      className="pf-ritual-row-icon"
+                      style={{
+                        background: done ? `${r.color}22` : 'transparent',
+                        borderColor: done ? r.color : 'var(--color-border, #ddd)',
+                      }}
+                    >
+                      <RitualIcon svgContent={r.svgContent} color={done ? r.color : 'var(--color-text-muted, #999)'} size={18} label={r.label} />
+                    </div>
+                    <span className="pf-ritual-row-label">{r.label}</span>
+                    <span
+                      className="pf-ritual-toggle"
+                      style={{
+                        background: done ? r.color : 'var(--color-border, #ddd)',
+                      }}
+                    >
+                      <span
+                        className="pf-ritual-toggle-knob"
+                        style={{ transform: done ? 'translateX(14px)' : 'translateX(0)' }}
+                      />
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
 }
 
 function buildContent(intention: string, grateful: string, greatAt: string): string {
@@ -194,6 +302,7 @@ export default function PostForm({
   initialIsPublic,
   username,
   wolfbotReviewExists = false,
+  rituals = [],
 }: PostFormProps) {
   const router = useRouter()
   const { data: session } = useSession()
@@ -211,7 +320,7 @@ export default function PostForm({
     bodyScale:   initialData?.morning?.bodyScale   ?? null,
     happyScale:  initialData?.morning?.happyScale  ?? null,
     stressScale: initialData?.morning?.stressScale ?? null,
-    routineChecklist: initialData?.morning?.routineChecklist ?? defaultChecklist(),
+    routineChecklist: initialData?.morning?.routineChecklist ?? defaultChecklist(rituals.map(r => r.key)),
   })
   const [image, setImage] = useState<string | null>(initialData?.image ?? null)
   const [imageCaption, setImageCaption] = useState<string | null>(initialData?.imageCaption ?? null)
@@ -549,26 +658,12 @@ export default function PostForm({
             <ScaleSelector label="Happy"        value={morning.happyScale}  color="#3AB87A" labels={HAPPY_LABELS}  onChange={n => { setMorning(m => ({ ...m, happyScale:  n })); markDirty() }} />
             <ScaleSelector label="Stress State" value={morning.stressScale} color="#C87840" labels={STRESS_LABELS} onChange={n => { setMorning(m => ({ ...m, stressScale: n })); markDirty() }} />
 
-            {/* Rituals */}
-            <div className="pf-rituals">
-              {RITUAL_KEYS.map(key => {
-                const { label, Icon, color } = ROUTINE_ICON_MAP[key]
-                const done = morning.routineChecklist[key]
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    className={`pf-ritual-btn${done ? ' pf-ritual-btn--done' : ''}`}
-                    style={done ? { borderColor: color, background: `${color}22` } : {}}
-                    onClick={() => toggleRitual(key)}
-                    title={label}
-                  >
-                    <Icon size={18} color={done ? color : undefined} />
-                    <span className="pf-ritual-label">{label}</span>
-                  </button>
-                )
-              })}
-            </div>
+            {/* Rituals — categorised accordion */}
+            <RitualAccordion
+              rituals={rituals}
+              checklist={morning.routineChecklist}
+              onToggle={toggleRitual}
+            />
           </div>
 
           {/* Title — after rituals */}

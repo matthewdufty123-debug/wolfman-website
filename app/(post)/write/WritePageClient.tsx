@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import PostForm from '@/components/PostForm'
+import PostForm, { type RitualDef } from '@/components/PostForm'
 import JournalOnboardingOverlay, { type OnboardingValues } from '@/components/JournalOnboardingOverlay'
 
 interface Props {
@@ -9,9 +9,10 @@ interface Props {
   defaultPublic:    boolean
   username:         string | null
   showOnboarding:   boolean
+  rituals:          RitualDef[]
 }
 
-export default function WritePageClient({ communityEnabled, defaultPublic, username, showOnboarding }: Props) {
+export default function WritePageClient({ communityEnabled, defaultPublic, username, showOnboarding, rituals }: Props) {
   const [overlayDone, setOverlayDone]       = useState(false)
   const [prefill,     setPrefill]           = useState<Partial<{ intention: string; grateful: string; greatAt: string }>>({})
 
@@ -37,6 +38,7 @@ export default function WritePageClient({ communityEnabled, defaultPublic, usern
         defaultPublic={defaultPublic}
         username={username}
         initialData={Object.keys(prefill).length > 0 ? prefill : undefined}
+        rituals={rituals}
       />
     </>
   )

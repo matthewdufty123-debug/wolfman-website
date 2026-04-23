@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import PostForm from '@/components/PostForm'
+import PostForm, { type RitualDef } from '@/components/PostForm'
 
 interface Props {
   postId: string
@@ -12,9 +12,10 @@ interface Props {
   initialIsPublic: boolean
   username: string | null
   wolfbotReviewExists: boolean
+  rituals: RitualDef[]
 }
 
-export default function EditPageClient({ postId, initialData, initialTitleSuggestionsUsed, communityEnabled, defaultPublic, initialIsPublic, username, wolfbotReviewExists }: Props) {
+export default function EditPageClient({ postId, initialData, initialTitleSuggestionsUsed, communityEnabled, defaultPublic, initialIsPublic, username, wolfbotReviewExists, rituals }: Props) {
   const router = useRouter()
   return (
     <PostForm
@@ -28,6 +29,7 @@ export default function EditPageClient({ postId, initialData, initialTitleSugges
       initialIsPublic={initialIsPublic}
       username={username}
       wolfbotReviewExists={wolfbotReviewExists}
+      rituals={rituals}
     />
   )
 }

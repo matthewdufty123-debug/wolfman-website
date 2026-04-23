@@ -4336,35 +4336,120 @@ html[data-theme="light"] .pf-scale-clear:hover {
   min-height: 1.2em;
 }
 
-.pf-rituals {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+/* ── Ritual accordion ────────────────────────────────────────────── */
+.pf-ritual-accordion {
   margin-top: 1rem;
+  border: 1px solid var(--color-border, rgba(255,255,255,0.12));
+  border-radius: 10px;
+  overflow: hidden;
 }
-
-.pf-ritual-btn {
+.pf-ritual-accordion-header {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.65rem;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: transparent;
-  color: var(--body-text);
-  cursor: pointer;
-  font-size: 0.75rem;
-  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  transition: all 0.12s ease;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: var(--font-inter), sans-serif;
+  letter-spacing: 0.02em;
   opacity: 0.55;
+  text-transform: uppercase;
 }
-
-.pf-ritual-btn--done {
-  opacity: 1;
+.pf-ritual-count {
+  background: #4A7FA5;
+  color: #fff;
+  font-size: 0.65rem;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
 }
+.pf-ritual-category {
+  border-top: 1px solid var(--color-border, rgba(255,255,255,0.08));
+}
+.pf-ritual-category-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font-size: 0.72rem;
+  font-family: var(--font-inter), sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.pf-ritual-category-name { flex: 1; text-align: left; }
+.pf-ritual-category-count {
+  background: var(--color-border, rgba(255,255,255,0.15));
+  font-size: 0.6rem;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+.pf-ritual-chevron { font-size: 0.7rem; opacity: 0.4; }
 
-.pf-ritual-label {
-  white-space: nowrap;
+.pf-ritual-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0.5rem 0.85rem;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--color-border, rgba(255,255,255,0.05));
+  cursor: pointer;
+  color: inherit;
+  font-family: var(--font-inter), sans-serif;
+  transition: background 0.12s ease;
+  opacity: 0.6;
+}
+.pf-ritual-row--done { opacity: 1; }
+.pf-ritual-row:active { background: rgba(128,128,128,0.08); }
+
+.pf-ritual-row-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--color-border, #ddd);
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.pf-ritual-row-label {
+  flex: 1;
+  text-align: left;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+.pf-ritual-toggle {
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+.pf-ritual-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .pf-error {
