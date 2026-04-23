@@ -7,7 +7,14 @@ export default async function AdminRitualsPage() {
   const session = await auth()
   if (!session?.user || session.user.role !== 'admin') redirect('/')
 
-  const initialRituals = await getAllRituals()
+  const rows = await getAllRituals()
+
+  // Serialize dates for client component
+  const initialRituals = rows.map(r => ({
+    ...r,
+    createdAt: r.createdAt.toISOString(),
+    updatedAt: r.updatedAt.toISOString(),
+  }))
 
   return (
     <main className="dash-main">

@@ -3,7 +3,22 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import RitualIcon from '@/components/RitualIcon'
-import type { Ritual } from '@/lib/rituals'
+// Serialised version of Ritual (dates as strings from server component)
+type Ritual = {
+  id: string
+  key: string
+  label: string
+  description: string
+  category: string
+  color: string
+  svgContent: string | null
+  emoji: string | null
+  hashtag: string | null
+  sortOrder: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
 
 type Filter = 'all' | 'active' | 'archived'
 
