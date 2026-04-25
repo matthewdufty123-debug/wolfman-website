@@ -74,7 +74,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id
         // Fetch extended profile fields at sign-in time
         const [row] = await db
-          .select({ displayName: users.displayName, bio: users.bio, avatar: users.avatar, username: users.username, onboardingComplete: users.onboardingComplete })
+          .select({ displayName: users.displayName, bio: users.bio, avatar: users.avatar, username: users.username, onboardingComplete: users.onboardingComplete, timezone: users.timezone })
           .from(users)
           .where(eq(users.id, user.id!))
         token.displayName        = row?.displayName        ?? null
@@ -82,6 +82,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.avatar             = row?.avatar             ?? null
         token.username           = row?.username           ?? null
         token.onboardingComplete = row?.onboardingComplete ?? false
+        token.timezone           = row?.timezone           ?? null
       } else if (token.id && !token.username) {
         // Username was null at sign-in (set later via account page) — re-fetch
         const [row] = await db
@@ -102,6 +103,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.avatar           = token.avatar           as string | null
         session.user.username         = token.username         as string | null
         session.user.onboardingComplete = token.onboardingComplete as boolean
+        session.user.timezone           = token.timezone           as string | null
       }
       return session
     },

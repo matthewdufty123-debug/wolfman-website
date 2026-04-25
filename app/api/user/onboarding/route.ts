@@ -3,6 +3,7 @@ import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
+import { isValidTimezone } from '@/lib/timezone'
 
 export async function POST(req: Request) {
   const session = await auth()
@@ -10,7 +11,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
   }
 
-  let body: { communityEnabled?: boolean; defaultPublic?: boolean; profession?: string; humourSource?: string }
+  let body: { communityEnabled?: boolean; defaultPublic?: boolean; timezone?: string; profession?: string; humourSource?: string }
   try {
     body = await req.json()
   } catch {
@@ -19,6 +20,11 @@ export async function POST(req: Request) {
 
   const communityEnabled = Boolean(body.communityEnabled)
   const defaultPublic = communityEnabled ? Boolean(body.defaultPublic) : false
+  const timezone = body.timezone?.trim() || null
+
+  if (timezone && !isValidTimezone(timezone)) {
+    return NextResponse.json({ error: 'Invalid timezone.' }, { status: 400 })
+  }
 
   await db
     .update(users)
@@ -26,6 +32,7 @@ export async function POST(req: Request) {
       communityEnabled,
       defaultPublic,
       onboardingComplete: true,
+      timezone,
       profession:    body.profession?.trim()    || null,
       humourSource:  body.humourSource?.trim()  || null,
     })

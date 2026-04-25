@@ -23,6 +23,7 @@ export const users = pgTable('users', {
   morningReminderTime:     text('morning_reminder_time'),      // 'HH:MM' in user's local time
   morningReminderTimezone: text('morning_reminder_timezone'),  // IANA tz string e.g. 'Europe/London'
   lastReminderSentAt:      timestamp('last_reminder_sent_at'), // guards against double-sends
+  timezone:                text('timezone'),                   // IANA tz string — canonical user timezone for day boundaries
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 

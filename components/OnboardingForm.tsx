@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { TIMEZONES, detectTimezone } from '@/lib/timezones'
 
 interface Props {
   username: string | null
@@ -11,6 +12,7 @@ export default function OnboardingForm({ username }: Props) {
   const router = useRouter()
   const [communityEnabled, setCommunityEnabled] = useState(false)
   const [defaultPublic, setDefaultPublic] = useState(false)
+  const [timezone, setTimezone] = useState(() => detectTimezone())
   const [profession, setProfession] = useState('')
   const [humourSource, setHumourSource] = useState('')
   const [saving, setSaving] = useState(false)
@@ -25,7 +27,7 @@ export default function OnboardingForm({ username }: Props) {
       const res = await fetch('/api/user/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ communityEnabled, defaultPublic, profession, humourSource }),
+        body: JSON.stringify({ communityEnabled, defaultPublic, timezone, profession, humourSource }),
       })
 
       if (!res.ok) {
@@ -106,7 +108,30 @@ export default function OnboardingForm({ username }: Props) {
         </div>
       )}
 
-      {/* Q3 — Profession */}
+      {/* Q3 — Timezone */}
+      <div className="onboarding-question">
+        <p className="onboarding-question-label">
+          What timezone are you in?
+        </p>
+        <p className="onboarding-question-hint">
+          This defines your journal day — midnight in your timezone starts a new day.
+        </p>
+        <select
+          className="onboarding-text-input auth-select"
+          value={timezone}
+          onChange={e => setTimezone(e.target.value)}
+          required
+        >
+          {!TIMEZONES.includes(timezone) && timezone && (
+            <option value={timezone}>{timezone.replace(/_/g, ' ')}</option>
+          )}
+          {TIMEZONES.map(tz => (
+            <option key={tz} value={tz}>{tz.replace(/_/g, ' ')}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Q4 — Profession (optional) */}
       <div className="onboarding-question">
         <p className="onboarding-question-label">
           What is your profession?
@@ -124,7 +149,7 @@ export default function OnboardingForm({ username }: Props) {
         />
       </div>
 
-      {/* Q4 — Humour source */}
+      {/* Q5 — Humour source */}
       <div className="onboarding-question">
         <p className="onboarding-question-label">
           Where do you find humour?

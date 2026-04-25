@@ -10,6 +10,7 @@ declare module 'next-auth' {
       avatar: string | null
       username: string | null
       onboardingComplete: boolean
+      timezone: string | null
     } & DefaultSession['user']
   }
 

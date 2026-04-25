@@ -8,6 +8,7 @@ import { noindexMetadata } from '@/lib/metadata'
 import SectionHeader from '@/components/SectionHeader'
 import ThemeButtons from '@/components/ThemeButtons'
 import FontSizeButtons from '@/components/FontSizeButtons'
+import TimezoneSettings from '@/components/TimezoneSettings'
 import ReminderSettings from '@/components/ReminderSettings'
 import AccountCommunityForm from '@/components/AccountCommunityForm'
 import AccountWolfBotProfileForm from '@/components/AccountWolfBotProfileForm'
@@ -58,6 +59,19 @@ export default async function SettingsPage() {
           <div className="setting-card-divider" />
           <div className="setting-card-body">
             <FontSizeButtons />
+          </div>
+        </div>
+
+        {/* Timezone */}
+        <div className="setting-card">
+          <div className="setting-card-head">
+            <p className="setting-card-label">Journal</p>
+            <p className="setting-card-title">Your timezone</p>
+            <p className="setting-card-desc">Defines your journal day boundary. Midnight in your timezone starts a new day.</p>
+          </div>
+          <div className="setting-card-divider" />
+          <div className="setting-card-body">
+            <TimezoneSettings />
           </div>
         </div>
 

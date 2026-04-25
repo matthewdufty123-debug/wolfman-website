@@ -43,8 +43,9 @@ Core user accounts.
 | humourSource | text | WOLF|BOT personalisation |
 | morningReminderEnabled | bool | Opt-in morning reminders |
 | morningReminderTime | text | e.g. "07:30" |
-| morningReminderTimezone | text | e.g. "Europe/London" |
+| morningReminderTimezone | text | **Deprecated** — use `timezone` instead |
 | lastReminderSentAt | timestamp | Prevents duplicate sends |
+| timezone | text | IANA tz string (e.g. "Europe/London"). Canonical user timezone — defines journal day boundary. Used by cron, hub, Telegram. |
 | createdAt | timestamp | |
 
 ### `posts`

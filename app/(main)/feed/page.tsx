@@ -293,6 +293,7 @@ export default async function FeedPage({
   }
 
   const showOnboardingBanner = session?.user?.id && !session.user.onboardingComplete
+  const showTimezoneBanner = session?.user?.id && session.user.onboardingComplete && !session.user.timezone
 
   return (
     <main className="feed-page">
@@ -303,6 +304,17 @@ export default async function FeedPage({
           </p>
           <Link href="/onboarding" className="onboarding-banner-link">
             Complete setup →
+          </Link>
+        </div>
+      )}
+
+      {showTimezoneBanner && (
+        <div className="onboarding-banner">
+          <p className="onboarding-banner-text">
+            Set your timezone so your journal days start at the right midnight.
+          </p>
+          <Link href="/settings" className="onboarding-banner-link">
+            Set timezone →
           </Link>
         </div>
       )}

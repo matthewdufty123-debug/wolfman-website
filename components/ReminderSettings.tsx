@@ -2,68 +2,9 @@
 
 import { useState, useEffect } from 'react'
 
-// Common IANA timezones for the dropdown — covers the majority of users
-const TIMEZONES = [
-  'Europe/London',
-  'Europe/Paris',
-  'Europe/Berlin',
-  'Europe/Amsterdam',
-  'Europe/Madrid',
-  'Europe/Rome',
-  'Europe/Stockholm',
-  'Europe/Warsaw',
-  'Europe/Lisbon',
-  'Europe/Dublin',
-  'Europe/Helsinki',
-  'Europe/Athens',
-  'Europe/Bucharest',
-  'Europe/Istanbul',
-  'Europe/Moscow',
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'America/Phoenix',
-  'America/Toronto',
-  'America/Vancouver',
-  'America/Mexico_City',
-  'America/Sao_Paulo',
-  'America/Argentina/Buenos_Aires',
-  'America/Bogota',
-  'America/Lima',
-  'America/Halifax',
-  'Atlantic/Reykjavik',
-  'Africa/Johannesburg',
-  'Africa/Lagos',
-  'Africa/Nairobi',
-  'Asia/Dubai',
-  'Asia/Kolkata',
-  'Asia/Dhaka',
-  'Asia/Bangkok',
-  'Asia/Singapore',
-  'Asia/Shanghai',
-  'Asia/Tokyo',
-  'Asia/Seoul',
-  'Asia/Karachi',
-  'Australia/Sydney',
-  'Australia/Melbourne',
-  'Australia/Perth',
-  'Pacific/Auckland',
-  'Pacific/Honolulu',
-]
-
-function detectTimezone(): string {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone
-  } catch {
-    return 'Europe/London'
-  }
-}
-
 export default function ReminderSettings() {
   const [enabled, setEnabled] = useState(false)
   const [time, setTime] = useState('07:00')
-  const [timezone, setTimezone] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -75,7 +16,6 @@ export default function ReminderSettings() {
       .then(data => {
         setEnabled(data.morningReminderEnabled ?? false)
         setTime(data.morningReminderTime ?? '07:00')
-        setTimezone(data.morningReminderTimezone ?? detectTimezone())
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -90,7 +30,7 @@ export default function ReminderSettings() {
       const res = await fetch('/api/user/reminders', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled, time: enabled ? time : null, timezone: enabled ? timezone : null }),
+        body: JSON.stringify({ enabled, time: enabled ? time : null }),
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
@@ -139,26 +79,9 @@ export default function ReminderSettings() {
               required
             />
           </div>
-          <div className="auth-field">
-            <label className="auth-label" htmlFor="reminder-tz">Timezone</label>
-            <select
-              id="reminder-tz"
-              className="auth-input auth-select"
-              value={timezone}
-              onChange={e => setTimezone(e.target.value)}
-              required
-            >
-              {!TIMEZONES.includes(timezone) && timezone && (
-                <option value={timezone}>{timezone}</option>
-              )}
-              {TIMEZONES.map(tz => (
-                <option key={tz} value={tz}>{tz.replace('_', ' ')}</option>
-              ))}
-            </select>
-          </div>
           <p className="settings-reminder-note">
-            You'll receive a single email each morning if you haven't journalled yet that day.
-            No reminder is sent on days you've already posted.
+            Uses your timezone setting above. You&apos;ll receive a single email each morning
+            if you haven&apos;t journalled yet that day.
           </p>
         </>
       )}
