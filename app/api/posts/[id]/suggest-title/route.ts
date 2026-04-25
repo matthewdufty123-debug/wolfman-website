@@ -4,11 +4,23 @@ import { db } from '@/lib/db'
 import { posts, wolfbotConfig } from '@/lib/db/schema'
 import { eq, inArray } from 'drizzle-orm'
 import Anthropic from '@anthropic-ai/sdk'
+import { getJournalSections } from '@/lib/db/queries'
 
 export const maxDuration = 30
 
 // Stub: all users treated as premium. Wire to billing in Release 0.8.
 function isPremium(_userId: string): boolean { return true }
+
+async function buildJournalText(postId: string, fallbackContent: string) {
+  const sections = await getJournalSections(postId)
+  if (sections.intention) {
+    const parts = [`Journal entry:\n\nToday's Intention:\n${sections.intention}`]
+    if (sections.gratitude) parts.push(`I'm Grateful For:\n${sections.gratitude}`)
+    if (sections.greatAt) parts.push(`Something I'm Great At:\n${sections.greatAt}`)
+    return parts.join('\n\n')
+  }
+  return `Journal entry:\n\n${fallbackContent}`
+}
 
 const DEFAULT_MODEL = 'claude-haiku-4-5-20251001'
 const DEFAULT_TITLE_PROMPT = `You are a title generator for a mindful morning journal. Read the journal entry and return a single vivid, specific title that captures the core theme or insight of the entry. Return ONLY the title — no quotes, no punctuation at the end, no explanation, nothing else. Maximum {max_words} words and {max_chars} characters.`
@@ -61,7 +73,7 @@ export async function POST(
     model,
     max_tokens: maxTokens,
     system: systemPrompt,
-    messages: [{ role: 'user', content: `Journal entry:\n\n${post.content}` }],
+    messages: [{ role: 'user', content: await buildJournalText(id, post.content) }],
   })
 
   const suggested = (response.content[0] as { type: string; text: string }).text.trim()

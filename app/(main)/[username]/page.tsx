@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
-import { posts, morningState, users, wolfbotReviews } from '@/lib/db/schema'
+import { posts, morningState, scaleEntries, users, wolfbotReviews } from '@/lib/db/schema'
 import { and, eq, gte, sql, isNotNull } from 'drizzle-orm'
 import ProfileAnalyticsClient from '@/components/profile/ProfileAnalyticsClient'
 import type { ScaleDataRow, WordCountDataRow } from '@/components/profile/ProfileAnalyticsClient'
@@ -140,16 +140,26 @@ export default async function ProfilePage(
   const firstOfMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
   const ytdCutoff = `${now.getFullYear()}-01-01`
 
-  const [scaleRows, allPostDates, [{ total }], wordCountRows, [{ wolfbotContextCount }], [allTimeWords]] = await Promise.all([
-    // Scale + ritual data — all time (client filters to 3M for analytics)
+  const [scaleRawRows, ritualRows, allPostDates, [{ total }], wordCountRows, [{ wolfbotContextCount }], [allTimeWords]] = await Promise.all([
+    // Scale data from scaleEntries — all time
     db
       .select({
-        date: posts.date,
+        postId: scaleEntries.postId,
+        date: sql<string>`${posts.date}::text`,
         slug: posts.slug,
-        brainScale: morningState.brainScale,
-        bodyScale: morningState.bodyScale,
-        happyScale: morningState.happyScale,
-        stressScale: morningState.stressScale,
+        type: scaleEntries.type,
+        value: scaleEntries.value,
+      })
+      .from(scaleEntries)
+      .innerJoin(posts, eq(scaleEntries.postId, posts.id))
+      .where(and(eq(posts.authorId, userId), eq(posts.status, 'published')))
+      .orderBy(posts.date),
+
+    // Ritual data from morningState — all time
+    db
+      .select({
+        date: sql<string>`${posts.date}::text`,
+        slug: posts.slug,
         routineChecklist: morningState.routineChecklist,
       })
       .from(morningState)
@@ -200,16 +210,37 @@ export default async function ProfilePage(
       .where(and(eq(posts.authorId, userId), eq(posts.status, 'published'))),
   ])
 
-  // Transform data for client
-  const scaleData: ScaleDataRow[] = scaleRows.map(r => ({
-    date: r.date,
-    slug: r.slug,
-    brainScale: r.brainScale,
-    bodyScale: r.bodyScale,
-    happyScale: r.happyScale,
-    stressScale: r.stressScale,
-    routineChecklist: r.routineChecklist as Record<string, boolean> | null,
-  }))
+  // Pivot scale rows by date
+  const scalePivot = new Map<string, { date: string; slug: string; brainScale: number | null; bodyScale: number | null; happyScale: number | null; stressScale: number | null }>()
+  for (const row of scaleRawRows) {
+    if (!scalePivot.has(row.date)) {
+      scalePivot.set(row.date, { date: row.date, slug: row.slug, brainScale: null, bodyScale: null, happyScale: null, stressScale: null })
+    }
+    const entry = scalePivot.get(row.date)!
+    if (row.type === 'brain') entry.brainScale = row.value
+    else if (row.type === 'body') entry.bodyScale = row.value
+    else if (row.type === 'happy') entry.happyScale = row.value
+    else if (row.type === 'stress') entry.stressScale = row.value
+  }
+
+  // Build ritual map by date
+  const ritualByDate = new Map(ritualRows.map(r => [r.date, r.routineChecklist as Record<string, boolean> | null]))
+
+  // Merge scales + rituals into ScaleDataRow[]
+  const allScaleDates = new Set([...scalePivot.keys(), ...ritualByDate.keys()])
+  const scaleData: ScaleDataRow[] = [...allScaleDates].sort().map(date => {
+    const s = scalePivot.get(date)
+    const ritualRow = ritualRows.find(r => r.date === date)
+    return {
+      date,
+      slug: s?.slug ?? ritualRow?.slug ?? '',
+      brainScale: s?.brainScale ?? null,
+      bodyScale: s?.bodyScale ?? null,
+      happyScale: s?.happyScale ?? null,
+      stressScale: s?.stressScale ?? null,
+      routineChecklist: ritualByDate.get(date) ?? null,
+    }
+  })
 
   const wordCountData: WordCountDataRow[] = wordCountRows
     .filter(r => r.wordCountTotal && r.wordCountTotal > 0)
@@ -223,7 +254,7 @@ export default async function ProfilePage(
 
   // All-time headline stats
   const allTimeTotalWords = Number(allTimeWords?.totalWords ?? 0)
-  const allTimeRitualCount = scaleRows.reduce((sum, r) => {
+  const allTimeRitualCount = scaleData.reduce((sum, r) => {
     if (!r.routineChecklist) return sum
     return sum + Object.values(r.routineChecklist as Record<string, boolean>).filter(Boolean).length
   }, 0)
@@ -263,7 +294,7 @@ export default async function ProfilePage(
 
   // Rituals cumulative — count of completed rituals per post date (as daily values)
   const ritualsByDay: Record<string, number> = {}
-  for (const r of scaleRows) {
+  for (const r of scaleData) {
     if (r.routineChecklist && (r.date.startsWith(curPrefix) || r.date.startsWith(prevPrefix))) {
       const count = Object.values(r.routineChecklist as Record<string, boolean>).filter(Boolean).length
       ritualsByDay[r.date] = (ritualsByDay[r.date] ?? 0) + count
@@ -301,10 +332,10 @@ export default async function ProfilePage(
     const gridStart = new Date(weekStart)
     gridStart.setDate(weekStart.getDate() - 28)
 
-    // Build lookup: date → ritual count from scaleRows
+    // Build lookup: date → ritual count from scaleData
     const ritualByDate: Record<string, number> = {}
     const postDateSet = new Set(allDates)
-    for (const r of scaleRows) {
+    for (const r of scaleData) {
       if (r.routineChecklist) {
         ritualByDate[r.date] = Object.values(r.routineChecklist as Record<string, boolean>).filter(Boolean).length
       }

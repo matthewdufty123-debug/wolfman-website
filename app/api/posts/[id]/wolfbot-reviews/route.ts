@@ -4,7 +4,7 @@ import { db } from '@/lib/db'
 import { posts, morningState, users, wolfbotReviews, wolfbotConfig } from '@/lib/db/schema'
 import { eq, inArray, desc, ne, and, gte, isNotNull, sql } from 'drizzle-orm'
 import Anthropic from '@anthropic-ai/sdk'
-import { parseContent } from '@/lib/parse-content'
+import { getJournalSections, getScalesForPost } from '@/lib/db/queries'
 
 export const maxDuration = 60
 
@@ -187,13 +187,15 @@ export async function POST(
 
   // ── Step 1: Parallel fetch — post, morning state, author, existing review ───
 
-  const [[post], [ms], [author], [existing]] = await Promise.all([
+  const [[post], [ms], [author], [existing], sections, scales] = await Promise.all([
     db.select().from(posts).where(eq(posts.id, id)),
     db.select().from(morningState).where(eq(morningState.postId, id)),
     db.select({ profession: users.profession, humourSource: users.humourSource })
       .from(users).where(eq(users.id, session.user.id)),
     db.select({ id: wolfbotReviews.id })
       .from(wolfbotReviews).where(eq(wolfbotReviews.postId, id)),
+    getJournalSections(id),
+    getScalesForPost(id),
   ])
 
   if (!post) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -311,7 +313,7 @@ export async function POST(
 
   // ── Step 5: Build the user message ────────────────────────────────────────────
 
-  const { intention, grateful, greatAt } = parseContent(post.content)
+  const { intention, gratitude: grateful, greatAt } = sections
   const wordCountBand = deriveWordCountBand(post.wordCountTotal)
 
   const profileLines: string[] = []
@@ -334,11 +336,11 @@ export async function POST(
     `Today's Intention:\n${intention}`,
     grateful  ? `\nI'm Grateful For:\n${grateful}` : '',
     greatAt   ? `\nSomething I'm Great At:\n${greatAt}` : '',
-    ms && (ms.brainScale != null || ms.bodyScale != null || ms.happyScale != null || ms.stressScale != null)
-      ? `\nMorning scores — Brain: ${ms.brainScale ?? 'not recorded'}/8, Body: ${ms.bodyScale ?? 'not recorded'}/8, Happy: ${ms.happyScale ?? 'not recorded'}/8, Stress State: ${ms.stressScale ?? 'not recorded'}/8`
+    (scales.brainScale != null || scales.bodyScale != null || scales.happyScale != null || scales.stressScale != null)
+      ? `\nMorning scores — Brain: ${scales.brainScale ?? 'not recorded'}/8, Body: ${scales.bodyScale ?? 'not recorded'}/8, Happy: ${scales.happyScale ?? 'not recorded'}/8, Stress State: ${scales.stressScale ?? 'not recorded'}/8`
       : '',
     routineLines ? `Rituals completed: ${routineLines}` : '',
-    post.eveningReflection ? `\nEvening reflection:\n${post.eveningReflection}` : '',
+    sections.reflection ? `\nEvening reflection:\n${sections.reflection}` : '',
     post.feelAboutToday    ? `Feel about today: ${post.feelAboutToday}/6` : '',
     ``,
     `WOLF|BOT context depth: ${journalContextCount} reviewed entries`,

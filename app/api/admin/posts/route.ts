@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { posts, morningState } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { calculateWordCounts } from '@/lib/word-count'
+import { insertJournalEntries, insertScaleEntries, replaceJournalEntries, replaceScaleEntries } from '@/lib/db/queries'
 
 async function requireAdmin() {
   const session = await auth()
@@ -64,8 +65,15 @@ export async function POST(request: Request) {
       brainScale: morning.brainScale,
       bodyScale: morning.bodyScale,
       happyScale: morning.happyScale ?? null,
+      stressScale: morning.stressScale ?? null,
       routineChecklist: morning.routineChecklist,
     })
+  }
+
+  // Dual-write to new normalised tables
+  if (post) {
+    await insertJournalEntries(post.id, content)
+    if (morning) await insertScaleEntries(post.id, morning)
   }
 
   return NextResponse.json(post, { status: 201 })
@@ -116,11 +124,19 @@ export async function PUT(request: Request) {
     const [existing] = await db.select({ id: morningState.id }).from(morningState).where(eq(morningState.postId, id))
     if (existing) {
       await db.update(morningState)
-        .set({ brainScale: morning.brainScale, bodyScale: morning.bodyScale, happyScale: morning.happyScale ?? null, routineChecklist: morning.routineChecklist })
+        .set({ brainScale: morning.brainScale, bodyScale: morning.bodyScale, happyScale: morning.happyScale ?? null, stressScale: morning.stressScale ?? null, routineChecklist: morning.routineChecklist })
         .where(eq(morningState.postId, id))
     } else {
-      await db.insert(morningState).values({ postId: id, brainScale: morning.brainScale, bodyScale: morning.bodyScale, happyScale: morning.happyScale ?? null, routineChecklist: morning.routineChecklist })
+      await db.insert(morningState).values({ postId: id, brainScale: morning.brainScale, bodyScale: morning.bodyScale, happyScale: morning.happyScale ?? null, stressScale: morning.stressScale ?? null, routineChecklist: morning.routineChecklist })
     }
+  }
+
+  // Dual-write to new normalised tables
+  if (content) {
+    await replaceJournalEntries(id, content)
+  }
+  if (morning) {
+    await replaceScaleEntries(id, morning)
   }
 
   return NextResponse.json(updated)

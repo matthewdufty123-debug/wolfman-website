@@ -3,6 +3,7 @@ import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { posts, morningState } from '@/lib/db/schema'
 import { calculateWordCounts } from '@/lib/word-count'
+import { insertJournalEntries, insertScaleEntries } from '@/lib/db/queries'
 import { eq, and, desc } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
@@ -78,6 +79,12 @@ export async function POST(request: Request) {
       stressScale: morning.stressScale ?? null,
       routineChecklist: morning.routineChecklist,
     })
+  }
+
+  // Dual-write to new normalised tables
+  if (post) {
+    await insertJournalEntries(post.id, content, eveningReflection)
+    if (morning) await insertScaleEntries(post.id, morning)
   }
 
   return NextResponse.json(post, { status: 201 })

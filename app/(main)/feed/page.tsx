@@ -14,6 +14,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { db } from '@/lib/db'
 import { posts, morningState, users } from '@/lib/db/schema'
+import { getScalesForPosts } from '@/lib/db/queries'
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import AnimatedRoutineIcons from '@/components/AnimatedRoutineIcons'
 import { deriveExcerpt } from '@/lib/posts'
@@ -228,9 +229,10 @@ export default async function FeedPage({
       .orderBy(desc(posts.date))
 
     const ids = rows.map(r => r.id)
-    const states = ids.length > 0
-      ? await db.select().from(morningState).where(inArray(morningState.postId, ids))
-      : []
+    const [states, scaleMap] = await Promise.all([
+      ids.length > 0 ? db.select({ postId: morningState.postId, routineChecklist: morningState.routineChecklist }).from(morningState).where(inArray(morningState.postId, ids)) : [],
+      getScalesForPosts(ids),
+    ])
 
     const stateMap = new Map(states.map(s => [s.postId, s]))
 
@@ -238,10 +240,10 @@ export default async function FeedPage({
       ...r,
       excerpt: r.excerpt || deriveExcerpt(content) || null,
       checklist:   stateMap.get(r.id)?.routineChecklist as Record<string, boolean> | undefined,
-      happyScale:  stateMap.get(r.id)?.happyScale  ?? null,
-      bodyScale:   stateMap.get(r.id)?.bodyScale   ?? null,
-      brainScale:  stateMap.get(r.id)?.brainScale  ?? null,
-      stressScale: stateMap.get(r.id)?.stressScale ?? null,
+      happyScale:  scaleMap.get(r.id)?.happyScale  ?? null,
+      bodyScale:   scaleMap.get(r.id)?.bodyScale   ?? null,
+      brainScale:  scaleMap.get(r.id)?.brainScale  ?? null,
+      stressScale: scaleMap.get(r.id)?.stressScale ?? null,
     }))
   } else {
     const rows = await db
@@ -272,9 +274,10 @@ export default async function FeedPage({
       .orderBy(desc(posts.date))
 
     const ids = rows.map(r => r.id)
-    const states = ids.length > 0
-      ? await db.select().from(morningState).where(inArray(morningState.postId, ids))
-      : []
+    const [states, scaleMap] = await Promise.all([
+      ids.length > 0 ? db.select({ postId: morningState.postId, routineChecklist: morningState.routineChecklist }).from(morningState).where(inArray(morningState.postId, ids)) : [],
+      getScalesForPosts(ids),
+    ])
 
     const stateMap = new Map(states.map(s => [s.postId, s]))
 
@@ -282,10 +285,10 @@ export default async function FeedPage({
       ...r,
       excerpt: r.excerpt || deriveExcerpt(content) || null,
       checklist:   stateMap.get(r.id)?.routineChecklist as Record<string, boolean> | undefined,
-      happyScale:  stateMap.get(r.id)?.happyScale  ?? null,
-      bodyScale:   stateMap.get(r.id)?.bodyScale   ?? null,
-      brainScale:  stateMap.get(r.id)?.brainScale  ?? null,
-      stressScale: stateMap.get(r.id)?.stressScale ?? null,
+      happyScale:  scaleMap.get(r.id)?.happyScale  ?? null,
+      bodyScale:   scaleMap.get(r.id)?.bodyScale   ?? null,
+      brainScale:  scaleMap.get(r.id)?.brainScale  ?? null,
+      stressScale: scaleMap.get(r.id)?.stressScale ?? null,
     }))
   }
 

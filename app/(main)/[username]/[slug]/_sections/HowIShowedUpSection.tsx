@@ -1,7 +1,5 @@
-import { db } from '@/lib/db'
-import { morningState, posts as postsTable } from '@/lib/db/schema'
-import { eq, and, lte, gte, asc, sql } from 'drizzle-orm'
 import HumanScoresSection from '@/components/journal/HumanScoresSection'
+import { getScalesForPost, getScaleHistory } from '@/lib/db/queries'
 
 interface Props {
   postId: string
@@ -29,13 +27,11 @@ function buildSlotDates(postDate: string): string[] {
 }
 
 export default async function HowIShowedUpSection({ postId, authorId, postDate }: Props) {
-  const ms = await db
-    .select()
-    .from(morningState)
-    .where(eq(morningState.postId, postId))
-    .then(r => r[0] ?? null)
+  const currentScales = await getScalesForPost(postId)
 
-  if (!ms) return null
+  const hasScales = currentScales.brainScale != null || currentScales.bodyScale != null ||
+    currentScales.happyScale != null || currentScales.stressScale != null
+  if (!hasScales) return null
 
   const slotDates = buildSlotDates(postDate)
   const windowStart = slotDates[0]
@@ -43,32 +39,11 @@ export default async function HowIShowedUpSection({ postId, authorId, postDate }
   let history: ScaleHistoryEntry[] = []
   try {
     if (authorId) {
-      const rows = await db
-        .select({
-          brainScale: morningState.brainScale,
-          bodyScale: morningState.bodyScale,
-          happyScale: morningState.happyScale,
-          stressScale: morningState.stressScale,
-          date: sql<string>`${postsTable.date}::text`,
-        })
-        .from(morningState)
-        .innerJoin(postsTable, eq(morningState.postId, postsTable.id))
-        .where(
-          and(
-            eq(postsTable.authorId, authorId),
-            gte(postsTable.date, sql`${windowStart}::date`),
-            lte(postsTable.date, sql`${postDate}::date`),
-            eq(postsTable.status, 'published'),
-          )
-        )
-        .orderBy(asc(postsTable.date))
-
-      // Map fetched rows by date, then fill all 14 slots (null where no post exists)
-      const byDate = new Map(rows.map(r => [r.date, r]))
+      const byDate = await getScaleHistory(authorId, windowStart, postDate)
       history = slotDates.map(date => {
-        const row = byDate.get(date)
-        return row
-          ? { brainScale: row.brainScale, bodyScale: row.bodyScale, happyScale: row.happyScale, stressScale: row.stressScale, date }
+        const scales = byDate.get(date)
+        return scales
+          ? { ...scales, date }
           : { brainScale: null, bodyScale: null, happyScale: null, stressScale: null, date }
       })
     }
@@ -78,10 +53,10 @@ export default async function HowIShowedUpSection({ postId, authorId, postDate }
 
   if (history.length === 0) {
     history = slotDates.map(date => ({
-      brainScale: date === postDate ? ms.brainScale : null,
-      bodyScale: date === postDate ? ms.bodyScale : null,
-      happyScale: date === postDate ? ms.happyScale : null,
-      stressScale: date === postDate ? ms.stressScale : null,
+      brainScale: date === postDate ? currentScales.brainScale : null,
+      bodyScale: date === postDate ? currentScales.bodyScale : null,
+      happyScale: date === postDate ? currentScales.happyScale : null,
+      stressScale: date === postDate ? currentScales.stressScale : null,
       date,
     }))
   }

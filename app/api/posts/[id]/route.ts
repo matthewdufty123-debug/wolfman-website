@@ -5,6 +5,7 @@ import { posts, morningState } from '@/lib/db/schema'
 import { eq, and, count } from 'drizzle-orm'
 import { notifyAdminFirstPost } from '@/lib/email'
 import { calculateWordCounts } from '@/lib/word-count'
+import { replaceJournalEntries, replaceScaleEntries, upsertReflectionEntry } from '@/lib/db/queries'
 
 async function requireOwner(postId: string) {
   const session = await auth()
@@ -101,6 +102,16 @@ export async function PUT(
         routineChecklist: morning.routineChecklist,
       })
     }
+  }
+
+  // Dual-write to new normalised tables
+  if (content) {
+    await replaceJournalEntries(id, content, eveningReflection)
+  } else if (eveningReflection !== undefined) {
+    await upsertReflectionEntry(id, eveningReflection)
+  }
+  if (morning) {
+    await replaceScaleEntries(id, morning)
   }
 
   return NextResponse.json(updated)
