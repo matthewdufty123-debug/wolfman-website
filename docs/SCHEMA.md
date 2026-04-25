@@ -97,6 +97,40 @@ One row per post. Captured at publish time via PostForm "After Waking" tab.
 
 See `docs/ROUTINES.md` for full ritual key list and checklist shape.
 
+### `journalEntries`
+
+Normalised journal entries. Multiple entries per post per type, with source tracking.
+Tables are empty until data migration (#247).
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | PK |
+| postId | UUID | FK -> posts (cascade delete) |
+| type | text | 'intention' / 'gratitude' / 'great_at' / 'reflection' |
+| content | text | Entry text |
+| source | text | 'web' (default) / 'telegram' |
+| sortOrder | int | Display ordering within type, default 0 |
+| createdAt | timestamp | |
+| updatedAt | timestamp | |
+
+Indexes: composite on `(post_id, type)`.
+
+### `scaleEntries`
+
+Normalised scale readings. Multiple readings per post per type, with source tracking.
+Tables are empty until data migration (#247).
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | PK |
+| postId | UUID | FK -> posts (cascade delete) |
+| type | text | 'brain' / 'body' / 'happy' / 'stress' |
+| value | smallint | 1-8 |
+| source | text | 'web' (default) / 'telegram' |
+| createdAt | timestamp | |
+
+Indexes: composite on `(post_id, type)`.
+
 ### `wolfbotReviews`
 
 One row per post. WOLF|BOT review and rating. Full column detail in `docs/WOLFBOT.md`.
@@ -208,6 +242,8 @@ Stripe/Printful commerce. Standard e-commerce tables.
 
 Commented out in schema. Planned for the Statistics feature. Aggregated per-user analytics:
 streaks, scale averages, ritual frequency, WOLF|BOT themes. Do not reference until built.
+Note: will need updating to query from `journalEntries` / `scaleEntries`
+instead of `posts.content` / `morningState` scale columns.
 
 ---
 

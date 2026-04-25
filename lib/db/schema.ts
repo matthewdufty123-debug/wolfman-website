@@ -1,4 +1,4 @@
-import { pgTable, text, integer, timestamp, uuid, boolean, date, smallint, jsonb, serial } from 'drizzle-orm/pg-core'
+import { pgTable, text, integer, timestamp, uuid, boolean, date, smallint, jsonb, serial, index } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -122,6 +122,37 @@ export const morningState = pgTable('morning_state', {
   routineChecklist: jsonb('routine_checklist').notNull().default({}),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
+
+// ── Journal entries (normalised) ─────────────────────────────────────────
+// Individual timestamped entries replacing the single concatenated
+// posts.content field. Supports multiple entries per section per day
+// and source tracking (web vs telegram). Added in #246.
+export const journalEntries = pgTable('journal_entries', {
+  id:        uuid('id').primaryKey().defaultRandom(),
+  postId:    uuid('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
+  type:      text('type').notNull(),                   // 'intention' | 'gratitude' | 'great_at' | 'reflection'
+  content:   text('content').notNull(),
+  source:    text('source').notNull().default('web'),   // 'web' | 'telegram'
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => [
+  index('journal_entries_post_type_idx').on(table.postId, table.type),
+])
+
+// ── Scale entries (normalised) ───────────────────────────────────────────
+// Individual timestamped scale readings replacing morningState scale columns.
+// Supports multiple readings per day and source tracking. Added in #246.
+export const scaleEntries = pgTable('scale_entries', {
+  id:        uuid('id').primaryKey().defaultRandom(),
+  postId:    uuid('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
+  type:      text('type').notNull(),                   // 'brain' | 'body' | 'happy' | 'stress'
+  value:     smallint('value').notNull(),               // 1–8
+  source:    text('source').notNull().default('web'),   // 'web' | 'telegram'
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => [
+  index('scale_entries_post_type_idx').on(table.postId, table.type),
+])
 
 // Evening reflection was previously a separate table (evening_reflection).
 // Consolidated into the posts table (eveningReflection, feelAboutToday columns) in the
