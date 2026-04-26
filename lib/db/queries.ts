@@ -4,9 +4,10 @@
  */
 
 import { db } from '@/lib/db'
-import { journalEntries, scaleEntries } from '@/lib/db/schema'
-import { eq, and, sql } from 'drizzle-orm'
+import { journalEntries, scaleEntries, posts } from '@/lib/db/schema'
+import { eq, and, sql, asc } from 'drizzle-orm'
 import { parseContent } from '@/lib/parse-content'
+import { calculateWordCounts } from '@/lib/word-count'
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -121,6 +122,65 @@ export async function upsertReflectionEntry(
       postId, type: 'reflection', content: reflection.trim(), source: 'web', sortOrder: 0,
     })
   }
+}
+
+// ── Entry-level helpers (for /today hub) ─────────────────────────────────
+
+/** Get all journal entry rows for a post (full row data for the hub). */
+export async function getEntriesForPost(postId: string) {
+  return db
+    .select({
+      id: journalEntries.id,
+      type: journalEntries.type,
+      content: journalEntries.content,
+      source: journalEntries.source,
+      sortOrder: journalEntries.sortOrder,
+      createdAt: journalEntries.createdAt,
+      updatedAt: journalEntries.updatedAt,
+    })
+    .from(journalEntries)
+    .where(eq(journalEntries.postId, postId))
+    .orderBy(asc(journalEntries.sortOrder), asc(journalEntries.createdAt))
+}
+
+/**
+ * Rebuild posts.content and word counts from all journalEntries rows.
+ * Called after every individual entry mutation to maintain dual-write.
+ */
+export async function reconstructContent(postId: string) {
+  const rows = await db
+    .select({ type: journalEntries.type, content: journalEntries.content })
+    .from(journalEntries)
+    .where(eq(journalEntries.postId, postId))
+    .orderBy(asc(journalEntries.sortOrder), asc(journalEntries.createdAt))
+
+  // Group entries by type
+  const groups: Record<string, string[]> = {}
+  for (const row of rows) {
+    if (!groups[row.type]) groups[row.type] = []
+    groups[row.type].push(row.content)
+  }
+
+  const intention = (groups.intention ?? []).join('\n\n')
+  const grateful = (groups.gratitude ?? []).join('\n\n')
+  const greatAt = (groups.great_at ?? []).join('\n\n')
+  const reflection = (groups.reflection ?? []).join('\n\n')
+
+  // Build markdown content (same format as PostForm.buildContent)
+  const parts: string[] = []
+  if (intention) parts.push(`## Today's Intention\n\n${intention}`)
+  if (grateful) parts.push(`## I'm Grateful For\n\n${grateful}`)
+  if (greatAt) parts.push(`## Something I'm Great At\n\n${greatAt}`)
+  const content = parts.join('\n\n')
+
+  const wordCounts = calculateWordCounts(content)
+
+  await db.update(posts).set({
+    content,
+    eveningReflection: reflection || null,
+    ...wordCounts,
+    updatedAt: new Date(),
+  }).where(eq(posts.id, postId))
 }
 
 // ── Read helpers ─────────────────────────────────────────────────────────

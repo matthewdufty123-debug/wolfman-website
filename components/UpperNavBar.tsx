@@ -112,7 +112,7 @@ export default function UpperNavBar() {
       case 'write-plus':
         if (status !== 'authenticated') return <div key={key} className="nav-slot nav-slot--empty" aria-hidden="true" />
         return (
-          <Link key={key} href="/write" className="nav-slot nav-slot--link" aria-label="Write a journal">
+          <Link key={key} href="/today" className="nav-slot nav-slot--link" aria-label="Write a journal">
             <Plus size={18} strokeWidth={2} />
           </Link>
         )

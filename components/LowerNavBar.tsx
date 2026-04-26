@@ -61,7 +61,7 @@ const PAGE_GROUPS: PageGroup[] = [
     color: '#4A7FA5',
     links: [
       { href: '/',                label: 'Feed',            icon: <Home         size={16} strokeWidth={1.5} /> },
-      { href: '/write',           label: 'Write a Journal', icon: <Pencil       size={16} strokeWidth={1.5} /> },
+      { href: '/today',           label: 'Write a Journal', icon: <Pencil       size={16} strokeWidth={1.5} /> },
       { href: '/subscriptions',   label: 'Subscriptions',   icon: <Sparkles     size={16} strokeWidth={1.5} /> },
       { href: '/discover',        label: 'Discover',        icon: <BadgeInfo    size={16} strokeWidth={1.5} /> },
     ],

@@ -178,14 +178,14 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
 export function getNavConfigKey(pathname: string): NavConfigKey {
   if (pathname === '/login' || pathname === '/register') return 'auth'
   if (pathname.startsWith('/admin')) return 'admin'
-  if (pathname.startsWith('/write') || pathname.startsWith('/edit/')) return 'writing'
+  if (pathname.startsWith('/write') || pathname.startsWith('/edit/') || pathname === '/today') return 'writing'
   if (isJournalReadingRoute(pathname)) return 'journal-reading'
   return 'standard'
 }
 
 // Known first-path-segments that are NOT [username]/[slug] journal routes.
 const KNOWN_PREFIXES = new Set([
-  'admin', 'edit', 'write', 'account', 'settings', 'shop', 'cart',
+  'admin', 'edit', 'write', 'today', 'account', 'settings', 'shop', 'cart',
   'checkout', 'login', 'register', 'about', 'morning-ritual',
   'morning-stats', 'intentions', 'feedback', 'beta', 'dev',
   'features', 'terms', 'discover', 'investment', 'rituals', 'achievements', 'api', 'posts', 'wolfbot',
