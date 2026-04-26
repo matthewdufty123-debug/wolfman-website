@@ -5,6 +5,7 @@ import type { ProcessedPost } from '@/lib/posts'
 import PostInfoSection from '@/components/journal/PostInfoSection'
 import JournalPhotoSection from '@/components/journal/JournalPhotoSection'
 import BottomNav from '@/components/journal/BottomNav'
+import WolfLogo from '@/components/WolfLogo'
 
 interface Props {
   post: ProcessedPost
@@ -80,7 +81,28 @@ export default async function PostInfoNavSection({ post, username, isOwner, user
     <>
       <PostInfoSection post={post} calendarDays={calendarDays} />
       <JournalPhotoSection imageUrl={post.image} title={post.title} caption={post.imageCaption} />
+
+      <div className="post-reading-end">
+        <p className="post-reading-end-label">YOU HAVE BEEN READING</p>
+        <p className="post-reading-end-title">{post.title}</p>
+        <p className="post-reading-end-date">{formatReadingDate(post.date)}</p>
+        <div className="post-reading-end-logo">
+          <a href="/" aria-label="Home">
+            <WolfLogo size={64} className="post-reading-end-wolf" />
+          </a>
+        </div>
+      </div>
+
       <BottomNav username={username} nextPost={nextPost} isOwner={isOwner} editHref={editHref} />
     </>
   )
+}
+
+function formatReadingDate(date: string) {
+  const d = new Date(date + 'T00:00:00')
+  const months = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December']
+  const day = d.getDate()
+  const suffix = [, 'st', 'nd', 'rd'][day % 10 > 3 ? 0 : (day % 100 - day % 10 !== 10 ? day % 10 : 0)] || 'th'
+  return `${day}${suffix} ${months[d.getMonth()]} ${d.getFullYear()}`
 }

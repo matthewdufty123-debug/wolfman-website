@@ -8,9 +8,11 @@ import { db } from '@/lib/db'
 import { users as usersTable } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
+import { posts as postsTable } from '@/lib/db/schema'
 import JournalWithReviewSection from './_sections/JournalWithReviewSection'
 import HowIShowedUpSection from './_sections/HowIShowedUpSection'
 import MorningRitualsServerSection from './_sections/MorningRitualsServerSection'
+import EveningSection from '@/components/journal/EveningSection'
 import PostInfoNavSection from './_sections/PostInfoNavSection'
 import WritingStatsSection from './_sections/WritingStatsSection'
 import {
@@ -97,6 +99,12 @@ export default async function PostPage({
   const postId = post.id ?? ''
   const isOwner = userId != null && userId === post.authorId
 
+  // Load evening reflection data (not on ProcessedPost type)
+  const [eveningData] = postId
+    ? await db.select({ eveningReflection: postsTable.eveningReflection, feelAboutToday: postsTable.feelAboutToday })
+        .from(postsTable).where(eq(postsTable.id, postId)).limit(1)
+    : [null]
+
   // ── Streaming layout — each section fetches its own data ───────────────
   return (
     <>
@@ -118,6 +126,16 @@ export default async function PostPage({
           <Suspense fallback={<Section3Skeleton />}>
             <MorningRitualsServerSection postId={postId} authorId={post.authorId ?? ''} postDate={post.date ?? ''} />
           </Suspense>
+
+          {/* Evening Reflection */}
+          {(eveningData?.eveningReflection || eveningData?.feelAboutToday != null || isOwner) && (
+            <EveningSection
+              postId={postId}
+              isOwner={isOwner}
+              reflection={eveningData?.eveningReflection ?? null}
+              feelAboutToday={eveningData?.feelAboutToday ?? null}
+            />
+          )}
 
           {/* Section 5: Writing Stats */}
           <Suspense fallback={<Section5Skeleton />}>

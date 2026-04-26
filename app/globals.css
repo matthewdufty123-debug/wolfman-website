@@ -1973,6 +1973,58 @@ select.dash-config-textarea {
   margin-bottom: 0;
 }
 
+/* ── Multi-entry rendering (timestamped entries) ── */
+
+.post-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.post-entry {
+  /* Individual entry within a multi-entry section */
+}
+
+.post-entry-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.post-entry-time {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.72rem;
+  color: var(--body-text, #4A4A4A);
+  opacity: 0.4;
+  letter-spacing: 0.02em;
+}
+
+.post-entry-source {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.72rem;
+  color: #A0622A;
+  opacity: 0.7;
+  letter-spacing: 0.02em;
+}
+
+/* ── Reading end footer ── */
+
+.post-reading-end-logo {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.post-reading-end-wolf {
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.post-reading-end-wolf:hover {
+  opacity: 1;
+}
+
 /* ── Post footer / colophon ── */
 
 .post-footer {

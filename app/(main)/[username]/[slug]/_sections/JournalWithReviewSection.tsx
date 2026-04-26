@@ -2,7 +2,9 @@ import { db } from '@/lib/db'
 import { dayScores, wolfbotReviews as wolfbotReviewsTable, wolfbotConfig } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import type { ProcessedPost } from '@/lib/posts'
+import { getEntriesForPost } from '@/lib/db/queries'
 import JournalTextSection from '@/components/journal/JournalTextSection'
+import JournalEntriesSection from '@/components/journal/JournalEntriesSection'
 import WolfBotSection, { type WolfBotReviews } from '@/components/journal/WolfBotSection'
 
 interface Props {
@@ -12,7 +14,7 @@ interface Props {
 }
 
 export default async function JournalWithReviewSection({ post, postId, isOwner }: Props) {
-  const [wbr, ds, promptVersionRow, pixelGridRow, pixelPaletteRow] = await Promise.all([
+  const [wbr, ds, promptVersionRow, pixelGridRow, pixelPaletteRow, entries] = await Promise.all([
     db.select({
       review:        wolfbotReviewsTable.review,
       reviewRating:  wolfbotReviewsTable.reviewRating,
@@ -35,6 +37,7 @@ export default async function JournalWithReviewSection({ post, postId, isOwner }
       .from(wolfbotConfig)
       .where(eq(wolfbotConfig.key, 'pixel_palette'))
       .then(r => r[0] ?? null),
+    getEntriesForPost(postId),
   ])
 
   const promptVersion = (promptVersionRow?.value as number) ?? 1
@@ -44,9 +47,17 @@ export default async function JournalWithReviewSection({ post, postId, isOwner }
   const synthesis = ds?.synthesis ?? post.review ?? null
   const wolfbotReviews: WolfBotReviews | null = wbr
 
+  // Use entry-based rendering if normalised entries exist, otherwise fall back to markdown
+  const hasEntries = entries.length > 0 && entries.some(e => e.type !== 'reflection')
+
   return (
     <>
-      <JournalTextSection post={post} />
+      <section id="the-journal" className="journal-section journal-section--text">
+        {hasEntries
+          ? <JournalEntriesSection post={post} entries={entries} />
+          : <JournalTextSection post={post} />
+        }
+      </section>
 
       <WolfBotSection
         synthesis={synthesis}
