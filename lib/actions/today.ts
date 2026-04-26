@@ -32,6 +32,7 @@ export type TodayPost = {
   feelAboutToday: number | null
   titleSuggestionsUsed: number | null
   isPublic: boolean
+  publishedAt: Date | null
 }
 
 export type TodayEntry = {
@@ -78,6 +79,7 @@ export async function findOrCreateTodayPost(
       feelAboutToday: posts.feelAboutToday,
       titleSuggestionsUsed: posts.titleSuggestionsUsed,
       isPublic: posts.isPublic,
+      publishedAt: posts.publishedAt,
     })
     .from(posts)
     .where(and(eq(posts.authorId, userId), eq(posts.date, todayDate)))
@@ -130,6 +132,7 @@ export async function findOrCreateTodayPost(
     feelAboutToday: posts.feelAboutToday,
     titleSuggestionsUsed: posts.titleSuggestionsUsed,
     isPublic: posts.isPublic,
+    publishedAt: posts.publishedAt,
   })
 
   return {

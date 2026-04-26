@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useCallback, useRef } from 'react'
 import type { TodayData, TodayEntry } from '@/lib/actions/today'
 import JournalSection from '@/components/today/JournalSection'
 import ScalePanel from '@/components/today/ScalePanel'
@@ -34,7 +33,6 @@ const SECTIONS = [
 ] as const
 
 export default function TodayHub({ initialData, rituals, communityEnabled, username }: Props) {
-  const router = useRouter()
   const postId = initialData.post.id
 
   const [entries, setEntries] = useState<TodayEntry[]>(initialData.entries)
@@ -43,6 +41,39 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
   const [image, setImage] = useState<string | null>(initialData.post.image)
   const [status, setStatus] = useState(initialData.post.status)
   const [isPublic, setIsPublic] = useState(initialData.post.isPublic)
+  const [title, setTitle] = useState(initialData.post.title)
+  const [slug, setSlug] = useState(initialData.post.slug)
+  const [publishedAt, setPublishedAt] = useState<string | null>(
+    initialData.post.publishedAt && new Date(initialData.post.publishedAt).getTime() > 0
+      ? new Date(initialData.post.publishedAt).toISOString()
+      : null
+  )
+
+  // ── Title editing ───────────────────────────────────────────────────
+
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [titleDraft, setTitleDraft] = useState(title)
+  const titleInputRef = useRef<HTMLInputElement>(null)
+
+  const saveTitle = useCallback(async () => {
+    const trimmed = titleDraft.trim()
+    if (!trimmed || trimmed === title) {
+      setEditingTitle(false)
+      setTitleDraft(title)
+      return
+    }
+    setTitle(trimmed)
+    setEditingTitle(false)
+    const res = await fetch(`/api/today/${postId}/title`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: trimmed }),
+    })
+    if (res.ok) {
+      const data = await res.json()
+      if (data.slug) setSlug(data.slug)
+    }
+  }, [postId, titleDraft, title])
 
   // ── Entry CRUD ──────────────────────────────────────────────────────
 
@@ -112,16 +143,41 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
       body: JSON.stringify({ isPublic }),
     })
     if (!res.ok) return
-    const { slug } = await res.json()
+    const data = await res.json()
     setStatus('published')
-    if (username) {
-      router.push(`/${username}/${slug}`)
-    }
-  }, [postId, isPublic, username, router])
+    setSlug(data.slug)
+    if (data.title) setTitle(data.title)
+    if (data.publishedAt) setPublishedAt(data.publishedAt)
+  }, [postId, isPublic])
 
   return (
     <main className="td-hub">
       <div className="td-date">{formatDate(initialData.post.date)}</div>
+
+      {/* Title */}
+      <div className="td-title-section">
+        {editingTitle ? (
+          <input
+            ref={titleInputRef}
+            className="td-title-input"
+            type="text"
+            value={titleDraft}
+            onChange={e => setTitleDraft(e.target.value)}
+            onBlur={saveTitle}
+            onKeyDown={e => { if (e.key === 'Enter') saveTitle(); if (e.key === 'Escape') { setEditingTitle(false); setTitleDraft(title) } }}
+            autoFocus
+          />
+        ) : (
+          <button
+            type="button"
+            className="td-title-display"
+            onClick={() => { setTitleDraft(title); setEditingTitle(true) }}
+            title="Tap to edit title"
+          >
+            {title}
+          </button>
+        )}
+      </div>
 
       {SECTIONS.map(section => (
         <JournalSection
@@ -163,6 +219,9 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
         entryCount={entries.length}
         isPublic={isPublic}
         communityEnabled={communityEnabled}
+        publishedAt={publishedAt}
+        slug={slug}
+        username={username}
         onTogglePublic={() => setIsPublic(v => !v)}
         onPublish={publish}
       />

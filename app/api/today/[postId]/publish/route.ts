@@ -5,6 +5,9 @@ import { posts, users } from '@/lib/db/schema'
 import { eq, and, count } from 'drizzle-orm'
 import { deriveExcerpt } from '@/lib/posts'
 import { notifyAdminFirstPost } from '@/lib/email'
+import { generateTitle } from '@/lib/ai/title'
+
+export const maxDuration = 30
 
 function makeSlug(title: string, date: string): string {
   const base = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60)
@@ -39,12 +42,24 @@ export async function POST(
 
   const body = await request.json().catch(() => ({}))
   const isPublic = body.isPublic ?? false
+  const isFirstPublish = post.status !== 'published'
+
+  // Auto-generate title if still the default pattern
+  let title = post.title
+  if (isFirstPublish && /^Today's Intentional Journal/.test(title) && (post.content ?? '').length > 20) {
+    try {
+      title = await generateTitle(postId, post.content ?? '')
+      await db.update(posts).set({ title }).where(eq(posts.id, postId))
+    } catch {
+      // Non-fatal — keep default title
+    }
+  }
 
   // Generate excerpt from content
   const excerpt = deriveExcerpt(post.content ?? '')
 
-  // Regenerate slug from title (might have been auto-generated)
-  const newSlug = makeSlug(post.title, post.date)
+  // Generate slug from (possibly new) title
+  const newSlug = makeSlug(title, post.date)
   const slugExists = await db.select({ id: posts.id }).from(posts)
     .where(and(eq(posts.slug, newSlug)))
     .limit(1)
@@ -52,19 +67,22 @@ export async function POST(
     ? `${newSlug}-${Date.now()}`
     : newSlug
 
-  const isFirstPublish = post.status !== 'published'
+  const publishedAt = new Date()
 
   await db.update(posts).set({
     status: 'published',
-    publishedAt: new Date(),
+    publishedAt,
     excerpt: excerpt || null,
     slug: finalSlug,
     isPublic: Boolean(isPublic),
     updatedAt: new Date(),
   }).where(eq(posts.id, postId))
 
-  // Notify admin on user's first-ever published post
+  // Trigger WOLF|BOT review on first publish (fire-and-forget)
   if (isFirstPublish) {
+    triggerWolfbotReview(postId).catch(() => {})
+
+    // Notify admin on user's first-ever published post
     try {
       const [publishedCount] = await db
         .select({ total: count() })
@@ -76,7 +94,7 @@ export async function POST(
         if (author?.username) {
           await notifyAdminFirstPost({
             username: author.username,
-            postTitle: post.title,
+            postTitle: title,
             postUrl: `https://wolfman.app/${author.username}/${finalSlug}`,
           })
         }
@@ -86,5 +104,16 @@ export async function POST(
     }
   }
 
-  return NextResponse.json({ slug: finalSlug })
+  return NextResponse.json({ slug: finalSlug, title, publishedAt: publishedAt.toISOString() })
+}
+
+async function triggerWolfbotReview(postId: string) {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : 'http://localhost:3000'
+  await fetch(`${baseUrl}/api/posts/${postId}/wolfbot-reviews`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ autoTriggered: true }),
+  })
 }
