@@ -9,6 +9,7 @@ import SectionHeader from '@/components/SectionHeader'
 import AccountNameForm from '@/components/AccountNameForm'
 import AccountPasswordForm from '@/components/AccountPasswordForm'
 import AccountUsernameForm from '@/components/AccountUsernameForm'
+import AccountPhoneForm from '@/components/AccountPhoneForm'
 import SignOutButton from '@/components/SignOutButton'
 import AvatarUpload from '@/components/AvatarUpload'
 import { generateUniqueUsername } from '@/lib/username'
@@ -20,7 +21,7 @@ export default async function AccountPage() {
   if (!session?.user) redirect('/login')
 
   const [user, userOrders] = await Promise.all([
-    db.select({ avatar: users.avatar, username: users.username }).from(users).where(eq(users.id, session.user.id)).then(r => r[0]),
+    db.select({ avatar: users.avatar, username: users.username, phoneNumber: users.phoneNumber, phoneVerified: users.phoneVerified }).from(users).where(eq(users.id, session.user.id)).then(r => r[0]),
     db.select().from(orders).where(eq(orders.userId, session.user.id)).orderBy(desc(orders.createdAt)),
   ])
 
@@ -74,6 +75,19 @@ export default async function AccountPage() {
           <div className="setting-card-divider" />
           <div className="setting-card-body">
             <AccountUsernameForm currentUsername={username ?? ''} />
+          </div>
+        </div>
+
+        {/* Phone number */}
+        <div className="setting-card">
+          <div className="setting-card-head">
+            <p className="setting-card-label">Identity</p>
+            <p className="setting-card-title">Phone number</p>
+            <p className="setting-card-desc">Used for Telegram integration. Stored securely — never shared.</p>
+          </div>
+          <div className="setting-card-divider" />
+          <div className="setting-card-body">
+            <AccountPhoneForm currentPhone={user?.phoneNumber ?? null} phoneVerified={user?.phoneVerified ?? false} />
           </div>
         </div>
 

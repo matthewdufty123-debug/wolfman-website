@@ -2555,6 +2555,29 @@ html[data-fontsize="xlarge"] .post-claude-review-body p {
   opacity: 0.5;
   cursor: not-allowed;
 }
+.auth-submit--danger {
+  background: transparent;
+  color: #A82020;
+  border: 1px solid #A82020;
+}
+.auth-submit--danger:hover {
+  background: #A82020;
+  color: #fff;
+}
+
+.account-phone-status { margin: 0 0 0.75rem; }
+.account-phone-badge {
+  font-family: var(--font-inter);
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  background: #e0e0e0;
+  color: #666;
+}
+.account-phone-badge--verified {
+  background: #d4edda;
+  color: #155724;
+}
 
 .auth-error {
   font-size: 0.875rem;

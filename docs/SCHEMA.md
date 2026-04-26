@@ -46,6 +46,8 @@ Core user accounts.
 | morningReminderTimezone | text | **Deprecated** — use `timezone` instead |
 | lastReminderSentAt | timestamp | Prevents duplicate sends |
 | timezone | text | IANA tz string (e.g. "Europe/London"). Canonical user timezone — defines journal day boundary. Used by cron, hub, Telegram. |
+| phoneNumber | text | E.164 format (e.g. "+447700900000"). Unique. Used for Telegram account linking. |
+| phoneVerified | bool | Whether phone ownership has been verified (reset on change) |
 | createdAt | timestamp | |
 
 ### `posts`

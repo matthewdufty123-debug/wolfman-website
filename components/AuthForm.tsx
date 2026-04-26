@@ -7,6 +7,8 @@ interface Field {
   type: string
   label: string
   autoComplete?: string
+  placeholder?: string
+  required?: boolean  // default true
 }
 
 type ActionState = { error: string } | undefined
@@ -36,8 +38,9 @@ export default function AuthForm({ action, submitLabel, fields, registeredParam,
             name={field.name}
             type={field.type}
             autoComplete={field.autoComplete}
+            placeholder={field.placeholder}
             className="auth-input"
-            required
+            required={field.required !== false}
           />
         </div>
       ))}

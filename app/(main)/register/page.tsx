@@ -81,6 +81,7 @@ export default async function RegisterPage() {
           fields={[
             { name: 'name', type: 'text', label: 'Your name', autoComplete: 'name' },
             { name: 'email', type: 'email', label: 'Email', autoComplete: 'email' },
+            { name: 'phone', type: 'tel', label: 'Phone number', autoComplete: 'tel', placeholder: '+44...' },
             { name: 'password', type: 'password', label: 'Password', autoComplete: 'new-password' },
           ]}
         />

@@ -24,6 +24,9 @@ export const users = pgTable('users', {
   morningReminderTimezone: text('morning_reminder_timezone'),  // IANA tz string e.g. 'Europe/London'
   lastReminderSentAt:      timestamp('last_reminder_sent_at'), // guards against double-sends
   timezone:                text('timezone'),                   // IANA tz string — canonical user timezone for day boundaries
+  // Phone / Telegram
+  phoneNumber:    text('phone_number').unique(),                    // E.164 format e.g. +447700900000
+  phoneVerified:  boolean('phone_verified').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 

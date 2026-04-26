@@ -7,6 +7,8 @@ import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 import { revalidatePath } from 'next/cache'
 import { isValidUsername, isUsernameAvailable } from '@/lib/username'
+import { normalisePhone } from '@/lib/phone'
+import { and, ne } from 'drizzle-orm'
 
 type ActionState = { error?: string; success?: string } | undefined
 
@@ -60,6 +62,37 @@ export async function updateUsername(_prev: ActionState, formData: FormData): Pr
   await db.update(users).set({ username }).where(eq(users.id, session.user.id))
   revalidatePath('/account')
   return { success: 'Username updated.' }
+}
+
+export async function updatePhone(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const session = await auth()
+  if (!session?.user?.id) return { error: 'Not authenticated.' }
+
+  const raw = (formData.get('phone') as string)?.trim()
+  if (!raw) return { error: 'Phone number cannot be empty.' }
+
+  const phoneNumber = normalisePhone(raw)
+  if (!phoneNumber) {
+    return { error: 'Please enter a valid phone number with country code (e.g. +447700900000).' }
+  }
+
+  const [existing] = await db.select({ id: users.id }).from(users)
+    .where(and(eq(users.phoneNumber, phoneNumber), ne(users.id, session.user.id)))
+    .limit(1)
+  if (existing) return { error: 'That phone number is already in use.' }
+
+  await db.update(users).set({ phoneNumber, phoneVerified: false }).where(eq(users.id, session.user.id))
+  revalidatePath('/account')
+  return { success: 'Phone number updated.' }
+}
+
+export async function removePhone(_prev: ActionState): Promise<ActionState> {
+  const session = await auth()
+  if (!session?.user?.id) return { error: 'Not authenticated.' }
+
+  await db.update(users).set({ phoneNumber: null, phoneVerified: false }).where(eq(users.id, session.user.id))
+  revalidatePath('/account')
+  return { success: 'Phone number removed.' }
 }
 
 export async function logout() {
