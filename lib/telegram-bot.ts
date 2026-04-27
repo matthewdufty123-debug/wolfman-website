@@ -10,6 +10,8 @@ import { sendMessage, sendMessageWithButtons, answerCallbackQuery, type Telegram
 import { findOrCreateTodayPost } from '@/lib/actions/today'
 import { reconstructContent, getEntriesForPost, getScalesForPost } from '@/lib/db/queries'
 import { getUserLocalDate } from '@/lib/timezone'
+import { fetchTelegramContext } from '@/lib/telegram-context'
+import { generatePromptText, parseScaleFromText } from '@/lib/telegram-ai'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -20,10 +22,12 @@ interface TelegramSessionState {
   date?: string  // YYYY-MM-DD — reset if stale
 }
 
-interface LinkedUser {
+export interface LinkedUser {
   id: string
   name: string | null
   timezone: string | null
+  profession: string | null
+  humourSource: string | null
   telegramState: unknown
 }
 
@@ -118,7 +122,7 @@ async function handleActionMenuInput(
   if (callbackData?.startsWith('scale:')) {
     const type = callbackData.split(':')[1]
     if (type in SCALE_LABELS) {
-      await sendScalePrompt(chatId, type)
+      await sendScalePrompt(chatId, type, user, session.postId!)
       await updateState(user.id, { ...session, state: 'prompting_scale', type })
       return
     }
@@ -127,7 +131,7 @@ async function handleActionMenuInput(
   if (callbackData?.startsWith('journal:')) {
     const type = callbackData.split(':')[1]
     if (type in JOURNAL_LABELS) {
-      await sendJournalPrompt(chatId, type)
+      await sendJournalPrompt(chatId, type, user, session.postId!)
       await updateState(user.id, { ...session, state: 'prompting_journal', type })
       return
     }
@@ -159,10 +163,14 @@ async function handleScaleInput(
     value = parseInt(callbackData.split(':')[1], 10)
   }
 
-  // Free text: extract number 1-8
+  // Free text: regex first, then Haiku parsing as fallback
   if (value === null && text) {
     const match = text.match(/\b([1-8])\b/)
-    if (match) value = parseInt(match[1], 10)
+    if (match) {
+      value = parseInt(match[1], 10)
+    } else {
+      value = await parseScaleFromText(text, session.type!)
+    }
   }
 
   if (value === null || value < 1 || value > 8) {
@@ -232,20 +240,44 @@ async function showActionMenu(chatId: number, name: string | null): Promise<void
   await sendMessageWithButtons(chatId, greeting, buttons)
 }
 
-async function sendScalePrompt(chatId: number, type: string): Promise<void> {
+async function sendScalePrompt(chatId: number, type: string, user: LinkedUser, postId: string): Promise<void> {
   const label = SCALE_LABELS[type] ?? type
+  const fallback = `How's your ${label}? (1-8)`
+
+  // Try Haiku for a contextual prompt
+  let promptText = fallback
+  try {
+    const context = await fetchTelegramContext(user, postId)
+    const aiText = await generatePromptText('scale', type, context)
+    if (aiText) promptText = aiText
+  } catch {
+    // Fallback silently
+  }
+
   const buttons: InlineKeyboardButton[][] = [
     [1, 2, 3, 4, 5, 6, 7, 8].map(n => ({ text: String(n), callback_data: `val:${n}` })),
   ]
-  await sendMessageWithButtons(chatId, `How's your ${label}? (1-8)`, buttons)
+  await sendMessageWithButtons(chatId, promptText, buttons)
 }
 
-async function sendJournalPrompt(chatId: number, type: string): Promise<void> {
+async function sendJournalPrompt(chatId: number, type: string, user: LinkedUser, postId: string): Promise<void> {
   const label = JOURNAL_LABELS[type] ?? type
+  const fallback = `Tell me ${label}:`
+
+  // Try Haiku for a contextual prompt
+  let promptText = fallback
+  try {
+    const context = await fetchTelegramContext(user, postId)
+    const aiText = await generatePromptText('journal', type, context)
+    if (aiText) promptText = aiText
+  } catch {
+    // Fallback silently
+  }
+
   const buttons: InlineKeyboardButton[][] = [
     [{ text: 'Skip', callback_data: 'skip' }],
   ]
-  await sendMessageWithButtons(chatId, `Tell me ${label}:`, buttons)
+  await sendMessageWithButtons(chatId, promptText, buttons)
 }
 
 // ── Data operations ────────────────────────────────────────────────────────

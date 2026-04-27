@@ -46,6 +46,8 @@ export async function POST(request: Request) {
       id: users.id,
       name: users.name,
       timezone: users.timezone,
+      profession: users.profession,
+      humourSource: users.humourSource,
       telegramState: users.telegramState,
     })
       .from(users)
