@@ -83,14 +83,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.username           = row?.username           ?? null
         token.onboardingComplete = row?.onboardingComplete ?? false
         token.timezone           = row?.timezone           ?? null
-      } else if (token.id && !token.username) {
-        // Username was null at sign-in (set later via account page) — re-fetch
+      } else if (token.id && (!token.username || !token.timezone)) {
+        // Username or timezone was null at sign-in (set later via settings) — re-fetch
         const [row] = await db
-          .select({ username: users.username })
+          .select({ username: users.username, timezone: users.timezone })
           .from(users)
           .where(eq(users.id, token.id as string))
           .limit(1)
-        token.username = row?.username ?? null
+        if (!token.username) token.username = row?.username ?? null
+        if (!token.timezone) token.timezone = row?.timezone ?? null
       }
       return token
     },
