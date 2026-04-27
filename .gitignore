@@ -18,3 +18,5 @@ Thumbs.db
 
 # Claude Code local settings (may contain tokens)
 .claude/
+
+.env*.local

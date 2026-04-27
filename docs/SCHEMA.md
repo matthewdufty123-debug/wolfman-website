@@ -48,6 +48,7 @@ Core user accounts.
 | timezone | text | IANA tz string (e.g. "Europe/London"). Canonical user timezone — defines journal day boundary. Used by cron, hub, Telegram. |
 | phoneNumber | text | E.164 format (e.g. "+447700900000"). Unique. Used for Telegram account linking. |
 | phoneVerified | bool | Whether phone ownership has been verified (reset on change) |
+| telegramChatId | text | Telegram chat ID — set when user links their Telegram account |
 | createdAt | timestamp | |
 
 ### `posts`

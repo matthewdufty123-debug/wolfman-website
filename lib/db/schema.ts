@@ -27,6 +27,7 @@ export const users = pgTable('users', {
   // Phone / Telegram
   phoneNumber:    text('phone_number').unique(),                    // E.164 format e.g. +447700900000
   phoneVerified:  boolean('phone_verified').notNull().default(false),
+  telegramChatId: text('telegram_chat_id'),                          // set when Telegram account linked
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
