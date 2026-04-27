@@ -50,6 +50,11 @@ Core user accounts.
 | phoneVerified | bool | Whether phone ownership has been verified (reset on change) |
 | telegramChatId | text | Telegram chat ID — set when user links their Telegram account |
 | telegramState | jsonb | Conversation state machine: `{ state, type?, postId?, date? }` |
+| telegramPromptsEnabled | bool | Master toggle for scheduled Telegram check-ins |
+| telegramMorningTime | text | HH:MM for morning prompt (default 07:00) |
+| telegramMiddayEnabled | bool | Enable midday check-in (13:00) |
+| telegramEveningEnabled | bool | Enable evening check-in (20:00) |
+| lastTelegramPromptSentAt | timestamp | Duplicate prevention for scheduled prompts |
 | createdAt | timestamp | |
 
 ### `posts`

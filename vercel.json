@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/morning-reminder",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/telegram-prompts",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

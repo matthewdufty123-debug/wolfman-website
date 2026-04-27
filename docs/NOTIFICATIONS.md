@@ -45,6 +45,28 @@ All are **fire-and-forget** — called with `.catch(() => {})`. Never await them
 
 ---
 
+## Telegram Scheduled Prompts
+
+Three daily check-ins via Telegram, powered by Haiku for contextual personalisation.
+
+| Time | Prompt | Data collected |
+|------|--------|----------------|
+| Morning (user-configured, default 07:00) | Mood scale | `scaleEntries` (brain) |
+| Midday (13:00) | Energy scale | `scaleEntries` (body) |
+| Evening (20:00) | Reflection | `journalEntries` (reflection) |
+
+**Opt-in:** `users.telegramPromptsEnabled` (master toggle) + per-slot toggles for midday/evening.
+
+**Cron:** `/api/cron/telegram-prompts` every 15 minutes — same pattern as morning email reminder.
+
+**Duplicate prevention:** `lastTelegramPromptSentAt` — checks same day + same hour range (2-hour buffer between slots).
+
+**Settings UI:** `/settings` page — "Telegram check-ins" card (only visible when Telegram is linked).
+
+**Fallback:** If Haiku API fails, fixed prompt text is used. The user is never blocked.
+
+---
+
 ## Beta Emails
 
 | Function | Purpose |
@@ -84,7 +106,8 @@ fast, no branding overhead.
 
 | Route | Schedule | Purpose |
 |-------|----------|---------|
-| `/api/cron/morning-reminder` | Every 15 min | Check and send morning reminders |
+| `/api/cron/morning-reminder` | Every 15 min | Check and send morning email reminders |
+| `/api/cron/telegram-prompts` | Every 15 min | Send scheduled Telegram check-ins (morning/midday/evening) |
 | `/api/cron/beta-emails` | Daily | Beta announcement emails |
 
 Cron jobs are configured in `vercel.json`. Do not change the schedule without testing.

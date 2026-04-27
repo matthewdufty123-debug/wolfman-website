@@ -29,6 +29,12 @@ export const users = pgTable('users', {
   phoneVerified:  boolean('phone_verified').notNull().default(false),
   telegramChatId: text('telegram_chat_id'),                          // set when Telegram account linked
   telegramState:  jsonb('telegram_state'),                            // conversation state machine: { state, type?, postId?, date? }
+  // Telegram scheduled prompts
+  telegramPromptsEnabled:   boolean('telegram_prompts_enabled').notNull().default(false),
+  telegramMorningTime:      text('telegram_morning_time'),             // HH:MM, default '07:00'
+  telegramMiddayEnabled:    boolean('telegram_midday_enabled').notNull().default(true),
+  telegramEveningEnabled:   boolean('telegram_evening_enabled').notNull().default(true),
+  lastTelegramPromptSentAt: timestamp('last_telegram_prompt_sent_at'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 

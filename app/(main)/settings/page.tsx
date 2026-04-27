@@ -10,6 +10,7 @@ import ThemeButtons from '@/components/ThemeButtons'
 import FontSizeButtons from '@/components/FontSizeButtons'
 import TimezoneSettings from '@/components/TimezoneSettings'
 import ReminderSettings from '@/components/ReminderSettings'
+import TelegramPromptSettings from '@/components/TelegramPromptSettings'
 import AccountCommunityForm from '@/components/AccountCommunityForm'
 import AccountWolfBotProfileForm from '@/components/AccountWolfBotProfileForm'
 
@@ -25,6 +26,7 @@ export default async function SettingsPage() {
       defaultPublic: users.defaultPublic,
       profession: users.profession,
       humourSource: users.humourSource,
+      telegramChatId: users.telegramChatId,
     })
     .from(users)
     .where(eq(users.id, session.user.id))
@@ -87,6 +89,21 @@ export default async function SettingsPage() {
             <ReminderSettings />
           </div>
         </div>
+
+        {/* Telegram check-ins — only show when Telegram is linked */}
+        {userData?.telegramChatId && (
+          <div className="setting-card">
+            <div className="setting-card-head">
+              <p className="setting-card-label">Notifications</p>
+              <p className="setting-card-title">Telegram check-ins</p>
+              <p className="setting-card-desc">Proactive mood, gratitude, and reflection prompts throughout the day.</p>
+            </div>
+            <div className="setting-card-divider" />
+            <div className="setting-card-body">
+              <TelegramPromptSettings />
+            </div>
+          </div>
+        )}
 
         {/* Community */}
         <div className="setting-card">
