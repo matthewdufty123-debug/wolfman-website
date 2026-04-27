@@ -49,6 +49,7 @@ Core user accounts.
 | phoneNumber | text | E.164 format (e.g. "+447700900000"). Unique. Used for Telegram account linking. |
 | phoneVerified | bool | Whether phone ownership has been verified (reset on change) |
 | telegramChatId | text | Telegram chat ID — set when user links their Telegram account |
+| telegramState | jsonb | Conversation state machine: `{ state, type?, postId?, date? }` |
 | createdAt | timestamp | |
 
 ### `posts`

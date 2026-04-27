@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { sendMessage, sendContactRequest, type TelegramUpdate } from '@/lib/telegram'
+import { handleTelegramMessage } from '@/lib/telegram-bot'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
@@ -22,17 +23,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  // Extract message (from direct message or callback query)
+  // Extract chatId from message or callback query
   const message = update.message ?? update.callback_query?.message
   if (!message) {
     return NextResponse.json({ ok: true })
   }
 
   const chatId = message.chat.id
-  const text = update.message?.text
   const contact = update.message?.contact
 
-  console.log(`[Telegram] chatId=${chatId} text=${text ?? '(none)'} contact=${contact ? contact.phone_number : '(none)'}`)
+  console.log(`[Telegram] chatId=${chatId} text=${update.message?.text ?? '(none)'} callback=${update.callback_query?.data ?? '(none)'}`)
 
   try {
     // Handle contact share — account linking
@@ -41,19 +41,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true })
     }
 
-    // Check if this chat is already linked to a user
-    const [linkedUser] = await db.select({ id: users.id, name: users.name })
+    // Check if this chat is linked to a user
+    const [linkedUser] = await db.select({
+      id: users.id,
+      name: users.name,
+      timezone: users.timezone,
+      telegramState: users.telegramState,
+    })
       .from(users)
       .where(eq(users.telegramChatId, String(chatId)))
       .limit(1)
 
     if (linkedUser) {
-      // Linked user — acknowledge (state machine comes in #252)
-      if (text === '/start') {
-        await sendMessage(chatId, `Welcome back, ${linkedUser.name ?? 'friend'}! Your account is linked.\n\nConversation features coming soon.`)
-      } else {
-        await sendMessage(chatId, 'Your account is linked! Conversation features are coming soon.')
-      }
+      await handleTelegramMessage(chatId, linkedUser, update)
     } else {
       // Not linked — prompt to share phone number
       await sendContactRequest(
@@ -70,10 +70,8 @@ export async function POST(request: Request) {
 }
 
 async function handleContactShare(chatId: number, rawPhone: string) {
-  // Normalise the shared phone number to E.164
   const phone = normalisePhone(rawPhone) ?? rawPhone.replace(/[\s\-()]/g, '')
 
-  // Look up user by phone number
   const [matchedUser] = await db.select({ id: users.id, name: users.name })
     .from(users)
     .where(eq(users.phoneNumber, phone))
@@ -87,13 +85,12 @@ async function handleContactShare(chatId: number, rawPhone: string) {
     return
   }
 
-  // Link the account
   await db.update(users)
     .set({ telegramChatId: String(chatId), phoneVerified: true })
     .where(eq(users.id, matchedUser.id))
 
   await sendMessage(
     chatId,
-    `You're linked, ${matchedUser.name ?? 'friend'}! I'll send your morning check-ins here.\n\nConversation features coming soon.`
+    `You're linked, ${matchedUser.name ?? 'friend'}! I'll send your morning check-ins here.\n\nTap /menu to get started.`
   )
 }

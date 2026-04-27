@@ -28,6 +28,7 @@ export const users = pgTable('users', {
   phoneNumber:    text('phone_number').unique(),                    // E.164 format e.g. +447700900000
   phoneVerified:  boolean('phone_verified').notNull().default(false),
   telegramChatId: text('telegram_chat_id'),                          // set when Telegram account linked
+  telegramState:  jsonb('telegram_state'),                            // conversation state machine: { state, type?, postId?, date? }
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 

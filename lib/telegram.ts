@@ -117,6 +117,12 @@ export async function sendContactRequest(
   })
 }
 
+// ── Callback queries ───────────────────────────────────────────────────────
+
+export async function answerCallbackQuery(callbackQueryId: string): Promise<TelegramApiResponse> {
+  return telegramApi('answerCallbackQuery', { callback_query_id: callbackQueryId })
+}
+
 // ── Webhook management ─────────────────────────────────────────────────────
 
 export async function setWebhook(url: string, secretToken?: string): Promise<TelegramApiResponse> {
