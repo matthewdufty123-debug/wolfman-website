@@ -81,7 +81,7 @@ export async function updatePhone(_prev: ActionState, formData: FormData): Promi
     .limit(1)
   if (existing) return { error: 'That phone number is already in use.' }
 
-  await db.update(users).set({ phoneNumber, phoneVerified: false }).where(eq(users.id, session.user.id))
+  await db.update(users).set({ phoneNumber, phoneVerified: false, telegramChatId: null }).where(eq(users.id, session.user.id))
   revalidatePath('/account')
   return { success: 'Phone number updated.' }
 }
@@ -90,9 +90,18 @@ export async function removePhone(_prev: ActionState): Promise<ActionState> {
   const session = await auth()
   if (!session?.user?.id) return { error: 'Not authenticated.' }
 
-  await db.update(users).set({ phoneNumber: null, phoneVerified: false }).where(eq(users.id, session.user.id))
+  await db.update(users).set({ phoneNumber: null, phoneVerified: false, telegramChatId: null }).where(eq(users.id, session.user.id))
   revalidatePath('/account')
   return { success: 'Phone number removed.' }
+}
+
+export async function unlinkTelegram(_prev: ActionState): Promise<ActionState> {
+  const session = await auth()
+  if (!session?.user?.id) return { error: 'Not authenticated.' }
+
+  await db.update(users).set({ telegramChatId: null }).where(eq(users.id, session.user.id))
+  revalidatePath('/account')
+  return { success: 'Telegram unlinked.' }
 }
 
 export async function logout() {

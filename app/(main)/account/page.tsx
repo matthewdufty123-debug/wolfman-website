@@ -21,7 +21,7 @@ export default async function AccountPage() {
   if (!session?.user) redirect('/login')
 
   const [user, userOrders] = await Promise.all([
-    db.select({ avatar: users.avatar, username: users.username, phoneNumber: users.phoneNumber, phoneVerified: users.phoneVerified }).from(users).where(eq(users.id, session.user.id)).then(r => r[0]),
+    db.select({ avatar: users.avatar, username: users.username, phoneNumber: users.phoneNumber, phoneVerified: users.phoneVerified, telegramChatId: users.telegramChatId }).from(users).where(eq(users.id, session.user.id)).then(r => r[0]),
     db.select().from(orders).where(eq(orders.userId, session.user.id)).orderBy(desc(orders.createdAt)),
   ])
 
@@ -87,7 +87,7 @@ export default async function AccountPage() {
           </div>
           <div className="setting-card-divider" />
           <div className="setting-card-body">
-            <AccountPhoneForm currentPhone={user?.phoneNumber ?? null} phoneVerified={user?.phoneVerified ?? false} />
+            <AccountPhoneForm currentPhone={user?.phoneNumber ?? null} phoneVerified={user?.phoneVerified ?? false} telegramLinked={!!user?.telegramChatId} />
           </div>
         </div>
 
