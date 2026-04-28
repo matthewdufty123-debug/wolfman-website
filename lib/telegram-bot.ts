@@ -7,6 +7,7 @@ import { db } from '@/lib/db'
 import { users, journalEntries, scaleEntries } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { sendMessage, sendMessageWithButtons, answerCallbackQuery, type TelegramUpdate, type InlineKeyboardButton } from '@/lib/telegram'
+import { BRAIN_LABELS, BODY_LABELS, HAPPY_LABELS, STRESS_LABELS } from '@/lib/scale-config'
 import { findOrCreateTodayPost } from '@/lib/actions/today'
 import { reconstructContent, getEntriesForPost, getScalesForPost } from '@/lib/db/queries'
 import { getUserLocalDate } from '@/lib/timezone'
@@ -254,9 +255,19 @@ async function sendScalePrompt(chatId: number, type: string, user: LinkedUser, p
     // Fallback silently
   }
 
-  const buttons: InlineKeyboardButton[][] = [
-    [1, 2, 3, 4, 5, 6, 7, 8].map(n => ({ text: String(n), callback_data: `val:${n}` })),
-  ]
+  const SCALE_BUTTON_LABELS: Record<string, readonly string[]> = {
+    brain: BRAIN_LABELS,
+    body: BODY_LABELS,
+    happy: HAPPY_LABELS,
+    stress: STRESS_LABELS,
+  }
+  const labels = SCALE_BUTTON_LABELS[type]
+  const buttons: InlineKeyboardButton[][] = labels
+    ? [...labels].reverse().map((label, i) => {
+        const value = 8 - i
+        return [{ text: `${value}  ${label}`, callback_data: `val:${value}` }]
+      })
+    : [[1, 2, 3, 4, 5, 6, 7, 8].map(n => ({ text: String(n), callback_data: `val:${n}` }))]
   await sendMessageWithButtons(chatId, promptText, buttons)
 }
 
