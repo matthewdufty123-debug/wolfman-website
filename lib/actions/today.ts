@@ -6,6 +6,44 @@ import { eq, and } from 'drizzle-orm'
 import { getUserLocalDate } from '@/lib/timezone'
 import { getEntriesForPost, getScalesForPost } from '@/lib/db/queries'
 
+/** Load an existing post by ID for editing — returns null if not found or not owned by userId */
+export async function loadPostForEdit(postId: string, userId: string): Promise<TodayData | null> {
+  const [post] = await db
+    .select({
+      id: posts.id,
+      date: posts.date,
+      title: posts.title,
+      slug: posts.slug,
+      status: posts.status,
+      image: posts.image,
+      imageCaption: posts.imageCaption,
+      videoId: posts.videoId,
+      feelAboutToday: posts.feelAboutToday,
+      titleSuggestionsUsed: posts.titleSuggestionsUsed,
+      isPublic: posts.isPublic,
+      publishedAt: posts.publishedAt,
+    })
+    .from(posts)
+    .where(and(eq(posts.id, postId), eq(posts.authorId, userId)))
+    .limit(1)
+
+  if (!post) return null
+
+  const [entries, scales, msRow] = await Promise.all([
+    getEntriesForPost(post.id),
+    getScalesForPost(post.id),
+    db.select({ routineChecklist: morningState.routineChecklist })
+      .from(morningState).where(eq(morningState.postId, post.id)).limit(1),
+  ])
+
+  return {
+    post,
+    entries,
+    scales,
+    rituals: (msRow[0]?.routineChecklist as Record<string, boolean>) ?? {},
+  }
+}
+
 function makeSlug(title: string, date: string): string {
   const base = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60)
   return `${date}-${base}`
