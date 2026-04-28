@@ -72,7 +72,9 @@ export async function POST(request: Request) {
 }
 
 async function handleContactShare(chatId: number, rawPhone: string) {
-  const phone = normalisePhone(rawPhone) ?? rawPhone.replace(/[\s\-()]/g, '')
+  // Telegram sometimes sends numbers without '+' prefix — add it if missing
+  const prefixed = rawPhone.startsWith('+') ? rawPhone : `+${rawPhone}`
+  const phone = normalisePhone(prefixed) ?? prefixed.replace(/[\s\-()]/g, '')
 
   const [matchedUser] = await db.select({ id: users.id, name: users.name })
     .from(users)
