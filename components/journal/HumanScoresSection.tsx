@@ -12,6 +12,7 @@ import {
   toBipolar,
 } from '@/components/charts/chartUtils'
 import type { ScaleHistoryEntry } from '@/app/(main)/[username]/[slug]/_sections/HowIShowedUpSection'
+import type { ScaleEntry, ScaleEntryMap } from '@/lib/db/queries'
 
 // ── Fixed pastel colours — one per scale, consistent throughout ───────────────
 
@@ -223,6 +224,37 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
   )
 }
 
+// ── Scale timeline — shows individual entries when multiple or noted ──────────
+
+function formatEntryTime(date: Date | string) {
+  const d = typeof date === 'string' ? new Date(date) : date
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+}
+
+function ScaleTimeline({ entries, labels }: { entries: ScaleEntry[]; labels: string[] }) {
+  // Skip if single entry with no note — the ring already shows the value
+  if (entries.length === 1 && !entries[0].note) return null
+  if (entries.length === 0) return null
+
+  return (
+    <div className="hss-timeline">
+      {entries.map(entry => (
+        <div key={entry.id} className="hss-timeline-entry">
+          <span className="hss-timeline-time">{formatEntryTime(entry.createdAt)}</span>
+          <span className="hss-timeline-badge">{entry.value}</span>
+          <span className="hss-timeline-label">{labels[entry.value - 1]}</span>
+          {entry.source === 'telegram' && (
+            <span className="hss-timeline-source">via Telegram</span>
+          )}
+          {entry.note && (
+            <span className="hss-timeline-note">{entry.note}</span>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ── Scale row ─────────────────────────────────────────────────────────────────
 
 interface ScaleRowProps {
@@ -234,9 +266,10 @@ interface ScaleRowProps {
   scaleKey: ScaleKey
   dates: string[]
   onOpenLegend: (key: string) => void
+  entries?: ScaleEntry[]
 }
 
-function ScaleRow({ title, description, value, labels, scaleValues, scaleKey, dates, onOpenLegend }: ScaleRowProps) {
+function ScaleRow({ title, description, value, labels, scaleValues, scaleKey, dates, onOpenLegend, entries }: ScaleRowProps) {
   const rowRef = useRef<HTMLDivElement>(null)
   const [revealed, setRevealed] = useState(false)
 
@@ -337,6 +370,8 @@ function ScaleRow({ title, description, value, labels, scaleValues, scaleKey, da
               <span className="hss-building-sub">{nonNullCount} of 3 journals needed</span>
             </div>
           )}
+
+          {entries && <ScaleTimeline entries={entries} labels={labels} />}
         </>
       ) : (
         <span className="hss-col-empty">—</span>
@@ -353,6 +388,7 @@ interface Props {
   happyScale: number | null
   stressScale: number | null
   history: ScaleHistoryEntry[]
+  scaleEntries?: ScaleEntryMap
 }
 
 const SCALE_META: Record<ScaleKey, { title: string; description: string; labels: string[] }> = {
@@ -364,7 +400,7 @@ const SCALE_META: Record<ScaleKey, { title: string; description: string; labels:
 
 const SCALE_KEYS: ScaleKey[] = ['brain', 'body', 'happy', 'stress']
 
-export default function HumanScoresSection({ brainScale, bodyScale, happyScale, stressScale, history }: Props) {
+export default function HumanScoresSection({ brainScale, bodyScale, happyScale, stressScale, history, scaleEntries }: Props) {
   const [legendKey, setLegendKey] = useState<string | null>(null)
 
   const dates        = history.map(e => e.date)
@@ -406,6 +442,7 @@ export default function HumanScoresSection({ brainScale, bodyScale, happyScale, 
               scaleKey={key}
               dates={dates}
               onOpenLegend={setLegendKey}
+              entries={scaleEntries?.[key]}
             />
             {/* Copper divider between scale rows — not after the last */}
             {idx < SCALE_KEYS.length - 1 && <RowDivider />}

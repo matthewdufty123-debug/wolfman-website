@@ -7375,6 +7375,68 @@ html[data-theme="dark"] .sih-desc { color: rgba(255,255,255,0.9); opacity: 0.72;
   opacity: 0.7;
 }
 
+/* Scale entry timeline — reading page */
+.hss-timeline {
+  margin-top: 1rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid rgba(160, 98, 42, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.hss-timeline-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding-left: 0.5rem;
+}
+.hss-timeline-time {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.7rem;
+  color: var(--body-text);
+  opacity: 0.45;
+  min-width: 2.5rem;
+}
+.hss-timeline-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #4A7FA5;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: var(--font-inter), sans-serif;
+  flex-shrink: 0;
+}
+.hss-timeline-label {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--body-text);
+  opacity: 0.8;
+}
+.hss-timeline-source {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.6rem;
+  color: var(--body-text);
+  opacity: 0.35;
+  font-style: italic;
+}
+.hss-timeline-note {
+  width: 100%;
+  padding-left: 3.4rem;
+  font-family: var(--font-lora), serif;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--body-text);
+  opacity: 0.6;
+  line-height: 1.4;
+}
+
 /* ── Writing Stats Section ────────────────────────────────────────────────── */
 
 .wss-wrap          { display: flex; flex-direction: column; gap: 1.75rem; width: 100%; }

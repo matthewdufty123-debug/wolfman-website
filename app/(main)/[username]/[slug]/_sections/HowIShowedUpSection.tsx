@@ -1,5 +1,5 @@
 import HumanScoresSection from '@/components/journal/HumanScoresSection'
-import { getScalesForPost, getScaleHistory } from '@/lib/db/queries'
+import { getScalesForPost, getScaleHistory, getScaleEntriesForPost } from '@/lib/db/queries'
 
 interface Props {
   postId: string
@@ -27,7 +27,10 @@ function buildSlotDates(postDate: string): string[] {
 }
 
 export default async function HowIShowedUpSection({ postId, authorId, postDate }: Props) {
-  const currentScales = await getScalesForPost(postId)
+  const [currentScales, scaleEntries] = await Promise.all([
+    getScalesForPost(postId),
+    getScaleEntriesForPost(postId),
+  ])
 
   const hasScales = currentScales.brainScale != null || currentScales.bodyScale != null ||
     currentScales.happyScale != null || currentScales.stressScale != null
@@ -70,6 +73,7 @@ export default async function HowIShowedUpSection({ postId, authorId, postDate }
       happyScale={postEntry.happyScale ?? null}
       stressScale={postEntry.stressScale ?? null}
       history={history}
+      scaleEntries={scaleEntries}
     />
   )
 }
