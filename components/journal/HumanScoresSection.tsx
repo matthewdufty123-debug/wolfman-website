@@ -224,6 +224,143 @@ function ScaleTrendChart({ values, labels, color, dates, revealed }: TrendChartP
   )
 }
 
+// ── Intraday chart — multi-scale timeline across the day ──────────────────────
+
+const INTRADAY_COLORS: Record<string, string> = {
+  brain: '#4A7FA5', body: '#A0622A', happy: '#3AB87A', stress: '#70C0C8',
+}
+const INTRADAY_LABELS: Record<string, string> = {
+  brain: 'Brain', body: 'Body', happy: 'Happy', stress: 'Stress',
+}
+
+function IntradayChart({ entries, revealed }: { entries: ScaleEntryMap; revealed: boolean }) {
+  // Flatten all entries and count total
+  const allEntries: (ScaleEntry & { scaleType: string })[] = []
+  for (const [type, list] of Object.entries(entries)) {
+    for (const e of list) allEntries.push({ ...e, scaleType: type })
+  }
+  if (allEntries.length < 2) return null
+
+  allEntries.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+
+  const VW = 400, VH = 180
+  const PLOT_LEFT = 36, PLOT_RIGHT = 390
+  const PAD_TOP = 10, PAD_BOTTOM = 28
+  const plotW = PLOT_RIGHT - PLOT_LEFT
+  const plotH = VH - PAD_TOP - PAD_BOTTOM
+
+  // Time range
+  const minT = new Date(allEntries[0].createdAt).getTime()
+  const maxT = new Date(allEntries[allEntries.length - 1].createdAt).getTime()
+  const timeSpan = Math.max(maxT - minT, 60000) // at least 1 min span
+
+  function xFor(t: number) {
+    return PLOT_LEFT + ((t - minT) / timeSpan) * plotW
+  }
+  function yFor(v: number) {
+    return PAD_TOP + ((8 - v) / 7) * plotH
+  }
+
+  // Y-axis: just 1, 4, 5, 8 for a clean look
+  const Y_TICKS = [8, 5, 4, 1]
+
+  // Build path per type
+  const types = Object.keys(INTRADAY_COLORS)
+  const typePaths: { type: string; path: string; dots: { x: number; y: number; isLast: boolean }[] }[] = []
+
+  for (const type of types) {
+    const typeEntries = (entries[type] ?? []).sort((a, b) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    )
+    if (typeEntries.length === 0) continue
+
+    const pts = typeEntries.map(e => ({
+      x: xFor(new Date(e.createdAt).getTime()),
+      y: yFor(e.value),
+    }))
+
+    let path = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)} `
+    for (let i = 1; i < pts.length; i++) {
+      const p0 = pts[i - 1], p1 = pts[i]
+      const cpx = ((p0.x + p1.x) / 2).toFixed(1)
+      path += `C ${cpx} ${p0.y.toFixed(1)}, ${cpx} ${p1.y.toFixed(1)}, ${p1.x.toFixed(1)} ${p1.y.toFixed(1)} `
+    }
+
+    typePaths.push({
+      type,
+      path,
+      dots: pts.map((p, i) => ({ ...p, isLast: i === pts.length - 1 })),
+    })
+  }
+
+  // X-axis time labels — derive from actual entry times
+  const uniqueTimes = [...new Set(allEntries.map(e => {
+    const d = new Date(e.createdAt)
+    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+  }))]
+  const timePoints = [...new Set(allEntries.map(e => new Date(e.createdAt).getTime()))]
+
+  return (
+    <svg
+      width="100%"
+      viewBox={`0 0 ${VW} ${VH}`}
+      preserveAspectRatio="xMidYMid meet"
+      aria-hidden="true"
+      style={{ display: 'block', opacity: revealed ? 1 : 0, transition: 'opacity 0.6s ease 0.3s' }}
+    >
+      {/* Y-axis grid lines */}
+      {Y_TICKS.map(v => {
+        const y = yFor(v)
+        const isMid = v === 5 || v === 4
+        return (
+          <g key={v}>
+            <line x1={PLOT_LEFT} y1={y} x2={PLOT_RIGHT} y2={y}
+              style={{ stroke: 'var(--chart-axis)' }}
+              strokeWidth={isMid ? 1.2 : 0.8}
+              strokeOpacity={isMid ? 0.8 : 0.3}
+            />
+            <text x={PLOT_LEFT - 6} y={y} textAnchor="end" dominantBaseline="middle"
+              fontSize="7" fontFamily="var(--font-inter), sans-serif"
+              style={{ fill: 'var(--chart-label)' }} fontWeight="600"
+            >{v}</text>
+          </g>
+        )
+      })}
+
+      {/* Lines per type */}
+      {typePaths.map(({ type, path }) => (
+        <path key={type} d={path} fill="none"
+          stroke={INTRADAY_COLORS[type]} strokeWidth={2}
+          strokeLinecap="round" strokeLinejoin="round"
+          strokeOpacity={0.85}
+        />
+      ))}
+
+      {/* Dots */}
+      {typePaths.map(({ type, dots }) =>
+        dots.map((d, i) => (
+          <circle key={`${type}-${i}`}
+            cx={d.x} cy={d.y}
+            r={d.isLast ? 4 : 2.5}
+            fill={INTRADAY_COLORS[type]}
+            fillOpacity={d.isLast ? 1 : 0.6}
+            style={{ opacity: revealed ? 1 : 0, transition: `opacity 0.3s ease ${0.4 + i * 0.06}s` }}
+          />
+        ))
+      )}
+
+      {/* X-axis time labels */}
+      {timePoints.map((t, i) => (
+        <text key={i} x={xFor(t)} y={VH - PAD_BOTTOM + 12}
+          textAnchor="middle" fontSize="7"
+          fontFamily="var(--font-inter), sans-serif"
+          style={{ fill: 'var(--chart-text)' }}
+        >{uniqueTimes[i]}</text>
+      ))}
+    </svg>
+  )
+}
+
 // ── Scale timeline — shows individual entries when multiple or noted ──────────
 
 function formatEntryTime(date: Date | string) {
@@ -449,6 +586,31 @@ export default function HumanScoresSection({ brainScale, bodyScale, happyScale, 
           </div>
         ))}
       </div>
+
+      {/* Intraday chart — shows when 2+ entries across all types */}
+      {scaleEntries && (() => {
+        const totalEntries = Object.values(scaleEntries).reduce((sum, arr) => sum + arr.length, 0)
+        if (totalEntries < 2) return null
+        return (
+          <>
+            <RowDivider />
+            <div className="hss-intraday">
+              <h3 className="hss-intraday-header">Your Day</h3>
+              <IntradayChart entries={scaleEntries} revealed={true} />
+              <div className="hss-intraday-legend">
+                {Object.entries(INTRADAY_COLORS).map(([type, color]) => (
+                  (scaleEntries[type]?.length ?? 0) > 0 && (
+                    <span key={type} className="hss-intraday-legend-item">
+                      <span className="hss-intraday-legend-dot" style={{ background: color }} />
+                      <span className="hss-intraday-legend-label">{INTRADAY_LABELS[type]}</span>
+                    </span>
+                  )
+                ))}
+              </div>
+            </div>
+          </>
+        )
+      })()}
 
       {/* Scoring legend modal */}
       {legendKey && legend && (

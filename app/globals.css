@@ -7437,6 +7437,45 @@ html[data-theme="dark"] .sih-desc { color: rgba(255,255,255,0.9); opacity: 0.72;
   line-height: 1.4;
 }
 
+/* Intraday chart */
+.hss-intraday {
+  margin-top: 0.5rem;
+}
+.hss-intraday-header {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--body-text);
+  opacity: 0.5;
+  margin: 0 0 0.5rem;
+}
+.hss-intraday-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+.hss-intraday-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.hss-intraday-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.hss-intraday-legend-label {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--body-text);
+  opacity: 0.6;
+}
+
 /* ── Writing Stats Section ────────────────────────────────────────────────── */
 
 .wss-wrap          { display: flex; flex-direction: column; gap: 1.75rem; width: 100%; }
