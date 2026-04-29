@@ -26,6 +26,18 @@ type MorningInput = {
   [key: string]: unknown
 }
 
+export type ScaleEntry = {
+  id: string
+  type: string
+  value: number
+  note: string | null
+  source: string
+  createdAt: Date
+}
+
+/** Grouped by type: { brain: ScaleEntry[], body: ScaleEntry[], ... } */
+export type ScaleEntryMap = Record<string, ScaleEntry[]>
+
 // ── Write helpers ────────────────────────────────────────────────────────
 
 /** Insert journal entry rows for a post from concatenated content + optional evening reflection. */
@@ -105,6 +117,50 @@ export async function replaceScaleEntries(
 ) {
   await db.delete(scaleEntries).where(eq(scaleEntries.postId, postId))
   await insertScaleEntries(postId, morning)
+}
+
+/** Insert a single scale entry (stacked model — no delete). Returns the inserted row. */
+export async function insertSingleScaleEntry(
+  postId: string,
+  type: string,
+  value: number,
+  source: string = 'web',
+  note?: string | null,
+) {
+  const [row] = await db.insert(scaleEntries).values({
+    postId, type, value, note: note ?? null, source,
+  }).returning({
+    id: scaleEntries.id,
+    type: scaleEntries.type,
+    value: scaleEntries.value,
+    note: scaleEntries.note,
+    source: scaleEntries.source,
+    createdAt: scaleEntries.createdAt,
+  })
+  return row
+}
+
+/** Get all individual scale entry rows for a post, grouped by type. */
+export async function getScaleEntriesForPost(postId: string): Promise<ScaleEntryMap> {
+  const rows = await db
+    .select({
+      id: scaleEntries.id,
+      type: scaleEntries.type,
+      value: scaleEntries.value,
+      note: scaleEntries.note,
+      source: scaleEntries.source,
+      createdAt: scaleEntries.createdAt,
+    })
+    .from(scaleEntries)
+    .where(eq(scaleEntries.postId, postId))
+    .orderBy(asc(scaleEntries.createdAt))
+
+  const grouped: ScaleEntryMap = {}
+  for (const row of rows) {
+    if (!grouped[row.type]) grouped[row.type] = []
+    grouped[row.type].push(row)
+  }
+  return grouped
 }
 
 /** Upsert a single reflection entry. For the EveningSection PUT (no content). */
@@ -221,16 +277,24 @@ export async function getScalesForPosts(postIds: string[]): Promise<Map<string, 
     .from(scaleEntries)
     .where(sql`${scaleEntries.postId} IN (${sql.join(postIds.map(id => sql`${id}`), sql`, `)})`)
 
-  const map = new Map<string, ScaleMap>()
+  // Accumulate sum + count per post+type for averaging
+  const acc = new Map<string, Record<string, { sum: number; count: number }>>()
   for (const row of rows) {
-    if (!map.has(row.postId)) {
-      map.set(row.postId, { brainScale: null, bodyScale: null, happyScale: null, stressScale: null })
-    }
-    const entry = map.get(row.postId)!
-    if (row.type === 'brain') entry.brainScale = row.value
-    else if (row.type === 'body') entry.bodyScale = row.value
-    else if (row.type === 'happy') entry.happyScale = row.value
-    else if (row.type === 'stress') entry.stressScale = row.value
+    if (!acc.has(row.postId)) acc.set(row.postId, {})
+    const byType = acc.get(row.postId)!
+    if (!byType[row.type]) byType[row.type] = { sum: 0, count: 0 }
+    byType[row.type].sum += row.value
+    byType[row.type].count += 1
+  }
+
+  const map = new Map<string, ScaleMap>()
+  for (const [postId, byType] of acc) {
+    map.set(postId, {
+      brainScale: byType.brain ? Math.round(byType.brain.sum / byType.brain.count) : null,
+      bodyScale: byType.body ? Math.round(byType.body.sum / byType.body.count) : null,
+      happyScale: byType.happy ? Math.round(byType.happy.sum / byType.happy.count) : null,
+      stressScale: byType.stress ? Math.round(byType.stress.sum / byType.stress.count) : null,
+    })
   }
 
   return map
@@ -271,17 +335,24 @@ export async function getScaleHistory(
       )
     )
 
-  // Pivot rows by date
-  const byDate = new Map<string, ScaleMap>()
+  // Accumulate sum + count per date+type for averaging
+  const acc = new Map<string, Record<string, { sum: number; count: number }>>()
   for (const row of rows) {
-    if (!byDate.has(row.date)) {
-      byDate.set(row.date, { brainScale: null, bodyScale: null, happyScale: null, stressScale: null })
-    }
-    const entry = byDate.get(row.date)!
-    if (row.type === 'brain') entry.brainScale = row.value
-    else if (row.type === 'body') entry.bodyScale = row.value
-    else if (row.type === 'happy') entry.happyScale = row.value
-    else if (row.type === 'stress') entry.stressScale = row.value
+    if (!acc.has(row.date)) acc.set(row.date, {})
+    const byType = acc.get(row.date)!
+    if (!byType[row.type]) byType[row.type] = { sum: 0, count: 0 }
+    byType[row.type].sum += row.value
+    byType[row.type].count += 1
+  }
+
+  const byDate = new Map<string, ScaleMap>()
+  for (const [date, byType] of acc) {
+    byDate.set(date, {
+      brainScale: byType.brain ? Math.round(byType.brain.sum / byType.brain.count) : null,
+      bodyScale: byType.body ? Math.round(byType.body.sum / byType.body.count) : null,
+      happyScale: byType.happy ? Math.round(byType.happy.sum / byType.happy.count) : null,
+      stressScale: byType.stress ? Math.round(byType.stress.sum / byType.stress.count) : null,
+    })
   }
 
   return byDate

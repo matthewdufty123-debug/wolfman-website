@@ -36,17 +36,23 @@ export async function GET() {
         .orderBy(posts.date),
     ])
 
-    // Pivot scale rows by date
-    const byDate = new Map<string, { brainScale: number | null; bodyScale: number | null; happyScale: number | null; stressScale: number | null }>()
+    // Pivot scale rows by date, averaging when multiple entries per type
+    const scaleAcc = new Map<string, Record<string, { sum: number; count: number }>>()
     for (const row of scaleRows) {
-      if (!byDate.has(row.date)) {
-        byDate.set(row.date, { brainScale: null, bodyScale: null, happyScale: null, stressScale: null })
-      }
-      const entry = byDate.get(row.date)!
-      if (row.type === 'brain') entry.brainScale = row.value
-      else if (row.type === 'body') entry.bodyScale = row.value
-      else if (row.type === 'happy') entry.happyScale = row.value
-      else if (row.type === 'stress') entry.stressScale = row.value
+      if (!scaleAcc.has(row.date)) scaleAcc.set(row.date, {})
+      const byType = scaleAcc.get(row.date)!
+      if (!byType[row.type]) byType[row.type] = { sum: 0, count: 0 }
+      byType[row.type].sum += row.value
+      byType[row.type].count += 1
+    }
+    const byDate = new Map<string, { brainScale: number | null; bodyScale: number | null; happyScale: number | null; stressScale: number | null }>()
+    for (const [date, byType] of scaleAcc) {
+      byDate.set(date, {
+        brainScale: byType.brain ? Math.round(byType.brain.sum / byType.brain.count) : null,
+        bodyScale: byType.body ? Math.round(byType.body.sum / byType.body.count) : null,
+        happyScale: byType.happy ? Math.round(byType.happy.sum / byType.happy.count) : null,
+        stressScale: byType.stress ? Math.round(byType.stress.sum / byType.stress.count) : null,
+      })
     }
 
     // Build ritual map by date

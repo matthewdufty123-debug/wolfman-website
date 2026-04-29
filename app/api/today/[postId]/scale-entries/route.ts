@@ -3,9 +3,11 @@ import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { posts } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
-import { replaceScaleEntries } from '@/lib/db/queries'
+import { insertSingleScaleEntry } from '@/lib/db/queries'
 
-export async function PUT(
+const VALID_TYPES = ['brain', 'body', 'happy', 'stress']
+
+export async function POST(
   request: Request,
   { params }: { params: Promise<{ postId: string }> },
 ) {
@@ -19,9 +21,18 @@ export async function PUT(
   if (post.authorId !== session.user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await request.json()
+  const { type, value, note } = body
 
-  // Replace scaleEntries (temporary — will be replaced by CRUD endpoints in #270)
-  await replaceScaleEntries(postId, body)
+  if (!VALID_TYPES.includes(type)) {
+    return NextResponse.json({ error: 'type must be brain, body, happy, or stress' }, { status: 400 })
+  }
+  if (typeof value !== 'number' || value < 1 || value > 8) {
+    return NextResponse.json({ error: 'value must be 1-8' }, { status: 400 })
+  }
+  if (note != null && typeof note !== 'string') {
+    return NextResponse.json({ error: 'note must be a string' }, { status: 400 })
+  }
 
-  return NextResponse.json({ ok: true })
+  const entry = await insertSingleScaleEntry(postId, type, value, 'web', note)
+  return NextResponse.json(entry, { status: 201 })
 }

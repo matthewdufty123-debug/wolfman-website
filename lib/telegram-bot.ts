@@ -5,7 +5,7 @@
 
 import { db } from '@/lib/db'
 import { users, journalEntries, scaleEntries } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { sendMessage, sendMessageWithButtons, answerCallbackQuery, type TelegramUpdate, type InlineKeyboardButton } from '@/lib/telegram'
 import { BRAIN_LABELS, BODY_LABELS, HAPPY_LABELS, STRESS_LABELS } from '@/lib/scale-config'
 import { findOrCreateTodayPost } from '@/lib/actions/today'
@@ -293,15 +293,12 @@ async function sendJournalPrompt(chatId: number, type: string, user: LinkedUser,
 
 // ── Data operations ────────────────────────────────────────────────────────
 
-async function saveScaleEntry(postId: string, type: string, value: number): Promise<void> {
-  // Upsert: delete existing entry of this type, then insert new one
-  await db.delete(scaleEntries)
-    .where(and(eq(scaleEntries.postId, postId), eq(scaleEntries.type, type)))
-
+async function saveScaleEntry(postId: string, type: string, value: number, note?: string): Promise<void> {
   await db.insert(scaleEntries).values({
     postId,
     type,
     value,
+    note: note ?? null,
     source: 'telegram',
   })
 }

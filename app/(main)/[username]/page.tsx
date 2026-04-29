@@ -210,17 +210,26 @@ export default async function ProfilePage(
       .where(and(eq(posts.authorId, userId), eq(posts.status, 'published'))),
   ])
 
-  // Pivot scale rows by date
-  const scalePivot = new Map<string, { date: string; slug: string; brainScale: number | null; bodyScale: number | null; happyScale: number | null; stressScale: number | null }>()
+  // Pivot scale rows by date, averaging when multiple entries per type
+  const scaleAcc = new Map<string, { slug: string; byType: Record<string, { sum: number; count: number }> }>()
   for (const row of scaleRawRows) {
-    if (!scalePivot.has(row.date)) {
-      scalePivot.set(row.date, { date: row.date, slug: row.slug, brainScale: null, bodyScale: null, happyScale: null, stressScale: null })
+    if (!scaleAcc.has(row.date)) {
+      scaleAcc.set(row.date, { slug: row.slug, byType: {} })
     }
-    const entry = scalePivot.get(row.date)!
-    if (row.type === 'brain') entry.brainScale = row.value
-    else if (row.type === 'body') entry.bodyScale = row.value
-    else if (row.type === 'happy') entry.happyScale = row.value
-    else if (row.type === 'stress') entry.stressScale = row.value
+    const entry = scaleAcc.get(row.date)!
+    if (!entry.byType[row.type]) entry.byType[row.type] = { sum: 0, count: 0 }
+    entry.byType[row.type].sum += row.value
+    entry.byType[row.type].count += 1
+  }
+  const scalePivot = new Map<string, { date: string; slug: string; brainScale: number | null; bodyScale: number | null; happyScale: number | null; stressScale: number | null }>()
+  for (const [date, { slug, byType }] of scaleAcc) {
+    scalePivot.set(date, {
+      date, slug,
+      brainScale: byType.brain ? Math.round(byType.brain.sum / byType.brain.count) : null,
+      bodyScale: byType.body ? Math.round(byType.body.sum / byType.body.count) : null,
+      happyScale: byType.happy ? Math.round(byType.happy.sum / byType.happy.count) : null,
+      stressScale: byType.stress ? Math.round(byType.stress.sum / byType.stress.count) : null,
+    })
   }
 
   // Build ritual map by date

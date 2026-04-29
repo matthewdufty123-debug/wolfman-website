@@ -84,22 +84,12 @@ export async function PUT(
     const [existing] = await db.select({ id: morningState.id }).from(morningState).where(eq(morningState.postId, id))
     if (existing) {
       await db.update(morningState)
-        .set({
-          brainScale: morning.brainScale ?? null,
-          bodyScale: morning.bodyScale ?? null,
-          happyScale: morning.happyScale ?? null,
-          stressScale: morning.stressScale ?? null,
-          routineChecklist: morning.routineChecklist,
-        })
+        .set({ routineChecklist: morning.routineChecklist })
         .where(eq(morningState.postId, id))
     } else {
       await db.insert(morningState).values({
         postId: id,
-        brainScale: morning.brainScale ?? null,
-        bodyScale: morning.bodyScale ?? null,
-        happyScale: morning.happyScale ?? null,
-        stressScale: morning.stressScale ?? null,
-        routineChecklist: morning.routineChecklist,
+        routineChecklist: morning.routineChecklist ?? {},
       })
     }
   }

@@ -58,15 +58,11 @@ export async function POST(request: Request) {
     ...calculateWordCounts(content),
   }).returning({ id: posts.id, slug: posts.slug })
 
-  // Save morning state if provided
+  // Save morning state if provided (routineChecklist only — scales go to scaleEntries)
   if (morning && post) {
     await db.insert(morningState).values({
       postId: post.id,
-      brainScale: morning.brainScale,
-      bodyScale: morning.bodyScale,
-      happyScale: morning.happyScale ?? null,
-      stressScale: morning.stressScale ?? null,
-      routineChecklist: morning.routineChecklist,
+      routineChecklist: morning.routineChecklist ?? {},
     })
   }
 
@@ -119,15 +115,15 @@ export async function PUT(request: Request) {
 
   if (!updated) return NextResponse.json({ error: 'Post not found' }, { status: 404 })
 
-  // Upsert morning state if provided
+  // Upsert morning state if provided (routineChecklist only — scales go to scaleEntries)
   if (morning) {
     const [existing] = await db.select({ id: morningState.id }).from(morningState).where(eq(morningState.postId, id))
     if (existing) {
       await db.update(morningState)
-        .set({ brainScale: morning.brainScale, bodyScale: morning.bodyScale, happyScale: morning.happyScale ?? null, stressScale: morning.stressScale ?? null, routineChecklist: morning.routineChecklist })
+        .set({ routineChecklist: morning.routineChecklist })
         .where(eq(morningState.postId, id))
     } else {
-      await db.insert(morningState).values({ postId: id, brainScale: morning.brainScale, bodyScale: morning.bodyScale, happyScale: morning.happyScale ?? null, stressScale: morning.stressScale ?? null, routineChecklist: morning.routineChecklist })
+      await db.insert(morningState).values({ postId: id, routineChecklist: morning.routineChecklist ?? {} })
     }
   }
 

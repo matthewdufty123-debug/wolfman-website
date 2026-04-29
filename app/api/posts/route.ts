@@ -73,11 +73,7 @@ export async function POST(request: Request) {
   if (morning && post) {
     await db.insert(morningState).values({
       postId: post.id,
-      brainScale: morning.brainScale ?? null,
-      bodyScale: morning.bodyScale ?? null,
-      happyScale: morning.happyScale ?? null,
-      stressScale: morning.stressScale ?? null,
-      routineChecklist: morning.routineChecklist,
+      routineChecklist: morning.routineChecklist ?? {},
     })
   }
 

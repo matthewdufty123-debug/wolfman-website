@@ -155,11 +155,13 @@ export const journalEntries = pgTable('journal_entries', {
 // ── Scale entries (normalised) ───────────────────────────────────────────
 // Individual timestamped scale readings replacing morningState scale columns.
 // Supports multiple readings per day and source tracking. Added in #246.
+// note column added in #269 for one-sentence context per reading.
 export const scaleEntries = pgTable('scale_entries', {
   id:        uuid('id').primaryKey().defaultRandom(),
   postId:    uuid('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
   type:      text('type').notNull(),                   // 'brain' | 'body' | 'happy' | 'stress'
   value:     smallint('value').notNull(),               // 1–8
+  note:      text('note'),                              // optional ~150 char context
   source:    text('source').notNull().default('web'),   // 'web' | 'telegram'
   createdAt: timestamp('created_at').notNull().defaultNow(),
 }, (table) => [
