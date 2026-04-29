@@ -2,11 +2,13 @@
 
 import { useState, useCallback, useRef } from 'react'
 import type { TodayData, TodayEntry } from '@/lib/actions/today'
+import type { ScaleEntryMap } from '@/lib/db/queries'
 import JournalSection from '@/components/today/JournalSection'
-import ScalePanel from '@/components/today/ScalePanel'
+import ScaleSection from '@/components/today/ScaleSection'
 import RitualPanel from '@/components/today/RitualPanel'
 import PhotoSection from '@/components/today/PhotoSection'
 import PublishBar from '@/components/today/PublishBar'
+import { BRAIN_LABELS, BODY_LABELS, HAPPY_LABELS, STRESS_LABELS } from '@/lib/scale-config'
 
 export type RitualDef = {
   key: string
@@ -32,11 +34,18 @@ const SECTIONS = [
   { type: 'reflection', label: 'Evening Reflection', placeholder: 'How did today go?' },
 ] as const
 
+const SCALE_SECTIONS = [
+  { type: 'brain', label: 'Brain', icon: '🧠', labels: BRAIN_LABELS },
+  { type: 'body', label: 'Body', icon: '💪', labels: BODY_LABELS },
+  { type: 'happy', label: 'Mood', icon: '😊', labels: HAPPY_LABELS },
+  { type: 'stress', label: 'Stress', icon: '⚡', labels: STRESS_LABELS },
+] as const
+
 export default function TodayHub({ initialData, rituals, communityEnabled, username }: Props) {
   const postId = initialData.post.id
 
   const [entries, setEntries] = useState<TodayEntry[]>(initialData.entries)
-  const [scales, setScales] = useState(initialData.scales)
+  const [scaleEntries, setScaleEntries] = useState<ScaleEntryMap>(initialData.scaleEntries)
   const [ritualChecklist, setRitualChecklist] = useState<Record<string, boolean>>(initialData.rituals)
   const [image, setImage] = useState<string | null>(initialData.post.image)
   const [status, setStatus] = useState(initialData.post.status)
@@ -105,15 +114,43 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
     setEntries(prev => prev.filter(e => e.id !== entryId))
   }, [postId])
 
-  // ── Scales ──────────────────────────────────────────────────────────
+  // ── Scale entry CRUD ──────────────────────────────────────────────
 
-  const saveScales = useCallback(async (newScales: typeof scales) => {
-    setScales(newScales)
-    await fetch(`/api/today/${postId}/scales`, {
+  const addScaleEntry = useCallback(async (type: string, value: number, note?: string) => {
+    const res = await fetch(`/api/today/${postId}/scale-entries`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, value, note }),
+    })
+    if (!res.ok) return
+    const entry = await res.json()
+    setScaleEntries(prev => ({
+      ...prev,
+      [type]: [...(prev[type] ?? []), entry],
+    }))
+  }, [postId])
+
+  const updateScaleEntry = useCallback(async (type: string, entryId: string, value: number, note?: string) => {
+    const res = await fetch(`/api/today/${postId}/scale-entries/${entryId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newScales),
+      body: JSON.stringify({ value, note: note ?? null }),
     })
+    if (!res.ok) return
+    const updated = await res.json()
+    setScaleEntries(prev => ({
+      ...prev,
+      [type]: (prev[type] ?? []).map(e => e.id === entryId ? updated : e),
+    }))
+  }, [postId])
+
+  const deleteScaleEntry = useCallback(async (type: string, entryId: string) => {
+    const res = await fetch(`/api/today/${postId}/scale-entries/${entryId}`, { method: 'DELETE' })
+    if (!res.ok) return
+    setScaleEntries(prev => ({
+      ...prev,
+      [type]: (prev[type] ?? []).filter(e => e.id !== entryId),
+    }))
   }, [postId])
 
   // ── Rituals ─────────────────────────────────────────────────────────
@@ -194,7 +231,22 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
 
       <div className="td-divider" />
 
-      <ScalePanel scales={scales} onSave={saveScales} />
+      <div className="td-scale-panel">
+        <h2 className="td-panel-title">How I Showed Up</h2>
+        {SCALE_SECTIONS.map(s => (
+          <ScaleSection
+            key={s.type}
+            type={s.type}
+            label={s.label}
+            icon={s.icon}
+            labels={s.labels}
+            entries={scaleEntries[s.type] ?? []}
+            onAdd={(value, note) => addScaleEntry(s.type, value, note)}
+            onUpdate={(entryId, value, note) => updateScaleEntry(s.type, entryId, value, note)}
+            onDelete={(entryId) => deleteScaleEntry(s.type, entryId)}
+          />
+        ))}
+      </div>
 
       <div className="td-divider" />
 
