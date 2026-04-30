@@ -6235,7 +6235,7 @@ html[data-theme="dark"] .stats-chart-card {
   color: #C8B020;
   border: 1px solid rgba(200, 176, 32, 0.3);
 }
-.features-status--coming-soon {
+.features-status--planned {
   background: rgba(144, 144, 144, 0.08);
   color: #909090;
   border: 1px solid rgba(144, 144, 144, 0.2);

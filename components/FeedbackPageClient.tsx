@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react'
 import Link from 'next/link'
-import BetaCountdown from '@/components/BetaCountdown'
 
 const CATEGORIES = ['Bug', 'Idea', 'Question']
 const TOPICS = ['Journal', 'Stats', 'Design', 'Performance', 'SEO', 'Shop', 'Auth', 'Mobile', 'Admin']
@@ -91,12 +90,8 @@ export default function FeedbackPageClient() {
   return (
     <main className="feedback-page">
       <div className="feedback-card">
-        <p className="beta-eyebrow">Beta Feedback</p>
+        <p className="beta-eyebrow">Feedback</p>
         <h1 className="feedback-title">Tell Matthew what you think.</h1>
-
-        <div className="feedback-countdown-row">
-          <BetaCountdown className="feedback-countdown" />
-        </div>
 
         {status === 'success' ? (
           <div className="feedback-success">

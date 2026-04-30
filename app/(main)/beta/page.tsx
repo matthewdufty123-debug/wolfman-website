@@ -10,8 +10,8 @@ import { count, notInArray } from 'drizzle-orm'
 import SectionHeader from '@/components/SectionHeader'
 
 export const metadata: Metadata = siteMetadata({
-  title: 'Public Beta',
-  description: 'What the wolfman.app public beta is, when it opens, and how to register your interest.',
+  title: 'Join Wolfman',
+  description: 'wolfman.app is a mindful morning journalling app being built in the open. Register your interest.',
   path: '/beta',
 })
 
@@ -26,8 +26,6 @@ export default async function BetaPage() {
 
   const showInterestForm = config.status === 'closed_alpha' && !session?.user?.id
   const subscriberCount = Number(total)
-  const cap = config.userCap ?? 51
-  const percentage = Math.round((subscriberCount / cap) * 100)
 
   return (
     <main className="beta-page">
@@ -38,61 +36,25 @@ export default async function BetaPage() {
         {showInterestForm && (
           <div className="beta-interest-block">
             <p className="beta-eyebrow">Register your interest</p>
-            <h1 className="beta-interest-heading">Be first through the door.</h1>
+            <h1 className="beta-interest-heading">Something worth waiting for.</h1>
             <p className="beta-interest-subtext">
-              The public beta opens on 1 May 2026. Leave your details and
-              you&apos;ll hear from us the moment registration opens.
+              wolfman.app is being built in the open. Leave your details and
+              we&apos;ll be in touch when registration opens.
             </p>
             <BetaInterestForm source="beta-page" />
           </div>
         )}
 
         {/* ── What is wolfman.app? ── */}
-        <p className="beta-eyebrow">Public Beta</p>
+        <p className="beta-eyebrow">About Wolfman</p>
         <h1 className={showInterestForm ? 'beta-section-title' : 'beta-title'}>
           {showInterestForm ? 'A mindful morning journaling app.' : 'You\u2019re part of something real.'}
         </h1>
         <p className="beta-intro">
-          wolfman.app is a public beta for a mindful morning journalling app. Real people, real
+          wolfman.app is a mindful morning journalling app. Real people, real
           mornings, real data. You log your intentions, your mood, your rituals &mdash; and gradually,
           a picture of your inner life starts to form.
         </p>
-
-        {/* ── Timeline ── */}
-        <div className="beta-section">
-          <h2 className="beta-section-title">Timeline</h2>
-          <table className="beta-timeline" aria-label="Beta timeline">
-            <thead>
-              <tr>
-                <th>Phase</th>
-                <th>Dates</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Closed Alpha</td>
-                <td>Now &rarr; 30 April 2026</td>
-                <td><span className="beta-timeline-status beta-timeline-status--active">Active</span></td>
-              </tr>
-              <tr>
-                <td>Public Beta opens</td>
-                <td>1 May 2026</td>
-                <td><span className="beta-timeline-status beta-timeline-status--upcoming">Upcoming</span></td>
-              </tr>
-              <tr>
-                <td>Public Beta closes</td>
-                <td>31 August 2026</td>
-                <td><span className="beta-timeline-status beta-timeline-status--upcoming">Upcoming</span></td>
-              </tr>
-              <tr>
-                <td>Full launch</td>
-                <td>After beta</td>
-                <td><span className="beta-timeline-status beta-timeline-status--tbd">TBD</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
 
         {/* ── What you get ── */}
         <div className="beta-section">
@@ -133,10 +95,12 @@ export default async function BetaPage() {
           </p>
         </div>
 
-        {/* ── Subscriber stats ── */}
-        <div className="beta-stats beta-stats--subtle">
-          <p className="beta-stats-label">{subscriberCount} of {cap} subscribed for Public Beta — {percentage}% full</p>
-        </div>
+        {/* ── Interest count ── */}
+        {subscriberCount > 0 && (
+          <div className="beta-stats beta-stats--subtle">
+            <p className="beta-stats-label">{subscriberCount} {subscriberCount === 1 ? 'person has' : 'people have'} registered interest</p>
+          </div>
+        )}
 
         {/* ── Questions ── */}
         <div className="beta-section">

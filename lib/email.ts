@@ -260,8 +260,8 @@ export async function sendBetaInterestConfirmation(email: string, name: string) 
                 Hi ${name},
               </p>
               <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.7; color: #4A4A4A;">
-                We&rsquo;ve noted your interest in the wolfman.app public beta. When registration opens on
-                <strong>1 May 2026</strong>, you&rsquo;ll be one of the first to hear about it.
+                We&rsquo;ve noted your interest in wolfman.app. When registration opens,
+                you&rsquo;ll be one of the first to hear about it.
               </p>
               <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.7; color: #4A4A4A;">
                 wolfman.app is a mindful morning journaling app &mdash; a place to set daily intentions,
@@ -286,7 +286,7 @@ export async function sendBetaInterestConfirmation(email: string, name: string) 
               </p>
               <p style="margin: 12px 0 0; font-size: 12px; color: #b0b0b0; line-height: 1.5;">
                 You registered your interest via wolfman.app. We&rsquo;ll only contact you
-                once &mdash; when the beta opens. No spam, no marketing.
+                once &mdash; when registration opens. No spam, no marketing.
               </p>
             </td>
           </tr>

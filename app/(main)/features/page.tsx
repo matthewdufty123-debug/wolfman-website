@@ -6,7 +6,7 @@ import SectionHeader from '@/components/SectionHeader'
 
 export const metadata: Metadata = siteMetadata({
   title: 'Features',
-  description: 'What we are building and when — the wolfman.app release roadmap.',
+  description: 'What we are building — the wolfman.app feature roadmap.',
   path: '/features',
 })
 
@@ -19,7 +19,7 @@ function releaseStatusLabel(status: ReleaseStatus) {
 function featureStatusBadge(status: FeatureStatus) {
   if (status === 'built') return <span className="features-status features-status--built">Built</span>
   if (status === 'in-development') return <span className="features-status features-status--in-development">In Development</span>
-  return <span className="features-status features-status--coming-soon">Coming Soon</span>
+  return <span className="features-status features-status--planned">Planned</span>
 }
 
 export default function FeaturesPage() {
@@ -27,11 +27,11 @@ export default function FeaturesPage() {
     <main className="features-page">
       <SectionHeader section="discover" current="/features" />
       <div className="features-header">
-        <p className="beta-eyebrow">Product Roadmap</p>
+        <p className="beta-eyebrow">Features</p>
         <h1 className="features-title">What we&apos;re building.</h1>
         <p className="features-intro">
           Nine releases. Each one adds something real. This is the honest, plain-English
-          version of where wolfman.app is going and what arrives in each release.
+          version of where wolfman.app is heading.
           If you want to see the technical detail behind this —
           the GitHub issues, open branches, and development stats —
           head to the{' '}

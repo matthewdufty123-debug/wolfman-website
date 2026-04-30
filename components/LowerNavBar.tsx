@@ -93,10 +93,10 @@ const PAGE_GROUPS: PageGroup[] = [
     ],
   },
   {
-    title: 'Beta Testing',
+    title: 'Behind the Scenes',
     color: '#C8B020',
     links: [
-      { href: '/beta',     label: 'About the Beta', icon: <BadgeInfo     size={16} strokeWidth={1.5} /> },
+      { href: '/beta',     label: 'Join Wolfman',   icon: <BadgeInfo     size={16} strokeWidth={1.5} /> },
       { href: '/feedback', label: 'Give Feedback',  icon: <MessageSquare size={16} strokeWidth={1.5} /> },
       { href: '/dev',      label: 'Dev Log',        icon: <Code2         size={16} strokeWidth={1.5} /> },
     ],

@@ -20,8 +20,7 @@ export default async function RegisterPage() {
           <h1 className="auth-title">Registration is not open yet.</h1>
           <p className="beta-register-closed-body">{message}</p>
           <p className="beta-register-closed-body">
-            The public beta opens on <strong>1 May 2026</strong>. Register your interest below
-            and we&apos;ll let you know the moment it does.
+            Register your interest below and we&apos;ll let you know when registration opens.
           </p>
           <div style={{ marginTop: '1.75rem' }}>
             <BetaInterestForm source="register-page" />
@@ -47,7 +46,6 @@ export default async function RegisterPage() {
           <h1 className="auth-title">Registration is closed.</h1>
           <p className="beta-register-closed-body">{message}</p>
           <p className="beta-register-closed-body">
-            The beta runs until <strong>31 August 2026</strong>.{' '}
             <Link href="/beta" className="beta-link">Register your interest →</Link>
           </p>
           <p className="beta-register-closed-body" style={{ marginTop: '2rem' }}>
@@ -65,12 +63,11 @@ export default async function RegisterPage() {
         <h1 className="auth-title">Create an account.</h1>
 
         <div className="beta-register-terms">
-          <p className="beta-register-terms-headline">You&apos;re joining the public beta.</p>
+          <p className="beta-register-terms-headline">Welcome to wolfman.app.</p>
           <ul className="beta-register-terms-list">
-            <li>Beta runs until <strong>31 August 2026</strong></li>
             <li>Your journal entries are private — only you can see them</li>
-            <li>If the beta continues, your data carries over seamlessly</li>
-            <li>If the beta ends, you get 30 days to download your data before deletion</li>
+            <li>If the site continues, your data carries over seamlessly</li>
+            <li>If the site closes, you get 30 days to download your data before deletion</li>
           </ul>
           <Link href="/beta" className="beta-register-terms-link">Full details →</Link>
         </div>

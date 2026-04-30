@@ -47,7 +47,7 @@ export default function BetaInterestForm({ source }: { source: Source }) {
       <div className="interest-success">
         <span className="interest-success-tick" aria-hidden="true">✓</span>
         <p className="interest-success-headline">
-          {isDuplicate ? "You're already on the list." : "We'll be in touch. See you on 1 May."}
+          {isDuplicate ? "You're already on the list." : "We'll be in touch when registration opens."}
         </p>
       </div>
     )
@@ -109,7 +109,7 @@ export default function BetaInterestForm({ source }: { source: Source }) {
             required
           />
           <span>
-            I agree to be contacted once when the public beta opens.
+            I agree to be contacted when registration opens.
             My email won&apos;t be used for anything else.{' '}
             <Link href="/terms" className="interest-consent-link">Terms</Link>
           </span>
