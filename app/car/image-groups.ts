@@ -62,6 +62,13 @@ export const docsImages: ImageItem[] = [
   { src: `${B}/two-keys.jpg`, alt: 'Two keys including receipted Land Rover blank' },
 ]
 
+// Interior sub-rows (organised to match eBay layout)
+export const interiorDashboardRow: ImageItem[] = [interiorImages[0], interiorImages[1], interiorImages[2]]
+export const interiorSeatsRow: ImageItem[] = [interiorImages[4], interiorImages[5], interiorImages[3]]
+export const interiorMidRow: ImageItem[] = [interiorImages[10], interiorImages[11], interiorImages[12]]
+export const interiorBackRow: ImageItem[] = [interiorImages[13], interiorImages[14], interiorImages[16], interiorImages[17]]
+export const interiorDoorCardsRow: ImageItem[] = [interiorImages[6], interiorImages[7], interiorImages[8], interiorImages[9]]
+
 // Attention item images — keyed by the item title for inline placement
 export const attentionImages: Record<string, ImageItem[]> = {
   'Centre console armrest': [

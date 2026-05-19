@@ -9,9 +9,11 @@ interface CarGalleryProps {
   images: ImageItem[]
   allImages: ImageItem[]
   small?: boolean
+  columns?: number
+  compact?: boolean
 }
 
-export default function CarGallery({ images, allImages, small }: CarGalleryProps) {
+export default function CarGallery({ images, allImages, small, columns, compact }: CarGalleryProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   const open = (img: ImageItem) => {
@@ -26,9 +28,9 @@ export default function CarGallery({ images, allImages, small }: CarGalleryProps
           display: small ? 'flex' : 'grid',
           ...(small
             ? { gap: 6, flexWrap: 'wrap' as const }
-            : { gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 6 }),
-          marginTop: small ? 6 : 12,
-          marginBottom: small ? 0 : 12,
+            : { gridTemplateColumns: columns ? `repeat(${columns},1fr)` : 'repeat(auto-fill, minmax(140px, 1fr))', gap: 6 }),
+          marginTop: compact ? 0 : small ? 6 : 12,
+          marginBottom: compact ? 6 : small ? 0 : 12,
         }}
       >
         {images.map(img => (
