@@ -22,7 +22,7 @@ const captionStyle = { fontFamily: 'Arial,Helvetica,sans-serif', fontSize: 11, c
 
 export default function CarPage() {
   return (
-    <div style={{ maxWidth: 780, margin: '0 auto', fontFamily: "Georgia,'Times New Roman',serif", color: '#1a1a1a', background: '#fff' }}>
+    <div style={{ maxWidth: 780, margin: '0 auto', fontFamily: "Georgia,'Times New Roman',serif", color: '#1a1a1a', background: '#fff', padding: '0 16px' }}>
 
       {/* ===== AUCTION BANNER ===== */}
       <div style={{ background: '#1a1a1a', padding: '12px 32px', borderRadius: '8px 8px 0 0', marginBottom: 0, textAlign: 'center' as const, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, flexWrap: 'wrap' as const }}>
