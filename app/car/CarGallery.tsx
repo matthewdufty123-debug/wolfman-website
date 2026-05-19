@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import type { ImageItem } from './image-groups'
 import Lightbox from './Lightbox'
 
@@ -31,24 +32,30 @@ export default function CarGallery({ images, allImages, small }: CarGalleryProps
         }}
       >
         {images.map(img => (
-          <img
+          <div
             key={img.src}
-            src={img.src}
-            alt={img.alt}
-            loading="lazy"
             onClick={() => open(img)}
             style={{
+              position: 'relative',
               width: small ? 80 : '100%',
               aspectRatio: '4/3',
-              objectFit: 'cover',
               borderRadius: 4,
               border: '1px solid #e0e0e0',
               cursor: 'pointer',
+              overflow: 'hidden',
               transition: 'transform 150ms ease',
             }}
-            onMouseEnter={e => { (e.target as HTMLImageElement).style.transform = 'scale(1.03)' }}
-            onMouseLeave={e => { (e.target as HTMLImageElement).style.transform = 'scale(1)' }}
-          />
+            onMouseEnter={e => { (e.currentTarget).style.transform = 'scale(1.03)' }}
+            onMouseLeave={e => { (e.currentTarget).style.transform = 'scale(1)' }}
+          >
+            <Image
+              src={img.src}
+              alt={img.alt}
+              fill
+              sizes={small ? '80px' : '(max-width: 780px) 25vw, 180px'}
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
         ))}
       </div>
 
