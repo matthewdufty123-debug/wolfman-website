@@ -65,10 +65,12 @@ export default function CareerAdminTabs({ initialData }: Props) {
   const [skills, setSkills] = useState(initialData.skills)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [reviewing, setReviewing] = useState(false)
+  const [reviewSummary, setReviewSummary] = useState('')
 
   const flash = useCallback((msg: string) => {
     setMessage(msg)
-    setTimeout(() => setMessage(''), 3000)
+    setTimeout(() => setMessage(''), 5000)
   }, [])
 
   const reload = useCallback(async () => {
@@ -83,9 +85,47 @@ export default function CareerAdminTabs({ initialData }: Props) {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-[#4A4A4A] mb-4 font-[family-name:var(--font-inter)]">
-        Career Admin
-      </h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-xl font-semibold text-[#4A4A4A] font-[family-name:var(--font-inter)]">
+          Career Admin
+        </h1>
+        <button
+          onClick={async () => {
+            setReviewing(true)
+            setReviewSummary('')
+            try {
+              const res = await fetch('/api/admin/career-review', { method: 'POST' })
+              const data = await res.json()
+              if (res.ok) {
+                setReviewSummary(data.summary)
+                await reload()
+                flash(`WOLF|BOT reviewed ${data.updatedCount} items (${data.inputTokens}→${data.outputTokens} tokens)`)
+              } else {
+                flash(`Error: ${data.error}`)
+              }
+            } catch {
+              flash('Failed to reach WOLF|BOT')
+            }
+            setReviewing(false)
+          }}
+          disabled={reviewing}
+          className="text-sm px-4 py-2 rounded bg-[#A0622A] text-white hover:bg-[#A0622A]/90 disabled:opacity-50 font-[family-name:var(--font-jetbrains)]"
+        >
+          {reviewing ? 'WOLF|BOT reviewing...' : 'Generate WOLF|BOT Review'}
+        </button>
+      </div>
+
+      {/* WOLF|BOT summary */}
+      {reviewSummary && (
+        <div className="mb-4 px-4 py-3 rounded-lg bg-[#A0622A]/5 border border-[#A0622A]/20">
+          <p className="text-xs font-bold text-[#A0622A] uppercase tracking-wider font-[family-name:var(--font-jetbrains)] mb-1">
+            WOLF|BOT Career Summary
+          </p>
+          <p className="text-sm text-[#4A4A4A] font-[family-name:var(--font-jetbrains)] leading-relaxed">
+            {reviewSummary}
+          </p>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b border-[#e8e3de]">
