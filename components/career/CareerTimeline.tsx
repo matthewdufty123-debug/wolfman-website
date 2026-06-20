@@ -33,30 +33,23 @@ interface SerializedRole {
   achievements: SerializedAchievement[]
 }
 
-// ── Era definitions ─────────────────────────────────────────────────────────
-
-const ERAS = [
-  { id: 'III', name: 'The canopy',    accent: [200,176,32],  meta: '2023 → now · Engineering at scale',  range: [15, 99] as const },
-  { id: 'II',  name: 'Branching out', accent: [144,144,144], meta: '2013 → 2023 · Ventures & analytics', range: [8, 14]  as const },
-  { id: 'I',   name: 'The roots',     accent: [160,98,42],   meta: '1997 → 2013 · Foundations',           range: [1, 7]   as const },
-]
-
 // ── Colour helpers ──────────────────────────────────────────────────────────
 
 function rgba(rgb: number[], a: number) {
   return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`
 }
-
-function hex(rgb: number[]) {
+function hexFromRgb(rgb: number[]) {
   return `#${rgb.map(c => c.toString(16).padStart(2, '0')).join('')}`
 }
 
-// ── Theme colour maps ───────────────────────────────────────────────────────
+// ── Theme colours ───────────────────────────────────────────────────────────
 
-const THEME_COLOURS: Record<string, { rgb: number[]; label: string; short: string }> = {
-  'change-management': { rgb: [58,184,122],  label: 'Change Management', short: 'CHANGE' },
-  'data-analytics':    { rgb: [42,106,176],  label: 'Data & Analytics',  short: 'DATA' },
-  operational:         { rgb: [200,176,32],  label: 'Operational',        short: 'OPS' },
+const ACCENT: number[] = [160, 98, 42] // bronze — main rail colour
+
+const THEME_COLOURS: Record<string, { rgb: number[]; short: string }> = {
+  'change-management': { rgb: [58, 184, 122], short: 'CHANGE' },
+  'data-analytics':    { rgb: [42, 106, 176], short: 'DATA' },
+  operational:         { rgb: [200, 176, 32], short: 'OPS' },
 }
 
 const THEMES_LIST = [
@@ -113,15 +106,6 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
     })
   }, [skills, search, themeFilter])
 
-  const eraGroups = useMemo(() => {
-    return ERAS.map(era => ({
-      ...era,
-      roles: filtered
-        .filter(r => r.sortOrder >= era.range[0] && r.sortOrder <= era.range[1])
-        .sort((a, b) => b.sortOrder - a.sortOrder),
-    })).filter(eg => eg.roles.length > 0)
-  }, [filtered])
-
   return (
     <div>
       {/* ── Search ── */}
@@ -137,32 +121,16 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
             background: 'var(--admin-card-bg)',
             border: '1px solid var(--admin-border)',
             color: 'var(--body-text)',
-            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.08)',
           }}
         />
       </div>
 
-      {/* ── Legend ── */}
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-4 font-[family-name:var(--font-jetbrains)] text-[11px]"
-           style={{ color: 'var(--body-text)', opacity: 0.5 }}>
-        {ERAS.map(era => (
-          <span key={era.id} className="flex items-center gap-2">
-            <span className="w-[10px] h-[10px] rounded-full" style={{ background: hex(era.accent) }} />
-            {era.name}
-          </span>
-        ))}
-        <span style={{ opacity: 0.7 }}>ref = role · ref.n = branch</span>
-      </div>
-
       {/* ── Filter pills ── */}
-      <div className="flex flex-wrap gap-2 mb-8 pt-4"
-           style={{ borderTop: '1px solid var(--admin-border)' }}>
-        {/* View toggle */}
+      <div className="flex flex-wrap gap-2 mb-8">
         {(['timeline', 'skills'] as const).map(v => (
           <button
             key={v}
             onClick={() => setView(v)}
-            aria-pressed={view === v}
             className="px-4 py-2 rounded-full text-xs font-medium font-[family-name:var(--font-jetbrains)] tracking-wide
                        transition-all duration-200"
             style={view === v
@@ -176,7 +144,6 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
 
         <span className="w-px h-7 self-center mx-1" style={{ background: 'var(--admin-border)' }} />
 
-        {/* Theme filters */}
         {(['all', 'change-management', 'data-analytics', 'operational'] as const).map(t => {
           const isActive = themeFilter === t
           const tc = t !== 'all' ? THEME_COLOURS[t] : null
@@ -184,7 +151,6 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
             <button
               key={t}
               onClick={() => setThemeFilter(t)}
-              aria-pressed={isActive}
               className="px-4 py-2 rounded-full text-xs font-medium font-[family-name:var(--font-jetbrains)] tracking-wide
                          transition-all duration-200 flex items-center gap-1.5"
               style={isActive
@@ -193,7 +159,7 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
               }
             >
               {tc && !isActive && (
-                <span className="w-2 h-2 rounded-full" style={{ background: hex(tc.rgb) }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: hexFromRgb(tc.rgb) }} />
               )}
               {t === 'all' ? 'All branches' : tc!.short}
             </button>
@@ -204,85 +170,38 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
       {/* ── Content ── */}
       {view === 'skills' ? (
         <SkillsSummary skills={filteredSkills} />
+      ) : filtered.length === 0 ? (
+        <p className="text-sm py-8" style={{ color: 'var(--body-text)', opacity: 0.5 }}>No results found.</p>
       ) : (
-        <div>
-          {eraGroups.length === 0 ? (
-            <p className="text-sm py-8" style={{ color: 'var(--body-text)', opacity: 0.5 }}>No results found.</p>
-          ) : (
-            <div>
-              {eraGroups.map((era, eraIdx) => (
-                <EraGroup key={era.id} era={era} eraIdx={eraIdx} isAdmin={isAdmin} />
-              ))}
-            </div>
-          )}
+        <div className="relative">
+          {/* Continuous vertical rail — runs the full height */}
+          <div
+            className="absolute top-0 bottom-0 w-[2px]"
+            style={{
+              left: '7px',
+              background: rgba(ACCENT, 0.2),
+            }}
+          />
+
+          {filtered.map((role, idx) => (
+            <RoleCard
+              key={role.id}
+              role={role}
+              idx={idx}
+              isLast={idx === filtered.length - 1}
+              isAdmin={isAdmin}
+            />
+          ))}
         </div>
       )}
     </div>
   )
 }
 
-// ── Era group ───────────────────────────────────────────────────────────────
-
-interface EraGroupData {
-  id: string
-  name: string
-  accent: number[]
-  meta: string
-  roles: SerializedRole[]
-}
-
-function EraGroup({ era, eraIdx, isAdmin }: { era: EraGroupData; eraIdx: number; isAdmin: boolean }) {
-  const accentHex = hex(era.accent)
-
-  return (
-    <div style={{ marginBottom: '48px' }}>
-      {/* Era band header */}
-      <div
-        className="flex items-baseline gap-3 sm:gap-4"
-        style={{ margin: eraIdx === 0 ? '0 0 24px' : '48px 0 24px' }}
-      >
-        <span
-          className="font-[family-name:var(--font-jetbrains)] text-xs font-medium tracking-widest"
-          style={{ color: accentHex }}
-        >
-          {era.id}
-        </span>
-        <span
-          className="font-[family-name:var(--font-inter)] text-lg sm:text-xl font-semibold tracking-tight"
-          style={{ color: 'var(--heading)' }}
-        >
-          {era.name}
-        </span>
-        <span
-          className="font-[family-name:var(--font-jetbrains)] text-xs ml-auto text-right hidden sm:block"
-          style={{ color: 'var(--body-text)', opacity: 0.35 }}
-        >
-          {era.meta}
-        </span>
-      </div>
-
-      {/* Roles with vertical rail */}
-      <div className="relative">
-        {era.roles.map((role, roleIdx) => (
-          <RoleCard
-            key={role.id}
-            role={role}
-            accent={era.accent}
-            roleIdx={roleIdx}
-            eraIdx={eraIdx}
-            isLast={roleIdx === era.roles.length - 1}
-            isAdmin={isAdmin}
-          />
-        ))}
-      </div>
-    </div>
-  )
-}
-
 // ── Role card ───────────────────────────────────────────────────────────────
 
-function RoleCard({ role, accent, roleIdx, eraIdx, isLast, isAdmin }: {
-  role: SerializedRole; accent: number[]; roleIdx: number; eraIdx: number; isLast: boolean; isAdmin: boolean
+function RoleCard({ role, idx, isLast, isAdmin }: {
+  role: SerializedRole; idx: number; isLast: boolean; isAdmin: boolean
 }) {
   const router = useRouter()
   const ref = useRef<HTMLElement>(null)
@@ -290,8 +209,6 @@ function RoleCard({ role, accent, roleIdx, eraIdx, isLast, isAdmin }: {
   const [editingRole, setEditingRole] = useState(false)
   const [editingAchievement, setEditingAchievement] = useState<string | null>(null)
   const [addingAchievement, setAddingAchievement] = useState(false)
-
-  const accentHex = hex(accent)
 
   // Scroll-reveal
   useEffect(() => {
@@ -306,275 +223,214 @@ function RoleCard({ role, accent, roleIdx, eraIdx, isLast, isAdmin }: {
     return () => observer.disconnect()
   }, [])
 
-  const delay = eraIdx * 100 + roleIdx * 80
-
   return (
     <article
       ref={ref}
-      className="relative grid group/role"
+      className="relative group/role"
       style={{
-        gridTemplateColumns: '44px 1fr',
-        columnGap: 'clamp(10px, 2.5vw, 22px)',
+        paddingLeft: '32px',
+        paddingBottom: isLast ? '8px' : '36px',
         opacity: visible ? 1 : 0,
         transform: visible ? 'none' : 'translateY(10px)',
-        transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms`,
+        transition: `opacity 0.5s ease ${idx * 80}ms, transform 0.5s ease ${idx * 80}ms`,
       }}
     >
-      {/* ── Rail column ── */}
-      <div className="relative">
-        {/* Vertical rail line */}
-        <div
-          className="absolute top-0 w-[2px]"
-          style={{
-            left: '50%',
-            transform: 'translateX(-50%)',
-            bottom: isLast ? 'auto' : '-2px',
-            height: isLast ? '34px' : undefined,
-            background: 'var(--admin-border)',
-          }}
-        />
-        {/* Dot */}
-        <div
-          className="absolute w-[15px] h-[15px] rounded-full z-10"
-          style={{
-            left: '50%',
-            top: '6px',
-            transform: 'translateX(-50%)',
-            ...(role.isCurrent
-              ? { background: accentHex, boxShadow: `0 0 0 5px ${rgba(accent, 0.16)}` }
-              : { background: 'var(--bg)', border: `2.5px solid ${accentHex}` }
-            ),
-          }}
-        />
+      {/* ── Dot on the rail ── */}
+      <div
+        className="absolute w-[15px] h-[15px] rounded-full z-10"
+        style={{
+          left: '0px',
+          top: '4px',
+          ...(role.isCurrent
+            ? { background: hexFromRgb(ACCENT), boxShadow: `0 0 0 5px ${rgba(ACCENT, 0.16)}` }
+            : { background: 'var(--bg)', border: `2.5px solid ${hexFromRgb(ACCENT)}` }
+          ),
+        }}
+      />
+
+      {/* ── Role header ── */}
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <h3 className="font-[family-name:var(--font-inter)] font-semibold text-base sm:text-lg leading-tight"
+            style={{ color: 'var(--heading)' }}>
+          {role.title}
+        </h3>
+        <span className="text-sm" style={{ color: 'var(--body-text)', opacity: 0.35 }}>at</span>
+        <span className="font-[family-name:var(--font-inter)] font-semibold text-base sm:text-lg"
+              style={{ color: 'var(--heading)' }}>
+          {role.company}
+        </span>
+        {role.isCurrent && (
+          <span
+            className="font-[family-name:var(--font-jetbrains)] text-[10px] tracking-widest uppercase
+                       px-2.5 py-0.5 rounded-full font-bold text-white self-center"
+            style={{ background: hexFromRgb(ACCENT) }}
+          >
+            Now
+          </span>
+        )}
+        {isAdmin && (
+          <button
+            onClick={() => setEditingRole(!editingRole)}
+            className="opacity-0 group-hover/role:opacity-50 hover:!opacity-100 transition-opacity"
+            title="Edit role"
+          >
+            <PencilIcon size={13} />
+          </button>
+        )}
       </div>
 
-      {/* ── Main content column ── */}
-      <div style={{ paddingBottom: isLast ? '6px' : '30px', minWidth: 0 }}>
-        {/* Role header row */}
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          {/* Ref badge */}
-          <span
-            className="font-[family-name:var(--font-jetbrains)] text-xs font-medium tracking-wide hidden sm:inline-block"
-            style={{
-              color: accentHex,
-              border: `1px solid ${rgba(accent, 0.35)}`,
-              borderRadius: '5px',
-              padding: '1px 7px',
-            }}
-          >
-            {role.sortOrder}
-          </span>
+      {/* ── Meta line ── */}
+      <p className="font-[family-name:var(--font-jetbrains)] text-xs mt-1"
+         style={{ color: 'var(--body-text)', opacity: 0.35 }}>
+        {formatDateRange(role.startDate, role.endDate)}
+        {' · '}
+        {role.employmentType === 'self-employed' ? 'Self-Employed' : 'Employed'}
+      </p>
 
-          <span className="font-[family-name:var(--font-inter)] font-semibold text-base sm:text-lg tracking-tight"
-                style={{ color: 'var(--heading)' }}>
-            {role.title}
-          </span>
-          <span className="text-sm" style={{ color: 'var(--body-text)', opacity: 0.35 }}>at</span>
-          <span className="font-[family-name:var(--font-inter)] font-semibold text-base sm:text-lg"
-                style={{ color: 'var(--heading)' }}>
-            {role.company}
-          </span>
-          {role.isCurrent && (
-            <span
-              className="font-[family-name:var(--font-jetbrains)] text-[10px] tracking-widest uppercase
-                         px-2.5 py-0.5 rounded-full font-bold text-white self-center"
-              style={{ background: accentHex }}
-            >
-              Now
-            </span>
-          )}
-          {isAdmin && (
+      {/* ── Summary ── */}
+      <p className="text-sm leading-relaxed mt-2" style={{ color: 'var(--body-text)', opacity: 0.7, maxWidth: '58ch' }}>
+        {role.summary}
+      </p>
+
+      {/* ── Admin edit form ── */}
+      {isAdmin && editingRole && (
+        <InlineRoleEditForm
+          role={role}
+          onClose={() => setEditingRole(false)}
+          onSaved={() => { setEditingRole(false); router.refresh() }}
+        />
+      )}
+
+      {/* ── Achievement branches ── */}
+      {role.achievements.length > 0 && (
+        <div className="mt-4 space-y-1">
+          {role.achievements.map(a => (
+            <AchievementItem
+              key={a.id}
+              achievement={a}
+              roleSort={role.sortOrder}
+              isAdmin={isAdmin}
+              isEditing={editingAchievement === a.id}
+              onEdit={() => setEditingAchievement(editingAchievement === a.id ? null : a.id)}
+              onSaved={() => { setEditingAchievement(null); router.refresh() }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Admin: Add achievement */}
+      {isAdmin && (
+        <div className="mt-3">
+          {addingAchievement ? (
+            <InlineAchievementEditForm
+              roleId={role.id}
+              roleSort={role.sortOrder}
+              nextSort={role.achievements.length + 1}
+              onClose={() => setAddingAchievement(false)}
+              onSaved={() => { setAddingAchievement(false); router.refresh() }}
+            />
+          ) : (
             <button
-              onClick={() => setEditingRole(!editingRole)}
-              className="opacity-0 group-hover/role:opacity-50 hover:!opacity-100 transition-opacity"
-              title="Edit role"
+              onClick={() => setAddingAchievement(true)}
+              className="opacity-0 group-hover/role:opacity-50 hover:!opacity-100 transition-opacity
+                         font-[family-name:var(--font-jetbrains)] text-[10px] tracking-wider uppercase
+                         px-2.5 py-1 rounded"
+              style={{ color: hexFromRgb(ACCENT), border: `1px dashed ${rgba(ACCENT, 0.35)}` }}
             >
-              <PencilIcon size={13} />
+              + Add Achievement
             </button>
           )}
         </div>
-
-        {/* Meta line */}
-        <p className="font-[family-name:var(--font-jetbrains)] text-xs mt-1"
-           style={{ color: 'var(--body-text)', opacity: 0.35 }}>
-          {formatDateRange(role.startDate, role.endDate)}
-          {' · '}
-          {role.employmentType === 'self-employed' ? 'Self-Employed' : 'Employed'}
-        </p>
-
-        {/* Summary */}
-        <p className="text-[15px] leading-relaxed mt-2" style={{ color: 'var(--body-text)', opacity: 0.7, maxWidth: '62ch' }}>
-          {role.summary}
-        </p>
-
-        {/* Inline role edit form */}
-        {isAdmin && editingRole && (
-          <InlineRoleEditForm
-            role={role}
-            onClose={() => setEditingRole(false)}
-            onSaved={() => { setEditingRole(false); router.refresh() }}
-          />
-        )}
-
-        {/* ── Achievement branches ── */}
-        {role.achievements.length > 0 && (
-          <div
-            className="relative mt-4"
-            style={{ paddingLeft: '20px' }}
-          >
-            {/* Branch sub-rail */}
-            <div
-              className="absolute top-[2px] w-[1.5px]"
-              style={{
-                left: '3px',
-                bottom: '13px',
-                background: rgba(accent, 0.25),
-              }}
-            />
-
-            {role.achievements.map(a => (
-              <AchievementItem
-                key={a.id}
-                achievement={a}
-                roleSort={role.sortOrder}
-                accent={accent}
-                isAdmin={isAdmin}
-                isEditing={editingAchievement === a.id}
-                onEdit={() => setEditingAchievement(editingAchievement === a.id ? null : a.id)}
-                onSaved={() => { setEditingAchievement(null); router.refresh() }}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Admin: Add achievement */}
-        {isAdmin && (
-          <div className="mt-3" style={{ marginLeft: '20px' }}>
-            {addingAchievement ? (
-              <InlineAchievementEditForm
-                roleId={role.id}
-                roleSort={role.sortOrder}
-                nextSort={role.achievements.length + 1}
-                onClose={() => setAddingAchievement(false)}
-                onSaved={() => { setAddingAchievement(false); router.refresh() }}
-              />
-            ) : (
-              <button
-                onClick={() => setAddingAchievement(true)}
-                className="opacity-0 group-hover/role:opacity-50 hover:!opacity-100 transition-opacity
-                           font-[family-name:var(--font-jetbrains)] text-[10px] tracking-wider uppercase
-                           px-2.5 py-1 rounded"
-                style={{ color: accentHex, border: `1px dashed ${rgba(accent, 0.35)}` }}
-              >
-                + Add Achievement
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+      )}
     </article>
   )
 }
 
 // ── Achievement item ────────────────────────────────────────────────────────
 
-function AchievementItem({ achievement: a, roleSort, accent, isAdmin, isEditing, onEdit, onSaved }: {
-  achievement: SerializedAchievement; roleSort: number; accent: number[]
+function AchievementItem({ achievement: a, roleSort, isAdmin, isEditing, onEdit, onSaved }: {
+  achievement: SerializedAchievement; roleSort: number
   isAdmin: boolean; isEditing: boolean; onEdit: () => void; onSaved: () => void
 }) {
   const tc = THEME_COLOURS[a.theme] ?? THEME_COLOURS.operational
 
   return (
     <div
-      className="relative group/ach"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'auto auto 1fr',
-        alignItems: 'start',
-        gap: '10px',
-        padding: '7px 0',
-      }}
+      className="relative group/ach rounded-lg px-4 py-3"
+      style={{ background: 'var(--admin-card-bg)' }}
     >
-      {/* Horizontal connector (pseudo-element replacement) */}
-      <div
-        className="absolute"
-        style={{
-          left: '-17px',
-          top: '15px',
-          width: '15px',
-          height: '1.5px',
-          background: rgba(accent, 0.25),
-        }}
-      />
+      {/* Top row: ref + badge + edit */}
+      <div className="flex items-center gap-2 mb-1.5">
+        <span
+          className="font-[family-name:var(--font-jetbrains)] text-[10px]"
+          style={{ color: 'var(--body-text)', opacity: 0.3 }}
+        >
+          {roleSort}.{a.sortOrder}
+        </span>
+        <span
+          className="font-[family-name:var(--font-jetbrains)] text-[10px] font-bold tracking-widest uppercase
+                     px-2 py-0.5 rounded"
+          style={{
+            color: hexFromRgb(tc.rgb),
+            background: rgba(tc.rgb, 0.12),
+          }}
+        >
+          {tc.short}
+        </span>
 
-      {/* Ref number */}
-      <span
-        className="font-[family-name:var(--font-jetbrains)] text-[11px] pt-[1px] whitespace-nowrap hidden sm:block"
-        style={{ color: 'var(--body-text)', opacity: 0.3 }}
-      >
-        {roleSort}.{a.sortOrder}
-      </span>
-
-      {/* Theme badge */}
-      <span
-        className="font-[family-name:var(--font-jetbrains)] text-[10px] font-bold tracking-widest uppercase
-                   whitespace-nowrap mt-[1px] px-2 py-0.5 rounded"
-        style={{
-          color: hex(tc.rgb),
-          background: rgba(tc.rgb, 0.12),
-        }}
-      >
-        {tc.short}
-      </span>
-
-      {/* Description + tags + wolfbot */}
-      <div style={{ maxWidth: '62ch' }}>
-        <p className="text-[15px] leading-relaxed" style={{ color: 'var(--body-text)' }}>
-          {a.description}
-          {isAdmin && (
-            <button
-              onClick={onEdit}
-              className="opacity-0 group-hover/ach:opacity-50 hover:!opacity-100 transition-opacity ml-2 align-middle"
-              title="Edit achievement"
-            >
-              <PencilIcon size={11} />
-            </button>
-          )}
-        </p>
-
-        {/* Skill tags */}
-        {a.skillTags && a.skillTags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {a.skillTags.map(tag => (
-              <span key={tag}
-                className="font-[family-name:var(--font-jetbrains)] text-[10px] px-2 py-0.5 rounded"
-                style={{ background: 'var(--admin-card-bg)', color: 'var(--body-text)', opacity: 0.55 }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* WOLF|BOT comment */}
-        {a.wolfbotComment && (
-          <p className="font-[family-name:var(--font-jetbrains)] text-xs mt-2 italic"
-             style={{ color: '#A0622A', opacity: 0.7 }}>
-            {a.wolfbotComment}
-          </p>
-        )}
-
-        {/* Inline edit form */}
-        {isAdmin && isEditing && (
-          <InlineAchievementEditForm
-            achievement={a}
-            roleId={a.roleId}
-            roleSort={roleSort}
-            onClose={onEdit}
-            onSaved={onSaved}
-          />
+        {isAdmin && (
+          <button
+            onClick={onEdit}
+            className="opacity-0 group-hover/ach:opacity-50 hover:!opacity-100 transition-opacity ml-auto"
+            title="Edit achievement"
+          >
+            <PencilIcon size={11} />
+          </button>
         )}
       </div>
+
+      {/* Description */}
+      <p className="text-sm leading-relaxed" style={{ color: 'var(--body-text)' }}>
+        {a.description}
+      </p>
+
+      {/* Skill tags */}
+      {a.skillTags && a.skillTags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {a.skillTags.map(tag => (
+            <span key={tag}
+              className="font-[family-name:var(--font-jetbrains)] text-[10px] px-2 py-0.5 rounded"
+              style={{
+                background: 'var(--bg)',
+                border: '1px solid var(--admin-border)',
+                color: 'var(--body-text)',
+                opacity: 0.55,
+              }}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* WOLF|BOT comment */}
+      {a.wolfbotComment && (
+        <p className="font-[family-name:var(--font-jetbrains)] text-xs mt-2 italic"
+           style={{ color: '#A0622A', opacity: 0.7 }}>
+          {a.wolfbotComment}
+        </p>
+      )}
+
+      {/* Inline edit form */}
+      {isAdmin && isEditing && (
+        <InlineAchievementEditForm
+          achievement={a}
+          roleId={a.roleId}
+          roleSort={roleSort}
+          onClose={onEdit}
+          onSaved={onSaved}
+        />
+      )}
     </div>
   )
 }
