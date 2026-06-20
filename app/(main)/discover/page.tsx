@@ -4,8 +4,8 @@ import Link from 'next/link'
 const CARDS = [
   {
     href: '/about',
-    title: 'About Wolfman',
-    body: "Matthew's story — data engineer, mountain biker, photographer, wood carver, and the human behind this site. Who he is, how he lives, and why the morning journalling practice matters.",
+    title: 'About & Career',
+    body: "Matthew's story — twenty-five years of building things with data. Career timeline, skills, achievements, and the human behind this site.",
   },
   {
     href: '/journaling',
@@ -31,16 +31,6 @@ const CARDS = [
     href: '/achievements',
     title: 'Achievements',
     body: 'Earned milestones that mark progress in the journalling practice — streaks held, rituals built, consistency rewarded. Achievements are earned, not given.',
-  },
-  {
-    href: '/features',
-    title: 'Features & Roadmap',
-    body: 'A plain-English overview of everything built, in development, and planned across each release. A clear picture of where the product is heading.',
-  },
-  {
-    href: '/investment',
-    title: 'Investment Case',
-    body: 'The business model and financial thinking behind Wolfman — for those interested in the commercial side of what is being built here.',
   },
 ]
 

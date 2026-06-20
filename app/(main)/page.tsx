@@ -2,16 +2,16 @@ export const dynamic = 'force-dynamic'
 
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { posts, users } from '@/lib/db/schema'
-import { and, desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq } from 'drizzle-orm'
 import { siteMetadata } from '@/lib/metadata'
 import { deriveExcerpt } from '@/lib/posts'
+import WolfLogo from '@/components/WolfLogo'
 
 export const metadata: Metadata = siteMetadata({
-  title: 'Wolfman — Mindful Morning Journalling',
-  description: 'A few honest minutes each morning can change the outlook of the day dramatically. Start your morning journalling practice with Wolfman.',
+  title: 'Matthew Wolfman',
+  description: 'Data engineer, mountain biker, photographer, and mindful human. Morning journals, career timeline, and photography shop.',
   path: '/',
 })
 
@@ -49,182 +49,105 @@ async function getRecentPublicPosts() {
   }))
 }
 
-async function getUserPostCountToday(userId: string): Promise<number> {
-  const today = new Date().toISOString().slice(0, 10)
-  const [row] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(posts)
-    .where(and(eq(posts.authorId, userId), eq(posts.date, today)))
-  return row?.count ?? 0
-}
-
 export default async function HomePage() {
-  const [session, recentPosts] = await Promise.all([
-    auth(),
-    getRecentPublicPosts(),
-  ])
-
-  const isLoggedIn = !!session?.user?.id
-  let postedToday = false
-  const username = session?.user?.username ?? null
-
-  if (isLoggedIn && session.user.id) {
-    const count = await getUserPostCountToday(session.user.id)
-    postedToday = count > 0
-  }
-
-  // CTA button state
-  let ctaHref = '/register'
-  let ctaText = 'Register an account to start logging your private journals'
-  if (isLoggedIn && postedToday && username) {
-    ctaHref = `/${username}`
-    ctaText = "Let's see your trends"
-  } else if (isLoggedIn) {
-    ctaHref = '/write'
-    ctaText = 'Ready to set your intention?'
-  }
+  const recentPosts = await getRecentPublicPosts()
 
   return (
-    <main className="home-page">
+    <main className="min-h-screen">
 
-      {/* Section 1 — Hero */}
-      <section className="home-hero">
-        <div className="home-hero-inner">
-          <p className="home-hero-strapline">
-            A few honest minutes each morning can change the outlook of the day dramatically.
-          </p>
-          <Link href={ctaHref} className="home-cta-btn">{ctaText}</Link>
-        </div>
+      {/* ── Hero ── */}
+      <section className="flex flex-col items-center justify-center px-6 pt-24 pb-16 text-center">
+        <WolfLogo size={80} className="mb-6 opacity-90" />
+        <h1 className="font-[family-name:var(--font-inter)] text-4xl sm:text-5xl font-semibold text-[#4A4A4A] tracking-tight mb-4">
+          Matthew Wolfman
+        </h1>
+        <p className="text-lg text-[#909090] max-w-md leading-relaxed">
+          Data engineer. Mountain biker. Photographer. Mindful human.
+        </p>
       </section>
 
-      {/* Section 2 — The idea */}
-      <section className="home-section home-section--idea">
-        <div className="home-section-inner">
-          <p className="home-eyebrow">The practice</p>
-          <p className="home-idea-body">
-            Every morning, you write what you intend for the day, note something you are
-            genuinely grateful for, and name one thing you are actually great at. You log
-            how your brain, body, happiness, and stress feel right now. You record which
-            morning rituals you completed.
-          </p>
-          <p className="home-idea-supporting">
-            The morning sets the day. Journalling sets the morning.
-          </p>
-        </div>
-      </section>
-
-      {/* Section 3 — How it works */}
-      <section className="home-section home-section--how">
-        <div className="home-section-inner">
-          <p className="home-eyebrow">Three steps</p>
-          <div className="home-steps">
-            <div className="home-step">
-              <p className="home-step-number">01</p>
-              <p className="home-step-label">Write your intentions</p>
-              <p className="home-step-body">
-                What do you want from today? One honest paragraph. No performance.
-              </p>
-            </div>
-            <div className="home-step">
-              <p className="home-step-number">02</p>
-              <p className="home-step-label">Log how you feel</p>
-              <p className="home-step-body">
-                Brain, body, happiness, stress — four honest scales before the day starts.
-              </p>
-            </div>
-            <div className="home-step">
-              <p className="home-step-number">03</p>
-              <p className="home-step-label">Build your rituals</p>
-              <p className="home-step-body">
-                Track the morning habits that shape everything that follows.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 4 — Your data is yours */}
-      <section className="home-section home-section--data">
-        <div className="home-section-inner">
-          <p className="home-eyebrow">Your data</p>
-          <h2 className="home-section-heading">You own everything you write here.</h2>
-          <div className="home-data-commitments">
-            <div className="home-commitment">
-              <p className="home-commitment-title">We do not sell your data</p>
-              <p className="home-commitment-body">Not now, not ever. Full stop.</p>
-            </div>
-            <div className="home-commitment">
-              <p className="home-commitment-title">We do not share your data</p>
-              <p className="home-commitment-body">Your entries are private by default. Only you can see them.</p>
-            </div>
-            <div className="home-commitment">
-              <p className="home-commitment-title">Download or delete at any time</p>
-              <p className="home-commitment-body">Your data is yours. Request it or remove it whenever you want.</p>
-            </div>
-            <div className="home-commitment">
-              <p className="home-commitment-title">All data is encrypted</p>
-              <p className="home-commitment-body">In transit and at rest. No exceptions.</p>
-            </div>
-          </div>
-          <Link href="/data-policy" className="home-data-link">Read the full data policy →</Link>
-        </div>
-      </section>
-
-      {/* Section 5 — Matthew */}
-      <section className="home-section home-section--matthew">
-        <div className="home-section-inner home-matthew-inner">
-          <div className="home-matthew-photo-placeholder">
-            <p className="home-matthew-photo-label">Matthew</p>
-          </div>
-          <div className="home-matthew-text">
-            <p className="home-eyebrow">The builder</p>
-            <h2 className="home-section-heading">Hi. I&apos;m Matthew.</h2>
-            <p className="home-matthew-body">
-              I am a data engineer, mountain biker, photographer, and wood carver based in the UK.
-              I built this site because the morning journalling practice genuinely changed how I
-              experience my days — and I wanted to share that, not as advice, but as a tool you
-              can use for yourself.
+      {/* ── Three link cards ── */}
+      <section className="max-w-3xl mx-auto px-6 pb-20">
+        <div className="grid gap-6 sm:grid-cols-3">
+          <Link
+            href="/feed"
+            className="group block rounded-lg border border-[#f0ebe6] bg-white p-6 transition-shadow hover:shadow-md"
+          >
+            <p className="font-[family-name:var(--font-inter)] text-sm font-semibold text-[#4A7FA5] mb-2 group-hover:text-[#3a6d8f]">
+              The Journal
             </p>
-            <Link href="/about" className="home-data-link">Read my story →</Link>
-          </div>
+            <p className="text-sm text-[#4A4A4A] leading-relaxed">
+              Daily morning intentions, written honestly.
+            </p>
+          </Link>
+
+          <Link
+            href="/about"
+            className="group block rounded-lg border border-[#f0ebe6] bg-white p-6 transition-shadow hover:shadow-md"
+          >
+            <p className="font-[family-name:var(--font-inter)] text-sm font-semibold text-[#A0622A] mb-2 group-hover:text-[#8a5424]">
+              About &amp; Career
+            </p>
+            <p className="text-sm text-[#4A4A4A] leading-relaxed">
+              Twenty-five years of building things with data.
+            </p>
+          </Link>
+
+          <Link
+            href="/shop"
+            className="group block rounded-lg border border-[#f0ebe6] bg-white p-6 transition-shadow hover:shadow-md"
+          >
+            <p className="font-[family-name:var(--font-inter)] text-sm font-semibold text-[#4A4A4A] mb-2 group-hover:text-[#333]">
+              The Shop
+            </p>
+            <p className="text-sm text-[#4A4A4A] leading-relaxed">
+              Photography, prints, and wellbeing.
+            </p>
+          </Link>
         </div>
       </section>
 
-      {/* Section 6 — From the journal */}
+      {/* ── Recent journals ── */}
       {recentPosts.length > 0 && (
-        <section className="home-section home-section--journals">
-          <div className="home-section-inner">
-            <p className="home-eyebrow">From the journal</p>
-            <h2 className="home-section-heading">The practice, in the wild.</h2>
-            <div className="home-journal-cards">
-              {recentPosts.map(post => {
-                const url = post.authorUsername
-                  ? `/${post.authorUsername}/${post.slug}`
-                  : `/posts/${post.slug}`
-                const authorName = post.authorDisplayName ?? post.authorName ?? post.authorUsername ?? 'Wolfman'
-                return (
-                  <Link key={post.slug} href={url} className="home-journal-card">
-                    <p className="home-journal-card-meta">{authorName} · {formatDate(post.date)}</p>
-                    <p className="home-journal-card-title">{post.title}</p>
-                    {post.excerpt && (
-                      <p className="home-journal-card-excerpt">{post.excerpt.slice(0, 120)}…</p>
-                    )}
-                  </Link>
-                )
-              })}
-            </div>
-            <Link href="/feed" className="home-data-link">Read all journals →</Link>
+        <section className="max-w-3xl mx-auto px-6 pb-24">
+          <p className="font-[family-name:var(--font-jetbrains)] text-xs tracking-widest uppercase text-[#A0622A] mb-3">
+            From the journal
+          </p>
+          <div className="space-y-4 mb-6">
+            {recentPosts.map(post => {
+              const url = post.authorUsername
+                ? `/${post.authorUsername}/${post.slug}`
+                : `/posts/${post.slug}`
+              const authorName = post.authorDisplayName ?? post.authorName ?? post.authorUsername ?? 'Wolfman'
+              return (
+                <Link
+                  key={post.slug}
+                  href={url}
+                  className="block rounded-lg border border-[#f0ebe6] bg-white p-5 transition-shadow hover:shadow-md"
+                >
+                  <p className="font-[family-name:var(--font-jetbrains)] text-xs text-[#909090] mb-1">
+                    {authorName} · {formatDate(post.date)}
+                  </p>
+                  <p className="font-[family-name:var(--font-inter)] text-base font-medium text-[#4A4A4A] mb-1">
+                    {post.title}
+                  </p>
+                  {post.excerpt && (
+                    <p className="text-sm text-[#909090] leading-relaxed">
+                      {post.excerpt.slice(0, 120)}…
+                    </p>
+                  )}
+                </Link>
+              )
+            })}
           </div>
+          <Link
+            href="/feed"
+            className="text-sm text-[#A0622A] hover:underline underline-offset-2"
+          >
+            Read all journals →
+          </Link>
         </section>
       )}
-
-      {/* Section 7 — CTA repeat */}
-      <section className="home-section home-section--cta">
-        <div className="home-section-inner home-section-inner--centered">
-          <p className="home-cta-repeat-line">Your first journal takes three minutes.</p>
-          <Link href={ctaHref} className="home-cta-btn">{ctaText}</Link>
-        </div>
-      </section>
 
     </main>
   )

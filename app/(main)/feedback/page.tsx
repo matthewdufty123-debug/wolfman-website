@@ -12,7 +12,7 @@ export const metadata: Metadata = siteMetadata({
 export default function FeedbackPage() {
   return (
     <>
-      <SectionHeader section="beta" current="/feedback" />
+      <SectionHeader section="discover" current="/feedback" />
       <FeedbackPageClient />
     </>
   )

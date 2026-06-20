@@ -86,7 +86,6 @@ const FEED_LOGO: SlotType = { kind: 'feed-logo' }
 const ABOUT: SlotType     = { kind: 'link', href: '/about',          label: 'about',   icon: 'BadgeInfo', hideLabel: true }
 const DISCOVER: SlotType  = { kind: 'link', href: '/discover',       label: 'discover', icon: 'BadgeInfo', hideLabel: true }
 const ADMIN: SlotType     = { kind: 'link', href: '/admin',          label: 'admin',   icon: 'LayoutDashboard' }
-const BETA_LINK: SlotType = { kind: 'link', href: '/beta',           label: 'beta',    icon: 'Building2',  hideLabel: true }
 const SETTINGS: SlotType  = { kind: 'link', href: '/settings', label: 'settings', icon: 'Settings', hideLabel: true, authOnly: true }
 const FEEDBACK_TEXT: SlotType = { kind: 'text-link', href: '/feedback', text: 'SEND FEEDBACK' }
 const SHARE: SlotType     = { kind: 'action', action: 'share',      label: 'share',   icon: 'Share2', hideLabel: true }
@@ -100,7 +99,7 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
 
   /**
    * standard
-   * Home, profiles, discover, features, beta, dev, feedback, terms,
+   * Home, profiles, discover, about, dev, feedback, terms,
    * morning-ritual, morning-stats, shop, cart, checkout, wolfbot
    *
    * Upper: logo(30%) | feedback(40%) | new-post(10%) | experience(10%) | shop(10%)
@@ -188,7 +187,7 @@ const KNOWN_PREFIXES = new Set([
   'admin', 'edit', 'write', 'today', 'account', 'settings', 'shop', 'cart',
   'checkout', 'login', 'register', 'about', 'morning-ritual',
   'morning-stats', 'intentions', 'feedback', 'beta', 'dev',
-  'features', 'terms', 'discover', 'investment', 'rituals', 'achievements', 'api', 'posts', 'wolfbot',
+  'features', 'terms', 'discover', 'rituals', 'achievements', 'api', 'posts', 'wolfbot', 'car',
   'journaling', 'scores',
 ])
 

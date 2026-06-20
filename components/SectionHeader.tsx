@@ -6,20 +6,12 @@ import { useRouter } from 'next/navigation'
 
 const DISCOVER_PAGES = [
   { href: '/discover',      label: 'Discover — Overview' },
-  { href: '/about',         label: 'About Wolfman' },
-  { href: '/investment',    label: 'Investment Case' },
-  { href: '/features',      label: 'Features & Roadmap' },
+  { href: '/about',         label: 'About & Career' },
   { href: '/journaling',    label: 'The Journalling Practice' },
   { href: '/scores',        label: 'Morning Scores' },
   { href: '/wolfbot',       label: 'WOLF|BOT' },
   { href: '/rituals',       label: 'Rituals' },
   { href: '/achievements',  label: 'Achievements' },
-]
-
-const BETA_PAGES = [
-  { href: '/beta',     label: 'About the Beta' },
-  { href: '/feedback', label: 'Give Feedback' },
-  { href: '/dev',      label: 'Dev Log' },
 ]
 
 function personalPages(username: string) {
@@ -33,21 +25,15 @@ function personalPages(username: string) {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 interface SectionHeaderProps {
-  section: 'discover' | 'beta' | 'personal'
+  section: 'discover' | 'personal'
   current: string
   username?: string
 }
 
 export default function SectionHeader({ section, current, username = '' }: SectionHeaderProps) {
   const router = useRouter()
-  const pages =
-    section === 'discover' ? DISCOVER_PAGES :
-    section === 'beta'     ? BETA_PAGES :
-                             personalPages(username)
-  const title =
-    section === 'discover' ? 'WHAT WOULD YOU LIKE TO LEARN ABOUT?' :
-    section === 'beta'     ? 'ABOUT THE BETA' :
-                             'YOUR SPACE'
+  const pages = section === 'discover' ? DISCOVER_PAGES : personalPages(username)
+  const title = section === 'discover' ? 'WHAT WOULD YOU LIKE TO LEARN ABOUT?' : 'YOUR SPACE'
 
   return (
     <div className="section-hdr">

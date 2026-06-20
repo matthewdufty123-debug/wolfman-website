@@ -2,35 +2,22 @@ import Link from 'next/link'
 import { register } from '@/lib/actions/auth'
 import AuthForm from '@/components/AuthForm'
 import { getRegistrationState } from '@/lib/site-config'
-import BetaInterestForm from '@/components/BetaInterestForm'
 
 export default async function RegisterPage() {
-  const { config, registrationOpen, capReached } = await getRegistrationState()
+  const { registrationOpen, capReached } = await getRegistrationState()
 
-  // Closed alpha / closed beta — registration not open yet
+  // Registration not open — invitation only
   if (!registrationOpen) {
-    const message = config.statusMessage ?? (
-      config.status === 'closed_alpha'
-        ? 'wolfman.app is currently in private alpha. Registration is not open yet.'
-        : 'wolfman.app is coming soon. Registration is not open yet.'
-    )
     return (
       <main className="auth-main">
         <div className="auth-card">
-          <h1 className="auth-title">Registration is not open yet.</h1>
-          <p className="beta-register-closed-body">{message}</p>
-          <p className="beta-register-closed-body">
-            Register your interest below and we&apos;ll let you know when registration opens.
+          <h1 className="auth-title">Registration is by invitation only.</h1>
+          <p className="auth-body">
+            wolfman.app is a private site. If you&apos;d like access, get in touch with Matthew directly.
           </p>
-          <div style={{ marginTop: '1.75rem' }}>
-            <BetaInterestForm source="register-page" />
-          </div>
-          <p className="beta-register-closed-body" style={{ marginTop: '2rem' }}>
-            <Link href="/beta" className="beta-link">Learn more about the beta →</Link>
-          </p>
-          <p className="beta-register-closed-body">
+          <p className="auth-switch">
             Already have an account?{' '}
-            <Link href="/login" className="beta-link">Sign in →</Link>
+            <Link href="/login" className="auth-switch-link">Sign in →</Link>
           </p>
         </div>
       </main>
@@ -39,17 +26,12 @@ export default async function RegisterPage() {
 
   // Open but cap reached
   if (capReached) {
-    const message = config.statusMessage ?? 'The wolfman.app beta has reached its limit of testers. Thank you for your interest — it means a lot.'
     return (
       <main className="auth-main">
         <div className="auth-card">
           <h1 className="auth-title">Registration is closed.</h1>
-          <p className="beta-register-closed-body">{message}</p>
-          <p className="beta-register-closed-body">
-            <Link href="/beta" className="beta-link">Register your interest →</Link>
-          </p>
-          <p className="beta-register-closed-body" style={{ marginTop: '2rem' }}>
-            <Link href="/beta" className="beta-link">Learn more about the beta →</Link>
+          <p className="auth-body">
+            wolfman.app has reached its current user limit. Thank you for your interest.
           </p>
         </div>
       </main>
@@ -61,16 +43,6 @@ export default async function RegisterPage() {
     <main className="auth-main">
       <div className="auth-card">
         <h1 className="auth-title">Create an account.</h1>
-
-        <div className="beta-register-terms">
-          <p className="beta-register-terms-headline">Welcome to wolfman.app.</p>
-          <ul className="beta-register-terms-list">
-            <li>Your journal entries are private — only you can see them</li>
-            <li>If the site continues, your data carries over seamlessly</li>
-            <li>If the site closes, you get 30 days to download your data before deletion</li>
-          </ul>
-          <Link href="/beta" className="beta-register-terms-link">Full details →</Link>
-        </div>
 
         <AuthForm
           action={register}

@@ -12,7 +12,7 @@ export const metadata: Metadata = siteMetadata({
 export default function DevPage() {
   return (
     <>
-      <SectionHeader section="beta" current="/dev" />
+      <SectionHeader section="discover" current="/dev" />
       <DevPageClient />
     </>
   )

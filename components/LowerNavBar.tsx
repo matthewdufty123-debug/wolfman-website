@@ -8,7 +8,7 @@ import {
   Home, Sunrise, Pencil, ShoppingBag, User, UserCircle2, Settings,
   Share2, Download, ArrowLeft, ChevronLeft, ChevronRight,
   LayoutDashboard, BadgeInfo, Bot, Plus, Building2, Rss, BookOpen, Menu, X, Search,
-  TrendingUp, Trophy, Sparkles, ShoppingCart, MessageSquare, Code2, FileText, Shield,
+  Trophy, Sparkles, ShoppingCart, MessageSquare, Code2, FileText, Shield,
 } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 import { signInWithGoogle, signInWithGitHub } from '@/lib/actions/oauth'
@@ -77,9 +77,7 @@ const PAGE_GROUPS: PageGroup[] = [
     title: 'Discover',
     color: '#3AB87A',
     links: [
-      { href: '/about',        label: 'About Wolfman',   icon: <User        size={16} strokeWidth={1.5} /> },
-      { href: '/investment',   label: 'Investment Case', icon: <TrendingUp  size={16} strokeWidth={1.5} /> },
-      { href: '/features',     label: 'Features',        icon: <Sparkles    size={16} strokeWidth={1.5} /> },
+      { href: '/about',        label: 'About & Career',  icon: <User        size={16} strokeWidth={1.5} /> },
       { href: '/rituals',      label: 'Rituals',         icon: <Sunrise     size={16} strokeWidth={1.5} /> },
       { href: '/achievements', label: 'Achievements',    icon: <Trophy      size={16} strokeWidth={1.5} /> },
     ],
@@ -96,7 +94,6 @@ const PAGE_GROUPS: PageGroup[] = [
     title: 'Behind the Scenes',
     color: '#C8B020',
     links: [
-      { href: '/beta',     label: 'Join Wolfman',   icon: <BadgeInfo     size={16} strokeWidth={1.5} /> },
       { href: '/feedback', label: 'Give Feedback',  icon: <MessageSquare size={16} strokeWidth={1.5} /> },
       { href: '/dev',      label: 'Dev Log',        icon: <Code2         size={16} strokeWidth={1.5} /> },
     ],
@@ -113,11 +110,7 @@ const PAGE_GROUPS: PageGroup[] = [
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-interface LowerNavBarProps {
-  registrationOpen: boolean
-}
-
-export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
+export default function LowerNavBar() {
   const pathname = usePathname()
   const router = useRouter()
   const { data: session } = useSession()
@@ -572,11 +565,6 @@ export default function LowerNavBar({ registrationOpen }: LowerNavBarProps) {
               {loginLoading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
-          {registrationOpen && (
-            <p className="login-register-prompt">
-              No account? <Link href="/register" onClick={() => setLoginOpen(false)}>Register here</Link>
-            </p>
-          )}
         </div>
       </div>
     </>
