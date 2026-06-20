@@ -106,7 +106,7 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * Lower: wolfbot(30%) | discover(40%) | wolf-logo(10%) | profile(10%) | menu(10%)
    */
   standard: {
-    upper: [WOLFMAN_LOGO, FEEDBACK_TEXT, WRITE_PLUS, SETTINGS, SHOP],
+    upper: [WOLFMAN_LOGO, EMPTY, WRITE_PLUS, SETTINGS, SHOP],
     lower: [WOLFBOT, DISCOVER, FEED_LOGO, ACCOUNT, MORE_PAGES],
   },
 
@@ -121,7 +121,7 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
   'journal-reading': {
     upper: [
       WOLFMAN_LOGO,                                                               // 30%
-      FEEDBACK_TEXT,                                                              // 40%
+      EMPTY,                                                                     // 40%
       { kind: 'link', href: '', label: 'edit', icon: 'Pencil', hideLabel: true }, // 10% — dynamic href
       SETTINGS,                                                                   // 10%
       SHARE,                                                                      // 10%
@@ -144,7 +144,7 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * Lower: back(30%) | empty | empty | empty | empty
    */
   writing: {
-    upper: [WOLFMAN_LOGO, FEEDBACK_TEXT, EMPTY, EMPTY, EMPTY],
+    upper: [WOLFMAN_LOGO, EMPTY, EMPTY, EMPTY, EMPTY],
     lower: [BACK, EMPTY, EMPTY, EMPTY, EMPTY],
   },
 
@@ -163,7 +163,7 @@ export const NAV_CONFIGS: Record<NavConfigKey, NavBarConfig> = {
    * /admin and /admin/*
    */
   admin: {
-    upper: [WOLFMAN_LOGO, FEEDBACK_TEXT, WRITE_PLUS, SETTINGS, SHOP],
+    upper: [WOLFMAN_LOGO, EMPTY, WRITE_PLUS, SETTINGS, SHOP],
     lower: [WOLFBOT, DISCOVER, FEED_LOGO, PROFILE_LINK, MORE_PAGES],
   },
 }
