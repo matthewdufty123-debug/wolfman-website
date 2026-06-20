@@ -58,10 +58,11 @@ export default async function HomePage() {
       {/* ── Hero ── */}
       <section className="flex flex-col items-center justify-center px-6 pt-24 pb-16 text-center">
         <WolfLogo size={80} className="mb-6 opacity-90" />
-        <h1 className="font-[family-name:var(--font-inter)] text-4xl sm:text-5xl font-semibold text-[#4A4A4A] tracking-tight mb-4">
+        <h1 className="font-[family-name:var(--font-inter)] text-4xl sm:text-5xl font-semibold tracking-tight mb-4"
+            style={{ color: 'var(--heading)' }}>
           Matthew Wolfman
         </h1>
-        <p className="text-lg text-[#909090] max-w-md leading-relaxed">
+        <p className="text-lg max-w-md leading-relaxed" style={{ color: 'var(--body-text)', opacity: 0.65 }}>
           Data engineer. Mountain biker. Photographer. Mindful human.
         </p>
       </section>
@@ -71,36 +72,40 @@ export default async function HomePage() {
         <div className="grid gap-6 sm:grid-cols-3">
           <Link
             href="/feed"
-            className="group block rounded-lg border border-[#f0ebe6] bg-white p-6 transition-shadow hover:shadow-md"
+            className="group block rounded-lg p-6 transition-shadow hover:shadow-md"
+            style={{ background: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)' }}
           >
-            <p className="font-[family-name:var(--font-inter)] text-sm font-semibold text-[#4A7FA5] mb-2 group-hover:text-[#3a6d8f]">
+            <p className="font-[family-name:var(--font-inter)] text-sm font-semibold text-[#4A7FA5] mb-2 group-hover:text-[#6090C0]">
               The Journal
             </p>
-            <p className="text-sm text-[#4A4A4A] leading-relaxed">
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--body-text)' }}>
               Daily morning intentions, written honestly.
             </p>
           </Link>
 
           <Link
             href="/about"
-            className="group block rounded-lg border border-[#f0ebe6] bg-white p-6 transition-shadow hover:shadow-md"
+            className="group block rounded-lg p-6 transition-shadow hover:shadow-md"
+            style={{ background: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)' }}
           >
-            <p className="font-[family-name:var(--font-inter)] text-sm font-semibold text-[#A0622A] mb-2 group-hover:text-[#8a5424]">
+            <p className="font-[family-name:var(--font-inter)] text-sm font-semibold text-[#A0622A] mb-2 group-hover:text-[#C87840]">
               About &amp; Career
             </p>
-            <p className="text-sm text-[#4A4A4A] leading-relaxed">
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--body-text)' }}>
               Twenty-five years of building things with data.
             </p>
           </Link>
 
           <Link
             href="/shop"
-            className="group block rounded-lg border border-[#f0ebe6] bg-white p-6 transition-shadow hover:shadow-md"
+            className="group block rounded-lg p-6 transition-shadow hover:shadow-md"
+            style={{ background: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)' }}
           >
-            <p className="font-[family-name:var(--font-inter)] text-sm font-semibold text-[#4A4A4A] mb-2 group-hover:text-[#333]">
+            <p className="font-[family-name:var(--font-inter)] text-sm font-semibold mb-2"
+               style={{ color: 'var(--heading)' }}>
               The Shop
             </p>
-            <p className="text-sm text-[#4A4A4A] leading-relaxed">
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--body-text)' }}>
               Photography, prints, and wellbeing.
             </p>
           </Link>
@@ -123,16 +128,18 @@ export default async function HomePage() {
                 <Link
                   key={post.slug}
                   href={url}
-                  className="block rounded-lg border border-[#f0ebe6] bg-white p-5 transition-shadow hover:shadow-md"
+                  className="block rounded-lg p-5 transition-shadow hover:shadow-md"
+                  style={{ background: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)' }}
                 >
-                  <p className="font-[family-name:var(--font-jetbrains)] text-xs text-[#909090] mb-1">
+                  <p className="font-[family-name:var(--font-jetbrains)] text-xs mb-1" style={{ color: 'var(--body-text)', opacity: 0.5 }}>
                     {authorName} · {formatDate(post.date)}
                   </p>
-                  <p className="font-[family-name:var(--font-inter)] text-base font-medium text-[#4A4A4A] mb-1">
+                  <p className="font-[family-name:var(--font-inter)] text-base font-medium mb-1"
+                     style={{ color: 'var(--heading)' }}>
                     {post.title}
                   </p>
                   {post.excerpt && (
-                    <p className="text-sm text-[#909090] leading-relaxed">
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--body-text)', opacity: 0.55 }}>
                       {post.excerpt.slice(0, 120)}…
                     </p>
                   )}
