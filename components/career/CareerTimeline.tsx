@@ -32,11 +32,11 @@ interface SerializedRole {
   achievements: SerializedAchievement[]
 }
 
-// ── Colour maps ──────────────────────────────────────────────────────────────
+// ── Colour maps (these colours are bright enough for both themes) ────────────
 
-const EMPLOYMENT_COLOURS: Record<string, { bg: string; text: string; border: string }> = {
-  employed:      { bg: 'bg-[#4A7FA5]/10', text: 'text-[#4A7FA5]', border: 'border-[#4A7FA5]/30' },
-  'self-employed': { bg: 'bg-[#A0622A]/10', text: 'text-[#A0622A]', border: 'border-[#A0622A]/30' },
+const EMPLOYMENT_COLOURS: Record<string, { bg: string; text: string }> = {
+  employed:        { bg: 'bg-[#4A7FA5]/10', text: 'text-[#4A7FA5]' },
+  'self-employed': { bg: 'bg-[#A0622A]/10', text: 'text-[#A0622A]' },
 }
 
 const THEME_COLOURS: Record<string, { bg: string; text: string; dot: string; label: string }> = {
@@ -71,7 +71,6 @@ export default function CareerTimeline({ roles, skills }: Props) {
           )
         })
 
-        // Keep role if it matches search OR has matching achievements
         const roleMatches = !q || (
           role.title.toLowerCase().includes(q) ||
           role.company.toLowerCase().includes(q) ||
@@ -102,48 +101,45 @@ export default function CareerTimeline({ roles, skills }: Props) {
           placeholder="Search roles, achievements, skills..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full px-4 py-3 rounded-lg border border-[#e8e3de] bg-white text-[#4A4A4A] text-sm
-                     placeholder:text-[#909090] focus:outline-none focus:border-[#A0622A] focus:ring-1 focus:ring-[#A0622A]/20
+          className="w-full px-4 py-3 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#A0622A]/20
                      font-[family-name:var(--font-inter)]"
+          style={{
+            background: 'var(--admin-card-bg)',
+            border: '1px solid var(--admin-border)',
+            color: 'var(--body-text)',
+          }}
         />
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 mb-8">
         {/* View toggle */}
-        <button
-          onClick={() => setView('timeline')}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium font-[family-name:var(--font-jetbrains)] tracking-wide transition-colors
-            ${view === 'timeline'
-              ? 'bg-[#4A4A4A] text-white'
-              : 'bg-[#f5f0eb] text-[#909090] hover:text-[#4A4A4A]'
-            }`}
-        >
-          Timeline
-        </button>
-        <button
-          onClick={() => setView('skills')}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium font-[family-name:var(--font-jetbrains)] tracking-wide transition-colors
-            ${view === 'skills'
-              ? 'bg-[#4A4A4A] text-white'
-              : 'bg-[#f5f0eb] text-[#909090] hover:text-[#4A4A4A]'
-            }`}
-        >
-          Skills
-        </button>
+        {(['timeline', 'skills'] as const).map(v => (
+          <button
+            key={v}
+            onClick={() => setView(v)}
+            className="px-3 py-1.5 rounded-full text-xs font-medium font-[family-name:var(--font-jetbrains)] tracking-wide transition-colors"
+            style={view === v
+              ? { background: 'var(--contrast-bg)', color: 'var(--contrast-text)' }
+              : { background: 'var(--admin-card-bg)', color: 'var(--body-text)', opacity: 0.6 }
+            }
+          >
+            {v === 'timeline' ? 'Timeline' : 'Skills'}
+          </button>
+        ))}
 
-        <span className="w-px h-6 bg-[#e8e3de] self-center mx-1" />
+        <span className="w-px h-6 self-center mx-1" style={{ background: 'var(--admin-border)' }} />
 
         {/* Theme filters */}
         {(['all', 'change-management', 'data-analytics', 'operational'] as const).map(t => (
           <button
             key={t}
             onClick={() => setThemeFilter(t)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium font-[family-name:var(--font-jetbrains)] tracking-wide transition-colors
-              ${themeFilter === t
-                ? 'bg-[#4A4A4A] text-white'
-                : 'bg-[#f5f0eb] text-[#909090] hover:text-[#4A4A4A]'
-              }`}
+            className="px-3 py-1.5 rounded-full text-xs font-medium font-[family-name:var(--font-jetbrains)] tracking-wide transition-colors"
+            style={themeFilter === t
+              ? { background: 'var(--contrast-bg)', color: 'var(--contrast-text)' }
+              : { background: 'var(--admin-card-bg)', color: 'var(--body-text)', opacity: 0.6 }
+            }
           >
             {t === 'all' ? 'All Themes' : THEME_COLOURS[t].label}
           </button>
@@ -156,10 +152,11 @@ export default function CareerTimeline({ roles, skills }: Props) {
       ) : (
         <div className="relative">
           {/* Timeline line */}
-          <div className="absolute left-[7px] top-2 bottom-2 w-px bg-[#e8e3de] sm:left-[11px]" />
+          <div className="absolute left-[7px] top-2 bottom-2 w-px sm:left-[11px]"
+               style={{ background: 'var(--admin-border)' }} />
 
           {filtered.length === 0 ? (
-            <p className="text-sm text-[#909090] pl-8 py-8">No results found.</p>
+            <p className="text-sm pl-8 py-8" style={{ color: 'var(--body-text)', opacity: 0.5 }}>No results found.</p>
           ) : (
             <div className="space-y-0">
               {filtered.map(role => (
@@ -177,7 +174,7 @@ export default function CareerTimeline({ roles, skills }: Props) {
 
 function RoleCard({ role }: { role: SerializedRole }) {
   const emp = EMPLOYMENT_COLOURS[role.employmentType] ?? EMPLOYMENT_COLOURS.employed
-  const dotColour = role.isCurrent ? 'bg-[#A0622A]' : 'bg-white border-2 border-[#A0622A]'
+  const dotColour = role.isCurrent ? 'bg-[#A0622A]' : 'border-2 border-[#A0622A]'
 
   return (
     <article className="relative grid grid-cols-[16px_1fr] gap-x-3 sm:grid-cols-[24px_1fr] sm:gap-x-4 pb-8 last:pb-2">
@@ -185,6 +182,7 @@ function RoleCard({ role }: { role: SerializedRole }) {
       <div className="relative flex justify-center pt-1.5">
         <span className={`w-[15px] h-[15px] rounded-full ${dotColour} z-10 shrink-0
           ${role.isCurrent ? 'ring-4 ring-[#A0622A]/15' : ''}`}
+          style={role.isCurrent ? undefined : { background: 'var(--bg)' }}
         />
       </div>
 
@@ -192,11 +190,13 @@ function RoleCard({ role }: { role: SerializedRole }) {
       <div className="min-w-0">
         {/* Header */}
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <h3 className="font-[family-name:var(--font-inter)] font-semibold text-[#4A4A4A] text-base sm:text-lg leading-tight">
+          <h3 className="font-[family-name:var(--font-inter)] font-semibold text-base sm:text-lg leading-tight"
+              style={{ color: 'var(--heading)' }}>
             {role.title}
           </h3>
-          <span className="text-[#909090] text-sm">at</span>
-          <span className="font-[family-name:var(--font-inter)] font-semibold text-[#4A4A4A] text-base sm:text-lg">
+          <span className="text-sm" style={{ color: 'var(--body-text)', opacity: 0.45 }}>at</span>
+          <span className="font-[family-name:var(--font-inter)] font-semibold text-base sm:text-lg"
+                style={{ color: 'var(--heading)' }}>
             {role.company}
           </span>
           {role.isCurrent && (
@@ -208,7 +208,8 @@ function RoleCard({ role }: { role: SerializedRole }) {
         </div>
 
         {/* Meta */}
-        <p className="font-[family-name:var(--font-jetbrains)] text-xs text-[#909090] mt-0.5">
+        <p className="font-[family-name:var(--font-jetbrains)] text-xs mt-0.5"
+           style={{ color: 'var(--body-text)', opacity: 0.45 }}>
           {formatDateRange(role.startDate, role.endDate)}
           <span className={`ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${emp.bg} ${emp.text}`}>
             {role.employmentType === 'self-employed' ? 'Self-Employed' : 'Employed'}
@@ -216,7 +217,7 @@ function RoleCard({ role }: { role: SerializedRole }) {
         </p>
 
         {/* Summary */}
-        <p className="text-[#4A4A4A] text-sm leading-relaxed mt-2 max-w-prose">
+        <p className="text-sm leading-relaxed mt-2 max-w-prose" style={{ color: 'var(--body-text)' }}>
           {role.summary}
         </p>
 
@@ -226,7 +227,8 @@ function RoleCard({ role }: { role: SerializedRole }) {
             {role.achievements.map(a => {
               const tc = THEME_COLOURS[a.theme] ?? THEME_COLOURS.operational
               return (
-                <div key={a.id} className="relative pl-4 border-l-2 border-[#f0ebe6]">
+                <div key={a.id} className="relative pl-4 border-l-2"
+                     style={{ borderColor: 'var(--admin-border)' }}>
                   {/* Theme badge */}
                   <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
                     font-[family-name:var(--font-jetbrains)] ${tc.bg} ${tc.text} mb-1`}>
@@ -234,14 +236,16 @@ function RoleCard({ role }: { role: SerializedRole }) {
                     {tc.label}
                   </span>
 
-                  <p className="text-sm text-[#4A4A4A] leading-relaxed">{a.description}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--body-text)' }}>
+                    {a.description}
+                  </p>
 
                   {/* Skill tags */}
                   {a.skillTags && a.skillTags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-1.5">
                       {a.skillTags.map(tag => (
-                        <span key={tag} className="font-[family-name:var(--font-jetbrains)] text-[10px] text-[#909090]
-                                                   bg-[#f5f0eb] px-2 py-0.5 rounded">
+                        <span key={tag} className="font-[family-name:var(--font-jetbrains)] text-[10px] px-2 py-0.5 rounded"
+                              style={{ background: 'var(--admin-card-bg)', color: 'var(--body-text)', opacity: 0.6 }}>
                           {tag}
                         </span>
                       ))}
@@ -250,8 +254,8 @@ function RoleCard({ role }: { role: SerializedRole }) {
 
                   {/* WOLF|BOT comment */}
                   {a.wolfbotComment && (
-                    <p className="font-[family-name:var(--font-jetbrains)] text-xs text-[#A0622A]/70 mt-1.5 italic">
-                      🐺 {a.wolfbotComment}
+                    <p className="font-[family-name:var(--font-jetbrains)] text-xs text-[#A0622A] mt-1.5 italic" style={{ opacity: 0.7 }}>
+                      {a.wolfbotComment}
                     </p>
                   )}
                 </div>
