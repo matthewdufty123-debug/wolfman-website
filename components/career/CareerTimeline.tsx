@@ -36,22 +36,27 @@ interface SerializedRole {
 // ── Era definitions ─────────────────────────────────────────────────────────
 
 const ERAS = [
-  { id: 'III', name: 'The canopy',    accent: '#C8B020', meta: '2023 → now · Engineering at scale',  range: [15, 99] as const },
-  { id: 'II',  name: 'Branching out', accent: '#909090', meta: '2013 → 2023 · Ventures & analytics', range: [8, 14]  as const },
-  { id: 'I',   name: 'The roots',     accent: '#A0622A', meta: '1997 → 2013 · Foundations',           range: [1, 7]   as const },
+  { id: 'III', name: 'The canopy',    accent: [200,176,32],  meta: '2023 → now · Engineering at scale',  range: [15, 99] as const },
+  { id: 'II',  name: 'Branching out', accent: [144,144,144], meta: '2013 → 2023 · Ventures & analytics', range: [8, 14]  as const },
+  { id: 'I',   name: 'The roots',     accent: [160,98,42],   meta: '1997 → 2013 · Foundations',           range: [1, 7]   as const },
 ]
 
-// ── Colour maps ─────────────────────────────────────────────────────────────
+// ── Colour helpers ──────────────────────────────────────────────────────────
 
-const EMPLOYMENT_COLOURS: Record<string, { bg: string; text: string }> = {
-  employed:        { bg: 'bg-[#4A7FA5]/10', text: 'text-[#4A7FA5]' },
-  'self-employed': { bg: 'bg-[#A0622A]/10', text: 'text-[#A0622A]' },
+function rgba(rgb: number[], a: number) {
+  return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`
 }
 
-const THEME_COLOURS: Record<string, { bg: string; text: string; dot: string; label: string; short: string }> = {
-  'change-management': { bg: 'bg-[#3AB87A]/10', text: 'text-[#3AB87A]', dot: 'bg-[#3AB87A]', label: 'Change Management', short: 'CHANGE' },
-  'data-analytics':    { bg: 'bg-[#2A6AB0]/10', text: 'text-[#2A6AB0]', dot: 'bg-[#2A6AB0]', label: 'Data & Analytics',  short: 'DATA' },
-  operational:         { bg: 'bg-[#C8B020]/10', text: 'text-[#C8B020]', dot: 'bg-[#C8B020]', label: 'Operational',        short: 'OPS' },
+function hex(rgb: number[]) {
+  return `#${rgb.map(c => c.toString(16).padStart(2, '0')).join('')}`
+}
+
+// ── Theme colour maps ───────────────────────────────────────────────────────
+
+const THEME_COLOURS: Record<string, { rgb: number[]; label: string; short: string }> = {
+  'change-management': { rgb: [58,184,122],  label: 'Change Management', short: 'CHANGE' },
+  'data-analytics':    { rgb: [42,106,176],  label: 'Data & Analytics',  short: 'DATA' },
+  operational:         { rgb: [200,176,32],  label: 'Operational',        short: 'OPS' },
 }
 
 const THEMES_LIST = [
@@ -88,13 +93,11 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
             a.skillTags?.some(t => t.toLowerCase().includes(q))
           )
         })
-
         const roleMatches = !q || (
           role.title.toLowerCase().includes(q) ||
           role.company.toLowerCase().includes(q) ||
           role.summary.toLowerCase().includes(q)
         )
-
         if (!roleMatches && achievements.length === 0) return null
         return { ...role, achievements }
       })
@@ -110,7 +113,6 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
     })
   }, [skills, search, themeFilter])
 
-  // Group roles into eras
   const eraGroups = useMemo(() => {
     return ERAS.map(era => ({
       ...era,
@@ -123,41 +125,56 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
   return (
     <div>
       {/* ── Search ── */}
-      <div className="mb-6">
+      <div className="mb-5">
         <input
           type="text"
           placeholder="Search roles, achievements, skills..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full px-4 py-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#A0622A]/30
+          className="w-full px-4 py-3 rounded-lg text-sm focus:outline-none focus:ring-2
                      font-[family-name:var(--font-inter)]"
           style={{
             background: 'var(--admin-card-bg)',
             border: '1px solid var(--admin-border)',
             color: 'var(--body-text)',
+            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.08)',
           }}
         />
       </div>
 
+      {/* ── Legend ── */}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-4 font-[family-name:var(--font-jetbrains)] text-[11px]"
+           style={{ color: 'var(--body-text)', opacity: 0.5 }}>
+        {ERAS.map(era => (
+          <span key={era.id} className="flex items-center gap-2">
+            <span className="w-[10px] h-[10px] rounded-full" style={{ background: hex(era.accent) }} />
+            {era.name}
+          </span>
+        ))}
+        <span style={{ opacity: 0.7 }}>ref = role · ref.n = branch</span>
+      </div>
+
       {/* ── Filter pills ── */}
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex flex-wrap gap-2 mb-8 pt-4"
+           style={{ borderTop: '1px solid var(--admin-border)' }}>
         {/* View toggle */}
         {(['timeline', 'skills'] as const).map(v => (
           <button
             key={v}
             onClick={() => setView(v)}
-            className="px-4 py-2 rounded-full text-xs font-semibold font-[family-name:var(--font-jetbrains)] tracking-wide
+            aria-pressed={view === v}
+            className="px-4 py-2 rounded-full text-xs font-medium font-[family-name:var(--font-jetbrains)] tracking-wide
                        transition-all duration-200"
             style={view === v
-              ? { background: 'var(--contrast-bg)', color: 'var(--contrast-text)', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }
-              : { background: 'var(--admin-card-bg)', color: 'var(--body-text)', opacity: 0.6, border: '1px solid var(--admin-border)' }
+              ? { background: 'var(--contrast-bg)', color: 'var(--contrast-text)' }
+              : { background: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', color: 'var(--body-text)', opacity: 0.6 }
             }
           >
             {v === 'timeline' ? 'Timeline' : 'Skills'}
           </button>
         ))}
 
-        <span className="w-px h-8 self-center mx-1" style={{ background: 'var(--admin-border)' }} />
+        <span className="w-px h-7 self-center mx-1" style={{ background: 'var(--admin-border)' }} />
 
         {/* Theme filters */}
         {(['all', 'change-management', 'data-analytics', 'operational'] as const).map(t => {
@@ -167,15 +184,18 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
             <button
               key={t}
               onClick={() => setThemeFilter(t)}
-              className="px-4 py-2 rounded-full text-xs font-semibold font-[family-name:var(--font-jetbrains)] tracking-wide
+              aria-pressed={isActive}
+              className="px-4 py-2 rounded-full text-xs font-medium font-[family-name:var(--font-jetbrains)] tracking-wide
                          transition-all duration-200 flex items-center gap-1.5"
               style={isActive
-                ? { background: 'var(--contrast-bg)', color: 'var(--contrast-text)', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }
-                : { background: 'var(--admin-card-bg)', color: 'var(--body-text)', opacity: 0.6, border: '1px solid var(--admin-border)' }
+                ? { background: 'var(--contrast-bg)', color: 'var(--contrast-text)' }
+                : { background: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', color: 'var(--body-text)', opacity: 0.6 }
               }
             >
-              {tc && !isActive && <span className={`w-2 h-2 rounded-full ${tc.dot}`} />}
-              {t === 'all' ? 'All Branches' : tc!.short}
+              {tc && !isActive && (
+                <span className="w-2 h-2 rounded-full" style={{ background: hex(tc.rgb) }} />
+              )}
+              {t === 'all' ? 'All branches' : tc!.short}
             </button>
           )
         })}
@@ -189,7 +209,7 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
           {eraGroups.length === 0 ? (
             <p className="text-sm py-8" style={{ color: 'var(--body-text)', opacity: 0.5 }}>No results found.</p>
           ) : (
-            <div className="space-y-2">
+            <div>
               {eraGroups.map((era, eraIdx) => (
                 <EraGroup key={era.id} era={era} eraIdx={eraIdx} isAdmin={isAdmin} />
               ))}
@@ -206,58 +226,43 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
 interface EraGroupData {
   id: string
   name: string
-  accent: string
+  accent: number[]
   meta: string
   roles: SerializedRole[]
 }
 
 function EraGroup({ era, eraIdx, isAdmin }: { era: EraGroupData; eraIdx: number; isAdmin: boolean }) {
+  const accentHex = hex(era.accent)
+
   return (
-    <div className="mb-8">
+    <div style={{ marginBottom: '48px' }}>
       {/* Era band header */}
       <div
-        className="flex items-center gap-4 px-5 py-3 rounded-lg mb-4"
-        style={{
-          background: `${era.accent}10`,
-          border: `1px solid ${era.accent}25`,
-        }}
+        className="flex items-baseline gap-3 sm:gap-4"
+        style={{ margin: eraIdx === 0 ? '0 0 24px' : '48px 0 24px' }}
       >
         <span
-          className="font-[family-name:var(--font-jetbrains)] text-lg font-bold tracking-tight"
-          style={{ color: era.accent }}
+          className="font-[family-name:var(--font-jetbrains)] text-xs font-medium tracking-widest"
+          style={{ color: accentHex }}
         >
           {era.id}
         </span>
-        <div className="flex-1 min-w-0">
-          <span
-            className="font-[family-name:var(--font-inter)] text-sm font-semibold"
-            style={{ color: 'var(--heading)' }}
-          >
-            {era.name}
-          </span>
-          <span
-            className="font-[family-name:var(--font-jetbrains)] text-xs ml-3"
-            style={{ color: 'var(--body-text)', opacity: 0.45 }}
-          >
-            {era.meta}
-          </span>
-        </div>
         <span
-          className="font-[family-name:var(--font-jetbrains)] text-[10px] tracking-wider uppercase"
-          style={{ color: era.accent, opacity: 0.6 }}
+          className="font-[family-name:var(--font-inter)] text-lg sm:text-xl font-semibold tracking-tight"
+          style={{ color: 'var(--heading)' }}
         >
-          {era.roles.length} role{era.roles.length !== 1 ? 's' : ''}
+          {era.name}
+        </span>
+        <span
+          className="font-[family-name:var(--font-jetbrains)] text-xs ml-auto text-right hidden sm:block"
+          style={{ color: 'var(--body-text)', opacity: 0.35 }}
+        >
+          {era.meta}
         </span>
       </div>
 
       {/* Roles with vertical rail */}
-      <div className="relative ml-2 sm:ml-4">
-        {/* Continuous vertical rail */}
-        <div
-          className="absolute left-[18px] top-0 bottom-0 w-[2px] sm:left-[22px]"
-          style={{ background: `${era.accent}30` }}
-        />
-
+      <div className="relative">
         {era.roles.map((role, roleIdx) => (
           <RoleCard
             key={role.id}
@@ -265,6 +270,7 @@ function EraGroup({ era, eraIdx, isAdmin }: { era: EraGroupData; eraIdx: number;
             accent={era.accent}
             roleIdx={roleIdx}
             eraIdx={eraIdx}
+            isLast={roleIdx === era.roles.length - 1}
             isAdmin={isAdmin}
           />
         ))}
@@ -275,8 +281,8 @@ function EraGroup({ era, eraIdx, isAdmin }: { era: EraGroupData; eraIdx: number;
 
 // ── Role card ───────────────────────────────────────────────────────────────
 
-function RoleCard({ role, accent, roleIdx, eraIdx, isAdmin }: {
-  role: SerializedRole; accent: string; roleIdx: number; eraIdx: number; isAdmin: boolean
+function RoleCard({ role, accent, roleIdx, eraIdx, isLast, isAdmin }: {
+  role: SerializedRole; accent: number[]; roleIdx: number; eraIdx: number; isLast: boolean; isAdmin: boolean
 }) {
   const router = useRouter()
   const ref = useRef<HTMLElement>(null)
@@ -285,15 +291,13 @@ function RoleCard({ role, accent, roleIdx, eraIdx, isAdmin }: {
   const [editingAchievement, setEditingAchievement] = useState<string | null>(null)
   const [addingAchievement, setAddingAchievement] = useState(false)
 
-  const emp = EMPLOYMENT_COLOURS[role.employmentType] ?? EMPLOYMENT_COLOURS.employed
+  const accentHex = hex(accent)
 
   // Scroll-reveal
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReduced) { setVisible(true); return }
-
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setVisible(true); return }
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect() } },
       { threshold: 0.1 }
@@ -302,46 +306,70 @@ function RoleCard({ role, accent, roleIdx, eraIdx, isAdmin }: {
     return () => observer.disconnect()
   }, [])
 
-  const delay = eraIdx * 120 + roleIdx * 80
+  const delay = eraIdx * 100 + roleIdx * 80
 
   return (
     <article
       ref={ref}
-      className="relative grid grid-cols-[40px_1fr] gap-x-3 sm:grid-cols-[48px_1fr] sm:gap-x-4 pb-8 last:pb-2 group/role"
+      className="relative grid group/role"
       style={{
+        gridTemplateColumns: '44px 1fr',
+        columnGap: 'clamp(10px, 2.5vw, 22px)',
         opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(16px)',
+        transform: visible ? 'none' : 'translateY(10px)',
         transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms`,
       }}
     >
-      {/* Dot + ref number */}
-      <div className="relative flex flex-col items-center pt-1">
-        {/* Dot */}
-        <span
-          className="w-[15px] h-[15px] rounded-full z-10 shrink-0"
-          style={role.isCurrent
-            ? { background: accent, boxShadow: `0 0 0 4px ${accent}20` }
-            : { background: 'var(--bg)', border: `2px solid ${accent}` }
-          }
+      {/* ── Rail column ── */}
+      <div className="relative">
+        {/* Vertical rail line */}
+        <div
+          className="absolute top-0 w-[2px]"
+          style={{
+            left: '50%',
+            transform: 'translateX(-50%)',
+            bottom: isLast ? 'auto' : '-2px',
+            height: isLast ? '34px' : undefined,
+            background: 'var(--admin-border)',
+          }}
         />
-        {/* Ref number */}
-        <span
-          className="font-[family-name:var(--font-jetbrains)] text-[10px] font-bold mt-1.5 px-1.5 py-0.5 rounded hidden sm:block"
-          style={{ color: accent, border: `1px solid ${accent}40` }}
-        >
-          {role.sortOrder}
-        </span>
+        {/* Dot */}
+        <div
+          className="absolute w-[15px] h-[15px] rounded-full z-10"
+          style={{
+            left: '50%',
+            top: '6px',
+            transform: 'translateX(-50%)',
+            ...(role.isCurrent
+              ? { background: accentHex, boxShadow: `0 0 0 5px ${rgba(accent, 0.16)}` }
+              : { background: 'var(--bg)', border: `2.5px solid ${accentHex}` }
+            ),
+          }}
+        />
       </div>
 
-      {/* Content */}
-      <div className="min-w-0">
-        {/* Header */}
-        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <h3 className="font-[family-name:var(--font-inter)] font-semibold text-base sm:text-lg leading-tight"
-              style={{ color: 'var(--heading)' }}>
+      {/* ── Main content column ── */}
+      <div style={{ paddingBottom: isLast ? '6px' : '30px', minWidth: 0 }}>
+        {/* Role header row */}
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          {/* Ref badge */}
+          <span
+            className="font-[family-name:var(--font-jetbrains)] text-xs font-medium tracking-wide hidden sm:inline-block"
+            style={{
+              color: accentHex,
+              border: `1px solid ${rgba(accent, 0.35)}`,
+              borderRadius: '5px',
+              padding: '1px 7px',
+            }}
+          >
+            {role.sortOrder}
+          </span>
+
+          <span className="font-[family-name:var(--font-inter)] font-semibold text-base sm:text-lg tracking-tight"
+                style={{ color: 'var(--heading)' }}>
             {role.title}
-          </h3>
-          <span className="text-sm" style={{ color: 'var(--body-text)', opacity: 0.4 }}>at</span>
+          </span>
+          <span className="text-sm" style={{ color: 'var(--body-text)', opacity: 0.35 }}>at</span>
           <span className="font-[family-name:var(--font-inter)] font-semibold text-base sm:text-lg"
                 style={{ color: 'var(--heading)' }}>
             {role.company}
@@ -349,8 +377,8 @@ function RoleCard({ role, accent, roleIdx, eraIdx, isAdmin }: {
           {role.isCurrent && (
             <span
               className="font-[family-name:var(--font-jetbrains)] text-[10px] tracking-widest uppercase
-                         px-2.5 py-0.5 rounded-full font-bold text-white"
-              style={{ background: accent }}
+                         px-2.5 py-0.5 rounded-full font-bold text-white self-center"
+              style={{ background: accentHex }}
             >
               Now
             </span>
@@ -358,7 +386,7 @@ function RoleCard({ role, accent, roleIdx, eraIdx, isAdmin }: {
           {isAdmin && (
             <button
               onClick={() => setEditingRole(!editingRole)}
-              className="opacity-0 group-hover/role:opacity-60 hover:!opacity-100 transition-opacity ml-1"
+              className="opacity-0 group-hover/role:opacity-50 hover:!opacity-100 transition-opacity"
               title="Edit role"
             >
               <PencilIcon size={13} />
@@ -366,17 +394,16 @@ function RoleCard({ role, accent, roleIdx, eraIdx, isAdmin }: {
           )}
         </div>
 
-        {/* Meta */}
-        <p className="font-[family-name:var(--font-jetbrains)] text-xs mt-0.5"
-           style={{ color: 'var(--body-text)', opacity: 0.45 }}>
+        {/* Meta line */}
+        <p className="font-[family-name:var(--font-jetbrains)] text-xs mt-1"
+           style={{ color: 'var(--body-text)', opacity: 0.35 }}>
           {formatDateRange(role.startDate, role.endDate)}
-          <span className={`ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${emp.bg} ${emp.text}`}>
-            {role.employmentType === 'self-employed' ? 'Self-Employed' : 'Employed'}
-          </span>
+          {' · '}
+          {role.employmentType === 'self-employed' ? 'Self-Employed' : 'Employed'}
         </p>
 
         {/* Summary */}
-        <p className="text-sm leading-relaxed mt-2 max-w-prose" style={{ color: 'var(--body-text)' }}>
+        <p className="text-[15px] leading-relaxed mt-2" style={{ color: 'var(--body-text)', opacity: 0.7, maxWidth: '62ch' }}>
           {role.summary}
         </p>
 
@@ -389,36 +416,40 @@ function RoleCard({ role, accent, roleIdx, eraIdx, isAdmin }: {
           />
         )}
 
-        {/* Achievement branch */}
+        {/* ── Achievement branches ── */}
         {role.achievements.length > 0 && (
-          <div className="mt-4 relative ml-2">
-            {/* Achievement sub-rail */}
+          <div
+            className="relative mt-4"
+            style={{ paddingLeft: '20px' }}
+          >
+            {/* Branch sub-rail */}
             <div
-              className="absolute left-[6px] top-0 bottom-0 w-px"
-              style={{ background: `${accent}25` }}
+              className="absolute top-[2px] w-[1.5px]"
+              style={{
+                left: '3px',
+                bottom: '13px',
+                background: rgba(accent, 0.25),
+              }}
             />
 
-            <div className="space-y-3">
-              {role.achievements.map((a, aIdx) => (
-                <AchievementItem
-                  key={a.id}
-                  achievement={a}
-                  roleSort={role.sortOrder}
-                  accent={accent}
-                  aIdx={aIdx}
-                  isAdmin={isAdmin}
-                  isEditing={editingAchievement === a.id}
-                  onEdit={() => setEditingAchievement(editingAchievement === a.id ? null : a.id)}
-                  onSaved={() => { setEditingAchievement(null); router.refresh() }}
-                />
-              ))}
-            </div>
+            {role.achievements.map(a => (
+              <AchievementItem
+                key={a.id}
+                achievement={a}
+                roleSort={role.sortOrder}
+                accent={accent}
+                isAdmin={isAdmin}
+                isEditing={editingAchievement === a.id}
+                onEdit={() => setEditingAchievement(editingAchievement === a.id ? null : a.id)}
+                onSaved={() => { setEditingAchievement(null); router.refresh() }}
+              />
+            ))}
           </div>
         )}
 
-        {/* Admin: Add achievement button */}
+        {/* Admin: Add achievement */}
         {isAdmin && (
-          <div className="mt-3 ml-2">
+          <div className="mt-3" style={{ marginLeft: '20px' }}>
             {addingAchievement ? (
               <InlineAchievementEditForm
                 roleId={role.id}
@@ -430,10 +461,10 @@ function RoleCard({ role, accent, roleIdx, eraIdx, isAdmin }: {
             ) : (
               <button
                 onClick={() => setAddingAchievement(true)}
-                className="opacity-0 group-hover/role:opacity-60 hover:!opacity-100 transition-opacity
+                className="opacity-0 group-hover/role:opacity-50 hover:!opacity-100 transition-opacity
                            font-[family-name:var(--font-jetbrains)] text-[10px] tracking-wider uppercase
                            px-2.5 py-1 rounded"
-                style={{ color: accent, border: `1px dashed ${accent}40` }}
+                style={{ color: accentHex, border: `1px dashed ${rgba(accent, 0.35)}` }}
               >
                 + Add Achievement
               </button>
@@ -447,86 +478,103 @@ function RoleCard({ role, accent, roleIdx, eraIdx, isAdmin }: {
 
 // ── Achievement item ────────────────────────────────────────────────────────
 
-function AchievementItem({ achievement: a, roleSort, accent, aIdx, isAdmin, isEditing, onEdit, onSaved }: {
-  achievement: SerializedAchievement; roleSort: number; accent: string; aIdx: number
+function AchievementItem({ achievement: a, roleSort, accent, isAdmin, isEditing, onEdit, onSaved }: {
+  achievement: SerializedAchievement; roleSort: number; accent: number[]
   isAdmin: boolean; isEditing: boolean; onEdit: () => void; onSaved: () => void
 }) {
   const tc = THEME_COLOURS[a.theme] ?? THEME_COLOURS.operational
 
   return (
-    <div className="relative pl-5 group/ach">
-      {/* Horizontal connector */}
+    <div
+      className="relative group/ach"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'auto auto 1fr',
+        alignItems: 'start',
+        gap: '10px',
+        padding: '7px 0',
+      }}
+    >
+      {/* Horizontal connector (pseudo-element replacement) */}
       <div
-        className="absolute left-[6px] top-[10px] w-3 h-px"
-        style={{ background: `${accent}35` }}
-      />
-      {/* Junction dot */}
-      <div
-        className="absolute left-[3px] top-[7px] w-[7px] h-[7px] rounded-full"
-        style={{ background: `${accent}50` }}
+        className="absolute"
+        style={{
+          left: '-17px',
+          top: '15px',
+          width: '15px',
+          height: '1.5px',
+          background: rgba(accent, 0.25),
+        }}
       />
 
-      {/* Ref number + theme badge row */}
-      <div className="flex items-center gap-2 mb-0.5">
-        <span
-          className="font-[family-name:var(--font-jetbrains)] text-[10px] hidden sm:inline"
-          style={{ color: 'var(--body-text)', opacity: 0.35 }}
-        >
-          {roleSort}.{a.sortOrder}
-        </span>
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
-          font-[family-name:var(--font-jetbrains)] ${tc.bg} ${tc.text}`}
-          style={{ border: `1px solid ${tc.dot.replace('bg-[', '').replace(']', '')}20` }}
-        >
-          <span className={`w-1.5 h-1.5 rounded-full ${tc.dot}`} />
-          {tc.short}
-        </span>
+      {/* Ref number */}
+      <span
+        className="font-[family-name:var(--font-jetbrains)] text-[11px] pt-[1px] whitespace-nowrap hidden sm:block"
+        style={{ color: 'var(--body-text)', opacity: 0.3 }}
+      >
+        {roleSort}.{a.sortOrder}
+      </span>
 
-        {isAdmin && (
-          <button
-            onClick={onEdit}
-            className="opacity-0 group-hover/ach:opacity-60 hover:!opacity-100 transition-opacity"
-            title="Edit achievement"
-          >
-            <PencilIcon size={11} />
-          </button>
+      {/* Theme badge */}
+      <span
+        className="font-[family-name:var(--font-jetbrains)] text-[10px] font-bold tracking-widest uppercase
+                   whitespace-nowrap mt-[1px] px-2 py-0.5 rounded"
+        style={{
+          color: hex(tc.rgb),
+          background: rgba(tc.rgb, 0.12),
+        }}
+      >
+        {tc.short}
+      </span>
+
+      {/* Description + tags + wolfbot */}
+      <div style={{ maxWidth: '62ch' }}>
+        <p className="text-[15px] leading-relaxed" style={{ color: 'var(--body-text)' }}>
+          {a.description}
+          {isAdmin && (
+            <button
+              onClick={onEdit}
+              className="opacity-0 group-hover/ach:opacity-50 hover:!opacity-100 transition-opacity ml-2 align-middle"
+              title="Edit achievement"
+            >
+              <PencilIcon size={11} />
+            </button>
+          )}
+        </p>
+
+        {/* Skill tags */}
+        {a.skillTags && a.skillTags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {a.skillTags.map(tag => (
+              <span key={tag}
+                className="font-[family-name:var(--font-jetbrains)] text-[10px] px-2 py-0.5 rounded"
+                style={{ background: 'var(--admin-card-bg)', color: 'var(--body-text)', opacity: 0.55 }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* WOLF|BOT comment */}
+        {a.wolfbotComment && (
+          <p className="font-[family-name:var(--font-jetbrains)] text-xs mt-2 italic"
+             style={{ color: '#A0622A', opacity: 0.7 }}>
+            {a.wolfbotComment}
+          </p>
+        )}
+
+        {/* Inline edit form */}
+        {isAdmin && isEditing && (
+          <InlineAchievementEditForm
+            achievement={a}
+            roleId={a.roleId}
+            roleSort={roleSort}
+            onClose={onEdit}
+            onSaved={onSaved}
+          />
         )}
       </div>
-
-      {/* Description */}
-      <p className="text-sm leading-relaxed" style={{ color: 'var(--body-text)' }}>
-        {a.description}
-      </p>
-
-      {/* Skill tags */}
-      {a.skillTags && a.skillTags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-1.5">
-          {a.skillTags.map(tag => (
-            <span key={tag} className="font-[family-name:var(--font-jetbrains)] text-[10px] px-2 py-0.5 rounded"
-                  style={{ background: 'var(--admin-card-bg)', color: 'var(--body-text)', opacity: 0.6 }}>
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* WOLF|BOT comment */}
-      {a.wolfbotComment && (
-        <p className="font-[family-name:var(--font-jetbrains)] text-xs text-[#A0622A] mt-1.5 italic" style={{ opacity: 0.7 }}>
-          {a.wolfbotComment}
-        </p>
-      )}
-
-      {/* Inline edit form */}
-      {isAdmin && isEditing && (
-        <InlineAchievementEditForm
-          achievement={a}
-          roleId={a.roleId}
-          roleSort={roleSort}
-          onClose={onEdit}
-          onSaved={onSaved}
-        />
-      )}
     </div>
   )
 }
@@ -666,7 +714,7 @@ function InlineAchievementEditForm({ achievement, roleId, roleSort, nextSort, on
   )
 }
 
-// ── Shared form primitives (theme-aware) ────────────────────────────────────
+// ── Shared form primitives ──────────────────────────────────────────────────
 
 function FormInput({ label, value, onChange, ...props }: {
   label: string; value: string; onChange: (v: string) => void
