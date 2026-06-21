@@ -116,14 +116,15 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
       {isAdmin && (
         <Link
           href="/admin/career"
-          className="inline-block mb-4 font-[family-name:var(--font-jetbrains)] text-xs tracking-wide text-[#A0622A] hover:underline underline-offset-2"
+          className="inline-flex items-center gap-1.5 mb-6 px-4 py-2 rounded font-[family-name:var(--font-jetbrains)] text-xs font-semibold tracking-wide text-white transition-colors duration-200"
+          style={{ background: '#214459' }}
         >
           Edit Career →
         </Link>
       )}
 
       {/* Search */}
-      <div className="mb-5">
+      <div className="mb-6">
         <input
           type="text"
           placeholder="Search roles, achievements, skills..."
@@ -133,29 +134,29 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
                      font-[family-name:var(--font-inter)]"
           style={{
             background: 'var(--admin-card-bg)',
-            border: '1px solid var(--admin-border)',
+            border: '1px solid var(--pill-border)',
             color: 'var(--body-text)',
           }}
         />
       </div>
 
       {/* Filter pills */}
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex flex-wrap gap-2.5 mb-10">
         {(['timeline', 'skills'] as const).map(v => (
           <button
             key={v}
             onClick={() => setView(v)}
-            className="px-4 py-2 rounded-full text-xs font-medium font-[family-name:var(--font-jetbrains)] tracking-wide transition-all duration-200"
+            className="px-5 py-2 rounded-full text-xs font-semibold font-[family-name:var(--font-jetbrains)] tracking-wide uppercase transition-all duration-200"
             style={view === v
               ? { background: 'var(--contrast-bg)', color: 'var(--contrast-text)' }
-              : { background: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', color: 'var(--body-text)', opacity: 0.6 }
+              : { background: 'var(--admin-card-bg)', border: '1px solid var(--pill-border)', color: 'var(--body-text)' }
             }
           >
             {v === 'timeline' ? 'Timeline' : 'Skills'}
           </button>
         ))}
 
-        <span className="w-px h-7 self-center mx-1" style={{ background: 'var(--admin-border)' }} />
+        <span className="w-px h-7 self-center mx-2" style={{ background: 'var(--pill-border)' }} />
 
         {(['all', 'change-management', 'data-analytics', 'operational'] as const).map(t => {
           const isActive = themeFilter === t
@@ -164,14 +165,14 @@ export default function CareerTimeline({ roles, skills, isAdmin = false }: Props
             <button
               key={t}
               onClick={() => setThemeFilter(t)}
-              className="px-4 py-2 rounded-full text-xs font-medium font-[family-name:var(--font-jetbrains)] tracking-wide transition-all duration-200 flex items-center gap-1.5"
+              className="px-5 py-2 rounded-full text-xs font-semibold font-[family-name:var(--font-jetbrains)] tracking-wide uppercase transition-all duration-200 flex items-center gap-2"
               style={isActive
                 ? { background: 'var(--contrast-bg)', color: 'var(--contrast-text)' }
-                : { background: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)', color: 'var(--body-text)', opacity: 0.6 }
+                : { background: 'var(--admin-card-bg)', border: '1px solid var(--pill-border)', color: 'var(--body-text)' }
               }
             >
               {tc && !isActive && <span className="w-2 h-2 rounded-full" style={{ background: tc.hex }} />}
-              {t === 'all' ? 'All branches' : tc!.short}
+              {t === 'all' ? 'All' : tc!.short}
             </button>
           )
         })}
@@ -213,7 +214,7 @@ function TimelineNode({ role, index }: { role: SerializedRole; index: number }) 
         style={{ transitionDelay: `${index * 100}ms` }}
       >
         {/* Header */}
-        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 mb-1">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-2">
           <h3 className="font-[family-name:var(--font-inter)] font-semibold text-base leading-tight"
               style={{ color: 'var(--heading)' }}>
             {role.title}
@@ -224,26 +225,26 @@ function TimelineNode({ role, index }: { role: SerializedRole; index: number }) 
             {role.company}
           </span>
           {role.isCurrent && (
-            <span className="font-[family-name:var(--font-jetbrains)] text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-full font-bold text-white bg-[#A0622A]">
+            <span className="ml-1 font-[family-name:var(--font-jetbrains)] text-[10px] tracking-widest uppercase px-2.5 py-1 rounded-full font-bold text-white bg-[#A0622A]">
               Now
             </span>
           )}
         </div>
 
         {/* Meta */}
-        <p className="font-[family-name:var(--font-jetbrains)] text-[11px] mb-3"
+        <p className="font-[family-name:var(--font-jetbrains)] text-[11px] mb-4"
            style={{ color: 'var(--body-text)', opacity: 0.35 }}>
           {formatDateRange(role.startDate, role.endDate)} · {role.employmentType === 'self-employed' ? 'Self-Employed' : 'Employed'}
         </p>
 
         {/* Summary */}
-        <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--body-text)', opacity: 0.7 }}>
+        <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--body-text)', opacity: 0.7 }}>
           {role.summary}
         </p>
 
         {/* Achievements */}
         {role.achievements.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {role.achievements.map(a => (
               <AchievementRow key={a.id} achievement={a} roleSort={role.sortOrder} />
             ))}
@@ -261,13 +262,13 @@ function AchievementRow({ achievement: a, roleSort }: { achievement: SerializedA
 
   return (
     <div
-      className="rounded-lg px-3 py-2.5"
-      style={{ borderLeft: `3px solid ${tc.hex}`, background: 'rgba(128,128,128,0.04)' }}
+      className="rounded-lg px-4 py-3.5"
+      style={{ borderLeft: `3px solid ${tc.hex}`, background: 'rgba(128,128,128,0.05)' }}
     >
       {/* Badge + ref */}
-      <div className="flex items-center gap-2 mb-1">
+      <div className="flex items-center gap-2.5 mb-2">
         <span
-          className="font-[family-name:var(--font-jetbrains)] text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded"
+          className="font-[family-name:var(--font-jetbrains)] text-[10px] font-bold tracking-widest uppercase px-2.5 py-0.5 rounded"
           style={{ color: tc.hex, background: tc.bg }}
         >
           {tc.short}
@@ -285,11 +286,11 @@ function AchievementRow({ achievement: a, roleSort }: { achievement: SerializedA
 
       {/* Skill tags */}
       {a.skillTags && a.skillTags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-2">
+        <div className="flex flex-wrap gap-2 mt-3">
           {a.skillTags.map(tag => (
             <span key={tag}
-              className="font-[family-name:var(--font-jetbrains)] text-[10px] px-2 py-0.5 rounded"
-              style={{ background: 'var(--bg)', border: '1px solid var(--admin-border)', color: 'var(--body-text)', opacity: 0.55 }}
+              className="font-[family-name:var(--font-jetbrains)] text-[10px] px-2.5 py-1 rounded"
+              style={{ background: 'var(--tag-bg)', border: '1px solid var(--pill-border)', color: 'var(--body-text)', opacity: 0.7 }}
             >
               {tag}
             </span>
@@ -299,7 +300,7 @@ function AchievementRow({ achievement: a, roleSort }: { achievement: SerializedA
 
       {/* WOLF|BOT */}
       {a.wolfbotComment && (
-        <p className="font-[family-name:var(--font-jetbrains)] text-[11px] mt-2 italic text-[#A0622A]" style={{ opacity: 0.7 }}>
+        <p className="font-[family-name:var(--font-jetbrains)] text-[11px] mt-3 italic text-[#A0622A]" style={{ opacity: 0.7 }}>
           {a.wolfbotComment}
         </p>
       )}

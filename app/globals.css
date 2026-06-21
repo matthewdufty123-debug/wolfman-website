@@ -18,6 +18,8 @@ html[data-theme="dark"] {
   --admin-card-bg: rgba(255,255,255,0.18);
   --admin-border: rgba(51,63,80,0.2);
   --admin-muted: rgba(51,63,80,0.55);
+  --pill-border: rgba(255,255,255,0.15);
+  --tag-bg: rgba(255,255,255,0.06);
   --wolf-panel-fill: #214459;
   /* chart tokens */
   --chart-axis: rgba(255,255,255,0.12);
@@ -57,6 +59,8 @@ html[data-theme="light"] {
   --admin-card-bg: rgba(0,0,0,0.18);
   --admin-border: rgba(229,203,187,0.2);
   --admin-muted: rgba(229,203,187,0.55);
+  --pill-border: rgba(0,0,0,0.12);
+  --tag-bg: rgba(0,0,0,0.05);
   --wolf-panel-fill: #4A7FA5;
   /* chart tokens */
   --chart-axis: rgba(74,74,74,0.15);
@@ -10324,7 +10328,7 @@ html[data-theme="dark"] .td-ritual-item--done { background: rgba(255, 255, 255, 
 .career-node {
   position: relative;
   width: calc(50% - 40px);
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
 }
 .career-node:last-child { margin-bottom: 0; }
 
@@ -10377,7 +10381,7 @@ html[data-theme="dark"] .td-ritual-item--done { background: rgba(255, 255, 255, 
   background: var(--admin-card-bg);
   border: 1px solid var(--admin-border);
   border-radius: 12px;
-  padding: 1.25rem 1.5rem;
+  padding: 1.5rem 2rem;
 }
 
 /* Scroll-reveal */
@@ -10427,7 +10431,7 @@ html[data-theme="dark"] .td-ritual-item--done { background: rgba(255, 255, 255, 
     transform: translateY(0) !important;
   }
   .career-card {
-    padding: 1rem 1.25rem;
+    padding: 1.25rem 1.5rem;
   }
 }
 
@@ -10444,13 +10448,13 @@ html[data-theme="dark"] .td-ritual-item--done { background: rgba(255, 255, 255, 
 .career-skills-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: 1.25rem;
 }
 .career-skill-card {
   background: var(--admin-card-bg);
   border: 1px solid var(--admin-border);
   border-radius: 12px;
-  padding: 1.25rem;
+  padding: 1.5rem;
 }
 
 @media (max-width: 1023px) {
