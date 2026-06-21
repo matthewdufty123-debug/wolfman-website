@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 
 const DISCOVER_PAGES = [
   { href: '/discover',      label: 'Discover — Overview' },
-  { href: '/about',         label: 'About & Career' },
   { href: '/journaling',    label: 'The Journalling Practice' },
   { href: '/scores',        label: 'Morning Scores' },
   { href: '/wolfbot',       label: 'WOLF|BOT' },

@@ -185,7 +185,7 @@ export function getNavConfigKey(pathname: string): NavConfigKey {
 // Known first-path-segments that are NOT [username]/[slug] journal routes.
 const KNOWN_PREFIXES = new Set([
   'admin', 'edit', 'write', 'today', 'account', 'settings', 'shop', 'cart',
-  'checkout', 'login', 'register', 'about', 'morning-ritual',
+  'checkout', 'login', 'register', 'career', 'morning-ritual',
   'morning-stats', 'intentions', 'feedback', 'beta', 'dev',
   'features', 'terms', 'discover', 'rituals', 'achievements', 'api', 'posts', 'wolfbot', 'car',
   'journaling', 'scores',

@@ -3,11 +3,6 @@ import Link from 'next/link'
 
 const CARDS = [
   {
-    href: '/about',
-    title: 'About & Career',
-    body: "Matthew's story — twenty-five years of building things with data. Career timeline, skills, achievements, and the human behind this site.",
-  },
-  {
     href: '/journaling',
     title: 'The Journalling Practice',
     body: 'How and why Matthew journals every morning — the three-part structure and the intention behind each section. Every journal on this site follows the same format.',

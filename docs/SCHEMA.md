@@ -248,58 +248,6 @@ Stripe/Printful commerce. Standard e-commerce tables.
 
 `accounts`, `sessions`, `verificationTokens` — standard Auth.js tables. Do not modify.
 
-### `careerRoles`
-
-Matthew's career timeline. 16 roles from 1997 to present.
-
-| Column | Type | Notes |
-|--------|------|-------|
-| id | UUID | PK |
-| title | text | Job title |
-| company | text | Company name |
-| employmentType | text | 'employed' or 'self-employed' |
-| startDate | text | "YYYY-MM" format |
-| endDate | text | null = current role |
-| summary | text | One-paragraph role summary |
-| sortOrder | smallint | Display ordering (16 = most recent) |
-| isCurrent | bool | |
-| createdAt | timestamp | |
-| updatedAt | timestamp | |
-
-### `careerAchievements`
-
-Achievements per role. Each has a theme and derived skill tags.
-
-| Column | Type | Notes |
-|--------|------|-------|
-| id | UUID | PK |
-| roleId | UUID | FK → careerRoles (cascade delete) |
-| theme | text | 'change-management' / 'data-analytics' / 'operational' |
-| description | text | What was achieved |
-| skillTags | text[] | Array of skill names derived from this achievement |
-| sortOrder | smallint | Display ordering within role |
-| wolfbotComment | text | WOLF\|BOT commentary (nullable) |
-| createdAt | timestamp | |
-
-Indexes: `role_id`, `theme`.
-
-### `careerSkills`
-
-Manual skills not tied to a specific achievement. Derived skills come from `careerAchievements.skillTags`.
-
-| Column | Type | Notes |
-|--------|------|-------|
-| id | UUID | PK |
-| name | text | Skill name |
-| theme | text | 'change-management' / 'data-analytics' / 'operational' |
-| source | text | Always 'manual' |
-| firstUsedDate | text | "YYYY-MM" |
-| description | text | Optional context |
-| wolfbotComment | text | WOLF\|BOT commentary (nullable) |
-| createdAt | timestamp | |
-
-Seed script: `npm run db:seed-career` (`lib/db/seed-career.ts`).
-
 ### `journalAnalytics` — NOT YET DEPLOYED
 
 Commented out in schema. Planned for the Statistics feature. Aggregated per-user analytics:
