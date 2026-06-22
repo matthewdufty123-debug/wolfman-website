@@ -78,6 +78,34 @@
   font-weight: 600;
 }
 
+/* export */
+.exportActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 32px;
+}
+.exportBtn {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-dim);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 15px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.exportBtn:hover {
+  color: var(--ink);
+  border-color: var(--copper);
+}
+.exportBtn:focus-visible {
+  outline: 2px solid var(--steel);
+  outline-offset: 2px;
+}
+
 /* legend */
 .legend {
   display: flex;

@@ -13,17 +13,84 @@ type Filter = "all" | "ach" | "skill";
 
 const NOW = new Date().getFullYear();
 
+function wrapText(s: string, width: number): string[] {
+  const words = String(s).split(/\s+/);
+  const out: string[] = [];
+  let line = "";
+  for (const w of words) {
+    if (!line) line = w;
+    else if ((line + " " + w).length <= width) line += " " + w;
+    else {
+      out.push(line);
+      line = w;
+    }
+  }
+  if (line) out.push(line);
+  return out;
+}
+
+function buildLineageText(): string {
+  const d = careerLineage;
+  const W = 74;
+  const L: string[] = [];
+  const m = d.meta;
+  L.push(m.owner.toUpperCase());
+  L.push(`${m.headline} \u00b7 ${m.range}`);
+  L.push("=".repeat(60));
+  if (m.profile) {
+    L.push("");
+    wrapText(m.profile, W).forEach((x) => L.push(x));
+  }
+  L.push("");
+  const catLabel = (k: CategoryKey) => d.categories[k]?.label ?? k;
+  d.nodes.forEach((node) => {
+    L.push(`[${node.ref}] ${node.title} \u00b7 ${node.company}`);
+    L.push(`      ${node.meta}`);
+    if (node.brief) {
+      L.push("");
+      return;
+    }
+    const skillNames = (node.skills || []).map((s) => s.n);
+    const groups = d.categoryOrder
+      .filter((k) => node.cats[k]?.length)
+      .map((k) => ({ label: catLabel(k), items: (node.cats[k] as string[]).slice() }));
+    groups.forEach((g, gi) => {
+      const lastGroup = gi === groups.length - 1 && skillNames.length === 0;
+      const gconn = lastGroup ? "  \u2514\u2500 " : "  \u251c\u2500 ";
+      const gpipe = lastGroup ? "     " : "  \u2502  ";
+      L.push(gconn + g.label);
+      g.items.forEach((it, ii) => {
+        const lastItem = ii === g.items.length - 1;
+        const iconn = lastItem ? "\u2514\u2500 " : "\u251c\u2500 ";
+        const ipipe = lastItem ? "   " : "\u2502  ";
+        wrapText(it, W - 8).forEach((wl, wi) =>
+          L.push(gpipe + (wi === 0 ? iconn : ipipe) + wl)
+        );
+      });
+    });
+    if (skillNames.length) {
+      L.push("  \u2514\u2500 Skills");
+      wrapText(skillNames.join(" \u00b7 "), W - 7).forEach((wl) =>
+        L.push("       " + wl)
+      );
+    }
+    L.push("");
+  });
+  return L.join("\n");
+}
+
 function skillBadge(sk: Skill) {
   if (sk.cert) {
-    return { label: String(sk.s), active: true, cert: true, end: undefined };
+    return { label: String(sk.s), active: true, cert: true, show: true, end: undefined };
   }
   const active = sk.e == null;
   const end = sk.e ?? NOW;
   const yrs = end - sk.s;
   return {
-    label: yrs >= 1 ? `${yrs}y` : "new",
+    label: `${yrs}y`,
     active,
     cert: false,
+    show: yrs >= 1,
     end: sk.e,
   };
 }
@@ -45,7 +112,7 @@ function SkillChip({ sk, colour }: { sk: Skill; colour: string }) {
       style={{ ["--cc" as string]: colour } as React.CSSProperties}
     >
       <span className={styles.skN}>{sk.n}</span>
-      <span className={styles.skY}>{b.label}</span>
+      {b.show && <span className={styles.skY}>{b.label}</span>}
       {!b.active && <span className={styles.skE}>{`\u2192${sk.e}`}</span>}
     </span>
   );
@@ -133,6 +200,44 @@ export default function CareerLineage() {
   const { meta, nodes } = careerLineage;
   const lineageRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<Filter>("all");
+  const [copied, setCopied] = useState(false);
+
+  const handleDownload = () => {
+    const blob = new Blob([buildLineageText()], {
+      type: "text/plain;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "matthew-dufty-career.txt";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopy = async () => {
+    const txt = buildLineageText();
+    try {
+      await navigator.clipboard.writeText(txt);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = txt;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand("copy");
+      } catch {
+        /* no-op */
+      }
+      ta.remove();
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1400);
+  };
 
   useEffect(() => {
     const root = lineageRef.current;
@@ -170,22 +275,23 @@ export default function CareerLineage() {
   return (
     <div className={styles.root}>
       <main className={styles.wrap}>
-        <p className={styles.kicker}>Wolfman Analytics</p>
+        <p className={styles.kicker}>Matthew Dufty</p>
         <p className={styles.eyebrow}>{`Career lineage \u00b7 ${meta.range}`}</p>
         <h1>
-          How I got here,
+          Professional Development
           <br />
-          <span className={styles.soft}>traced like data lineage.</span>
+          <span className={styles.soft}>with skills and achievements.</span>
         </h1>
-        <p className={styles.thesis}>
-          Over twenty years turning data into decisions.{" "}
-          <strong>
-            Each role grew skills and shipped wins, grouped by what they were
-            really about.
-          </strong>{" "}
-          Skills start at the job where I first earned them and the clock keeps
-          running while I keep using them.
-        </p>
+        <p className={styles.thesis}>{meta.profile}</p>
+
+        <div className={styles.exportActions}>
+          <button type="button" className={styles.exportBtn} onClick={handleDownload}>
+            Download .txt
+          </button>
+          <button type="button" className={styles.exportBtn} onClick={handleCopy}>
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
 
         <div className={styles.legend} aria-hidden="true">
           {careerLineage.categoryOrder.map((key) => (
@@ -206,7 +312,7 @@ export default function CareerLineage() {
           </span>
         </div>
         <p className={styles.legendNote}>
-          Each win is numbered to its role. Skills show years of experience
+          Each achievement is numbered to its role. Skills show years of experience
           counted to today, and dim when I stopped using them. Personal projects
           ran alongside the work and carry a copper marker.
         </p>
@@ -214,7 +320,7 @@ export default function CareerLineage() {
         <div className={styles.controls} role="group" aria-label="Filter">
           {([
             ["all", "Everything"],
-            ["ach", "Wins only"],
+            ["ach", "Achievements only"],
             ["skill", "Skills only"],
           ] as [Filter, string][]).map(([key, label]) => (
             <button

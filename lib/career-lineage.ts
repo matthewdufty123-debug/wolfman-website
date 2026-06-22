@@ -22,6 +22,7 @@ export interface CareerNode {
   company: string;
   meta: string;
   summary: string;
+  brief?: boolean;
   cats: Partial<Record<CategoryKey, string[]>>;
   skills: Skill[];
 }
@@ -32,7 +33,7 @@ export interface CategoryDef {
 }
 
 export interface CareerLineageData {
-  meta: { title: string; range: string; owner: string; headline: string };
+  meta: { title: string; range: string; owner: string; headline: string; profile?: string };
   categoryOrder: CategoryKey[];
   categories: Record<CategoryKey, CategoryDef>;
   skillColour: string;

@@ -3,7 +3,8 @@
     "title": "Career lineage",
     "range": "1997 → present",
     "owner": "Matthew Dufty",
-    "headline": "Senior Data Engineer & Analyst"
+    "headline": "Senior Data Engineer & Analyst",
+    "profile": "A pragmatic, solution-focused data engineer and analyst with over twenty years turning data into decisions. I cover the full spectrum: understanding what the business needs, leveraging the change process to get things done, modelling data with the latest tooling in Databricks, Fabric, and AI to lift productivity, then using years of experience to analyse it and tell the story visually. I communicate with stakeholders at every level, from store operators to senior leadership, and I deliver the full package, end to end."
   },
   "categoryOrder": ["DE", "DA", "CHG", "OPS", "LS"],
   "categories": {
@@ -16,34 +17,24 @@
   "skillColour": "#70c0c8",
   "nodes": [
     {
-      "ref": "P3", "kind": "personal", "personal": true,
-      "title": "wolfman.app", "company": "Personal project",
-      "meta": "2026 → present · Next.js journalling app",
-      "summary": "A full-stack mindful journalling app I designed and built this year. Live in public beta.",
-      "cats": {
-        "DE": [
-          "Built a full-stack journalling app in Next.js and TypeScript, on a Neon Postgres database with Drizzle ORM.",
-          "Wired in Stripe payments, Auth.js, Vercel Blob storage, and the Anthropic API for an AI journalling assistant."
-        ]
-      },
-      "skills": [
-        { "n": "Next.js and TypeScript", "s": 2026 },
-        { "n": "Full-stack and cloud (Postgres, Vercel, Stripe)", "s": 2026 }
-      ]
-    },
-    {
-      "ref": "16", "current": true,
+      "ref": "17", "current": true,
       "title": "Data Engineer", "company": "Aldi Stores Ltd",
       "meta": "Dec 2023 → present · National Data & Analytics",
-      "summary": "Across engineering and analytics for the national function. I build the platforms and deliver the insight that runs on them.",
+      "summary": "I build production-ready data solutions across SQL Server, Azure Data Factory, Databricks and Power BI, and design the scalable models behind them, keeping data quality, validation, and lineage tight across complex datasets. On top of the engineering and analytics, I design and deliver the change management that moves the supply chain and analytics function forward.",
       "cats": {
         "DE": [
-          "Co-designed and built the SQL Server database that powers all Aldi GB and Ireland supply chain reporting. The ETL handles over twenty million new rows every day.",
-          "Built the migration pipelines from SQL Server to Databricks under Unity Catalog governance, with medallion layers deployed through CI/CD."
+          "Co-designed and built the SQL Server database that powers all Aldi GB and Ireland supply chain reporting. The ETL handles over twenty million new rows every day, kept fast with a robust indexing strategy.",
+          "Built modular PySpark components used across the platform, including an Event Logger, SCD Type 2 processing, and automated anomaly detection.",
+          "Built the migration pipelines from SQL Server to Databricks under Unity Catalog governance, with medallion layers deployed through CI/CD.",
+          "Automated SQL extraction from SAP Data Sphere in Python, feeding the star schema models behind reporting.",
+          "Brought the agentic workflow from my own projects into the department, using GitHub Copilot and Databricks Genie to accelerate delivery for me and the wider team.",
+          "Worked with Genie to write context md files for business processes, so Unity Catalog metadata can read tables and fields and infer accurate actions. Rolled the approach out across the department, where it was adopted universally and sped the whole team up.",
+          "Used GitHub Copilot in VS Code against SQL Server to develop solutions fast and produce documentation that conforms to our standardised guidelines."
         ],
         "DA": [
           "Delivered supply chain insight across loss, forecast accuracy, and warehouse capacity. Used from senior leadership to store operators to shape purchasing and planning.",
-          "During the AHEAD system migration, built critical reporting to close information gaps when the department had nothing else to rely on."
+          "During the AHEAD system migration, built critical reporting to close information gaps when the department had nothing else to rely on.",
+          "Built our country's Power BI proof of concept to replace Tableau, working through a set of acceptance criteria across semantic models and front-end designs at varying DAX complexity to test whether Power BI would meet the business's future performance needs."
         ],
         "CHG": [
           "Designed and carried a demand-to-solution agile framework across a 300+ person supply chain department, winning buy-in face to face.",
@@ -52,7 +43,11 @@
         "LS": [
           "Challenged the core design of the supply chain database, met resistance, gathered the evidence, and won the change. The conflict resolved with every relationship intact.",
           "Presented a complex rota-planning report to senior leaders across distribution centres under hard questioning, and kept composure. Managers now use it daily.",
-          "Delivered Databricks and SQL execution-plan training, and coached a colleague into forecasting analysis the team had never attempted."
+          "Delivered Databricks and SQL execution-plan training, and coached a colleague into forecasting analysis the team had never attempted.",
+          "Led the small team behind the Power BI proof of concept and presented our findings to the other countries taking part. The approach won recognition across the international community.",
+          "Led stakeholder workshops that translated reporting requirements into technical specifications, keeping it face to face to build engaged relationships.",
+          "Delivered training to departments with hundreds of attendees, and produced training videos so end users could draw their own insight and lean less on the team.",
+          "Built architecture and solution documentation in Confluence that serves both engineers needing technical guidance and business users needing operational reference."
         ]
       },
       "skills": [
@@ -70,27 +65,60 @@
       ]
     },
     {
-      "ref": "15",
+      "ref": "P3", "kind": "personal", "personal": true,
+      "title": "wolfman.app", "company": "Personal project",
+      "meta": "2026 → present · Next.js journalling website",
+      "summary": "A full-stack mindful journalling website I designed and built this year with an agentic workflow. Live in public beta.",
+      "cats": {
+        "DE": [
+          "Built a full-stack journalling website in Next.js and TypeScript, on a Neon Postgres database with Drizzle ORM.",
+          "Wired in Stripe payments, Auth.js, Vercel Blob storage, and the Anthropic API for an AI journalling assistant.",
+          "Built it with an agentic workflow, matching the model to the task so routine work runs on lighter models and only the hard problems pull the heavy ones, keeping token cost down.",
+          "Tuned a layered set of CLAUDE.md and task-specific instruction files so the coding agent starts every session knowing the codebase, the conventions, and the job.",
+          "Wired the site's own feedback feature into GitHub so a bug raised on the live site becomes an issue, then gets resolved in conversation with the agent, all running on a release plan mapped to GitHub milestones."
+        ]
+      },
+      "skills": [
+        { "n": "Next.js and TypeScript", "s": 2026 },
+        { "n": "Full-stack and cloud (Postgres, Vercel, Stripe)", "s": 2026 },
+        { "n": "Agentic engineering with Claude Code", "s": 2026 },
+        { "n": "Context engineering (CLAUDE.md and instruction files)", "s": 2026 },
+        { "n": "Model selection and token optimisation", "s": 2026 },
+        { "n": "GitHub (repos, issues, Actions)", "s": 2026 }
+      ]
+    },
+    {
+      "ref": "16",
       "title": "Data Analyst", "company": "ERIKS Industrial Supply",
       "meta": "Jan 2023 → Dec 2023 · IT",
-      "summary": "Modelling ERP data into business reporting.",
+      "summary": "Data analyst in IT, spanning finance and warehouse analytics, ERP data modelling, and an agile process audit across the department.",
       "cats": {
         "DE": ["Developed SQL Server data models sourced from ERP systems."],
-        "DA": ["Delivered dashboards tracking finance and warehouse operations."]
+        "DA": [
+          "Delivered dashboards tracking finance and warehouse operations.",
+          "Built a financial general ledger audit report in Power BI, on a heavy semantic model that processed all of ERIKS's general ledger data and served as a second line of reconciliation checks.",
+          "Built a live warehouse report shown on screens across the floor, displaying volume moving through the warehouse in real time. Tuned the direct live connection carefully so it never slowed the source system."
+        ],
+        "CHG": ["Ran a full audit of the agile process across the IT department to find training gaps and align everyone on a common way of working."],
+        "LS": ["Promoted the value agile brought to the IT function and to business communication, building shared understanding across the department toward a common goal."]
       },
       "skills": [
         { "n": "SQL Server data modelling", "s": 2023 },
         { "n": "SQL (T-SQL, SSMS)", "s": 2023 },
-        { "n": "Power BI semantic modelling, Fabric", "s": 2023 }
+        { "n": "Microsoft Fabric", "s": 2023 }
       ]
     },
     {
-      "ref": "14",
+      "ref": "15",
       "title": "Data Analyst", "company": "Selco Builders Warehouse",
       "meta": "Jan 2022 → Jan 2023 · Marketing",
       "summary": "Led the move from spreadsheet reporting to a proper Power BI practice.",
       "cats": {
-        "DA": ["Led the complete Power BI migration from legacy Excel reporting."],
+        "DE": ["Built Power BI semantic models, creating shared datasets that fed multiple reports across the team."],
+        "DA": [
+          "Led the complete Power BI migration from legacy Excel reporting.",
+          "Delivered multiple Power BI reports across the marketing team, from marketing effectiveness through to sales analysis, cut by region, store, and time period across thousands of products."
+        ],
         "LS": [
           "Set the design principles and development standards the whole team adopted.",
           "Trained colleagues to bring them up to speed on Power BI best practice."
@@ -98,23 +126,38 @@
       },
       "skills": [
         { "n": "Power BI strategy and standards", "s": 2022 },
-        { "n": "Training delivery", "s": 2022 }
+        { "n": "Power BI semantic modelling", "s": 2022 },
+        { "n": "Training and enablement", "s": 2022 }
       ]
     },
     {
-      "ref": "13",
+      "ref": "14",
       "title": "Performance Analyst", "company": "DWP",
-      "meta": "Feb 2021 → Jan 2022 · Civil Service",
+      "meta": "Nov 2021 → Jan 2022 · Civil Service",
       "summary": "Performance reporting for leadership, where the priorities moved weekly.",
       "cats": {
-        "DA": ["Built a report that earned Group Director recognition and a rare financial reward. The visual style became the department standard."],
-        "OPS": ["Kept pace with reporting demands that shifted weekly with government mandates."],
-        "LS": ["Coached 18 to 24 year olds on Universal Credit through their job search."]
+        "DA": [
+          "Built a report that earned Group Director recognition and a rare financial reward. The visual style became the department standard.",
+          "Built a quick read on the end-to-end customer journey and how process levers move the KPIs leadership cared about."
+        ],
+        "OPS": ["Kept pace with reporting demands that shifted weekly with government mandates."]
       },
       "skills": [
         { "n": "Power Query", "s": 2021 },
         { "n": "DAX", "s": 2021 },
         { "n": "Power BI", "s": 2021 },
+        { "n": "Data storytelling and presentation", "s": 2021 }
+      ]
+    },
+    {
+      "ref": "13",
+      "title": "Work Coach", "company": "DWP",
+      "meta": "Feb 2021 → Nov 2021 · Civil Service",
+      "summary": "Coaching young people on Universal Credit through their job search.",
+      "cats": {
+        "LS": ["Coached 18 to 24 year olds on Universal Credit through their job search, keeping them motivated and focused while they looked for work."]
+      },
+      "skills": [
         { "n": "Coaching and mentoring", "s": 2021 }
       ]
     },
@@ -124,7 +167,14 @@
       "meta": "Jan 2020 → Feb 2021 · Self-employed",
       "summary": "A social media management service for small businesses.",
       "cats": {
-        "OPS": ["Ran a social media management service for small business clients end to end."]
+        "OPS": [
+          "Ran a social media management service for small business clients end to end.",
+          "Created branding templates for small business customers using Lightroom, Photoshop, and InDesign.",
+          "Scheduled and managed client social posts using tools like Later.com."
+        ],
+        "LS": [
+          "Built my own marketing strategy and promoted every service through social media."
+        ]
       },
       "skills": []
     },
@@ -151,6 +201,16 @@
       ]
     },
     {
+      "ref": "P4", "kind": "personal", "personal": true,
+      "title": "YouTube and blog", "company": "Personal project",
+      "meta": "2020 → present · Content",
+      "summary": "An active YouTube channel and blog sharing data, AI, and personal projects.",
+      "cats": {
+        "LS": ["Run a YouTube channel and blog where I teach and share data, AI, and personal project work."]
+      },
+      "skills": []
+    },
+    {
       "ref": "11",
       "title": "Digital Content Producer", "company": "Team UAV",
       "meta": "Aug 2019 → Dec 2019 · Commercial drone services",
@@ -160,7 +220,6 @@
       },
       "skills": [
         { "n": "Adobe Premiere", "s": 2019, "e": 2021 },
-        { "n": "Adobe InDesign", "s": 2019, "e": 2021 },
         { "n": "Photography (DSLR)", "s": 2019, "e": 2023 }
       ]
     },
@@ -168,17 +227,26 @@
       "ref": "10",
       "title": "eBay Business Owner", "company": "Big Dog Motors",
       "meta": "Nov 2015 → Jul 2019 · Self-employed · automotive parts",
-      "summary": "An eBay business in classic car spares, run on its numbers.",
+      "summary": "A classic car spares business I ran solo on eBay, handling everything from buying stock to shipping, design, and the numbers.",
       "cats": {
-        "DA": ["Built performance reporting in Excel from PayPal, banking, and eBay feeds."],
+        "DA": [
+          "Built performance reporting in Excel from PayPal, banking, and eBay feeds.",
+          "Used Excel to track what was selling and what was going stale, steering buying and pricing decisions."
+        ],
         "OPS": [
           "Sold roughly 6,700 units over 44 months at 31% net profit.",
-          "Held eBay Top Rated Seller status throughout, at 99.8% positive feedback."
+          "Sourced, bought, and collected all stock myself, running purchasing end to end.",
+          "Optimised the shipping workflow and chased more competitive carrier quotes to protect margin.",
+          "Built an automated image-overlay workflow and used InDesign and Photoshop to make product images outclass the competition, listing hundreds of new items on eBay every week."
+        ],
+        "LS": [
+          "Handled every customer query, refund, and complaint myself, holding eBay Top Rated Seller status at 99.8% positive feedback throughout."
         ]
       },
       "skills": [
         { "n": "E-commerce and margin management", "s": 2015, "e": 2021 },
         { "n": "Adobe Photoshop and Lightroom", "s": 2015, "e": 2023 },
+        { "n": "Adobe InDesign", "s": 2015, "e": 2021 },
         { "n": "Social media and digital marketing", "s": 2015, "e": 2021 }
       ]
     },
@@ -189,20 +257,25 @@
       "summary": "Built the data spine for a sales agency.",
       "cats": {
         "DE": ["Designed and built the MS Access database holding all prospect and customer sales data."],
+        "DA": ["Built management reports that highlighted sales performance for the team."],
         "OPS": ["Designed and ran a commission-based incentive scheme for the sales team."]
       },
       "skills": []
     },
     {
       "ref": "08",
-      "title": "Development Lead & Owner", "company": "myppe Recycling Ltd",
+      "title": "Operational Manager & Co-owner", "company": "myppe Recycling Ltd",
       "meta": "Apr 2013 → Sep 2014 · Environmental services",
-      "summary": "Started the business, ran the operation, reported the impact.",
+      "summary": "Co-owned and ran an environmental services business, from setting up the unit and winning contracts to reporting the impact.",
       "cats": {
         "DA": ["Built an environmental reporting service in MS Access that clients used for ISO 14001 audits and Environment Agency submissions."],
         "OPS": [
-          "Secured funding, designed the operation, and managed three staff.",
-          "Held SLAs with large organisations and grew the client base across channels."
+          "Secured funding and set the business up from an empty unit, hiring and managing the staff, and optimising the operational workflow to cut waste and overhead.",
+          "Held the service level agreements with the large organisations we supplied."
+        ],
+        "LS": [
+          "Built an extensive marketing campaign around the environmental benefits we delivered, aligned to the ISO 14001 directives our clients answered to.",
+          "Developed the sales campaigns and won contracts with large organisations including Selco through face-to-face meetings."
         ]
       },
       "skills": [
@@ -217,15 +290,22 @@
       "summary": "PRINCE2 project manager delivering business change across the retail business.",
       "cats": {
         "CHG": [
+          "Delivered 18 projects as a certified PRINCE2 practitioner across the period.",
           "Took projects through investment appraisal and approval with development costs up to £850k.",
           "Delivered the £840k Vulnerable Customer Identifier, a mandatory OFGEM change ranked a top five deliverable for 2008/9.",
           "Delivered the £300k Bulk Change of Agent project, including a historic data cleanse.",
           "Ran three major projects across three retail programmes in parallel, one with six work streams.",
           "Held budget governance and financial control, reporting forecast against actual to programme boards."
+        ],
+        "LS": [
+          "Used influencing and negotiation to carry local, middle, and senior management through transformational change."
         ]
       },
       "skills": [
         { "n": "Project and delivery management", "s": 2007 },
+        { "n": "Senior and executive stakeholder communication", "s": 2007 },
+        { "n": "Influencing and negotiation", "s": 2007 },
+        { "n": "Requirements gathering and workshops", "s": 2007 },
         { "n": "Investment appraisal and business case", "s": 2007, "e": 2014 },
         { "n": "Budget, P&L and financial control", "s": 2007, "e": 2021 },
         { "n": "Risk management", "s": 2007 },
@@ -285,29 +365,29 @@
     {
       "ref": "03",
       "title": "Clerical Assistant", "company": "RWE npower",
-      "meta": "Jun 2001 → Dec 2001 · Customer Take On",
-      "summary": "The first rung at npower.",
+      "meta": "Dec 1999 → Dec 2001 · Customer Take On",
+      "summary": "The first rung at npower, data entry to start, then validating contract information across the customer journey.",
       "cats": {
-        "OPS": ["Validated contract information to keep data integrity across the customer journey."]
+        "OPS": ["Validated contract information to keep data integrity across the customer journey, starting on data entry."]
       },
       "skills": [
-        { "n": "Data integrity and validation", "s": 2001 }
+        { "n": "Data integrity and validation", "s": 1999 }
       ]
     },
     {
-      "ref": "02",
+      "ref": "02", "brief": true,
       "title": "Logistics", "company": "James Paget Group",
-      "meta": "Jun 1998 → Jun 2001 · Sales & distribution",
+      "meta": "Jun 1998 → Dec 1999 · Sales & distribution",
       "summary": "Sales and logistics, delivering hydraulics to customers.",
       "cats": {
         "OPS": ["Worked within a sales team delivering hydraulics to customers."]
       },
       "skills": [
-        { "n": "Sales and customer service", "s": 1998, "e": 2001 }
+        { "n": "Sales and customer service", "s": 1998, "e": 1999 }
       ]
     },
     {
-      "ref": "01",
+      "ref": "01", "brief": true,
       "title": "Control Panel Wiring", "company": "Amptronic Ltd",
       "meta": "Jun 1997 → Jun 1998 · Manufacturing",
       "summary": "Where it started. Wiring control panels to schematics.",
