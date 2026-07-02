@@ -23,20 +23,20 @@ export default function ThemeLogo({ className }: ThemeLogoProps) {
         src="/images/site_images/Grey Bronze Full with LogoAsset 151000.png"
         alt="Wolfman"
         width={1000}
-        height={300}
+        height={190}
+        sizes="(min-width: 768px) 25vw, 100vw"
         className="theme-logo theme-logo--dark"
         priority
-        unoptimized
       />
       {/* Light / Warm themes */}
       <Image
         src="/images/site_images/White Bronze with LogoAsset 131000.png"
         alt="Wolfman"
         width={1000}
-        height={300}
+        height={190}
+        sizes="(min-width: 768px) 25vw, 100vw"
         className="theme-logo theme-logo--light"
         priority
-        unoptimized
       />
     </div>
   )

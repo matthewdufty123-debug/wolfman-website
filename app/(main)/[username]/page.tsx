@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
@@ -84,7 +85,7 @@ function Avatar({ src, name, size = 72 }: { src: string | null; name: string; si
   const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
   if (src) {
     return (
-      <img
+      <Image
         src={src}
         alt={name}
         width={size}

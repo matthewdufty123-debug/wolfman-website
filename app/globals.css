@@ -4920,6 +4920,7 @@ html[data-theme="dark"] .stats-chart-card {
 }
 
 .feed-card-media {
+  position: relative; /* anchor for next/image fill */
   width: 100%;
   height: 190px;
   overflow: hidden;
