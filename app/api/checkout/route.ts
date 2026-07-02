@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import type Stripe from 'stripe'
 import { auth } from '@/auth'
+import { getStripe } from '@/lib/stripe'
 import type { CartItem } from '@/lib/cart'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 export async function POST(request: Request) {
   const session = await auth()
@@ -30,7 +29,7 @@ export async function POST(request: Request) {
 
   let checkoutSession: Stripe.Checkout.Session
   try {
-    checkoutSession = await stripe.checkout.sessions.create({
+    checkoutSession = await getStripe().checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',

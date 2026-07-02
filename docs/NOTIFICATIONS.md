@@ -67,19 +67,6 @@ Three daily check-ins via Telegram, powered by Haiku for contextual personalisat
 
 ---
 
-## Beta Emails
-
-| Function | Purpose |
-|----------|---------|
-| `sendBetaWeekNotice(recipients, betaOpensAt)` | "One week until public beta opens" announcement |
-| `sendBetaGoLive(recipients)` | "We're live — register now" broadcast |
-| `sendBetaInterestConfirmation(email, name)` | Confirmation email to pre-registration interest |
-| `sendAdminBetaInterestAlert(email, name)` | Admin alert when someone pre-registers |
-
-**Delivery:** `/api/cron/beta-emails` — daily cron
-
----
-
 ## Commerce
 
 | Function | Purpose |
@@ -108,7 +95,6 @@ fast, no branding overhead.
 |-------|----------|---------|
 | `/api/cron/morning-reminder` | Every 15 min | Check and send morning email reminders |
 | `/api/cron/telegram-prompts` | Every 15 min | Send scheduled Telegram check-ins (morning/midday/evening) |
-| `/api/cron/beta-emails` | Daily | Beta announcement emails |
 
 Cron jobs are configured in `vercel.json`. Do not change the schedule without testing.
 
