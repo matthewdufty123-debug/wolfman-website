@@ -12,6 +12,7 @@ export const metadata: Metadata = siteMetadata({
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { db } from '@/lib/db'
 import { posts, morningState, users } from '@/lib/db/schema'
 import { getScalesForPosts } from '@/lib/db/queries'
@@ -29,7 +30,7 @@ function Avatar({ src, name, size = 40 }: { src: string | null; name: string; si
   const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
   if (src) {
     return (
-      <img
+      <Image
         src={src}
         alt={name}
         width={size}
@@ -180,7 +181,14 @@ function FeedCard({ post, showAuthor }: { post: FeedPost; showAuthor: boolean })
       <Link href={cardUrl} className="feed-card-media-link">
         <div className="feed-card-media">
           {post.image
-            ? <img src={post.image} alt={post.title} className="feed-card-photo" />
+            ? <Image
+                src={post.image}
+                alt={post.title}
+                fill
+                sizes="(max-width: 720px) 100vw, 680px"
+                className="feed-card-photo"
+                style={{ objectFit: 'cover' }}
+              />
             : <div className="feed-card-photo-fallback" />
           }
         </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import PhotoCropUpload from '@/components/PhotoCropUpload'
 
 interface Props {
@@ -28,7 +29,15 @@ export default function PhotoSection({ postId, image, onUploaded }: Props) {
       </div>
 
       {image && !showUpload && (
-        <img src={image} alt="Journal photo" className="td-photo-preview" />
+        <Image
+          src={image}
+          alt="Journal photo"
+          width={800}
+          height={800}
+          sizes="(max-width: 720px) 100vw, 680px"
+          className="td-photo-preview"
+          style={{ height: 'auto' }}
+        />
       )}
 
       {showUpload && (

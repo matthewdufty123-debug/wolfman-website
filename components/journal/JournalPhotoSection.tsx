@@ -16,11 +16,11 @@ export default function JournalPhotoSection({ imageUrl, title, caption }: Props)
         <Image
           src={imageUrl}
           alt={caption || title}
-          width={600}
-          height={600}
+          width={800}
+          height={800}
+          sizes="(max-width: 720px) 100vw, 680px"
           className="journal-photo-img"
           style={{ width: '100%', height: 'auto', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 8 }}
-          unoptimized
         />
         {caption && (
           <p className="journal-photo-caption">{caption}</p>
