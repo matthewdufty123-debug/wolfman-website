@@ -126,7 +126,6 @@ Guest checkout supported. Full detail: `docs/SHOP.md`
 | `/admin` | Admin dashboard |
 | `/admin/wolfbot` | WOLF\|BOT prompt + pixel art editor |
 | `/discover` | Discover hub (NBLS2 destination) |
-| `/features` | Non-technical release roadmap |
 | `/dev` | GitHub-integrated development hub |
 | `/beta` | Beta info, terms, countdown |
 | `/feedback` | Beta feedback → GitHub Issues |
@@ -268,11 +267,10 @@ Full versioning rules: `VERSIONING.md`
 
 1. Once an issue is agreed, apply the `in-progress` label via GitHub API.
 2. Use the issue's description as the brief — generate a plan and confirm with Matthew before implementing.
-3. **On completion — four steps before committing:**
+3. **On completion — three steps before committing:**
    - **a. Bump version** in `package.json` per versioning rules above
-   - **b. Features check** — open `lib/releases.ts`. Does this commit fully complete anything marked "In Development" or "Coming Soon"? If yes, flag it and ask Matthew to confirm before marking as `'built'`
-   - **c. Log version entry** — after deploy, go to `/admin` → "Log version entry" to update the release notes on `/dev`. Do not skip this.
-   - **d. Commit** with `closes #N` in the message to auto-close the GitHub issue
+   - **b. Log version entry** — after deploy, go to `/admin` → "Log version entry" to update the release notes on `/dev`. Do not skip this.
+   - **c. Commit** with `closes #N` in the message to auto-close the GitHub issue
 4. **Push only when Matthew explicitly confirms.**
 
 ### Raising GitHub Issues

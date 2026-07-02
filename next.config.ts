@@ -6,6 +6,12 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: appVersion,
   },
+  async redirects() {
+    return [
+      { source: '/features', destination: '/dev', permanent: false },
+      { source: '/intentions', destination: '/feed', permanent: false },
+    ]
+  },
   outputFileTracingIncludes: {
     '/[username]/[slug]/opengraph-image': ['./public/images/site_images/**'],
   },

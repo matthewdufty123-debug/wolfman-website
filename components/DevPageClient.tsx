@@ -151,7 +151,6 @@ export default function DevPageClient() {
           <a href={`https://github.com/${GITHUB_REPO}`} className="dev-link" target="_blank" rel="noopener noreferrer">
             See the code on GitHub →
           </a>
-          <Link href="/features" className="dev-link">Product roadmap →</Link>
           {isAdmin && (
             <Link href="/admin" className="dev-link">Admin panel →</Link>
           )}

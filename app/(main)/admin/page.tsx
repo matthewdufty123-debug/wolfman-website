@@ -132,7 +132,7 @@ export default async function AdminDashboard() {
             <Link href="/admin/rituals" className="dash-link">Rituals manager →</Link>
             <Link href="/admin/wolfbot" className="dash-link">WOLF|BOT config →</Link>
             <Link href="/write" className="dash-link">Write a journal</Link>
-            <Link href="/intentions" className="dash-link">All intentions</Link>
+            <Link href="/feed" className="dash-link">All intentions</Link>
             <Link href="https://vercel.com" className="dash-link" target="_blank">Vercel dashboard</Link>
             <Link href="https://console.neon.tech" className="dash-link" target="_blank">Neon database</Link>
           </div>

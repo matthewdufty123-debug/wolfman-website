@@ -96,7 +96,7 @@ export default function DataPolicyPage() {
 
         <p className="beta-section-body" style={{ marginTop: '2rem', fontSize: '0.8rem', opacity: 0.6 }}>
           Last updated: April 2026. A full legal review will be completed before v1.0 — see{' '}
-          <Link href="/features" className="beta-link">Release 0.9 — Legal</Link>.
+          <Link href="/dev" className="beta-link">Release 0.9 — Legal</Link>.
         </p>
       </div>
     </main>
