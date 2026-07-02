@@ -8704,3 +8704,292 @@ html[data-theme="dark"] .td-scale-pill { border-color: rgba(255, 255, 255, 0.15)
 html[data-theme="dark"] .td-ritual-item { border-color: rgba(255, 255, 255, 0.08); }
 html[data-theme="dark"] .td-ritual-item--done { background: rgba(255, 255, 255, 0.04); }
 
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Home page — hero, journal preview, three doors
+   Minimal by intention: the words are the heroes, whitespace is deliberate.
+   All colour through theme tokens so dark/light/cool/warm follow for free.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.home-page {
+  min-height: 100vh;
+  padding: 0 1.5rem 7rem;
+}
+
+/* ── Hero ── */
+.home-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 5.5rem 0 4rem;
+}
+
+.home-hero-logo {
+  margin-bottom: 1.5rem;
+  opacity: 0.92;
+}
+
+.home-name {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: clamp(2.1rem, 7vw, 3rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--heading);
+  margin: 0 0 0.75rem;
+}
+
+.home-tagline {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--body-text);
+  opacity: 0.65;
+  max-width: 26rem;
+  margin: 0 0 2.25rem;
+}
+
+.home-cta-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.home-cta {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: #214459;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 0.8rem 1.6rem;
+  text-decoration: none;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.home-cta:hover {
+  background: #2b566f;
+  transform: translateY(-1px);
+}
+
+.home-cta-quiet {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--body-text);
+  opacity: 0.6;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.home-cta-quiet:hover {
+  opacity: 1;
+}
+
+/* ── From the journal ── */
+.home-journal {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding-bottom: 4.5rem;
+}
+
+.home-eyebrow {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #A0622A;
+  margin: 0 0 0.5rem;
+}
+
+.home-journal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.home-journal-row {
+  border-bottom: 1px solid var(--sub-divider);
+}
+
+.home-journal-row:last-child {
+  border-bottom: none;
+}
+
+.home-journal-item {
+  display: block;
+  padding: 1.5rem 0;
+  text-decoration: none;
+}
+
+.home-journal-meta {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.75rem;
+  color: var(--body-text);
+  opacity: 0.5;
+  margin: 0 0 0.35rem;
+}
+
+.home-journal-title {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--heading);
+  margin: 0 0 0.4rem;
+  transition: color 0.15s ease;
+}
+
+.home-journal-item:hover .home-journal-title {
+  color: #4A7FA5;
+}
+
+.home-journal-excerpt {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--body-text);
+  opacity: 0.62;
+  margin: 0;
+}
+
+.home-more-row {
+  padding-top: 0.75rem;
+}
+
+.home-more {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #A0622A;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.home-more:hover {
+  color: #C87840;
+}
+
+/* ── Three doors ── */
+.home-doors {
+  max-width: 40rem;
+  margin: 0 auto;
+  border-top: 1px solid var(--sub-divider);
+  padding-top: 2.5rem;
+  display: grid;
+  gap: 2rem;
+}
+
+.home-door {
+  display: block;
+  text-decoration: none;
+}
+
+.home-door-label {
+  display: block;
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.3rem;
+  transition: color 0.15s ease;
+}
+
+.home-door-label--journal { color: #4A7FA5; }
+.home-door-label--career  { color: #A0622A; }
+.home-door-label--shop    { color: var(--heading); }
+
+.home-door:hover .home-door-label--journal { color: #6090C0; }
+.home-door:hover .home-door-label--career  { color: #C87840; }
+.home-door:hover .home-door-label--shop    { color: #4A7FA5; }
+
+.home-door-desc {
+  display: block;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--body-text);
+  opacity: 0.6;
+}
+
+/* ── Desktop ── */
+@media (min-width: 720px) {
+  .home-hero {
+    padding: 7rem 0 5rem;
+  }
+
+  .home-doors {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+  }
+}
+
+/* ── Legal pages (terms) — quiet, readable, theme-aware ── */
+.legal-wrap {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 7rem;
+}
+
+.legal-eyebrow {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #A0622A;
+  margin: 0 0 1rem;
+}
+
+.legal-title {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1.85rem;
+  font-weight: 600;
+  color: var(--heading);
+  margin: 0 0 1.5rem;
+}
+
+.legal-section {
+  margin-bottom: 2rem;
+}
+
+.legal-heading {
+  font-family: var(--font-inter), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--heading);
+  margin: 0 0 0.75rem;
+}
+
+.legal-body {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--body-text);
+  opacity: 0.85;
+  margin: 0;
+}
+
+.legal-intro {
+  margin-bottom: 2.5rem;
+}
+
+.legal-body--spaced {
+  margin-bottom: 0.75rem;
+}
+
+.legal-link {
+  color: #A0622A;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.legal-link:hover {
+  color: #C87840;
+}
+
+.legal-footnote {
+  font-size: 0.78rem;
+  color: var(--body-text);
+  opacity: 0.45;
+  margin: 3rem 0 0;
+}
