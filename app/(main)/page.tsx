@@ -23,6 +23,11 @@ function formatDate(iso: string) {
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
 }
 
+function trimExcerpt(text: string, max = 140) {
+  if (text.length <= max) return text
+  return text.slice(0, max).replace(/\s+\S*$/, '') + '…'
+}
+
 async function getRecentPublicPosts() {
   try {
     const rows = await db
@@ -61,108 +66,65 @@ export default async function HomePage() {
   const recentPosts = await getRecentPublicPosts()
 
   return (
-    <main className="min-h-screen">
+    <main className="home-page">
 
       {/* ── Hero ── */}
-      <section className="flex flex-col items-center justify-center px-6 pt-24 pb-16 text-center">
-        <WolfLogo size={80} className="mb-6 opacity-90" />
-        <h1 className="font-[family-name:var(--font-inter)] text-4xl sm:text-5xl font-semibold tracking-tight mb-4"
-            style={{ color: 'var(--heading)' }}>
-          Matthew Wolfman
-        </h1>
-        <p className="text-lg max-w-md leading-relaxed" style={{ color: 'var(--body-text)', opacity: 0.65 }}>
+      <section className="home-hero">
+        <WolfLogo size={84} priority className="home-hero-logo" />
+        <h1 className="home-name">Matthew Wolfman</h1>
+        <p className="home-tagline">
           Data engineer. Mountain biker. Photographer. Mindful human.
         </p>
-      </section>
-
-      {/* ── Three link cards ── */}
-      <section className="max-w-3xl mx-auto px-6 pb-20">
-        <div className="grid gap-6 sm:grid-cols-3">
-          <Link
-            href="/feed"
-            className="group block rounded-lg p-6 transition-shadow hover:shadow-md"
-            style={{ background: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)' }}
-          >
-            <p className="font-[family-name:var(--font-inter)] text-sm font-semibold text-[#4A7FA5] mb-2 group-hover:text-[#6090C0]">
-              The Journal
-            </p>
-            <p className="text-sm leading-relaxed" style={{ color: 'var(--body-text)' }}>
-              Daily morning intentions, written honestly.
-            </p>
-          </Link>
-
-          <Link
-            href="/about"
-            className="group block rounded-lg p-6 transition-shadow hover:shadow-md"
-            style={{ background: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)' }}
-          >
-            <p className="font-[family-name:var(--font-inter)] text-sm font-semibold text-[#A0622A] mb-2 group-hover:text-[#C87840]">
-              About &amp; Career
-            </p>
-            <p className="text-sm leading-relaxed" style={{ color: 'var(--body-text)' }}>
-              Twenty-five years of building things with data.
-            </p>
-          </Link>
-
-          <Link
-            href="/shop"
-            className="group block rounded-lg p-6 transition-shadow hover:shadow-md"
-            style={{ background: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)' }}
-          >
-            <p className="font-[family-name:var(--font-inter)] text-sm font-semibold mb-2"
-               style={{ color: 'var(--heading)' }}>
-              The Shop
-            </p>
-            <p className="text-sm leading-relaxed" style={{ color: 'var(--body-text)' }}>
-              Photography, prints, and wellbeing.
-            </p>
-          </Link>
+        <div className="home-cta-row">
+          <Link href="/feed" className="home-cta">Read the journal</Link>
+          <Link href="/career" className="home-cta-quiet">The story so far →</Link>
         </div>
       </section>
 
-      {/* ── Recent journals ── */}
+      {/* ── From the journal — the words come first ── */}
       {recentPosts.length > 0 && (
-        <section className="max-w-3xl mx-auto px-6 pb-24">
-          <p className="font-[family-name:var(--font-jetbrains)] text-xs tracking-widest uppercase text-[#A0622A] mb-3">
-            From the journal
-          </p>
-          <div className="space-y-4 mb-6">
+        <section className="home-journal">
+          <p className="home-eyebrow">From the journal</p>
+          <ul className="home-journal-list">
             {recentPosts.map(post => {
               const url = post.authorUsername
                 ? `/${post.authorUsername}/${post.slug}`
                 : `/posts/${post.slug}`
               const authorName = post.authorDisplayName ?? post.authorName ?? post.authorUsername ?? 'Wolfman'
               return (
-                <Link
-                  key={post.slug}
-                  href={url}
-                  className="block rounded-lg p-5 transition-shadow hover:shadow-md"
-                  style={{ background: 'var(--admin-card-bg)', border: '1px solid var(--admin-border)' }}
-                >
-                  <p className="font-[family-name:var(--font-jetbrains)] text-xs mb-1" style={{ color: 'var(--body-text)', opacity: 0.5 }}>
-                    {authorName} · {formatDate(post.date)}
-                  </p>
-                  <p className="font-[family-name:var(--font-inter)] text-base font-medium mb-1"
-                     style={{ color: 'var(--heading)' }}>
-                    {post.title}
-                  </p>
-                  {post.excerpt && (
-                    <p className="text-sm leading-relaxed" style={{ color: 'var(--body-text)', opacity: 0.55 }}>
-                      {post.excerpt.slice(0, 120)}…
-                    </p>
-                  )}
-                </Link>
+                <li key={post.slug} className="home-journal-row">
+                  <Link href={url} className="home-journal-item">
+                    <p className="home-journal-meta">{authorName} · {formatDate(post.date)}</p>
+                    <h2 className="home-journal-title">{post.title}</h2>
+                    {post.excerpt && (
+                      <p className="home-journal-excerpt">{trimExcerpt(post.excerpt)}</p>
+                    )}
+                  </Link>
+                </li>
               )
             })}
+          </ul>
+          <div className="home-more-row">
+            <Link href="/feed" className="home-more">Read all journals →</Link>
           </div>
-          <Link
-            href="/feed"
-            className="text-sm text-[#A0622A] hover:underline underline-offset-2"
-          >
-            Read all journals →
-          </Link>
         </section>
       )}
+
+      {/* ── Three doors ── */}
+      <section className="home-doors">
+        <Link href="/feed" className="home-door">
+          <span className="home-door-label home-door-label--journal">The Journal</span>
+          <span className="home-door-desc">Daily morning intentions, written honestly.</span>
+        </Link>
+        <Link href="/career" className="home-door">
+          <span className="home-door-label home-door-label--career">Career</span>
+          <span className="home-door-desc">Twenty-five years of building things with data.</span>
+        </Link>
+        <Link href="/shop" className="home-door">
+          <span className="home-door-label home-door-label--shop">The Shop</span>
+          <span className="home-door-desc">Photography, prints, and wellbeing.</span>
+        </Link>
+      </section>
 
     </main>
   )

@@ -28,7 +28,7 @@ continues as a separate feed visible to all.
 | Service | Purpose |
 |---------|---------|
 | Next.js 15 (App Router) + TypeScript | Framework |
-| Tailwind CSS | Styling |
+| Bespoke CSS (`app/globals.css`) | Styling — theme tokens on `html[data-theme]`. Tailwind is NOT installed; never write Tailwind utility classes |
 | Auth.js v5 (next-auth@beta) | Authentication — JWT sessions, email/password + GitHub + Google OAuth |
 | Neon PostgreSQL + Drizzle ORM | Database. Schema: `lib/db/schema.ts`. Apply changes: `npm run db:push`. Full table definitions: `docs/SCHEMA.md` |
 | Vercel Blob | Image storage — never commit large images to git. Upload via `/api/admin/upload` |
