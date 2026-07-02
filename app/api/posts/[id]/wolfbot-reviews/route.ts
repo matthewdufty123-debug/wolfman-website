@@ -5,6 +5,7 @@ import { posts, morningState, users, wolfbotReviews, wolfbotConfig } from '@/lib
 import { eq, inArray, desc, ne, and, gte, isNotNull, sql } from 'drizzle-orm'
 import Anthropic from '@anthropic-ai/sdk'
 import { getJournalSections, getScalesForPost } from '@/lib/db/queries'
+import { revalidatePost } from '@/lib/revalidate-post'
 
 export const maxDuration = 60
 
@@ -432,6 +433,9 @@ export async function POST(
   } else {
     await db.insert(wolfbotReviews).values(reviewData)
   }
+
+  // The review appears on the ISR-cached reading page — refresh it
+  await revalidatePost(id)
 
   return NextResponse.json({ ok: true, review: parsed.review ?? null })
 }

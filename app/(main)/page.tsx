@@ -1,4 +1,6 @@
-export const dynamic = 'force-dynamic'
+// ISR — the three recent journals don't change per-request. Publishing
+// revalidates this page on demand via revalidatePost().
+export const revalidate = 300
 
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -22,31 +24,37 @@ function formatDate(iso: string) {
 }
 
 async function getRecentPublicPosts() {
-  const rows = await db
-    .select({
-      slug: posts.slug,
-      title: posts.title,
-      date: posts.date,
-      excerpt: posts.excerpt,
-      content: posts.content,
-      authorUsername: users.username,
-      authorDisplayName: users.displayName,
-      authorName: users.name,
-    })
-    .from(posts)
-    .innerJoin(users, eq(posts.authorId, users.id))
-    .where(and(
-      eq(posts.status, 'published'),
-      eq(posts.isPublic, true),
-      eq(users.communityEnabled, true),
-    ))
-    .orderBy(desc(posts.date))
-    .limit(3)
+  try {
+    const rows = await db
+      .select({
+        slug: posts.slug,
+        title: posts.title,
+        date: posts.date,
+        excerpt: posts.excerpt,
+        content: posts.content,
+        authorUsername: users.username,
+        authorDisplayName: users.displayName,
+        authorName: users.name,
+      })
+      .from(posts)
+      .innerJoin(users, eq(posts.authorId, users.id))
+      .where(and(
+        eq(posts.status, 'published'),
+        eq(posts.isPublic, true),
+        eq(users.communityEnabled, true),
+      ))
+      .orderBy(desc(posts.date))
+      .limit(3)
 
-  return rows.map(r => ({
-    ...r,
-    excerpt: r.excerpt || deriveExcerpt(r.content) || null,
-  }))
+    return rows.map(r => ({
+      ...r,
+      excerpt: r.excerpt || deriveExcerpt(r.content) || null,
+    }))
+  } catch {
+    // Fail soft — keeps builds green without a database and the page
+    // rendering through transient DB errors; ISR refills within 5 min
+    return []
+  }
 }
 
 export default async function HomePage() {
