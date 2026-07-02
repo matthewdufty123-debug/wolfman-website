@@ -6,6 +6,7 @@ import { eq, and, count } from 'drizzle-orm'
 import { notifyAdminFirstPost } from '@/lib/email'
 import { calculateWordCounts } from '@/lib/word-count'
 import { replaceJournalEntries, replaceScaleEntries, upsertReflectionEntry } from '@/lib/db/queries'
+import { revalidatePost } from '@/lib/revalidate-post'
 
 async function requireOwner(postId: string) {
   const session = await auth()
@@ -104,6 +105,9 @@ export async function PUT(
     await replaceScaleEntries(id, morning)
   }
 
+  // Refresh the ISR-cached reading page and home page immediately
+  await revalidatePost(id)
+
   return NextResponse.json(updated)
 }
 
@@ -115,6 +119,9 @@ export async function DELETE(
   const { error, status } = await requireOwner(id)
   if (error) return NextResponse.json({ error }, { status })
 
+  // Revalidate before deleting — the slug lookup needs the row; the
+  // refreshed render then 404s, which is correct
+  await revalidatePost(id)
   await db.delete(posts).where(eq(posts.id, id))
   return NextResponse.json({ ok: true })
 }

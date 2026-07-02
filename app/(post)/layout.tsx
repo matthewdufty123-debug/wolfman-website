@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic'
-
 import UpperNavBar from '@/components/UpperNavBar'
 import LowerNavBar from '@/components/LowerNavBar'
 import { PostContextProvider } from '@/lib/post-context'

@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { posts, users } from '@/lib/db/schema'
 import { eq, and, count } from 'drizzle-orm'
 import { deriveExcerpt } from '@/lib/posts'
+import { revalidatePost } from '@/lib/revalidate-post'
 import { notifyAdminFirstPost } from '@/lib/email'
 import { generateTitle } from '@/lib/ai/title'
 
@@ -77,6 +78,9 @@ export async function POST(
     isPublic: Boolean(isPublic),
     updatedAt: new Date(),
   }).where(eq(posts.id, postId))
+
+  // Refresh the ISR-cached reading page and home page immediately
+  await revalidatePost(postId)
 
   // Trigger WOLF|BOT review on first publish (fire-and-forget)
   if (isFirstPublish) {

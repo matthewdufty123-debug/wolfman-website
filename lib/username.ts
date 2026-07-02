@@ -1,14 +1,9 @@
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
+import { RESERVED_USERNAMES } from '@/lib/reserved-usernames'
 
-export const RESERVED_USERNAMES = new Set([
-  'admin', 'shop', 'cart', 'checkout', 'account', 'settings',
-  'login', 'register', 'write', 'edit', 'discover', 'api',
-  'feedback', 'beta', 'about', 'intentions', 'morning-stats',
-  'morning-ritual', 'journal', 'stats', 'profile', 'help',
-  'support', 'terms', 'privacy', 'null', 'undefined', 'wolfman',
-])
+export { RESERVED_USERNAMES }
 
 const USERNAME_REGEX = /^[a-z0-9][a-z0-9-]{0,28}[a-z0-9]$|^[a-z0-9]{2}$/
 

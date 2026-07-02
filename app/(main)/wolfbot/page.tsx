@@ -15,17 +15,22 @@ export const metadata: Metadata = siteMetadata({
 export const revalidate = 300
 
 async function getStats() {
-  const [row] = await db
-    .select({
-      totalReviews: sql<number>`count(*)::int`,
-      totalRated:   sql<number>`count(*) filter (where review_rating is not null)::int`,
-      totalFire:    sql<number>`count(*) filter (where review_rating = 3)::int`,
-      totalThumb:   sql<number>`count(*) filter (where review_rating = 2)::int`,
-      totalPlay:    sql<number>`coalesce(sum(count_play), 0)::int`,
-    })
-    .from(wolfbotReviews)
+  try {
+    const [row] = await db
+      .select({
+        totalReviews: sql<number>`count(*)::int`,
+        totalRated:   sql<number>`count(*) filter (where review_rating is not null)::int`,
+        totalFire:    sql<number>`count(*) filter (where review_rating = 3)::int`,
+        totalThumb:   sql<number>`count(*) filter (where review_rating = 2)::int`,
+        totalPlay:    sql<number>`coalesce(sum(count_play), 0)::int`,
+      })
+      .from(wolfbotReviews)
 
-  return row ?? { totalReviews: 0, totalRated: 0, totalFire: 0, totalThumb: 0, totalPlay: 0 }
+    if (row) return row
+  } catch {
+    // Fail soft — keeps builds green without a database; ISR refills within 5 min
+  }
+  return { totalReviews: 0, totalRated: 0, totalFire: 0, totalThumb: 0, totalPlay: 0 }
 }
 
 export default async function WolfbotPage() {

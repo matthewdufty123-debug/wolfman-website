@@ -1,3 +1,7 @@
+// Live gate — registration open/closed and the beta user cap must be
+// checked per-request, never frozen into a static build
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { register } from '@/lib/actions/auth'
 import AuthForm from '@/components/AuthForm'
