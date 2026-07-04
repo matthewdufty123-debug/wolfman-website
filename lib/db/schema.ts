@@ -1,4 +1,4 @@
-import { pgTable, text, integer, timestamp, uuid, boolean, date, smallint, jsonb, serial, index } from 'drizzle-orm/pg-core'
+import { pgTable, text, integer, timestamp, uuid, boolean, date, smallint, jsonb, serial, index, uniqueIndex } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -124,13 +124,11 @@ export const posts = pgTable('posts', {
 // Happy: 1 (Completely Lost) → 8 (Absolutely Joyful)
 // Stress State: 1 (Completely Overwhelmed) → 8 (Hunt Mode)
 // Routine: { sunlight, breathwork, cacao, meditation, coldShower, walk, animalLove } — true/false
+// Scale columns were migrated to scaleEntries (#247) and dropped in #289 —
+// this table now holds the ritual checklist only.
 export const morningState = pgTable('morning_state', {
   id: uuid('id').primaryKey().defaultRandom(),
   postId: uuid('post_id').notNull().unique().references(() => posts.id, { onDelete: 'cascade' }),
-  brainScale: smallint('brain_scale'),   // 1–8, nullable (user may skip)
-  bodyScale: smallint('body_scale'),     // 1–8, nullable (user may skip)
-  happyScale: smallint('happy_scale'),   // 1–8, nullable
-  stressScale: smallint('stress_scale'), // 1–8, nullable
   routineChecklist: jsonb('routine_checklist').notNull().default({}),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
@@ -154,20 +152,19 @@ export const journalEntries = pgTable('journal_entries', {
 
 // ── Scale entries (normalised) ───────────────────────────────────────────
 // One scale reading per post per type — one snapshot per day (#288).
-// Writes go through upsertScaleEntry; where legacy multi-reading rows exist,
-// the earliest entry is the day's value. The note column and legacy extra rows
-// are removed by the #289 migration, which also adds a unique (post_id, type)
-// index.
+// Writes go through upsertScaleEntry; the unique index enforces the model.
+// Legacy multi-reading rows were collapsed to the first reading of the day
+// by scripts/collapse-scale-entries.ts (#289) — run it before db:push if the
+// unique index creation fails on duplicates.
 export const scaleEntries = pgTable('scale_entries', {
   id:        uuid('id').primaryKey().defaultRandom(),
   postId:    uuid('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),
   type:      text('type').notNull(),                   // 'brain' | 'body' | 'happy' | 'stress'
   value:     smallint('value').notNull(),               // 1–8
-  note:      text('note'),                              // optional ~150 char context
   source:    text('source').notNull().default('web'),   // 'web' | 'telegram'
   createdAt: timestamp('created_at').notNull().defaultNow(),
 }, (table) => [
-  index('scale_entries_post_type_idx').on(table.postId, table.type),
+  uniqueIndex('scale_entries_post_type_uq').on(table.postId, table.type),
 ])
 
 // Evening reflection was previously a separate table (evening_reflection).

@@ -47,8 +47,8 @@ All scales run **1–8**. Any reference to 1–6 elsewhere is incorrect.
 
 > The multi-snapshot-per-day capture (with per-reading notes) trialled in #246/#269 was
 > retired in #288 — it added friction and muddied the statistics. Legacy multi-reading
-> days are collapsed to their **first** reading by the #289 migration; until that runs,
-> all read paths take the earliest entry as the day's value.
+> days were collapsed to their **first** reading by `scripts/collapse-scale-entries.ts`
+> (#289), and a unique `(post_id, type)` index now enforces one snapshot per day.
 
 ---
 
@@ -78,18 +78,14 @@ Captured via PostForm "Before Bed" tab, or inline on the journal reading page.
 
 ## Database Table — `morningState`
 
-One row per post. Holds the **ritual checklist** — scale values live in `scaleEntries`
-(the `brainScale`/`bodyScale`/`happyScale`/`stressScale` columns here are legacy,
-no longer read, and will be dropped alongside the #289 cleanup).
+One row per post. Holds the **ritual checklist only** — scale values live in
+`scaleEntries` (see `docs/SCHEMA.md`). The legacy scale columns were migrated in #247
+and dropped in #289.
 
 | Column | Type | Notes |
 |--------|------|-------|
 | id | UUID | PK |
 | postId | UUID | Unique FK → posts |
-| brainScale | int | Legacy — superseded by `scaleEntries` |
-| bodyScale | int | Legacy — superseded by `scaleEntries` |
-| happyScale | int | Legacy — superseded by `scaleEntries` |
-| stressScale | int | Legacy — superseded by `scaleEntries` |
 | routineChecklist | JSONB | `{ sunlight?: bool, breathwork?: bool, … }` — all 10 ritual keys |
 | createdAt | timestamp | |
 

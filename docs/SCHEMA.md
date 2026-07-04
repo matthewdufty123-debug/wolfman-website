@@ -92,16 +92,13 @@ User-facing copy uses "journal" not "post".
 
 ### `morningState`
 
-One row per post. Captured at publish time via PostForm "After Waking" tab.
+One row per post — holds the **ritual checklist only**. The scale columns were
+migrated to `scaleEntries` in #247 and dropped from the schema in #289.
 
 | Column | Type | Notes |
 |--------|------|-------|
 | id | UUID | PK |
 | postId | UUID | Unique FK → posts |
-| brainScale | int | 1–8 |
-| bodyScale | int | 1–8 |
-| happyScale | int | 1–8 |
-| stressScale | int | 1–8 |
 | routineChecklist | JSONB | `{ sunlight?: bool, breathwork?: bool, … }` |
 | createdAt | timestamp | |
 
@@ -129,9 +126,12 @@ Indexes: composite on `(post_id, type)`.
 
 Normalised scale readings — **one snapshot per post per type** (#288). All writes go
 through `upsertScaleEntry` in `lib/db/queries.ts`: setting a scale updates the existing
-row (keeping its original `createdAt`) or inserts one. Where legacy multi-reading rows
-still exist, all read paths take the **earliest entry** as the day's value until the
-#289 migration collapses them.
+row (keeping its original `createdAt`) or inserts one.
+
+Legacy multi-reading rows (and their notes) were collapsed to the first reading of the
+day by `scripts/collapse-scale-entries.ts` (#289 — `npm run db:collapse-scales`, dry-run
+by default). The script archives every note and a full table snapshot to a gitignored
+JSON file before deleting anything.
 
 | Column | Type | Notes |
 |--------|------|-------|
@@ -139,12 +139,11 @@ still exist, all read paths take the **earliest entry** as the day's value until
 | postId | UUID | FK -> posts (cascade delete) |
 | type | text | 'brain' / 'body' / 'happy' / 'stress' |
 | value | smallint | 1-8 |
-| note | text | Retired — no longer written; dropped by #289 |
 | source | text | 'web' (default) / 'telegram' |
 | createdAt | timestamp | |
 
-Indexes: composite on `(post_id, type)`. #289 adds a unique index on the same pair
-once history is deduplicated.
+Indexes: **unique** on `(post_id, type)` — enforces one snapshot per day at the DB
+level. If `db:push` fails creating it, duplicates remain: run the collapse script first.
 
 ### `wolfbotReviews`
 
