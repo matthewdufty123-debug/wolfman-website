@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef } from 'react'
 import type { TodayData, TodayEntry } from '@/lib/actions/today'
-import type { ScaleEntryMap } from '@/lib/db/queries'
 import JournalSection from '@/components/today/JournalSection'
 import ScaleSection from '@/components/today/ScaleSection'
 import RitualPanel from '@/components/today/RitualPanel'
@@ -45,7 +44,12 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
   const postId = initialData.post.id
 
   const [entries, setEntries] = useState<TodayEntry[]>(initialData.entries)
-  const [scaleEntries, setScaleEntries] = useState<ScaleEntryMap>(initialData.scaleEntries)
+  const [scales, setScales] = useState<Record<string, number | null>>({
+    brain: initialData.scales.brainScale,
+    body: initialData.scales.bodyScale,
+    happy: initialData.scales.happyScale,
+    stress: initialData.scales.stressScale,
+  })
   const [ritualChecklist, setRitualChecklist] = useState<Record<string, boolean>>(initialData.rituals)
   const [image, setImage] = useState<string | null>(initialData.post.image)
   const [status, setStatus] = useState(initialData.post.status)
@@ -114,44 +118,28 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
     setEntries(prev => prev.filter(e => e.id !== entryId))
   }, [postId])
 
-  // ── Scale entry CRUD ──────────────────────────────────────────────
+  // ── Scales — one snapshot per day ─────────────────────────────────
 
-  const addScaleEntry = useCallback(async (type: string, value: number, note?: string) => {
+  const setScale = useCallback(async (type: string, value: number) => {
+    setScales(prev => ({ ...prev, [type]: value }))
     const res = await fetch(`/api/today/${postId}/scale-entries`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, value, note }),
-    })
-    if (!res.ok) return
-    const entry = await res.json()
-    setScaleEntries(prev => ({
-      ...prev,
-      [type]: [...(prev[type] ?? []), entry],
-    }))
-  }, [postId])
-
-  const updateScaleEntry = useCallback(async (type: string, entryId: string, value: number, note?: string) => {
-    const res = await fetch(`/api/today/${postId}/scale-entries/${entryId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ value, note: note ?? null }),
+      body: JSON.stringify({ type, value }),
     })
-    if (!res.ok) return
-    const updated = await res.json()
-    setScaleEntries(prev => ({
-      ...prev,
-      [type]: (prev[type] ?? []).map(e => e.id === entryId ? updated : e),
-    }))
+    if (!res.ok) setScales(prev => ({ ...prev, [type]: null }))
   }, [postId])
 
-  const deleteScaleEntry = useCallback(async (type: string, entryId: string) => {
-    const res = await fetch(`/api/today/${postId}/scale-entries/${entryId}`, { method: 'DELETE' })
-    if (!res.ok) return
-    setScaleEntries(prev => ({
-      ...prev,
-      [type]: (prev[type] ?? []).filter(e => e.id !== entryId),
-    }))
-  }, [postId])
+  const clearScale = useCallback(async (type: string) => {
+    const previous = scales[type]
+    setScales(prev => ({ ...prev, [type]: null }))
+    const res = await fetch(`/api/today/${postId}/scale-entries`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type }),
+    })
+    if (!res.ok) setScales(prev => ({ ...prev, [type]: previous ?? null }))
+  }, [postId, scales])
 
   // ── Rituals ─────────────────────────────────────────────────────────
 
@@ -236,14 +224,12 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
         {SCALE_SECTIONS.map(s => (
           <ScaleSection
             key={s.type}
-            type={s.type}
             label={s.label}
             icon={s.icon}
             labels={s.labels}
-            entries={scaleEntries[s.type] ?? []}
-            onAdd={(value, note) => addScaleEntry(s.type, value, note)}
-            onUpdate={(entryId, value, note) => updateScaleEntry(s.type, entryId, value, note)}
-            onDelete={(entryId) => deleteScaleEntry(s.type, entryId)}
+            value={scales[s.type] ?? null}
+            onSelect={value => setScale(s.type, value)}
+            onClear={() => clearScale(s.type)}
           />
         ))}
       </div>

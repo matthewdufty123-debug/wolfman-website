@@ -153,9 +153,11 @@ export const journalEntries = pgTable('journal_entries', {
 ])
 
 // ── Scale entries (normalised) ───────────────────────────────────────────
-// Individual timestamped scale readings replacing morningState scale columns.
-// Supports multiple readings per day and source tracking. Added in #246.
-// note column added in #269 for one-sentence context per reading.
+// One scale reading per post per type — one snapshot per day (#288).
+// Writes go through upsertScaleEntry; where legacy multi-reading rows exist,
+// the earliest entry is the day's value. The note column and legacy extra rows
+// are removed by the #289 migration, which also adds a unique (post_id, type)
+// index.
 export const scaleEntries = pgTable('scale_entries', {
   id:        uuid('id').primaryKey().defaultRandom(),
   postId:    uuid('post_id').notNull().references(() => posts.id, { onDelete: 'cascade' }),

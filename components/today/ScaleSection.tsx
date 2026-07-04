@@ -1,66 +1,40 @@
 'use client'
 
-import { useState } from 'react'
-import type { ScaleEntry } from '@/lib/db/queries'
-import ScaleEntryCard from './ScaleEntryCard'
-import AddScaleEntryForm from './AddScaleEntryForm'
-
 interface Props {
-  type: string
   label: string
   icon: string
   labels: readonly string[]
-  entries: ScaleEntry[]
-  onAdd: (value: number, note?: string) => Promise<void>
-  onUpdate: (entryId: string, value: number, note?: string) => Promise<void>
-  onDelete: (entryId: string) => Promise<void>
+  value: number | null
+  onSelect: (value: number) => Promise<void>
+  onClear: () => Promise<void>
 }
 
-export default function ScaleSection({ label, icon, labels, entries, onAdd, onUpdate, onDelete }: Props) {
-  const [adding, setAdding] = useState(false)
-
-  async function handleAdd(value: number, note?: string) {
-    await onAdd(value, note)
-    setAdding(false)
-  }
-
+/** One snapshot per day (#288): a single 1–8 selector per scale. Tapping the
+ * selected value again clears it. */
+export default function ScaleSection({ label, icon, labels, value, onSelect, onClear }: Props) {
   return (
     <section className="td-section">
       <div className="td-section-header">
         <h2 className="td-section-title">{icon} {label}</h2>
-        <button
-          type="button"
-          className="td-section-add"
-          onClick={() => setAdding(true)}
-          aria-label={`Add ${label} reading`}
-        >
-          +
-        </button>
+        {value !== null && (
+          <span className="td-scale-current">{value}/8 — {labels[value - 1]}</span>
+        )}
       </div>
 
-      {entries.length > 0 ? (
-        <div className="td-entry-list">
-          {entries.map(entry => (
-            <ScaleEntryCard
-              key={entry.id}
-              entry={entry}
-              labels={labels}
-              onUpdate={onUpdate}
-              onDelete={onDelete}
-            />
-          ))}
-        </div>
-      ) : !adding ? (
-        <p className="td-section-empty">no readings yet</p>
-      ) : null}
-
-      {adding && (
-        <AddScaleEntryForm
-          labels={labels}
-          onSubmit={handleAdd}
-          onCancel={() => setAdding(false)}
-        />
-      )}
+      <div className="td-scale-pills td-scale-select">
+        {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
+          <button
+            key={n}
+            type="button"
+            className={`td-scale-pill${value === n ? ' td-scale-pill--selected' : ''}`}
+            onClick={() => (value === n ? onClear() : onSelect(n))}
+            aria-pressed={value === n}
+          >
+            <span className="td-scale-pill-num">{n}</span>
+            <span className="td-scale-pill-label">{labels[n - 1]}</span>
+          </button>
+        ))}
+      </div>
     </section>
   )
 }

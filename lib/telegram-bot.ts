@@ -4,12 +4,12 @@
  */
 
 import { db } from '@/lib/db'
-import { users, journalEntries, scaleEntries } from '@/lib/db/schema'
+import { users, journalEntries } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { sendMessage, sendMessageWithButtons, answerCallbackQuery, type TelegramUpdate, type InlineKeyboardButton } from '@/lib/telegram'
 import { BRAIN_LABELS, BODY_LABELS, HAPPY_LABELS, STRESS_LABELS } from '@/lib/scale-config'
 import { findOrCreateTodayPost } from '@/lib/actions/today'
-import { reconstructContent, getEntriesForPost, getScalesForPost } from '@/lib/db/queries'
+import { reconstructContent, getEntriesForPost, getScalesForPost, upsertScaleEntry } from '@/lib/db/queries'
 import { getUserLocalDate } from '@/lib/timezone'
 import { fetchTelegramContext } from '@/lib/telegram-context'
 import { generatePromptText, parseScaleFromText } from '@/lib/telegram-ai'
@@ -17,11 +17,10 @@ import { generatePromptText, parseScaleFromText } from '@/lib/telegram-ai'
 // ── Types ──────────────────────────────────────────────────────────────────
 
 interface TelegramSessionState {
-  state: 'idle' | 'action_menu' | 'prompting_scale' | 'prompting_journal' | 'prompting_note'
+  state: 'idle' | 'action_menu' | 'prompting_scale' | 'prompting_journal'
   type?: string
   postId?: string
   date?: string  // YYYY-MM-DD — reset if stale
-  lastScaleEntryId?: string
 }
 
 export interface LinkedUser {
@@ -106,10 +105,6 @@ export async function handleTelegramMessage(
       await handleJournalInput(chatId, user, session, callbackData, text)
       return
 
-    case 'prompting_note':
-      await handleNoteInput(chatId, user, session, callbackData, text)
-      return
-
     default:
       await showActionMenu(chatId, user.name)
       await updateState(user.id, { ...session, state: 'action_menu' })
@@ -184,13 +179,11 @@ async function handleScaleInput(
     return
   }
 
-  const entryId = await saveScaleEntry(session.postId!, session.type!, value)
+  await upsertScaleEntry(session.postId!, session.type!, value, 'telegram')
   const label = SCALE_LABELS[session.type!] ?? session.type
-  const noteButtons: InlineKeyboardButton[][] = [
-    [{ text: 'Skip', callback_data: 'skip_note' }],
-  ]
-  await sendMessageWithButtons(chatId, `${label} logged as ${value}/8.\n\nWant to add a note? Send some text or tap Skip.`, noteButtons)
-  await updateState(user.id, { ...session, state: 'prompting_note', lastScaleEntryId: entryId })
+  await sendMessage(chatId, `${label} logged as ${value}/8.`)
+  await showActionMenu(chatId, null)
+  await updateState(user.id, { ...session, state: 'action_menu', type: undefined })
 }
 
 async function handleJournalInput(
@@ -218,35 +211,6 @@ async function handleJournalInput(
   }
 
   await sendMessage(chatId, "Send me some text, or tap Skip.")
-}
-
-async function handleNoteInput(
-  chatId: number,
-  user: LinkedUser,
-  session: TelegramSessionState,
-  callbackData?: string,
-  text?: string,
-): Promise<void> {
-  // Skip — return to menu without saving a note
-  if (callbackData === 'skip_note') {
-    await showActionMenu(chatId, null)
-    await updateState(user.id, { ...session, state: 'action_menu', type: undefined, lastScaleEntryId: undefined })
-    return
-  }
-
-  // Free text — update the scale entry with the note
-  if (text && text.trim() && session.lastScaleEntryId) {
-    await db.update(scaleEntries)
-      .set({ note: text.trim().slice(0, 150) })
-      .where(eq(scaleEntries.id, session.lastScaleEntryId))
-
-    await sendMessage(chatId, 'Note added.')
-    await showActionMenu(chatId, null)
-    await updateState(user.id, { ...session, state: 'action_menu', type: undefined, lastScaleEntryId: undefined })
-    return
-  }
-
-  await sendMessage(chatId, "Send me a note, or tap Skip.")
 }
 
 // ── UI builders ────────────────────────────────────────────────────────────
@@ -328,17 +292,6 @@ async function sendJournalPrompt(chatId: number, type: string, user: LinkedUser,
 }
 
 // ── Data operations ────────────────────────────────────────────────────────
-
-async function saveScaleEntry(postId: string, type: string, value: number, note?: string): Promise<string> {
-  const [row] = await db.insert(scaleEntries).values({
-    postId,
-    type,
-    value,
-    note: note ?? null,
-    source: 'telegram',
-  }).returning({ id: scaleEntries.id })
-  return row.id
-}
 
 async function saveJournalEntry(postId: string, type: string, content: string): Promise<void> {
   // Calculate sort order

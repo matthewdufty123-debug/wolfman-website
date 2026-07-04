@@ -4,7 +4,7 @@ import { db } from '@/lib/db'
 import { posts, morningState } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { getUserLocalDate } from '@/lib/timezone'
-import { getEntriesForPost, getScalesForPost, getScaleEntriesForPost, type ScaleEntryMap } from '@/lib/db/queries'
+import { getEntriesForPost, getScalesForPost } from '@/lib/db/queries'
 
 /** Load an existing post by ID for editing — returns null if not found or not owned by userId */
 export async function loadPostForEdit(postId: string, userId: string): Promise<TodayData | null> {
@@ -29,10 +29,9 @@ export async function loadPostForEdit(postId: string, userId: string): Promise<T
 
   if (!post) return null
 
-  const [entries, scales, scaleEntriesMap, msRow] = await Promise.all([
+  const [entries, scales, msRow] = await Promise.all([
     getEntriesForPost(post.id),
     getScalesForPost(post.id),
-    getScaleEntriesForPost(post.id),
     db.select({ routineChecklist: morningState.routineChecklist })
       .from(morningState).where(eq(morningState.postId, post.id)).limit(1),
   ])
@@ -41,7 +40,6 @@ export async function loadPostForEdit(postId: string, userId: string): Promise<T
     post,
     entries,
     scales,
-    scaleEntries: scaleEntriesMap,
     rituals: (msRow[0]?.routineChecklist as Record<string, boolean>) ?? {},
   }
 }
@@ -96,7 +94,6 @@ export type TodayData = {
   post: TodayPost
   entries: TodayEntry[]
   scales: TodayScales
-  scaleEntries: ScaleEntryMap
   rituals: Record<string, boolean>
 }
 
@@ -128,10 +125,9 @@ export async function findOrCreateTodayPost(
 
   if (existing) {
     // Load entries, scales, rituals
-    const [entries, scales, scaleEntriesMap, msRow] = await Promise.all([
+    const [entries, scales, msRow] = await Promise.all([
       getEntriesForPost(existing.id),
       getScalesForPost(existing.id),
-      getScaleEntriesForPost(existing.id),
       db.select({ routineChecklist: morningState.routineChecklist })
         .from(morningState).where(eq(morningState.postId, existing.id)).limit(1),
     ])
@@ -140,7 +136,6 @@ export async function findOrCreateTodayPost(
       post: existing,
       entries,
       scales,
-      scaleEntries: scaleEntriesMap,
       rituals: (msRow[0]?.routineChecklist as Record<string, boolean>) ?? {},
     }
   }
@@ -182,7 +177,6 @@ export async function findOrCreateTodayPost(
     post: newPost,
     entries: [],
     scales: { brainScale: null, bodyScale: null, happyScale: null, stressScale: null },
-    scaleEntries: {},
     rituals: {},
   }
 }

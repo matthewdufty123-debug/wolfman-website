@@ -26,18 +26,6 @@ type MorningInput = {
   [key: string]: unknown
 }
 
-export type ScaleEntry = {
-  id: string
-  type: string
-  value: number
-  note: string | null
-  source: string
-  createdAt: Date
-}
-
-/** Grouped by type: { brain: ScaleEntry[], body: ScaleEntry[], ... } */
-export type ScaleEntryMap = Record<string, ScaleEntry[]>
-
 // ── Write helpers ────────────────────────────────────────────────────────
 
 /** Insert journal entry rows for a post from concatenated content + optional evening reflection. */
@@ -119,48 +107,44 @@ export async function replaceScaleEntries(
   await insertScaleEntries(postId, morning)
 }
 
-/** Insert a single scale entry (stacked model — no delete). Returns the inserted row. */
-export async function insertSingleScaleEntry(
+/**
+ * Set a post's scale value — one snapshot per day (#288).
+ * Updates the existing entry if one exists (keeping its original createdAt),
+ * otherwise inserts. Extra rows from the retired multi-snapshot era are left
+ * for the #289 migration; the earliest entry is the day's value everywhere.
+ */
+export async function upsertScaleEntry(
   postId: string,
   type: string,
   value: number,
   source: string = 'web',
-  note?: string | null,
 ) {
+  const [existing] = await db
+    .select({ id: scaleEntries.id })
+    .from(scaleEntries)
+    .where(and(eq(scaleEntries.postId, postId), eq(scaleEntries.type, type)))
+    .orderBy(asc(scaleEntries.createdAt))
+    .limit(1)
+
+  if (existing) {
+    const [row] = await db.update(scaleEntries)
+      .set({ value, source })
+      .where(eq(scaleEntries.id, existing.id))
+      .returning({ type: scaleEntries.type, value: scaleEntries.value })
+    return row
+  }
+
   const [row] = await db.insert(scaleEntries).values({
-    postId, type, value, note: note ?? null, source,
-  }).returning({
-    id: scaleEntries.id,
-    type: scaleEntries.type,
-    value: scaleEntries.value,
-    note: scaleEntries.note,
-    source: scaleEntries.source,
-    createdAt: scaleEntries.createdAt,
-  })
+    postId, type, value, source,
+  }).returning({ type: scaleEntries.type, value: scaleEntries.value })
   return row
 }
 
-/** Get all individual scale entry rows for a post, grouped by type. */
-export async function getScaleEntriesForPost(postId: string): Promise<ScaleEntryMap> {
-  const rows = await db
-    .select({
-      id: scaleEntries.id,
-      type: scaleEntries.type,
-      value: scaleEntries.value,
-      note: scaleEntries.note,
-      source: scaleEntries.source,
-      createdAt: scaleEntries.createdAt,
-    })
-    .from(scaleEntries)
-    .where(eq(scaleEntries.postId, postId))
-    .orderBy(asc(scaleEntries.createdAt))
-
-  const grouped: ScaleEntryMap = {}
-  for (const row of rows) {
-    if (!grouped[row.type]) grouped[row.type] = []
-    grouped[row.type].push(row)
-  }
-  return grouped
+/** Clear a post's scale value entirely. */
+export async function clearScaleEntry(postId: string, type: string) {
+  await db.delete(scaleEntries).where(
+    and(eq(scaleEntries.postId, postId), eq(scaleEntries.type, type))
+  )
 }
 
 /** Upsert a single reflection entry. For the EveningSection PUT (no content). */
@@ -276,24 +260,24 @@ export async function getScalesForPosts(postIds: string[]): Promise<Map<string, 
     })
     .from(scaleEntries)
     .where(sql`${scaleEntries.postId} IN (${sql.join(postIds.map(id => sql`${id}`), sql`, `)})`)
+    .orderBy(asc(scaleEntries.createdAt))
 
-  // Accumulate sum + count per post+type for averaging
-  const acc = new Map<string, Record<string, { sum: number; count: number }>>()
+  // One snapshot per day (#288): first entry of the day wins. Legacy multi-entry
+  // days keep this rule until the #289 migration collapses them for real.
+  const acc = new Map<string, Record<string, number>>()
   for (const row of rows) {
     if (!acc.has(row.postId)) acc.set(row.postId, {})
     const byType = acc.get(row.postId)!
-    if (!byType[row.type]) byType[row.type] = { sum: 0, count: 0 }
-    byType[row.type].sum += row.value
-    byType[row.type].count += 1
+    if (byType[row.type] === undefined) byType[row.type] = row.value
   }
 
   const map = new Map<string, ScaleMap>()
   for (const [postId, byType] of acc) {
     map.set(postId, {
-      brainScale: byType.brain ? Math.round(byType.brain.sum / byType.brain.count) : null,
-      bodyScale: byType.body ? Math.round(byType.body.sum / byType.body.count) : null,
-      happyScale: byType.happy ? Math.round(byType.happy.sum / byType.happy.count) : null,
-      stressScale: byType.stress ? Math.round(byType.stress.sum / byType.stress.count) : null,
+      brainScale: byType.brain ?? null,
+      bodyScale: byType.body ?? null,
+      happyScale: byType.happy ?? null,
+      stressScale: byType.stress ?? null,
     })
   }
 
@@ -334,24 +318,23 @@ export async function getScaleHistory(
         eq(postsTable.status, 'published'),
       )
     )
+    .orderBy(asc(scaleEntries.createdAt))
 
-  // Accumulate sum + count per date+type for averaging
-  const acc = new Map<string, Record<string, { sum: number; count: number }>>()
+  // One snapshot per day (#288): first entry of the day wins.
+  const acc = new Map<string, Record<string, number>>()
   for (const row of rows) {
     if (!acc.has(row.date)) acc.set(row.date, {})
     const byType = acc.get(row.date)!
-    if (!byType[row.type]) byType[row.type] = { sum: 0, count: 0 }
-    byType[row.type].sum += row.value
-    byType[row.type].count += 1
+    if (byType[row.type] === undefined) byType[row.type] = row.value
   }
 
   const byDate = new Map<string, ScaleMap>()
   for (const [date, byType] of acc) {
     byDate.set(date, {
-      brainScale: byType.brain ? Math.round(byType.brain.sum / byType.brain.count) : null,
-      bodyScale: byType.body ? Math.round(byType.body.sum / byType.body.count) : null,
-      happyScale: byType.happy ? Math.round(byType.happy.sum / byType.happy.count) : null,
-      stressScale: byType.stress ? Math.round(byType.stress.sum / byType.stress.count) : null,
+      brainScale: byType.brain ?? null,
+      bodyScale: byType.body ?? null,
+      happyScale: byType.happy ?? null,
+      stressScale: byType.stress ?? null,
     })
   }
 
