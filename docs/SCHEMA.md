@@ -127,8 +127,11 @@ Indexes: composite on `(post_id, type)`.
 
 ### `scaleEntries`
 
-Normalised scale readings. Multiple readings per post per type, with source tracking.
-Tables are empty until data migration (#247).
+Normalised scale readings — **one snapshot per post per type** (#288). All writes go
+through `upsertScaleEntry` in `lib/db/queries.ts`: setting a scale updates the existing
+row (keeping its original `createdAt`) or inserts one. Where legacy multi-reading rows
+still exist, all read paths take the **earliest entry** as the day's value until the
+#289 migration collapses them.
 
 | Column | Type | Notes |
 |--------|------|-------|
@@ -136,10 +139,12 @@ Tables are empty until data migration (#247).
 | postId | UUID | FK -> posts (cascade delete) |
 | type | text | 'brain' / 'body' / 'happy' / 'stress' |
 | value | smallint | 1-8 |
+| note | text | Retired — no longer written; dropped by #289 |
 | source | text | 'web' (default) / 'telegram' |
 | createdAt | timestamp | |
 
-Indexes: composite on `(post_id, type)`.
+Indexes: composite on `(post_id, type)`. #289 adds a unique index on the same pair
+once history is deduplicated.
 
 ### `wolfbotReviews`
 

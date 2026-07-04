@@ -23,7 +23,7 @@ export async function GET() {
         .innerJoin(posts, eq(scaleEntries.postId, posts.id))
         .innerJoin(users, eq(posts.authorId, users.id))
         .where(and(gte(posts.date, cutoff), eq(users.role, 'admin')))
-        .orderBy(posts.date),
+        .orderBy(posts.date, scaleEntries.createdAt),
       db
         .select({
           date: sql<string>`${posts.date}::text`,
@@ -36,22 +36,20 @@ export async function GET() {
         .orderBy(posts.date),
     ])
 
-    // Pivot scale rows by date, averaging when multiple entries per type
-    const scaleAcc = new Map<string, Record<string, { sum: number; count: number }>>()
+    // Pivot scale rows by date — one snapshot per day (#288), first entry wins
+    const scaleAcc = new Map<string, Record<string, number>>()
     for (const row of scaleRows) {
       if (!scaleAcc.has(row.date)) scaleAcc.set(row.date, {})
       const byType = scaleAcc.get(row.date)!
-      if (!byType[row.type]) byType[row.type] = { sum: 0, count: 0 }
-      byType[row.type].sum += row.value
-      byType[row.type].count += 1
+      if (byType[row.type] === undefined) byType[row.type] = row.value
     }
     const byDate = new Map<string, { brainScale: number | null; bodyScale: number | null; happyScale: number | null; stressScale: number | null }>()
     for (const [date, byType] of scaleAcc) {
       byDate.set(date, {
-        brainScale: byType.brain ? Math.round(byType.brain.sum / byType.brain.count) : null,
-        bodyScale: byType.body ? Math.round(byType.body.sum / byType.body.count) : null,
-        happyScale: byType.happy ? Math.round(byType.happy.sum / byType.happy.count) : null,
-        stressScale: byType.stress ? Math.round(byType.stress.sum / byType.stress.count) : null,
+        brainScale: byType.brain ?? null,
+        bodyScale: byType.body ?? null,
+        happyScale: byType.happy ?? null,
+        stressScale: byType.stress ?? null,
       })
     }
 

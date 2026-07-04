@@ -32,16 +32,23 @@ Always use `coldShower` and `animalLove` — never `cold_shower` or `animal_love
 
 ## Morning Scales
 
-Four scales captured at publish time via the PostForm "After Waking" tab.
+Four scales, each captured **once per day** (#288) — a single mindful snapshot, stored
+as one row per scale in the `scaleEntries` table (see `docs/SCHEMA.md`). Set via the
+`/today` hub or the Telegram bot; setting a scale again replaces the day's value.
 
-| Field | Range | What it measures |
-|-------|-------|-----------------|
-| `brainScale` | 1–8 | Brain activity / mental clarity |
-| `bodyScale` | 1–8 | Body energy / physical readiness |
-| `happyScale` | 1–8 | Happiness / mood |
-| `stressScale` | 1–8 | Stress level |
+| Type | Range | What it measures |
+|------|-------|-----------------|
+| `brain` | 1–8 | Brain activity / mental clarity |
+| `body` | 1–8 | Body energy / physical readiness |
+| `happy` | 1–8 | Happiness / mood |
+| `stress` | 1–8 | Stress level |
 
 All scales run **1–8**. Any reference to 1–6 elsewhere is incorrect.
+
+> The multi-snapshot-per-day capture (with per-reading notes) trialled in #246/#269 was
+> retired in #288 — it added friction and muddied the statistics. Legacy multi-reading
+> days are collapsed to their **first** reading by the #289 migration; until that runs,
+> all read paths take the earliest entry as the day's value.
 
 ---
 
@@ -71,16 +78,18 @@ Captured via PostForm "Before Bed" tab, or inline on the journal reading page.
 
 ## Database Table — `morningState`
 
-One row per post. Captured at publish time.
+One row per post. Holds the **ritual checklist** — scale values live in `scaleEntries`
+(the `brainScale`/`bodyScale`/`happyScale`/`stressScale` columns here are legacy,
+no longer read, and will be dropped alongside the #289 cleanup).
 
 | Column | Type | Notes |
 |--------|------|-------|
 | id | UUID | PK |
 | postId | UUID | Unique FK → posts |
-| brainScale | int | 1–8, nullable |
-| bodyScale | int | 1–8, nullable |
-| happyScale | int | 1–8, nullable |
-| stressScale | int | 1–8, nullable |
+| brainScale | int | Legacy — superseded by `scaleEntries` |
+| bodyScale | int | Legacy — superseded by `scaleEntries` |
+| happyScale | int | Legacy — superseded by `scaleEntries` |
+| stressScale | int | Legacy — superseded by `scaleEntries` |
 | routineChecklist | JSONB | `{ sunlight?: bool, breathwork?: bool, … }` — all 10 ritual keys |
 | createdAt | timestamp | |
 

@@ -154,7 +154,7 @@ export default async function ProfilePage(
       .from(scaleEntries)
       .innerJoin(posts, eq(scaleEntries.postId, posts.id))
       .where(and(eq(posts.authorId, userId), eq(posts.status, 'published')))
-      .orderBy(posts.date),
+      .orderBy(posts.date, scaleEntries.createdAt),
 
     // Ritual data from morningState — all time
     db
@@ -211,25 +211,23 @@ export default async function ProfilePage(
       .where(and(eq(posts.authorId, userId), eq(posts.status, 'published'))),
   ])
 
-  // Pivot scale rows by date, averaging when multiple entries per type
-  const scaleAcc = new Map<string, { slug: string; byType: Record<string, { sum: number; count: number }> }>()
+  // Pivot scale rows by date — one snapshot per day (#288), first entry wins
+  const scaleAcc = new Map<string, { slug: string; byType: Record<string, number> }>()
   for (const row of scaleRawRows) {
     if (!scaleAcc.has(row.date)) {
       scaleAcc.set(row.date, { slug: row.slug, byType: {} })
     }
     const entry = scaleAcc.get(row.date)!
-    if (!entry.byType[row.type]) entry.byType[row.type] = { sum: 0, count: 0 }
-    entry.byType[row.type].sum += row.value
-    entry.byType[row.type].count += 1
+    if (entry.byType[row.type] === undefined) entry.byType[row.type] = row.value
   }
   const scalePivot = new Map<string, { date: string; slug: string; brainScale: number | null; bodyScale: number | null; happyScale: number | null; stressScale: number | null }>()
   for (const [date, { slug, byType }] of scaleAcc) {
     scalePivot.set(date, {
       date, slug,
-      brainScale: byType.brain ? Math.round(byType.brain.sum / byType.brain.count) : null,
-      bodyScale: byType.body ? Math.round(byType.body.sum / byType.body.count) : null,
-      happyScale: byType.happy ? Math.round(byType.happy.sum / byType.happy.count) : null,
-      stressScale: byType.stress ? Math.round(byType.stress.sum / byType.stress.count) : null,
+      brainScale: byType.brain ?? null,
+      bodyScale: byType.body ?? null,
+      happyScale: byType.happy ?? null,
+      stressScale: byType.stress ?? null,
     })
   }
 
