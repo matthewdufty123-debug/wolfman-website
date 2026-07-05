@@ -8529,6 +8529,13 @@ html[data-theme="dark"] .subs-cta--free {
 }
 .td-publish-btn:hover:not(:disabled) { opacity: 0.9; }
 .td-publish-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+/* Post-publish confirmation flash — emerald, full opacity while it shows */
+.td-publish-btn--confirmed,
+.td-publish-btn--confirmed:disabled {
+  background: #3AB87A;
+  opacity: 1;
+  cursor: default;
+}
 
 .td-publish-hint {
   font-family: var(--font-inter), sans-serif;

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 
 interface Props {
@@ -27,12 +27,21 @@ export default function PublishBar({
   onPublish,
 }: Props) {
   const [publishing, setPublishing] = useState(false)
+  // 'published' | 'republished' — flashes a confirmation on the button after the action lands
+  const [confirmed, setConfirmed] = useState<string | null>(null)
+  const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isPublished = status === 'published'
 
+  useEffect(() => () => { if (confirmTimer.current) clearTimeout(confirmTimer.current) }, [])
+
   async function handlePublish() {
+    const wasPublished = isPublished
     setPublishing(true)
     await onPublish()
     setPublishing(false)
+    setConfirmed(wasPublished ? 'Republished' : 'Published')
+    if (confirmTimer.current) clearTimeout(confirmTimer.current)
+    confirmTimer.current = setTimeout(() => setConfirmed(null), 3000)
   }
 
   const journalUrl = (username && slug) ? `/${username}/${slug}` : null
@@ -72,14 +81,17 @@ export default function PublishBar({
 
         <button
           type="button"
-          className="td-publish-btn"
+          className={`td-publish-btn${confirmed ? ' td-publish-btn--confirmed' : ''}`}
           onClick={handlePublish}
-          disabled={publishing || nothingToPublish}
+          disabled={publishing || nothingToPublish || confirmed !== null}
           title={nothingToPublish ? 'Write at least one entry to publish' : undefined}
+          aria-live="polite"
         >
           {publishing
             ? 'Publishing\u2026'
-            : isPublished ? 'Republish' : 'Publish'}
+            : confirmed
+              ? `\u2713 ${confirmed}`
+              : isPublished ? 'Republish' : 'Publish'}
         </button>
       </div>
 
