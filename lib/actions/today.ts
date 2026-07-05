@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from '@/lib/db'
-import { posts, morningState } from '@/lib/db/schema'
+import { posts, morningState, users } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { getUserLocalDate } from '@/lib/timezone'
 import { getEntriesForPost, getScalesForPost } from '@/lib/db/queries'
@@ -148,6 +148,13 @@ export async function findOrCreateTodayPost(
   const slugExists = await db.select({ id: posts.id }).from(posts).where(eq(posts.slug, slug)).limit(1)
   const finalSlug = slugExists.length > 0 ? `${slug}-${Date.now()}` : slug
 
+  // New drafts inherit the user's "new posts public by default" setting
+  const [prefs] = await db
+    .select({ defaultPublic: users.defaultPublic })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
+
   const [newPost] = await db.insert(posts).values({
     slug: finalSlug,
     title,
@@ -156,7 +163,7 @@ export async function findOrCreateTodayPost(
     content: '',
     authorId: userId,
     status: 'draft',
-    isPublic: false,
+    isPublic: prefs?.defaultPublic ?? false,
     publishedAt: new Date(0),
   }).returning({
     id: posts.id,

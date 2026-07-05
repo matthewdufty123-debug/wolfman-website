@@ -159,6 +159,22 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
     setImage(url)
   }, [])
 
+  // ── Visibility ──────────────────────────────────────────────────────
+  // Drafts flip locally and the value is sent at publish time; published
+  // posts update the database immediately so nothing is ever stuck Private.
+
+  const togglePublic = useCallback(async () => {
+    const next = !isPublic
+    setIsPublic(next)
+    if (status !== 'published') return
+    const res = await fetch(`/api/today/${postId}/visibility`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isPublic: next }),
+    })
+    if (!res.ok) setIsPublic(!next)
+  }, [postId, isPublic, status])
+
   // ── Publish ─────────────────────────────────────────────────────────
 
   const publish = useCallback(async () => {
@@ -260,7 +276,7 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
         publishedAt={publishedAt}
         slug={slug}
         username={username}
-        onTogglePublic={() => setIsPublic(v => !v)}
+        onTogglePublic={togglePublic}
         onPublish={publish}
       />
     </main>

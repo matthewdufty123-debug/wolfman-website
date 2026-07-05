@@ -33,6 +33,7 @@ export async function POST(
       content: posts.content,
       status: posts.status,
       slug: posts.slug,
+      isPublic: posts.isPublic,
     })
     .from(posts)
     .where(eq(posts.id, postId))
@@ -42,7 +43,7 @@ export async function POST(
   if (post.authorId !== session.user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await request.json().catch(() => ({}))
-  const isPublic = body.isPublic ?? false
+  const isPublic = body.isPublic ?? post.isPublic
   const isFirstPublish = post.status !== 'published'
 
   // Auto-generate title if still the default pattern
