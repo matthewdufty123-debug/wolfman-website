@@ -1,5 +1,8 @@
 import { auth } from '@/auth'
 import { redirect, notFound } from 'next/navigation'
+import { db } from '@/lib/db'
+import { users } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 import { loadPostForEdit } from '@/lib/actions/today'
 import { getActiveRituals } from '@/lib/rituals'
 import TodayHub from '../../today/TodayHub'
@@ -10,9 +13,11 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
 
   const { id } = await params
 
-  const [data, activeRituals] = await Promise.all([
+  const [data, activeRituals, [prefs]] = await Promise.all([
     loadPostForEdit(id, session.user.id),
     getActiveRituals(),
+    db.select({ communityEnabled: users.communityEnabled })
+      .from(users).where(eq(users.id, session.user.id)).limit(1),
   ])
 
   if (!data) notFound()
@@ -31,7 +36,7 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
     <TodayHub
       initialData={data}
       rituals={ritualDefs}
-      communityEnabled={session.user.onboardingComplete}
+      communityEnabled={prefs?.communityEnabled ?? false}
       username={session.user.username}
     />
   )

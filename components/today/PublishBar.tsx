@@ -57,11 +57,12 @@ export default function PublishBar({
         </Link>
       )}
 
-      {communityEnabled && !isPublished && (
+      {communityEnabled && (
         <button
           type="button"
           className={`td-visibility-toggle${isPublic ? ' td-visibility-toggle--public' : ''}`}
           onClick={onTogglePublic}
+          title={isPublished ? 'Changes community visibility immediately' : 'Visibility when published'}
         >
           {isPublic ? 'Public' : 'Private'}
         </button>

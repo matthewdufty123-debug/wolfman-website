@@ -1,6 +1,9 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { db } from '@/lib/db'
+import { users } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 import { findOrCreateTodayPost } from '@/lib/actions/today'
 import { getActiveRituals } from '@/lib/rituals'
 import TodayHub from './TodayHub'
@@ -26,9 +29,11 @@ export default async function TodayPage() {
     )
   }
 
-  const [data, activeRituals] = await Promise.all([
+  const [data, activeRituals, [prefs]] = await Promise.all([
     findOrCreateTodayPost(session.user.id, timezone),
     getActiveRituals(),
+    db.select({ communityEnabled: users.communityEnabled })
+      .from(users).where(eq(users.id, session.user.id)).limit(1),
   ])
 
   const ritualDefs = activeRituals.map(r => ({
@@ -45,7 +50,7 @@ export default async function TodayPage() {
     <TodayHub
       initialData={data}
       rituals={ritualDefs}
-      communityEnabled={session.user.onboardingComplete}
+      communityEnabled={prefs?.communityEnabled ?? false}
       username={session.user.username}
     />
   )
