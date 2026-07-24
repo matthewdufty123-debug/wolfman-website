@@ -36,49 +36,55 @@ export default function PublishBar({
   }
 
   const journalUrl = (username && slug) ? `/${username}/${slug}` : null
+  const nothingToPublish = entryCount === 0
 
   return (
-    <div className="td-publish-bar">
-      <div className="td-publish-status">
-        {isPublished ? (
-          <span className="td-status td-status--published">
-            Published{publishedAt ? ` at ${formatTime(publishedAt)}` : ''}
-          </span>
-        ) : (
-          <span className="td-status td-status--draft">
-            Draft{entryCount > 0 ? ` \u00b7 ${entryCount} ${entryCount === 1 ? 'entry' : 'entries'}` : ''}
-          </span>
+    <div className="td-publish-wrap">
+      <div className="td-publish-bar">
+        <div className="td-publish-status">
+          {isPublished ? (
+            <span className="td-status td-status--published">
+              Published{publishedAt ? ` at ${formatTime(publishedAt)}` : ''}
+            </span>
+          ) : (
+            <span className="td-status td-status--draft">
+              Draft{entryCount > 0 ? ` \u00b7 ${entryCount} ${entryCount === 1 ? 'entry' : 'entries'}` : ''}
+            </span>
+          )}
+        </div>
+
+        {isPublished && journalUrl && (
+          <Link href={journalUrl} className="td-view-link">
+            View journal
+          </Link>
         )}
-      </div>
 
-      {isPublished && journalUrl && (
-        <Link href={journalUrl} className="td-view-link">
-          View journal
-        </Link>
-      )}
+        {communityEnabled && (
+          <button
+            type="button"
+            className={`td-visibility-toggle${isPublic ? ' td-visibility-toggle--public' : ''}`}
+            onClick={onTogglePublic}
+            title={isPublished ? 'Changes community visibility immediately' : 'Visibility when published'}
+          >
+            {isPublic ? 'Public' : 'Private'}
+          </button>
+        )}
 
-      {communityEnabled && (
-        <button
-          type="button"
-          className={`td-visibility-toggle${isPublic ? ' td-visibility-toggle--public' : ''}`}
-          onClick={onTogglePublic}
-          title={isPublished ? 'Changes community visibility immediately' : 'Visibility when published'}
-        >
-          {isPublic ? 'Public' : 'Private'}
-        </button>
-      )}
-
-      {entryCount > 0 && (
         <button
           type="button"
           className="td-publish-btn"
           onClick={handlePublish}
-          disabled={publishing}
+          disabled={publishing || nothingToPublish}
+          title={nothingToPublish ? 'Write at least one entry to publish' : undefined}
         >
           {publishing
             ? 'Publishing\u2026'
             : isPublished ? 'Republish' : 'Publish'}
         </button>
+      </div>
+
+      {nothingToPublish && !isPublished && (
+        <p className="td-publish-hint">Write at least one entry above to publish your journal.</p>
       )}
     </div>
   )
