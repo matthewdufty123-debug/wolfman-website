@@ -5,8 +5,8 @@ import type { TodayEntry } from '@/lib/actions/today'
 
 interface Props {
   entry: TodayEntry
-  onUpdate: (entryId: string, content: string) => Promise<void>
-  onDelete: (entryId: string) => Promise<void>
+  onUpdate: (entryId: string, content: string) => Promise<boolean>
+  onDelete: (entryId: string) => Promise<boolean>
 }
 
 function formatTime(date: Date | string) {
@@ -19,6 +19,7 @@ export default function EntryCard({ entry, onUpdate, onDelete }: Props) {
   const [editContent, setEditContent] = useState(entry.content)
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const wasEdited = entry.updatedAt && entry.createdAt &&
     new Date(entry.updatedAt).getTime() - new Date(entry.createdAt).getTime() > 1000
@@ -26,13 +27,21 @@ export default function EntryCard({ entry, onUpdate, onDelete }: Props) {
   async function handleSave() {
     if (!editContent.trim()) return
     setSaving(true)
-    await onUpdate(entry.id, editContent)
+    setError(null)
+    const ok = await onUpdate(entry.id, editContent)
     setSaving(false)
-    setEditing(false)
+    // Only close on success — a failed save keeps the editor open with the
+    // rewritten text in it, rather than discarding it and reverting.
+    if (ok) setEditing(false)
+    else setError("Couldn't save that change. Your writing is still here — try again.")
   }
 
   async function handleDelete() {
-    await onDelete(entry.id)
+    const ok = await onDelete(entry.id)
+    if (!ok) {
+      setConfirmDelete(false)
+      setError("Couldn't delete that entry. Try again.")
+    }
   }
 
   if (editing) {
@@ -44,6 +53,7 @@ export default function EntryCard({ entry, onUpdate, onDelete }: Props) {
           onChange={e => setEditContent(e.target.value)}
           autoFocus
         />
+        {error && <p className="td-entry-error">{error}</p>}
         <div className="td-entry-actions">
           <button
             type="button"
@@ -70,6 +80,7 @@ export default function EntryCard({ entry, onUpdate, onDelete }: Props) {
       <div className="td-entry-text" onClick={() => setEditing(true)}>
         {entry.content}
       </div>
+      {error && <p className="td-entry-error">{error}</p>}
       <div className="td-entry-footer">
         <span className="td-entry-meta">
           {formatTime(entry.createdAt)}

@@ -89,34 +89,96 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
   }, [postId, titleDraft, title])
 
   // ── Entry CRUD ──────────────────────────────────────────────────────
+  // Each of these reports success so callers can keep the user's writing on
+  // screen when a save fails, instead of closing the editor and losing it.
 
-  const addEntry = useCallback(async (type: string, content: string) => {
-    const res = await fetch(`/api/today/${postId}/entries`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, content }),
+  const addEntry = useCallback(async (type: string, content: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/today/${postId}/entries`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, content }),
+      })
+      if (!res.ok) return false
+      const { entry } = await res.json()
+      setEntries(prev => [...prev, entry])
+      return true
+    } catch {
+      return false
+    }
+  }, [postId])
+
+  const updateEntry = useCallback(async (entryId: string, content: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/today/${postId}/entries/${entryId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      })
+      if (!res.ok) return false
+      const { entry } = await res.json()
+      setEntries(prev => prev.map(e => e.id === entryId ? entry : e))
+      return true
+    } catch {
+      return false
+    }
+  }, [postId])
+
+  const deleteEntry = useCallback(async (entryId: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/today/${postId}/entries/${entryId}`, { method: 'DELETE' })
+      if (!res.ok) return false
+      setEntries(prev => prev.filter(e => e.id !== entryId))
+      return true
+    } catch {
+      return false
+    }
+  }, [postId])
+
+  // ── Open editors ────────────────────────────────────────────────────
+  // Text typed into a section but not yet added lives here rather than inside
+  // the form, so Publish can commit it. A key present means that section's
+  // editor is open; absent means closed.
+
+  const [drafts, setDrafts] = useState<Record<string, string>>({})
+  const [draftErrors, setDraftErrors] = useState<Record<string, string>>({})
+
+  const openDraft = useCallback((type: string) => {
+    setDrafts(prev => ({ ...prev, [type]: prev[type] ?? '' }))
+  }, [])
+
+  const changeDraft = useCallback((type: string, content: string) => {
+    setDrafts(prev => ({ ...prev, [type]: content }))
+  }, [])
+
+  const closeDraft = useCallback((type: string) => {
+    setDrafts(prev => {
+      const next = { ...prev }
+      delete next[type]
+      return next
     })
-    if (!res.ok) return
-    const { entry } = await res.json()
-    setEntries(prev => [...prev, entry])
-  }, [postId])
-
-  const updateEntry = useCallback(async (entryId: string, content: string) => {
-    const res = await fetch(`/api/today/${postId}/entries/${entryId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content }),
+    setDraftErrors(prev => {
+      const next = { ...prev }
+      delete next[type]
+      return next
     })
-    if (!res.ok) return
-    const { entry } = await res.json()
-    setEntries(prev => prev.map(e => e.id === entryId ? entry : e))
-  }, [postId])
+  }, [])
 
-  const deleteEntry = useCallback(async (entryId: string) => {
-    const res = await fetch(`/api/today/${postId}/entries/${entryId}`, { method: 'DELETE' })
-    if (!res.ok) return
-    setEntries(prev => prev.filter(e => e.id !== entryId))
-  }, [postId])
+  const commitDraft = useCallback(async (type: string) => {
+    const content = drafts[type]
+    if (!content || !content.trim()) return
+    const ok = await addEntry(type, content)
+    if (ok) {
+      closeDraft(type)
+    } else {
+      setDraftErrors(prev => ({
+        ...prev,
+        [type]: "Couldn't save that. Your writing is still here — check your connection and try again.",
+      }))
+    }
+  }, [drafts, addEntry, closeDraft])
+
+  const pendingDrafts = Object.entries(drafts).filter(([, c]) => c.trim().length > 0)
 
   // ── Scales — one snapshot per day ─────────────────────────────────
 
@@ -177,19 +239,47 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
 
   // ── Publish ─────────────────────────────────────────────────────────
 
-  const publish = useCallback(async () => {
-    const res = await fetch(`/api/today/${postId}/publish`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ isPublic }),
-    })
-    if (!res.ok) return
-    const data = await res.json()
-    setStatus('published')
-    setSlug(data.slug)
-    if (data.title) setTitle(data.title)
-    if (data.publishedAt) setPublishedAt(data.publishedAt)
-  }, [postId, isPublic])
+  const [publishError, setPublishError] = useState<string | null>(null)
+
+  const publish = useCallback(async (): Promise<boolean> => {
+    setPublishError(null)
+
+    // Anything still sitting in an open editor is real writing — save it
+    // first, so pressing Publish never quietly leaves it out of the journal.
+    for (const [type, content] of pendingDrafts) {
+      const ok = await addEntry(type, content)
+      if (!ok) {
+        setDraftErrors(prev => ({
+          ...prev,
+          [type]: "Couldn't save this. Your writing is still here — check your connection and try again.",
+        }))
+        setPublishError('Some of your writing could not be saved, so nothing was published.')
+        return false
+      }
+      closeDraft(type)
+    }
+
+    try {
+      const res = await fetch(`/api/today/${postId}/publish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isPublic }),
+      })
+      if (!res.ok) {
+        setPublishError("Couldn't publish just now. Your journal is saved — try again in a moment.")
+        return false
+      }
+      const data = await res.json()
+      setStatus('published')
+      setSlug(data.slug)
+      if (data.title) setTitle(data.title)
+      if (data.publishedAt) setPublishedAt(data.publishedAt)
+      return true
+    } catch {
+      setPublishError("Couldn't publish just now. Your journal is saved — try again in a moment.")
+      return false
+    }
+  }, [postId, isPublic, pendingDrafts, addEntry, closeDraft])
 
   return (
     <main className="td-hub">
@@ -227,7 +317,12 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
           label={section.label}
           placeholder={section.placeholder}
           entries={entries.filter(e => e.type === section.type)}
-          onAdd={content => addEntry(section.type, content)}
+          draft={drafts[section.type] ?? null}
+          draftError={draftErrors[section.type] ?? null}
+          onOpenDraft={() => openDraft(section.type)}
+          onDraftChange={content => changeDraft(section.type, content)}
+          onCommitDraft={() => commitDraft(section.type)}
+          onCancelDraft={() => closeDraft(section.type)}
           onUpdate={updateEntry}
           onDelete={deleteEntry}
         />
@@ -271,6 +366,8 @@ export default function TodayHub({ initialData, rituals, communityEnabled, usern
       <PublishBar
         status={status}
         entryCount={entries.length}
+        pendingCount={pendingDrafts.length}
+        error={publishError}
         isPublic={isPublic}
         communityEnabled={communityEnabled}
         publishedAt={publishedAt}
