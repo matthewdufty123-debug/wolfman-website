@@ -2,8 +2,23 @@ import { neon } from '@neondatabase/serverless'
 import { drizzle } from 'drizzle-orm/neon-http'
 import * as schema from './schema'
 
-const sql = neon(process.env.DATABASE_URL!)
-export const db = drizzle(sql, { schema })
+/**
+ * Production talks to Neon over HTTP. The E2E harness (`npm run test:e2e`)
+ * runs a throwaway PostgreSQL on localhost, which speaks the wire protocol
+ * instead — set DATABASE_DRIVER=pg to point at it. Nothing but the test
+ * harness ever sets that variable, so production is untouched.
+ */
+function createDb() {
+  if (process.env.DATABASE_DRIVER === 'pg') {
+    // Required lazily so `pg` is never pulled into a production bundle.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { drizzle: drizzlePg } = require('drizzle-orm/node-postgres')
+    return drizzlePg(process.env.DATABASE_URL!, { schema }) as unknown as ReturnType<typeof drizzle<typeof schema>>
+  }
+  return drizzle(neon(process.env.DATABASE_URL!), { schema })
+}
+
+export const db = createDb()
 
 /**
  * Retry wrapper for Neon cold-start / control-plane errors.

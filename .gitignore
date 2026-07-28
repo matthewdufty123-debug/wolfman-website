@@ -23,3 +23,8 @@ Thumbs.db
 
 # Scale entries migration archives (#289) — contain journal note text
 scale-entries-archive-*.json
+
+# Test artefacts
+/test-results
+/playwright-report
+/tests/screenshots
