@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import type { TodayEntry } from '@/lib/actions/today'
 import EntryCard from './EntryCard'
 import AddEntryForm from './AddEntryForm'
@@ -10,18 +9,32 @@ interface Props {
   label: string
   placeholder: string
   entries: TodayEntry[]
-  onAdd: (content: string) => Promise<void>
-  onUpdate: (entryId: string, content: string) => Promise<void>
-  onDelete: (entryId: string) => Promise<void>
+  // Draft content lives in TodayHub so Publish can commit whatever is still
+  // sitting in an open editor. null means the editor is closed.
+  draft: string | null
+  draftError: string | null
+  onOpenDraft: () => void
+  onDraftChange: (content: string) => void
+  onCommitDraft: () => Promise<void>
+  onCancelDraft: () => void
+  onUpdate: (entryId: string, content: string) => Promise<boolean>
+  onDelete: (entryId: string) => Promise<boolean>
 }
 
-export default function JournalSection({ type, label, placeholder, entries, onAdd, onUpdate, onDelete }: Props) {
-  const [adding, setAdding] = useState(false)
-
-  async function handleAdd(content: string) {
-    await onAdd(content)
-    setAdding(false)
-  }
+export default function JournalSection({
+  label,
+  placeholder,
+  entries,
+  draft,
+  draftError,
+  onOpenDraft,
+  onDraftChange,
+  onCommitDraft,
+  onCancelDraft,
+  onUpdate,
+  onDelete,
+}: Props) {
+  const adding = draft !== null
 
   return (
     <section className="td-section">
@@ -30,7 +43,7 @@ export default function JournalSection({ type, label, placeholder, entries, onAd
         <button
           type="button"
           className="td-section-add"
-          onClick={() => setAdding(true)}
+          onClick={onOpenDraft}
           aria-label={`Add ${label}`}
         >
           +
@@ -55,8 +68,11 @@ export default function JournalSection({ type, label, placeholder, entries, onAd
       {adding && (
         <AddEntryForm
           placeholder={placeholder}
-          onSubmit={handleAdd}
-          onCancel={() => setAdding(false)}
+          value={draft}
+          error={draftError}
+          onChange={onDraftChange}
+          onSubmit={onCommitDraft}
+          onCancel={onCancelDraft}
         />
       )}
     </section>

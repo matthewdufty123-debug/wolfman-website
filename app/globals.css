@@ -8331,6 +8331,15 @@ html[data-theme="dark"] .subs-cta--free {
 
 .td-add-form { margin-top: 0.5rem; }
 
+/* A save that didn't land — the writing stays put, this says why */
+.td-entry-error {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #A82020;
+  margin: 0.5rem 0 0;
+}
+
 .td-scale-panel { }
 .td-panel-title {
   font-family: var(--font-inter), sans-serif;
@@ -8542,6 +8551,15 @@ html[data-theme="dark"] .subs-cta--free {
   font-size: 0.75rem;
   color: var(--body-text);
   opacity: 0.55;
+  margin: -0.35rem 0 0.5rem;
+  text-align: right;
+}
+
+/* Publish failed — crimson from the extended palette, quiet but unmissable */
+.td-publish-error {
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.78rem;
+  color: #A82020;
   margin: -0.35rem 0 0.5rem;
   text-align: right;
 }

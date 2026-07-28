@@ -31,6 +31,7 @@ continues as a separate feed visible to all.
 | Bespoke CSS (`app/globals.css`) | Styling — theme tokens on `html[data-theme]`. Tailwind is NOT installed; never write Tailwind utility classes |
 | Auth.js v5 (next-auth@beta) | Authentication — JWT sessions, email/password + GitHub + Google OAuth |
 | Neon PostgreSQL + Drizzle ORM | Database. Schema: `lib/db/schema.ts`. Apply changes: `npm run db:push`. Full table definitions: `docs/SCHEMA.md` |
+| Vitest + Playwright | Testing — component tests (`npm test`) and browser E2E against a throwaway Postgres (`npm run test:e2e`). Full detail: `docs/TESTING.md` |
 | Vercel Blob | Image storage — never commit large images to git. Upload via `/api/admin/upload` |
 | Stripe | Payments — test keys in `.env.local`, production in Vercel dashboard |
 | Printful API | Print-on-demand fulfilment |
@@ -64,6 +65,7 @@ continues as a separate feed visible to all.
 | Achievements | `docs/ACHIEVEMENTS.md` | Achievements feature (not yet built — placeholder) |
 | Shop | `docs/SHOP.md` | Shop, Stripe, Printful — expand when feature goes live |
 | Statistics | `docs/STATISTICS.md` | Statistics feature — expand when built |
+| Testing | `docs/TESTING.md` | Writing or running tests, the E2E harness, screenshots |
 
 ---
 
@@ -267,10 +269,13 @@ Full versioning rules: `VERSIONING.md`
 
 1. Once an issue is agreed, apply the `in-progress` label via GitHub API.
 2. Use the issue's description as the brief — generate a plan and confirm with Matthew before implementing.
-3. **On completion — three steps before committing:**
-   - **a. Bump version** in `package.json` per versioning rules above
-   - **b. Log version entry** — after deploy, go to `/admin` → "Log version entry" to update the release notes on `/dev`. Do not skip this.
-   - **c. Commit** with `closes #N` in the message to auto-close the GitHub issue
+3. **On completion — four steps before committing:**
+   - **a. Run the tests** — `npm test` always; `npm run test:e2e` when the change
+     touches a user flow. Fixing a bug? Add a test that fails without the fix,
+     and prove it by reverting the fix and watching it go red. See `docs/TESTING.md`.
+   - **b. Bump version** in `package.json` per versioning rules above
+   - **c. Log version entry** — after deploy, go to `/admin` → "Log version entry" to update the release notes on `/dev`. Do not skip this.
+   - **d. Commit** with `closes #N` in the message to auto-close the GitHub issue
 4. **Push only when Matthew explicitly confirms.**
 
 ### Raising GitHub Issues

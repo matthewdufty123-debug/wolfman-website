@@ -1,7 +1,7 @@
 {
   "name": "wolfman-website",
   "version": "0.1.12",
-  "appVersion": "0.1.53.4",
+  "appVersion": "0.1.54.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,7 +14,13 @@
     "db:studio": "drizzle-kit studio",
     "db:seed-wolfbot": "tsx lib/db/seed-wolfbot.ts",
     "db:backfill-words": "tsx scripts/backfill-word-counts.ts",
-    "db:collapse-scales": "tsx scripts/collapse-scale-entries.ts"
+    "db:collapse-scales": "tsx scripts/collapse-scale-entries.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:db": "bash scripts/test-db.sh",
+    "test:all": "vitest run && playwright test"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
@@ -36,14 +42,24 @@
     "svix": "^1.89.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.0",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.4",
     "dotenv": "^17.3.1",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "^15.2.3",
-    "typescript": "^5"
+    "jsdom": "^30.0.0",
+    "pg": "^8.22.0",
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.10"
   }
 }

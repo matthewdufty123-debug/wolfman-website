@@ -6,18 +6,23 @@ import Link from 'next/link'
 interface Props {
   status: string
   entryCount: number
+  /** Sections with writing typed but not yet added — publishing commits these first. */
+  pendingCount: number
+  error: string | null
   isPublic: boolean
   communityEnabled: boolean
   publishedAt: string | null
   slug: string | null
   username: string | null
   onTogglePublic: () => void
-  onPublish: () => Promise<void>
+  onPublish: () => Promise<boolean>
 }
 
 export default function PublishBar({
   status,
   entryCount,
+  pendingCount,
+  error,
   isPublic,
   communityEnabled,
   publishedAt,
@@ -37,15 +42,19 @@ export default function PublishBar({
   async function handlePublish() {
     const wasPublished = isPublished
     setPublishing(true)
-    await onPublish()
+    const ok = await onPublish()
     setPublishing(false)
+    // Only confirm what actually happened — a failed publish shows its own
+    // error instead, never a tick.
+    if (!ok) return
     setConfirmed(wasPublished ? 'Republished' : 'Published')
     if (confirmTimer.current) clearTimeout(confirmTimer.current)
     confirmTimer.current = setTimeout(() => setConfirmed(null), 3000)
   }
 
   const journalUrl = (username && slug) ? `/${username}/${slug}` : null
-  const nothingToPublish = entryCount === 0
+  // Writing sitting in an open editor counts — publishing saves it first.
+  const nothingToPublish = entryCount === 0 && pendingCount === 0
 
   return (
     <div className="td-publish-wrap">
@@ -98,6 +107,14 @@ export default function PublishBar({
       {nothingToPublish && !isPublished && (
         <p className="td-publish-hint">Write at least one entry above to publish your journal.</p>
       )}
+
+      {!nothingToPublish && pendingCount > 0 && (
+        <p className="td-publish-hint">
+          Your unsaved writing will be saved when you {isPublished ? 'republish' : 'publish'}.
+        </p>
+      )}
+
+      {error && <p className="td-publish-error">{error}</p>}
     </div>
   )
 }
